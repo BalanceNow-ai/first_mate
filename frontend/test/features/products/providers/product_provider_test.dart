@@ -10,6 +10,8 @@ void main() {
       expect(filter.brand, isNull);
       expect(filter.search, isNull);
       expect(filter.vesselId, isNull);
+      expect(filter.onSale, false);
+      expect(filter.vesselCompatible, false);
       expect(filter.offset, 0);
       expect(filter.limit, 20);
     });
@@ -30,6 +32,8 @@ void main() {
         brand: 'Yamaha',
         vesselId: 'v-001',
         search: 'oil',
+        onSale: true,
+        vesselCompatible: true,
         offset: 10,
         limit: 50,
       );
@@ -40,8 +44,48 @@ void main() {
       expect(modified.brand, 'Mercury'); // changed
       expect(modified.vesselId, 'v-001'); // preserved
       expect(modified.search, 'oil'); // preserved
+      expect(modified.onSale, true); // preserved
+      expect(modified.vesselCompatible, true); // preserved
       expect(modified.offset, 10); // preserved
       expect(modified.limit, 50); // preserved
+    });
+
+    test('copyWith clears fields with clear flags', () {
+      const filter = ProductFilter(
+        category: 'Anchors',
+        brand: 'Test',
+        search: 'rope',
+      );
+
+      final cleared = filter.copyWith(
+        clearCategory: true,
+        clearBrand: true,
+        clearSearch: true,
+      );
+
+      expect(cleared.category, isNull);
+      expect(cleared.brand, isNull);
+      expect(cleared.search, isNull);
+    });
+
+    test('onSale toggle works', () {
+      const filter = ProductFilter();
+      final withSale = filter.copyWith(onSale: true);
+      final withoutSale = withSale.copyWith(onSale: false);
+
+      expect(withSale.onSale, true);
+      expect(withoutSale.onSale, false);
+    });
+
+    test('vesselCompatible toggle sets vessel ID', () {
+      const filter = ProductFilter();
+      final compatible = filter.copyWith(
+        vesselCompatible: true,
+        vesselId: 'my-vessel-id',
+      );
+
+      expect(compatible.vesselCompatible, true);
+      expect(compatible.vesselId, 'my-vessel-id');
     });
   });
 }

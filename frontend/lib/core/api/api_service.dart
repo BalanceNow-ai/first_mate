@@ -56,11 +56,22 @@ class ApiService {
 
   // --- Products ---
 
+  Future<List<String>> getProductCategories() async {
+    final response = await _dio.get('/products/categories');
+    return (response.data as List).cast<String>();
+  }
+
+  Future<List<String>> getProductBrands() async {
+    final response = await _dio.get('/products/brands');
+    return (response.data as List).cast<String>();
+  }
+
   Future<List<Product>> getProducts({
     String? category,
     String? brand,
     String? vesselId,
     String? search,
+    bool? onSale,
     int offset = 0,
     int limit = 20,
   }) async {
@@ -72,6 +83,7 @@ class ApiService {
     if (brand != null) params['brand'] = brand;
     if (vesselId != null) params['vessel_id'] = vesselId;
     if (search != null) params['search'] = search;
+    if (onSale == true) params['on_sale'] = true;
 
     final response = await _dio.get('/products/', queryParameters: params);
     return (response.data as List)
@@ -151,6 +163,42 @@ class ApiService {
 
   Future<Map<String, dynamic>> getCrewPoints() async {
     final response = await _dio.get('/loyalty/points');
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> getCrewMultiplier() async {
+    final response = await _dio.get('/loyalty/multiplier');
+    return response.data;
+  }
+
+  Future<List<Map<String, dynamic>>> getCrewTeams() async {
+    final response = await _dio.get('/loyalty/teams');
+    return (response.data as List).cast<Map<String, dynamic>>();
+  }
+
+  Future<Map<String, dynamic>> redeemPoints(Map<String, dynamic> data) async {
+    final response = await _dio.post('/loyalty/points/redeem', data: data);
+    return response.data;
+  }
+
+  // --- Helm Dash ---
+
+  Future<Map<String, dynamic>> getHelmDashQuote(
+      double lat, double lng) async {
+    final response = await _dio.post('/helm-dash/quote', data: {
+      'delivery_lat': lat,
+      'delivery_lng': lng,
+    });
+    return response.data;
+  }
+
+  Future<List<Map<String, dynamic>>> getHelmDashDeliveries() async {
+    final response = await _dio.get('/helm-dash/deliveries');
+    return (response.data as List).cast<Map<String, dynamic>>();
+  }
+
+  Future<Map<String, dynamic>> getHelmDashDelivery(String id) async {
+    final response = await _dio.get('/helm-dash/deliveries/$id');
     return response.data;
   }
 }
