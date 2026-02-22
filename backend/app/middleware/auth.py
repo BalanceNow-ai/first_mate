@@ -1,6 +1,7 @@
 """Supabase JWT authentication middleware."""
 
 import json
+import logging
 import uuid
 from base64 import urlsafe_b64decode
 from typing import Annotated
@@ -10,10 +11,20 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.config import get_settings
 
+logger = logging.getLogger(__name__)
+
 security = HTTPBearer()
 settings = get_settings()
 
 ALGORITHM = "HS256"
+
+# Fail-fast in production if Supabase is not configured
+if settings.app_env == "production" and not settings.supabase_anon_key:
+    raise RuntimeError(
+        "FATAL: Supabase authentication is not configured. "
+        "Set SUPABASE_ANON_KEY in production. "
+        "The application cannot start with an insecure auth configuration."
+    )
 
 
 def _decode_jwt_payload(token: str) -> dict:
@@ -53,6 +64,11 @@ async def get_current_user_id(
             )
         else:
             # Development fallback: decode without verification
+            logger.warning(
+                "WARNING: Authentication is in insecure development mode. "
+                "JWTs are not being cryptographically verified. "
+                "Set SUPABASE_ANON_KEY to enable proper JWT validation."
+            )
             payload = _decode_jwt_payload(token)
 
         user_id = payload.get("sub")

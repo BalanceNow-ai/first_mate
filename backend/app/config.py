@@ -79,6 +79,13 @@ class Settings(BaseSettings):
     # Error Tracking
     sentry_dsn: str = ""
 
+    # Helm Dash Delivery
+    warehouse_lat: float = -36.8406  # Westhaven Marina, Auckland
+    warehouse_lng: float = 174.7530
+    helm_dash_base_fee: float = 25.00
+    helm_dash_per_nm_fee: float = 8.00
+    helm_dash_speed_knots: float = 25.0
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
 

@@ -1,5 +1,6 @@
 """Stripe payment processing router."""
 
+import json
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -39,6 +40,15 @@ async def create_payment_intent(
             detail="Order is not in a payable state",
         )
 
+    if not settings.stripe_secret_key:
+        # Development fallback — return mock payment intent
+        order.stripe_payment_intent_id = f"pi_mock_{order.id}"
+        await db.flush()
+        return {
+            "client_secret": f"pi_mock_{order.id}_secret",
+            "payment_intent_id": f"pi_mock_{order.id}",
+        }
+
     try:
         import stripe
 
@@ -56,14 +66,6 @@ async def create_payment_intent(
         return {
             "client_secret": intent.client_secret,
             "payment_intent_id": intent.id,
-        }
-    except ImportError:
-        # Stripe not configured — return mock for development
-        order.stripe_payment_intent_id = f"pi_mock_{order.id}"
-        await db.flush()
-        return {
-            "client_secret": f"pi_mock_{order.id}_secret",
-            "payment_intent_id": f"pi_mock_{order.id}",
         }
     except Exception as e:
         raise HTTPException(
@@ -85,23 +87,16 @@ async def stripe_webhook(
     payload = await request.body()
 
     try:
-        import stripe
-
-        stripe.api_key = settings.stripe_secret_key
-
         if settings.stripe_webhook_secret:
+            import stripe
+
+            stripe.api_key = settings.stripe_secret_key
             sig_header = request.headers.get("stripe-signature", "")
             event = stripe.Webhook.construct_event(
                 payload, sig_header, settings.stripe_webhook_secret
             )
         else:
-            import json
-
             event = json.loads(payload)
-    except ImportError:
-        import json
-
-        event = json.loads(payload)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
