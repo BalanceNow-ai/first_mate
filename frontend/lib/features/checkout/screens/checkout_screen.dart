@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:go_router/go_router.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
 import 'package:helm_marine/features/checkout/providers/checkout_provider.dart';
@@ -136,12 +137,27 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   },
                   isProcessing: state.isProcessing,
                   error: state.error,
+                  clientSecret: state.clientSecret,
                   onConfirmOrder: () async {
                     final notifier = ref.read(checkoutProvider.notifier);
                     final success = await notifier.createOrder();
                     if (success) {
-                      notifier.confirmPayment();
-                      _goToPage(2);
+                      // Confirm payment with Stripe
+                      try {
+                        final cs =
+                            ref.read(checkoutProvider).clientSecret;
+                        if (cs != null) {
+                          await Stripe.instance.confirmPayment(
+                            paymentIntentClientSecret: cs,
+                          );
+                        }
+                        notifier.confirmPayment();
+                        _goToPage(2);
+                      } on StripeException catch (e) {
+                        notifier.setError(
+                          e.error.localizedMessage ?? 'Payment failed',
+                        );
+                      }
                     }
                   },
                   cartState: cartState,
@@ -537,6 +553,7 @@ class _PaymentStep extends StatelessWidget {
   final ValueChanged<String> onPaymentMethodChanged;
   final bool isProcessing;
   final String? error;
+  final String? clientSecret;
   final VoidCallback onConfirmOrder;
   final AsyncValue<Map<String, dynamic>> cartState;
 
@@ -545,6 +562,7 @@ class _PaymentStep extends StatelessWidget {
     required this.onPaymentMethodChanged,
     required this.isProcessing,
     this.error,
+    this.clientSecret,
     required this.onConfirmOrder,
     required this.cartState,
   });
@@ -589,7 +607,7 @@ class _PaymentStep extends StatelessWidget {
         ),
         const SizedBox(height: 24),
 
-        // Card input placeholder (Stripe Element would go here)
+        // Stripe card input
         if (paymentMethod == 'card') ...[
           Card(
             child: Padding(
@@ -602,21 +620,10 @@ class _PaymentStep extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           )),
                   const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey[300]!),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.credit_card, color: Colors.grey[400]),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Stripe card element',
-                          style: TextStyle(color: Colors.grey[500]),
-                        ),
-                      ],
+                  const CardField(
+                    enablePostalCode: true,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 8),

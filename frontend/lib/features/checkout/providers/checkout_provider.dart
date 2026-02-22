@@ -124,6 +124,10 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
     state = state.copyWith(currentStep: 2);
   }
 
+  void setError(String message) {
+    state = state.copyWith(isProcessing: false, error: message);
+  }
+
   void reset() {
     state = const CheckoutState();
   }

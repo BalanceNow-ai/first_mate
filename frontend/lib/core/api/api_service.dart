@@ -212,6 +212,14 @@ class ApiService {
     return response.data;
   }
 
+  // --- Users ---
+
+  Future<Map<String, dynamic>> updateProfile(
+      Map<String, dynamic> data) async {
+    final response = await _dio.patch('/users/me', data: data);
+    return response.data;
+  }
+
   // --- Shipping ---
 
   Future<Map<String, dynamic>> getShippingRates(

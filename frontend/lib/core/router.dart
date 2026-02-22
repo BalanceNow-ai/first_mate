@@ -16,6 +16,9 @@ import 'package:helm_marine/features/helm_dash/screens/delivery_tracking_screen.
 import 'package:helm_marine/features/checklists/screens/vessel_checklists_screen.dart';
 import 'package:helm_marine/features/checkout/screens/checkout_screen.dart';
 import 'package:helm_marine/features/checkout/screens/order_detail_screen.dart';
+import 'package:helm_marine/features/profile/screens/user_profile_screen.dart';
+import 'package:helm_marine/features/profile/screens/edit_profile_screen.dart';
+import 'package:helm_marine/features/onboarding/screens/onboarding_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
@@ -26,8 +29,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isLoggedIn = authState.valueOrNull != null;
       final isAuthRoute =
           state.matchedLocation == '/login' || state.matchedLocation == '/signup';
+      final isOnboarding = state.matchedLocation == '/onboarding';
 
-      if (!isLoggedIn && !isAuthRoute) return '/login';
+      if (!isLoggedIn && !isAuthRoute && !isOnboarding) return '/login';
       if (isLoggedIn && isAuthRoute) return '/';
       return null;
     },
@@ -39,6 +43,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/signup',
         builder: (context, state) => const SignupScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) => _ScaffoldWithNav(child: child),
@@ -53,7 +61,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: 'new',
-                builder: (context, state) => const VesselFormScreen(),
+                builder: (context, state) {
+                  final from = state.uri.queryParameters['from'];
+                  return VesselFormScreen(fromOnboarding: from == 'onboarding');
+                },
               ),
               GoRoute(
                 path: ':vesselId',
@@ -119,6 +130,16 @@ final routerProvider = Provider<GoRouter>((ref) {
               orderId: state.pathParameters['orderId']!,
             ),
           ),
+          GoRoute(
+            path: '/profile',
+            builder: (context, state) => const UserProfileScreen(),
+            routes: [
+              GoRoute(
+                path: 'edit',
+                builder: (context, state) => const EditProfileScreen(),
+              ),
+            ],
+          ),
         ],
       ),
     ],
@@ -142,7 +163,7 @@ class _ScaffoldWithNav extends StatelessWidget {
           NavigationDestination(icon: Icon(Icons.directions_boat), label: 'Vessels'),
           NavigationDestination(icon: Icon(Icons.shopping_bag), label: 'Products'),
           NavigationDestination(icon: Icon(Icons.stars), label: 'Crew'),
-          NavigationDestination(icon: Icon(Icons.chat), label: 'First Mate'),
+          NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );
@@ -153,7 +174,7 @@ class _ScaffoldWithNav extends StatelessWidget {
     if (location.startsWith('/vessels')) return 1;
     if (location.startsWith('/products')) return 2;
     if (location.startsWith('/crew')) return 3;
-    if (location.startsWith('/chat')) return 4;
+    if (location.startsWith('/profile')) return 4;
     return 0;
   }
 
@@ -168,7 +189,7 @@ class _ScaffoldWithNav extends StatelessWidget {
       case 3:
         context.go('/crew');
       case 4:
-        context.go('/chat');
+        context.go('/profile');
     }
   }
 }

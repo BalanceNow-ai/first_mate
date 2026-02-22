@@ -45,6 +45,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           backgroundColor: HelmTheme.error,
         ),
       );
+    } else if (authState.valueOrNull != null && mounted) {
+      context.go('/onboarding');
     }
   }
 
