@@ -10,6 +10,7 @@ void main() {
       AsyncValue<Map<String, dynamic>>? pointsState,
       AsyncValue<Map<String, dynamic>>? multiplierState,
       AsyncValue<List<Map<String, dynamic>>>? teamsState,
+      AsyncValue<List<Map<String, dynamic>>>? experiencesState,
     }) {
       return ProviderScope(
         overrides: [
@@ -28,6 +29,11 @@ void main() {
               if (teamsState is AsyncError) throw teamsState.error!;
               return teamsState.value!;
             }),
+          if (experiencesState != null)
+            experiencesProvider.overrideWith((ref) async {
+              if (experiencesState is AsyncError) throw experiencesState.error!;
+              return experiencesState.value!;
+            }),
         ],
         child: const MaterialApp(
           home: CrewDashboardScreen(),
@@ -43,6 +49,7 @@ void main() {
           'multiplier': 1.25,
         }),
         teamsState: const AsyncData([]),
+        experiencesState: const AsyncData([]),
       ));
       await tester.pumpAndSettle();
 
@@ -58,6 +65,7 @@ void main() {
           'multiplier': 1.5,
         }),
         teamsState: const AsyncData([]),
+        experiencesState: const AsyncData([]),
       ));
       await tester.pumpAndSettle();
 
@@ -72,6 +80,7 @@ void main() {
         multiplierState:
             const AsyncData({'monthly_spend': 0.0, 'multiplier': 1.0}),
         teamsState: const AsyncData([]),
+        experiencesState: const AsyncData([]),
       ));
       await tester.pumpAndSettle();
 
@@ -91,6 +100,7 @@ void main() {
             'crew_wallet_balance': 300,
           },
         ]),
+        experiencesState: const AsyncData([]),
       ));
       await tester.pumpAndSettle();
 
@@ -99,19 +109,71 @@ void main() {
       expect(find.text('300 CP'), findsOneWidget);
     });
 
-    testWidgets('shows signature experiences section', (tester) async {
+    testWidgets('shows dynamic signature experiences from provider',
+        (tester) async {
       await tester.pumpWidget(buildTestWidget(
         pointsState:
             const AsyncData({'points_balance': 0, 'tier': 'deckhand'}),
         multiplierState:
             const AsyncData({'monthly_spend': 0.0, 'multiplier': 1.0}),
         teamsState: const AsyncData([]),
+        experiencesState: const AsyncData([
+          {
+            'id': 'exp-1',
+            'title': 'Harbour Cruise',
+            'description': 'Auckland harbour cruise',
+            'cost_cp': 5000,
+            'location': 'Auckland',
+          },
+          {
+            'id': 'exp-2',
+            'title': 'Fishing Charter',
+            'description': 'Deep-sea fishing in the Hauraki Gulf',
+            'cost_cp': 15000,
+            'location': 'Hauraki Gulf',
+          },
+        ]),
       ));
       await tester.pumpAndSettle();
 
       expect(find.text('Signature Experiences'), findsOneWidget);
       expect(find.text('Harbour Cruise'), findsOneWidget);
       expect(find.text('Fishing Charter'), findsOneWidget);
+    });
+
+    testWidgets('shows empty experiences message', (tester) async {
+      await tester.pumpWidget(buildTestWidget(
+        pointsState:
+            const AsyncData({'points_balance': 0, 'tier': 'deckhand'}),
+        multiplierState:
+            const AsyncData({'monthly_spend': 0.0, 'multiplier': 1.0}),
+        teamsState: const AsyncData([]),
+        experiencesState: const AsyncData([]),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('No experiences available'), findsOneWidget);
+    });
+
+    testWidgets('shows experience cost in CP', (tester) async {
+      await tester.pumpWidget(buildTestWidget(
+        pointsState:
+            const AsyncData({'points_balance': 0, 'tier': 'deckhand'}),
+        multiplierState:
+            const AsyncData({'monthly_spend': 0.0, 'multiplier': 1.0}),
+        teamsState: const AsyncData([]),
+        experiencesState: const AsyncData([
+          {
+            'id': 'exp-1',
+            'title': 'Marine Detailing',
+            'description': 'Professional hull detail',
+            'cost_cp': 8000,
+          },
+        ]),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('8000'), findsOneWidget);
     });
   });
 }

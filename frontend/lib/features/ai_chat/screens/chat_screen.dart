@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
 import 'package:helm_marine/features/ai_chat/providers/chat_provider.dart';
@@ -189,13 +190,61 @@ class _MessageBubble extends StatelessWidget {
                   bottomRight: Radius.circular(isUser ? 4 : 16),
                 ),
               ),
-              child: Text(
-                message.content,
-                style: TextStyle(
-                  color: isUser ? Colors.white : Colors.black87,
-                  height: 1.4,
-                ),
-              ),
+              child: isUser
+                  ? Text(
+                      message.content,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        height: 1.4,
+                      ),
+                    )
+                  : MarkdownBody(
+                      data: message.content,
+                      selectable: true,
+                      shrinkWrap: true,
+                      styleSheet: MarkdownStyleSheet(
+                        p: const TextStyle(
+                          color: Colors.black87,
+                          height: 1.4,
+                        ),
+                        h1: const TextStyle(
+                          color: Colors.black87,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        h2: const TextStyle(
+                          color: Colors.black87,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        h3: const TextStyle(
+                          color: Colors.black87,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        code: TextStyle(
+                          backgroundColor: Colors.grey[200],
+                          color: HelmTheme.primaryDark,
+                          fontFamily: 'monospace',
+                          fontSize: 13,
+                        ),
+                        codeblockDecoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        listBullet: const TextStyle(
+                          color: Colors.black87,
+                        ),
+                        blockquoteDecoration: BoxDecoration(
+                          border: Border(
+                            left: BorderSide(
+                              color: HelmTheme.primary.withOpacity(0.5),
+                              width: 3,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
             ),
           ),
           if (isUser) const SizedBox(width: 8),

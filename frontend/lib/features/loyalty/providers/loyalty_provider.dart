@@ -14,6 +14,13 @@ final crewMultiplierProvider =
   return apiService.getCrewMultiplier();
 });
 
+/// Signature Experiences from Strapi.
+final experiencesProvider =
+    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final apiService = ref.read(apiServiceProvider);
+  return apiService.getSignatureExperiences();
+});
+
 /// User's crew teams.
 final crewTeamsProvider =
     FutureProvider<List<Map<String, dynamic>>>((ref) async {

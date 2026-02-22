@@ -42,10 +42,21 @@ class CrewTeamMemberResponse(BaseModel):
 class RedeemPointsRequest(BaseModel):
     points: int = Field(gt=0)
     redemption_type: str  # product_discount, experience
-    experience_id: uuid.UUID | None = None
+    experience_id: str | None = None
 
 
 class PointsMultiplier(BaseModel):
     monthly_spend: float
     multiplier: float
     effective_rate: float
+
+
+class SignatureExperience(BaseModel):
+    id: str
+    title: str
+    description: str
+    cost_cp: int = Field(gt=0)
+    image_url: str | None = None
+    location: str | None = None
+    duration_hours: float | None = None
+    available: bool = True

@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mapbox_gl/mapbox_gl.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
 import 'package:helm_marine/features/helm_dash/providers/delivery_provider.dart';
+
+const String _mapboxAccessToken = String.fromEnvironment(
+  'MAPBOX_ACCESS_TOKEN',
+  defaultValue: '',
+);
+
+// Westhaven Marina, Auckland
+const _warehouseLatLng = LatLng(-36.8406, 174.7530);
 
 class DeliveryTrackingScreen extends ConsumerWidget {
   final String deliveryId;
@@ -31,77 +40,35 @@ class DeliveryTrackingScreen extends ConsumerWidget {
           final coords =
               delivery['delivery_coordinates'] as Map<String, dynamic>?;
 
+          final destLatLng = coords != null
+              ? LatLng(
+                  (coords['lat'] as num?)?.toDouble() ?? _warehouseLatLng.latitude,
+                  (coords['lng'] as num?)?.toDouble() ?? _warehouseLatLng.longitude,
+                )
+              : null;
+
+          final vesselLocation = liveLocationState.valueOrNull;
+
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              // Map placeholder
-              Container(
-                height: 250,
-                decoration: BoxDecoration(
-                  color: HelmTheme.primary.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(16),
-                  border:
-                      Border.all(color: HelmTheme.primary.withOpacity(0.2)),
-                ),
-                child: Stack(
-                  children: [
-                    // Simulated map area
-                    const Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.map, size: 48, color: HelmTheme.primary),
-                          SizedBox(height: 8),
-                          Text(
-                            'Mapbox map view',
-                            style: TextStyle(color: HelmTheme.primary),
-                          ),
-                          Text(
-                            '(Requires Mapbox access token)',
-                            style:
-                                TextStyle(color: Colors.grey, fontSize: 12),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Warehouse pin
-                    const Positioned(
-                      left: 30,
-                      top: 40,
-                      child: _MapPin(
-                        icon: Icons.warehouse,
-                        color: HelmTheme.primary,
-                        label: 'Warehouse',
-                      ),
-                    ),
-
-                    // Delivery pin
-                    if (coords != null)
-                      const Positioned(
-                        right: 40,
-                        bottom: 50,
-                        child: _MapPin(
-                          icon: Icons.location_on,
-                          color: HelmTheme.error,
-                          label: 'Delivery',
+              // Mapbox Map
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: SizedBox(
+                  height: 280,
+                  child: _mapboxAccessToken.isNotEmpty
+                      ? _MapboxView(
+                          warehouseLatLng: _warehouseLatLng,
+                          destLatLng: destLatLng,
+                          vesselLocation: vesselLocation,
+                          status: status,
+                        )
+                      : _FallbackMapView(
+                          status: status,
+                          coords: coords,
+                          vesselLocation: vesselLocation,
                         ),
-                      ),
-
-                    // Live vessel position
-                    liveLocationState.whenOrNull(
-                          data: (loc) => Positioned(
-                            left: _simulateX(status),
-                            top: _simulateY(status),
-                            child: _MapPin(
-                              icon: Icons.directions_boat,
-                              color: HelmTheme.accent,
-                              label: loc.label,
-                            ),
-                          ),
-                        ) ??
-                        const SizedBox.shrink(),
-                  ],
                 ),
               ),
               const SizedBox(height: 24),
@@ -232,6 +199,191 @@ class DeliveryTrackingScreen extends ConsumerWidget {
     );
   }
 
+  int _statusIndex(String status) {
+    const statuses = ['pending', 'assigned', 'pickup', 'en_route', 'delivered'];
+    return statuses.indexOf(status);
+  }
+}
+
+/// Live Mapbox GL map widget with markers for warehouse, destination, and vessel.
+class _MapboxView extends StatefulWidget {
+  final LatLng warehouseLatLng;
+  final LatLng? destLatLng;
+  final DeliveryLocation? vesselLocation;
+  final String status;
+
+  const _MapboxView({
+    required this.warehouseLatLng,
+    this.destLatLng,
+    this.vesselLocation,
+    required this.status,
+  });
+
+  @override
+  State<_MapboxView> createState() => _MapboxViewState();
+}
+
+class _MapboxViewState extends State<_MapboxView> {
+  MapboxMapController? _controller;
+
+  LatLng get _center {
+    if (widget.vesselLocation != null) {
+      return LatLng(widget.vesselLocation!.lat, widget.vesselLocation!.lng);
+    }
+    if (widget.destLatLng != null) {
+      return LatLng(
+        (widget.warehouseLatLng.latitude + widget.destLatLng!.latitude) / 2,
+        (widget.warehouseLatLng.longitude + widget.destLatLng!.longitude) / 2,
+      );
+    }
+    return widget.warehouseLatLng;
+  }
+
+  @override
+  void didUpdateWidget(covariant _MapboxView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_controller != null) {
+      _addMarkers();
+    }
+  }
+
+  void _onMapCreated(MapboxMapController controller) {
+    _controller = controller;
+    _addMarkers();
+  }
+
+  Future<void> _addMarkers() async {
+    final controller = _controller;
+    if (controller == null) return;
+
+    await controller.clearSymbols();
+
+    // Warehouse marker
+    await controller.addSymbol(SymbolOptions(
+      geometry: widget.warehouseLatLng,
+      iconImage: 'harbor',
+      iconSize: 1.5,
+      textField: 'Warehouse',
+      textOffset: const Offset(0, 1.5),
+      textSize: 11,
+    ));
+
+    // Destination marker
+    if (widget.destLatLng != null) {
+      await controller.addSymbol(SymbolOptions(
+        geometry: widget.destLatLng!,
+        iconImage: 'marker',
+        iconSize: 1.5,
+        textField: 'Delivery',
+        textOffset: const Offset(0, 1.5),
+        textSize: 11,
+      ));
+    }
+
+    // Vessel marker (live position)
+    if (widget.vesselLocation != null) {
+      await controller.addSymbol(SymbolOptions(
+        geometry: LatLng(
+          widget.vesselLocation!.lat,
+          widget.vesselLocation!.lng,
+        ),
+        iconImage: 'ferry',
+        iconSize: 1.5,
+        textField: widget.vesselLocation!.label,
+        textOffset: const Offset(0, 1.5),
+        textSize: 11,
+      ));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MapboxMap(
+      accessToken: _mapboxAccessToken,
+      initialCameraPosition: CameraPosition(
+        target: _center,
+        zoom: 12.0,
+      ),
+      styleString: MapboxStyles.OUTDOORS,
+      onMapCreated: _onMapCreated,
+      myLocationEnabled: false,
+      trackCameraPosition: false,
+    );
+  }
+}
+
+/// Fallback map view when no Mapbox token is configured.
+class _FallbackMapView extends StatelessWidget {
+  final String status;
+  final Map<String, dynamic>? coords;
+  final DeliveryLocation? vesselLocation;
+
+  const _FallbackMapView({
+    required this.status,
+    this.coords,
+    this.vesselLocation,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: HelmTheme.primary.withOpacity(0.08),
+        border: Border.all(color: HelmTheme.primary.withOpacity(0.2)),
+      ),
+      child: Stack(
+        children: [
+          const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.map, size: 48, color: HelmTheme.primary),
+                SizedBox(height: 8),
+                Text(
+                  'Map view',
+                  style: TextStyle(color: HelmTheme.primary),
+                ),
+                Text(
+                  'Set MAPBOX_ACCESS_TOKEN to enable live map',
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          const Positioned(
+            left: 30,
+            top: 40,
+            child: _MapPin(
+              icon: Icons.warehouse,
+              color: HelmTheme.primary,
+              label: 'Warehouse',
+            ),
+          ),
+          if (coords != null)
+            const Positioned(
+              right: 40,
+              bottom: 50,
+              child: _MapPin(
+                icon: Icons.location_on,
+                color: HelmTheme.error,
+                label: 'Delivery',
+              ),
+            ),
+          if (vesselLocation != null)
+            Positioned(
+              left: _simulateX(status),
+              top: _simulateY(status),
+              child: _MapPin(
+                icon: Icons.directions_boat,
+                color: HelmTheme.accent,
+                label: vesselLocation!.label,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   double _simulateX(String status) {
     switch (status) {
       case 'pending':
@@ -262,11 +414,6 @@ class DeliveryTrackingScreen extends ConsumerWidget {
       default:
         return 40;
     }
-  }
-
-  int _statusIndex(String status) {
-    const statuses = ['pending', 'assigned', 'pickup', 'en_route', 'delivered'];
-    return statuses.indexOf(status);
   }
 }
 

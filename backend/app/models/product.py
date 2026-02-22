@@ -27,7 +27,7 @@ class Product(Base):
     cost_price: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)
     stock_quantity: Mapped[int] = mapped_column(Integer, default=0)
     weight_grams: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    images: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    images: Mapped[list | None] = mapped_column(JSONB, nullable=True)
     specifications: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(

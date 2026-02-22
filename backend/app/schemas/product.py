@@ -16,7 +16,7 @@ class ProductBase(BaseModel):
     price: float = Field(gt=0)
     sale_price: float | None = None
     weight_grams: int | None = None
-    images: dict | None = None
+    images: list[str] | None = None
     specifications: dict | None = None
 
 
@@ -36,7 +36,7 @@ class ProductUpdate(BaseModel):
     cost_price: float | None = None
     stock_quantity: int | None = None
     weight_grams: int | None = None
-    images: dict | None = None
+    images: list[str] | None = None
     specifications: dict | None = None
     is_active: bool | None = None
 
