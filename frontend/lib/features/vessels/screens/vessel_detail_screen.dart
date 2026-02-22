@@ -143,6 +143,16 @@ class VesselDetailScreen extends ConsumerWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () =>
+                    context.go('/vessels/$vesselId/checklists'),
+                icon: const Icon(Icons.checklist),
+                label: const Text('Voyage Checklists'),
+              ),
+            ),
           ],
         ),
         loading: () => const Center(child: CircularProgressIndicator()),

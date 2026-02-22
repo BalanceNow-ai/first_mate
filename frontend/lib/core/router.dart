@@ -13,6 +13,9 @@ import 'package:helm_marine/features/products/screens/product_detail_screen.dart
 import 'package:helm_marine/features/ai_chat/screens/chat_screen.dart';
 import 'package:helm_marine/features/loyalty/screens/crew_dashboard_screen.dart';
 import 'package:helm_marine/features/helm_dash/screens/delivery_tracking_screen.dart';
+import 'package:helm_marine/features/checklists/screens/vessel_checklists_screen.dart';
+import 'package:helm_marine/features/checkout/screens/checkout_screen.dart';
+import 'package:helm_marine/features/checkout/screens/order_detail_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
@@ -70,6 +73,12 @@ final routerProvider = Provider<GoRouter>((ref) {
                       vesselId: state.pathParameters['vesselId'],
                     ),
                   ),
+                  GoRoute(
+                    path: 'checklists',
+                    builder: (context, state) => VesselChecklistsScreen(
+                      vesselId: state.pathParameters['vesselId']!,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -98,6 +107,16 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/dash/:deliveryId',
             builder: (context, state) => DeliveryTrackingScreen(
               deliveryId: state.pathParameters['deliveryId']!,
+            ),
+          ),
+          GoRoute(
+            path: '/checkout',
+            builder: (context, state) => const CheckoutScreen(),
+          ),
+          GoRoute(
+            path: '/orders/:orderId',
+            builder: (context, state) => OrderDetailScreen(
+              orderId: state.pathParameters['orderId']!,
             ),
           ),
         ],
