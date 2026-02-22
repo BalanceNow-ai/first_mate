@@ -1,12 +1,13 @@
 """Helm Dash on-demand maritime delivery router."""
 
-import uuid
 import math
+import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import get_settings
 from app.database import get_db
 from app.middleware.auth import CurrentUserId
 from app.models.helm_dash import HelmDashDelivery
@@ -19,16 +20,7 @@ from app.schemas.helm_dash import (
 )
 
 router = APIRouter(prefix="/helm-dash", tags=["Helm Dash Delivery"])
-
-# Helm warehouse coordinates (Westhaven Marina, Auckland)
-WAREHOUSE_LAT = -36.8406
-WAREHOUSE_LNG = 174.7530
-
-# Pricing: base fee + per nautical mile
-BASE_DELIVERY_FEE = 25.00
-PER_NM_FEE = 8.00
-# Average speed of delivery vessel in knots
-DELIVERY_SPEED_KNOTS = 25
+settings = get_settings()
 
 
 def _calculate_nautical_miles(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
@@ -56,12 +48,12 @@ async def get_delivery_quote(
     on average vessel speed.
     """
     nm = _calculate_nautical_miles(
-        WAREHOUSE_LAT, WAREHOUSE_LNG,
+        settings.warehouse_lat, settings.warehouse_lng,
         request.delivery_lat, request.delivery_lng,
     )
 
-    delivery_fee = round(BASE_DELIVERY_FEE + (nm * PER_NM_FEE), 2)
-    estimated_minutes = max(15, int((nm / DELIVERY_SPEED_KNOTS) * 60) + 15)  # +15 min prep
+    delivery_fee = round(settings.helm_dash_base_fee + (nm * settings.helm_dash_per_nm_fee), 2)
+    estimated_minutes = max(15, int((nm / settings.helm_dash_speed_knots) * 60) + 15)
 
     return HelmDashQuoteResponse(
         delivery_fee=delivery_fee,
