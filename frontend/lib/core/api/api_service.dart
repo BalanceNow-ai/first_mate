@@ -130,6 +130,38 @@ class ApiService {
     return response.data;
   }
 
+  // --- Checklists ---
+
+  Future<List<Map<String, dynamic>>> getVesselChecklists(String vesselId) async {
+    final response = await _dio.get('/checklists/vessel/$vesselId');
+    return (response.data as List).cast<Map<String, dynamic>>();
+  }
+
+  Future<Map<String, dynamic>> generateChecklists(String vesselId) async {
+    final response = await _dio.post('/checklists/vessel/$vesselId/generate');
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> toggleChecklistItem(String itemId) async {
+    final response = await _dio.patch('/checklists/items/$itemId/toggle');
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> linkProductToItem(
+      String itemId, String productId) async {
+    final response = await _dio.patch(
+      '/checklists/items/$itemId/link-product',
+      data: {'product_id': productId},
+    );
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> addUncheckedToCart(String vesselId) async {
+    final response =
+        await _dio.post('/checklists/vessel/$vesselId/add-unchecked-to-cart');
+    return response.data;
+  }
+
   // --- Cart ---
 
   Future<Map<String, dynamic>> getCart() async {
@@ -144,11 +176,40 @@ class ApiService {
     });
   }
 
+  Future<void> updateCartItem(String itemId, int quantity) async {
+    await _dio.patch('/cart/items/$itemId', data: {'quantity': quantity});
+  }
+
+  Future<void> removeCartItem(String itemId) async {
+    await _dio.delete('/cart/items/$itemId');
+  }
+
+  Future<void> clearCart() async {
+    await _dio.delete('/cart/');
+  }
+
   // --- Orders ---
 
   Future<List<Map<String, dynamic>>> getOrders() async {
     final response = await _dio.get('/orders/');
     return (response.data as List).cast<Map<String, dynamic>>();
+  }
+
+  Future<Map<String, dynamic>> createOrder(Map<String, dynamic> data) async {
+    final response = await _dio.post('/orders/', data: data);
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> getOrder(String orderId) async {
+    final response = await _dio.get('/orders/$orderId');
+    return response.data;
+  }
+
+  // --- Payments ---
+
+  Future<Map<String, dynamic>> createPaymentIntent(String orderId) async {
+    final response = await _dio.post('/payments/$orderId/create-intent');
+    return response.data;
   }
 
   // --- Shipping ---
