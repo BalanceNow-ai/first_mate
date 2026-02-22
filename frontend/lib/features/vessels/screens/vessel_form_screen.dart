@@ -6,8 +6,9 @@ import 'package:helm_marine/features/vessels/providers/vessel_provider.dart';
 
 class VesselFormScreen extends ConsumerStatefulWidget {
   final String? vesselId;
+  final bool fromOnboarding;
 
-  const VesselFormScreen({super.key, this.vesselId});
+  const VesselFormScreen({super.key, this.vesselId, this.fromOnboarding = false});
 
   bool get isEditing => vesselId != null;
 
@@ -109,7 +110,7 @@ class _VesselFormScreenState extends ConsumerState<VesselFormScreen> {
       } else {
         await notifier.createVessel(data);
       }
-      if (mounted) context.go('/vessels');
+      if (mounted) context.go(widget.fromOnboarding ? '/' : '/vessels');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
