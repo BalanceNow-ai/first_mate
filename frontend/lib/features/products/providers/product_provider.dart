@@ -8,6 +8,8 @@ class ProductFilter {
   final String? brand;
   final String? vesselId;
   final String? search;
+  final bool onSale;
+  final bool vesselCompatible;
   final int offset;
   final int limit;
 
@@ -16,6 +18,8 @@ class ProductFilter {
     this.brand,
     this.vesselId,
     this.search,
+    this.onSale = false,
+    this.vesselCompatible = false,
     this.offset = 0,
     this.limit = 20,
   });
@@ -25,14 +29,21 @@ class ProductFilter {
     String? brand,
     String? vesselId,
     String? search,
+    bool? onSale,
+    bool? vesselCompatible,
     int? offset,
     int? limit,
+    bool clearCategory = false,
+    bool clearBrand = false,
+    bool clearSearch = false,
   }) {
     return ProductFilter(
-      category: category ?? this.category,
-      brand: brand ?? this.brand,
+      category: clearCategory ? null : (category ?? this.category),
+      brand: clearBrand ? null : (brand ?? this.brand),
       vesselId: vesselId ?? this.vesselId,
-      search: search ?? this.search,
+      search: clearSearch ? null : (search ?? this.search),
+      onSale: onSale ?? this.onSale,
+      vesselCompatible: vesselCompatible ?? this.vesselCompatible,
       offset: offset ?? this.offset,
       limit: limit ?? this.limit,
     );
@@ -44,6 +55,18 @@ final productFilterProvider = StateProvider<ProductFilter>(
   (ref) => const ProductFilter(),
 );
 
+/// Available categories from backend.
+final productCategoriesProvider = FutureProvider<List<String>>((ref) async {
+  final apiService = ref.read(apiServiceProvider);
+  return apiService.getProductCategories();
+});
+
+/// Available brands from backend.
+final productBrandsProvider = FutureProvider<List<String>>((ref) async {
+  final apiService = ref.read(apiServiceProvider);
+  return apiService.getProductBrands();
+});
+
 /// Product list based on current filter.
 final productListProvider = FutureProvider<List<Product>>((ref) async {
   final filter = ref.watch(productFilterProvider);
@@ -51,8 +74,9 @@ final productListProvider = FutureProvider<List<Product>>((ref) async {
   return apiService.getProducts(
     category: filter.category,
     brand: filter.brand,
-    vesselId: filter.vesselId,
+    vesselId: filter.vesselCompatible ? filter.vesselId : null,
     search: filter.search,
+    onSale: filter.onSale ? true : null,
     offset: filter.offset,
     limit: filter.limit,
   );

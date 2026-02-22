@@ -23,6 +23,34 @@ from app.schemas.product import (
 router = APIRouter(prefix="/products", tags=["Products"])
 
 
+@router.get("/categories")
+async def list_categories(
+    db: AsyncSession = Depends(get_db),
+) -> list[str]:
+    """List all unique product categories."""
+    result = await db.execute(
+        select(Product.category)
+        .where(Product.is_active.is_(True), Product.category.isnot(None))
+        .distinct()
+        .order_by(Product.category)
+    )
+    return [row[0] for row in result.all()]
+
+
+@router.get("/brands")
+async def list_brands(
+    db: AsyncSession = Depends(get_db),
+) -> list[str]:
+    """List all unique product brands."""
+    result = await db.execute(
+        select(Product.brand)
+        .where(Product.is_active.is_(True), Product.brand.isnot(None))
+        .distinct()
+        .order_by(Product.brand)
+    )
+    return [row[0] for row in result.all()]
+
+
 @router.get("/", response_model=list[ProductResponse])
 async def list_products(
     category: str | None = None,
@@ -32,6 +60,7 @@ async def list_products(
     min_price: float | None = None,
     max_price: float | None = None,
     in_stock: bool | None = None,
+    on_sale: bool | None = None,
     search: str | None = None,
     offset: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
@@ -52,6 +81,8 @@ async def list_products(
         query = query.where(Product.price <= max_price)
     if in_stock:
         query = query.where(Product.stock_quantity > 0)
+    if on_sale:
+        query = query.where(Product.sale_price.isnot(None))
     if search:
         search_filter = f"%{search}%"
         query = query.where(

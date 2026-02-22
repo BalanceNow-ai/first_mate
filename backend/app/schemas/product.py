@@ -14,6 +14,7 @@ class ProductBase(BaseModel):
     category: str
     sub_category: str | None = None
     price: float = Field(gt=0)
+    sale_price: float | None = None
     weight_grams: int | None = None
     images: dict | None = None
     specifications: dict | None = None
@@ -31,6 +32,7 @@ class ProductUpdate(BaseModel):
     category: str | None = None
     sub_category: str | None = None
     price: float | None = Field(None, gt=0)
+    sale_price: float | None = None
     cost_price: float | None = None
     stock_quantity: int | None = None
     weight_grams: int | None = None
@@ -41,6 +43,7 @@ class ProductUpdate(BaseModel):
 
 class ProductResponse(ProductBase):
     id: uuid.UUID
+    cost_price: float | None = None
     stock_quantity: int
     is_active: bool
     created_at: datetime

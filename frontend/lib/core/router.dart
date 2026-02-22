@@ -11,6 +11,8 @@ import 'package:helm_marine/features/vessels/screens/vessel_form_screen.dart';
 import 'package:helm_marine/features/products/screens/product_list_screen.dart';
 import 'package:helm_marine/features/products/screens/product_detail_screen.dart';
 import 'package:helm_marine/features/ai_chat/screens/chat_screen.dart';
+import 'package:helm_marine/features/loyalty/screens/crew_dashboard_screen.dart';
+import 'package:helm_marine/features/helm_dash/screens/delivery_tracking_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
@@ -85,8 +87,18 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
           GoRoute(
+            path: '/crew',
+            builder: (context, state) => const CrewDashboardScreen(),
+          ),
+          GoRoute(
             path: '/chat',
             builder: (context, state) => const ChatScreen(),
+          ),
+          GoRoute(
+            path: '/dash/:deliveryId',
+            builder: (context, state) => DeliveryTrackingScreen(
+              deliveryId: state.pathParameters['deliveryId']!,
+            ),
           ),
         ],
       ),
@@ -108,8 +120,9 @@ class _ScaffoldWithNav extends StatelessWidget {
         onDestinationSelected: (index) => _onItemTapped(index, context),
         destinations: const [
           NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
-          NavigationDestination(icon: Icon(Icons.directions_boat), label: 'My Vessels'),
+          NavigationDestination(icon: Icon(Icons.directions_boat), label: 'Vessels'),
           NavigationDestination(icon: Icon(Icons.shopping_bag), label: 'Products'),
+          NavigationDestination(icon: Icon(Icons.stars), label: 'Crew'),
           NavigationDestination(icon: Icon(Icons.chat), label: 'First Mate'),
         ],
       ),
@@ -120,7 +133,8 @@ class _ScaffoldWithNav extends StatelessWidget {
     final location = GoRouterState.of(context).matchedLocation;
     if (location.startsWith('/vessels')) return 1;
     if (location.startsWith('/products')) return 2;
-    if (location.startsWith('/chat')) return 3;
+    if (location.startsWith('/crew')) return 3;
+    if (location.startsWith('/chat')) return 4;
     return 0;
   }
 
@@ -133,6 +147,8 @@ class _ScaffoldWithNav extends StatelessWidget {
       case 2:
         context.go('/products');
       case 3:
+        context.go('/crew');
+      case 4:
         context.go('/chat');
     }
   }
