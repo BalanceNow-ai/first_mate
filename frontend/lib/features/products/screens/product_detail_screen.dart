@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 import 'package:helm_marine/core/api/api_service.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
 import 'package:helm_marine/features/products/providers/product_provider.dart';
@@ -18,6 +20,7 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   int _quantity = 1;
   bool _addingToCart = false;
+  int _currentImagePage = 0;
 
   Future<void> _addToCart() async {
     setState(() => _addingToCart = true);
@@ -115,22 +118,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         data: (product) => ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            // Image
-            Container(
-              height: 250,
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: product.imageUrl != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Image.network(product.imageUrl!, fit: BoxFit.contain),
-                    )
-                  : const Center(
-                      child: Icon(Icons.inventory_2_outlined,
-                          size: 80, color: Colors.grey),
-                    ),
+            // Image Gallery
+            _ProductImageGallery(
+              images: product.images,
+              fallbackUrl: product.imageUrl,
+              currentPage: _currentImagePage,
+              onPageChanged: (page) =>
+                  setState(() => _currentImagePage = page),
             ),
             const SizedBox(height: 16),
 
@@ -257,6 +251,138 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error: $error')),
+      ),
+    );
+  }
+}
+
+class _ProductImageGallery extends StatelessWidget {
+  final List<String> images;
+  final String? fallbackUrl;
+  final int currentPage;
+  final ValueChanged<int> onPageChanged;
+
+  const _ProductImageGallery({
+    required this.images,
+    this.fallbackUrl,
+    required this.currentPage,
+    required this.onPageChanged,
+  });
+
+  List<String> get _allImages {
+    if (images.isNotEmpty) return images;
+    if (fallbackUrl != null) return [fallbackUrl!];
+    return [];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final imageUrls = _allImages;
+
+    if (imageUrls.isEmpty) {
+      return Container(
+        height: 250,
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Center(
+          child: Icon(Icons.inventory_2_outlined, size: 80, color: Colors.grey),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => _FullScreenGallery(
+                images: imageUrls,
+                initialIndex: currentPage,
+              ),
+            ),
+          ),
+          child: Container(
+            height: 250,
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: PageView.builder(
+                itemCount: imageUrls.length,
+                onPageChanged: onPageChanged,
+                itemBuilder: (context, index) {
+                  return Image.network(
+                    imageUrls[index],
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => const Center(
+                      child: Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+        if (imageUrls.length > 1) ...[
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(imageUrls.length, (index) {
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                width: currentPage == index ? 10 : 6,
+                height: currentPage == index ? 10 : 6,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: currentPage == index
+                      ? HelmTheme.primary
+                      : Colors.grey[300],
+                ),
+              );
+            }),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _FullScreenGallery extends StatelessWidget {
+  final List<String> images;
+  final int initialIndex;
+
+  const _FullScreenGallery({
+    required this.images,
+    required this.initialIndex,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        title: Text('${initialIndex + 1} / ${images.length}'),
+      ),
+      body: PhotoViewGallery.builder(
+        scrollPhysics: const BouncingScrollPhysics(),
+        pageController: PageController(initialPage: initialIndex),
+        itemCount: images.length,
+        builder: (context, index) {
+          return PhotoViewGalleryPageOptions(
+            imageProvider: NetworkImage(images[index]),
+            minScale: PhotoViewComputedScale.contained,
+            maxScale: PhotoViewComputedScale.covered * 3,
+          );
+        },
+        loadingBuilder: (context, event) => const Center(
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
       ),
     );
   }

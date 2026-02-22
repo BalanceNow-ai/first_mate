@@ -161,6 +161,11 @@ class ApiService {
 
   // --- Loyalty ---
 
+  Future<List<Map<String, dynamic>>> getSignatureExperiences() async {
+    final response = await _dio.get('/loyalty/experiences');
+    return (response.data as List).cast<Map<String, dynamic>>();
+  }
+
   Future<Map<String, dynamic>> getCrewPoints() async {
     final response = await _dio.get('/loyalty/points');
     return response.data;

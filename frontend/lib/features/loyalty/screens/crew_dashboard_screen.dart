@@ -11,6 +11,7 @@ class CrewDashboardScreen extends ConsumerWidget {
     final pointsState = ref.watch(crewPointsProvider);
     final multiplierState = ref.watch(crewMultiplierProvider);
     final teamsState = ref.watch(crewTeamsProvider);
+    final experiencesState = ref.watch(experiencesProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Crew Rewards')),
@@ -19,6 +20,7 @@ class CrewDashboardScreen extends ConsumerWidget {
           ref.invalidate(crewPointsProvider);
           ref.invalidate(crewMultiplierProvider);
           ref.invalidate(crewTeamsProvider);
+          ref.invalidate(experiencesProvider);
         },
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -127,25 +129,40 @@ class CrewDashboardScreen extends ConsumerWidget {
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            _ExperienceCard(
-              title: 'Harbour Cruise',
-              description:
-                  'A guided harbour cruise around Auckland\'s Waitematā Harbour',
-              costCp: 5000,
-            ),
-            const SizedBox(height: 8),
-            _ExperienceCard(
-              title: 'Fishing Charter',
-              description:
-                  'Full-day deep-sea fishing charter in the Hauraki Gulf',
-              costCp: 15000,
-            ),
-            const SizedBox(height: 8),
-            _ExperienceCard(
-              title: 'Marine Detailing',
-              description:
-                  'Professional hull and topside detail for vessels up to 30ft',
-              costCp: 8000,
+            experiencesState.when(
+              data: (experiences) {
+                if (experiences.isEmpty) {
+                  return Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        children: [
+                          Icon(Icons.explore_outlined,
+                              size: 48, color: Colors.grey[400]),
+                          const SizedBox(height: 12),
+                          const Text('No experiences available'),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+                return Column(
+                  children: experiences.map((exp) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _ExperienceCard(
+                        title: exp['title'] as String? ?? '',
+                        description: exp['description'] as String? ?? '',
+                        costCp: exp['cost_cp'] as int? ?? 0,
+                        location: exp['location'] as String?,
+                      ),
+                    );
+                  }).toList(),
+                );
+              },
+              loading: () => const _LoadingCard(),
+              error: (e, _) =>
+                  _ErrorCard(message: 'Failed to load experiences: $e'),
             ),
           ],
         ),
@@ -314,11 +331,13 @@ class _ExperienceCard extends StatelessWidget {
   final String title;
   final String description;
   final int costCp;
+  final String? location;
 
   const _ExperienceCard({
     required this.title,
     required this.description,
     required this.costCp,
+    this.location,
   });
 
   @override
@@ -330,7 +349,11 @@ class _ExperienceCard extends StatelessWidget {
           child: const Icon(Icons.star, color: HelmTheme.accent),
         ),
         title: Text(title),
-        subtitle: Text(description, maxLines: 2, overflow: TextOverflow.ellipsis),
+        subtitle: Text(
+          location != null ? '$description\n$location' : description,
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+        ),
         trailing: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
