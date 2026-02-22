@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Helm — NZ Marine Platform | UI Wireframes & Mock Designs</title>
+<style>
+  :root {
+    --navy: #0a2342;
+    --ocean: #1a6b9a;
+    --seafoam: #2ec4b6;
+    --sand: #f4f1e8;
+    --coral: #e76f51;
+    --white: #ffffff;
+    --light-grey: #f5f7fa;
+    --mid-grey: #e2e8f0;
+    --dark-grey: #4a5568;
+    --text: #1a202c;
+    --success: #38a169;
+    --warning: #d69e2e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f0f4f8; color: var(--text); }
+
+  /* Navigation */
+  .screen-nav { background: var(--navy); padding: 12px 24px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; position: sticky; top: 0; z-index: 100; }
+  .screen-nav h1 { color: var(--seafoam); font-size: 18px; font-weight: 700; margin-right: 16px; white-space: nowrap; }
+  .nav-btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 12px; transition: all 0.2s; white-space: nowrap; }
+  .nav-btn:hover, .nav-btn.active { background: var(--seafoam); border-color: var(--seafoam); color: var(--navy); font-weight: 600; }
+
+  /* Screens */
+  .screen { display: none; min-height: calc(100vh - 52px); }
+  .screen.active { display: block; }
+
+  /* ========== SCREEN 1: HOMEPAGE ========== */
+  .hero { background: linear-gradient(135deg, var(--navy) 0%, var(--ocean) 60%, var(--seafoam) 100%); color: white; padding: 0; overflow: hidden; position: relative; }
+  .hero-content { max-width: 1200px; margin: 0 auto; padding: 80px 40px 60px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  .hero-text h2 { font-size: 48px; font-weight: 800; line-height: 1.1; margin-bottom: 20px; }
+  .hero-text h2 span { color: var(--seafoam); }
+  .hero-text p { font-size: 18px; opacity: 0.9; margin-bottom: 32px; line-height: 1.6; }
+  .hero-cta { display: flex; gap: 16px; flex-wrap: wrap; }
+  .btn-primary { background: var(--seafoam); color: var(--navy); padding: 14px 28px; border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer; border: none; text-decoration: none; display: inline-block; transition: transform 0.2s; }
+  .btn-primary:hover { transform: translateY(-2px); }
+  .btn-secondary { background: transparent; color: white; padding: 14px 28px; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; border: 2px solid rgba(255,255,255,0.5); text-decoration: none; display: inline-block; }
+  .hero-mockup { background: rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); }
+  .mockup-vessel-card { background: white; border-radius: 12px; padding: 16px; color: var(--text); margin-bottom: 12px; }
+  .vessel-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .vessel-icon { width: 48px; height: 48px; background: var(--ocean); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+  .vessel-name { font-weight: 700; font-size: 16px; }
+  .vessel-sub { font-size: 12px; color: var(--dark-grey); }
+  .compatibility-badge { background: #e6ffed; color: var(--success); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .mockup-ai-bubble { background: rgba(46,196,182,0.2); border: 1px solid var(--seafoam); border-radius: 12px; padding: 12px; color: white; font-size: 13px; line-height: 1.5; }
+  .mockup-ai-bubble strong { color: var(--seafoam); }
+
+  .site-header { background: var(--navy); padding: 0 40px; display: flex; align-items: center; gap: 32px; height: 64px; }
+  .logo { color: var(--seafoam); font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+  .logo span { color: white; }
+  .site-nav { display: flex; gap: 24px; flex: 1; }
+  .site-nav a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 14px; font-weight: 500; padding: 8px 0; border-bottom: 2px solid transparent; transition: all 0.2s; cursor: pointer; }
+  .site-nav a:hover { color: white; border-bottom-color: var(--seafoam); }
+  .header-actions { display: flex; gap: 12px; align-items: center; }
+  .vessel-selector { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 8px 14px; border-radius: 8px; font-size: 13px; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  .vessel-selector .dot { width: 8px; height: 8px; background: var(--seafoam); border-radius: 50%; }
+  .cart-btn { background: var(--seafoam); color: var(--navy); padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; border: none; position: relative; }
+  .cart-badge { position: absolute; top: -6px; right: -6px; background: var(--coral); color: white; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+
+  .search-bar-section { background: var(--sand); padding: 20px 40px; border-bottom: 1px solid var(--mid-grey); }
+  .search-container { max-width: 800px; margin: 0 auto; display: flex; gap: 12px; }
+  .search-input { flex: 1; padding: 14px 20px; border: 2px solid var(--mid-grey); border-radius: 10px; font-size: 15px; background: white; }
+  .search-input:focus { outline: none; border-color: var(--ocean); }
+  .search-btn { background: var(--navy); color: white; padding: 14px 28px; border-radius: 10px; font-weight: 600; cursor: pointer; border: none; font-size: 15px; }
+  .compatibility-filter { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; color: var(--dark-grey); }
+  .toggle { width: 36px; height: 20px; background: var(--success); border-radius: 10px; position: relative; cursor: pointer; }
+  .toggle::after { content: ''; position: absolute; width: 16px; height: 16px; background: white; border-radius: 50%; top: 2px; right: 2px; }
+
+  .categories-section { padding: 40px; max-width: 1200px; margin: 0 auto; }
+  .section-title { font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 24px; }
+  .categories-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
+  .category-card { background: white; border-radius: 12px; padding: 20px 16px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .category-card:hover { border-color: var(--ocean); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(26,107,154,0.15); }
+  .category-icon { font-size: 36px; margin-bottom: 10px; }
+  .category-name { font-size: 13px; font-weight: 600; color: var(--navy); }
+  .category-count { font-size: 11px; color: var(--dark-grey); margin-top: 4px; }
+
+  .value-props { background: var(--navy); padding: 60px 40px; }
+  .value-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+  .value-card { color: white; text-align: center; }
+  .value-icon { font-size: 40px; margin-bottom: 16px; }
+  .value-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: var(--seafoam); }
+  .value-desc { font-size: 13px; opacity: 0.8; line-height: 1.5; }
+
+  /* ========== SCREEN 2: MY VESSEL GARAGE ========== */
+  .page-layout { display: grid; grid-template-columns: 260px 1fr; min-height: calc(100vh - 64px); }
+  .sidebar { background: white; border-right: 1px solid var(--mid-grey); padding: 24px 0; }
+  .sidebar-section { padding: 0 20px; margin-bottom: 24px; }
+  .sidebar-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--dark-grey); margin-bottom: 12px; }
+  .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; color: var(--text); margin-bottom: 4px; transition: background 0.15s; }
+  .sidebar-item:hover { background: var(--light-grey); }
+  .sidebar-item.active { background: #e8f4fd; color: var(--ocean); font-weight: 600; }
+  .sidebar-item .icon { font-size: 18px; }
+  .main-content { padding: 32px 40px; background: var(--light-grey); }
+  .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+  .page-title { font-size: 28px; font-weight: 800; color: var(--navy); }
+  .page-subtitle { font-size: 14px; color: var(--dark-grey); margin-top: 4px; }
+
+  .vessel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; margin-bottom: 32px; }
+  .vessel-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 2px solid transparent; cursor: pointer; transition: all 0.2s; }
+  .vessel-card:hover { border-color: var(--ocean); box-shadow: 0 8px 24px rgba(26,107,154,0.15); }
+  .vessel-card.primary { border-color: var(--seafoam); }
+  .vessel-card-image { height: 160px; background: linear-gradient(135deg, var(--navy), var(--ocean)); display: flex; align-items: center; justify-content: center; font-size: 64px; position: relative; }
+  .primary-badge { position: absolute; top: 12px; left: 12px; background: var(--seafoam); color: var(--navy); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .vessel-card-body { padding: 20px; }
+  .vessel-card-name { font-size: 20px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+  .vessel-card-model { font-size: 13px; color: var(--dark-grey); margin-bottom: 16px; }
+  .vessel-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .stat { background: var(--light-grey); border-radius: 8px; padding: 10px 12px; }
+  .stat-label { font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--dark-grey); margin-bottom: 2px; }
+  .stat-value { font-size: 14px; font-weight: 700; color: var(--navy); }
+  .add-vessel-card { background: white; border-radius: 16px; border: 2px dashed var(--mid-grey); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 280px; cursor: pointer; transition: all 0.2s; color: var(--dark-grey); }
+  .add-vessel-card:hover { border-color: var(--ocean); color: var(--ocean); }
+  .add-vessel-icon { font-size: 48px; margin-bottom: 12px; }
+  .add-vessel-text { font-size: 16px; font-weight: 600; }
+
+  .vessel-detail { background: white; border-radius: 16px; padding: 32px; }
+  .vessel-detail-header { display: flex; gap: 24px; align-items: flex-start; margin-bottom: 32px; padding-bottom: 32px; border-bottom: 1px solid var(--mid-grey); }
+  .vessel-detail-img { width: 120px; height: 120px; background: linear-gradient(135deg, var(--navy), var(--ocean)); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 56px; flex-shrink: 0; }
+  .vessel-detail-info h2 { font-size: 28px; font-weight: 800; color: var(--navy); }
+  .vessel-detail-info p { color: var(--dark-grey); margin-top: 4px; }
+  .vessel-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .tag { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .tag-blue { background: #e8f4fd; color: var(--ocean); }
+  .tag-green { background: #e6ffed; color: var(--success); }
+  .tag-orange { background: #fff3e0; color: #e65100; }
+
+  .equipment-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+  .equipment-item { background: var(--light-grey); border-radius: 10px; padding: 16px; display: flex; gap: 12px; align-items: flex-start; }
+  .equip-icon { font-size: 28px; flex-shrink: 0; }
+  .equip-name { font-size: 13px; font-weight: 600; color: var(--navy); }
+  .equip-model { font-size: 12px; color: var(--dark-grey); margin-top: 2px; }
+  .equip-badge { margin-top: 6px; }
+
+  /* ========== SCREEN 3: PRODUCT PAGE ========== */
+  .product-layout { display: grid; grid-template-columns: 1fr 380px; gap: 32px; padding: 32px 40px; max-width: 1200px; margin: 0 auto; }
+  .product-images { background: white; border-radius: 16px; padding: 24px; }
+  .main-image { width: 100%; height: 360px; background: var(--light-grey); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 100px; margin-bottom: 16px; }
+  .thumb-row { display: flex; gap: 12px; }
+  .thumb { width: 72px; height: 72px; background: var(--light-grey); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 28px; cursor: pointer; border: 2px solid transparent; }
+  .thumb.active { border-color: var(--ocean); }
+  .product-info { display: flex; flex-direction: column; gap: 16px; }
+  .product-info-card { background: white; border-radius: 16px; padding: 24px; }
+  .product-brand { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--ocean); letter-spacing: 0.5px; }
+  .product-title { font-size: 22px; font-weight: 800; color: var(--navy); margin: 8px 0; line-height: 1.3; }
+  .product-sku { font-size: 12px; color: var(--dark-grey); }
+  .rating-row { display: flex; align-items: center; gap: 8px; margin: 12px 0; }
+  .stars { color: #f6ad55; font-size: 16px; }
+  .rating-count { font-size: 13px; color: var(--dark-grey); }
+  .price-row { display: flex; align-items: baseline; gap: 12px; margin: 16px 0; }
+  .price { font-size: 36px; font-weight: 800; color: var(--navy); }
+  .price-was { font-size: 16px; color: var(--dark-grey); text-decoration: line-through; }
+  .price-save { font-size: 13px; background: #fff0f0; color: var(--coral); padding: 4px 10px; border-radius: 20px; font-weight: 600; }
+
+  .compatibility-box { border-radius: 12px; padding: 16px; margin: 16px 0; }
+  .compat-yes { background: #e6ffed; border: 1px solid #9ae6b4; }
+  .compat-no { background: #fff5f5; border: 1px solid #feb2b2; }
+  .compat-header { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; }
+  .compat-yes .compat-header { color: var(--success); }
+  .compat-no .compat-header { color: #c53030; }
+  .compat-detail { font-size: 13px; color: var(--dark-grey); margin-top: 6px; }
+
+  .qty-add { display: flex; gap: 12px; align-items: center; margin-top: 8px; }
+  .qty-control { display: flex; align-items: center; border: 2px solid var(--mid-grey); border-radius: 8px; overflow: hidden; }
+  .qty-btn { width: 40px; height: 44px; background: var(--light-grey); border: none; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .qty-val { width: 48px; text-align: center; font-size: 16px; font-weight: 600; border: none; outline: none; }
+  .add-to-cart { flex: 1; background: var(--navy); color: white; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; border: none; }
+  .ask-ai-btn { width: 100%; background: var(--seafoam); color: var(--navy); padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; }
+
+  /* ========== SCREEN 4: FIRST MATE AI ========== */
+  .ai-layout { display: grid; grid-template-columns: 280px 1fr 300px; height: calc(100vh - 64px); }
+  .ai-sidebar { background: white; border-right: 1px solid var(--mid-grey); padding: 20px; overflow-y: auto; }
+  .ai-sidebar-title { font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--dark-grey); letter-spacing: 0.5px; margin-bottom: 12px; }
+  .chat-history-item { padding: 10px 12px; border-radius: 8px; cursor: pointer; margin-bottom: 4px; font-size: 13px; color: var(--dark-grey); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chat-history-item:hover { background: var(--light-grey); }
+  .chat-history-item.active { background: #e8f4fd; color: var(--ocean); font-weight: 600; }
+  .ai-main { display: flex; flex-direction: column; background: var(--light-grey); }
+  .ai-header { background: white; border-bottom: 1px solid var(--mid-grey); padding: 16px 24px; display: flex; align-items: center; gap: 16px; }
+  .ai-avatar { width: 44px; height: 44px; background: linear-gradient(135deg, var(--navy), var(--seafoam)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .ai-name { font-weight: 700; font-size: 16px; color: var(--navy); }
+  .ai-status { font-size: 12px; color: var(--success); display: flex; align-items: center; gap: 4px; }
+  .ai-status::before { content: '●'; }
+  .vessel-context { background: #e8f4fd; border: 1px solid #bee3f8; padding: 6px 14px; border-radius: 20px; font-size: 12px; color: var(--ocean); font-weight: 600; margin-left: auto; }
+  .chat-messages { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+  .message { max-width: 72%; }
+  .message.user { align-self: flex-end; }
+  .message.ai { align-self: flex-start; }
+  .message-bubble { padding: 14px 18px; border-radius: 16px; font-size: 14px; line-height: 1.6; }
+  .message.user .message-bubble { background: var(--navy); color: white; border-bottom-right-radius: 4px; }
+  .message.ai .message-bubble { background: white; color: var(--text); border-bottom-left-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .message-meta { font-size: 11px; color: var(--dark-grey); margin-top: 4px; }
+  .message.user .message-meta { text-align: right; }
+  .product-suggestion { background: var(--light-grey); border-radius: 10px; padding: 12px; margin-top: 10px; display: flex; gap: 12px; align-items: center; border: 1px solid var(--mid-grey); }
+  .product-suggestion-img { width: 52px; height: 52px; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
+  .product-suggestion-name { font-size: 13px; font-weight: 600; color: var(--navy); }
+  .product-suggestion-price { font-size: 14px; font-weight: 700; color: var(--ocean); margin-top: 2px; }
+  .product-suggestion-btn { margin-left: auto; background: var(--navy); color: white; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; white-space: nowrap; }
+  .typing-indicator { display: flex; gap: 4px; align-items: center; padding: 14px 18px; background: white; border-radius: 16px; border-bottom-left-radius: 4px; width: fit-content; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .typing-dot { width: 8px; height: 8px; background: var(--dark-grey); border-radius: 50%; animation: typing 1.2s infinite; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typing { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-6px); opacity: 1; } }
+  .chat-input-area { background: white; border-top: 1px solid var(--mid-grey); padding: 16px 24px; }
+  .agent-pills { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .agent-pill { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--mid-grey); background: white; color: var(--dark-grey); transition: all 0.15s; }
+  .agent-pill:hover { border-color: var(--ocean); color: var(--ocean); }
+  .agent-pill.active { background: var(--ocean); color: white; border-color: var(--ocean); }
+  .chat-input-row { display: flex; gap: 12px; }
+  .chat-input { flex: 1; padding: 12px 16px; border: 2px solid var(--mid-grey); border-radius: 10px; font-size: 14px; resize: none; height: 48px; }
+  .chat-input:focus { outline: none; border-color: var(--ocean); }
+  .send-btn { background: var(--navy); color: white; width: 48px; height: 48px; border-radius: 10px; border: none; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+  .ai-context-panel { background: white; border-left: 1px solid var(--mid-grey); padding: 20px; overflow-y: auto; }
+  .context-section { margin-bottom: 24px; }
+  .context-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--dark-grey); letter-spacing: 0.5px; margin-bottom: 12px; }
+  .context-vessel { background: var(--light-grey); border-radius: 10px; padding: 14px; }
+  .context-vessel-name { font-weight: 700; font-size: 15px; color: var(--navy); }
+  .context-vessel-detail { font-size: 12px; color: var(--dark-grey); margin-top: 4px; }
+  .context-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--mid-grey); font-size: 13px; }
+  .context-item:last-child { border-bottom: none; }
+  .context-item-label { color: var(--dark-grey); }
+  .context-item-value { font-weight: 600; color: var(--navy); }
+
+  /* ========== SCREEN 5: VOYAGE CHECKLISTS ========== */
+  .checklist-layout { padding: 32px 40px; max-width: 1200px; margin: 0 auto; }
+  .checklist-tabs { display: flex; gap: 0; margin-bottom: 32px; background: white; border-radius: 12px; padding: 6px; width: fit-content; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .checklist-tab { padding: 10px 24px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--dark-grey); transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+  .checklist-tab.active { background: var(--navy); color: white; }
+  .checklist-tab .tab-icon { font-size: 18px; }
+  .checklist-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .checklist-category { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .checklist-cat-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--mid-grey); }
+  .checklist-cat-icon { font-size: 28px; }
+  .checklist-cat-name { font-size: 17px; font-weight: 700; color: var(--navy); }
+  .checklist-cat-progress { margin-left: auto; font-size: 13px; color: var(--dark-grey); }
+  .progress-bar { height: 4px; background: var(--mid-grey); border-radius: 2px; margin-top: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--success); border-radius: 2px; }
+  .checklist-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--light-grey); }
+  .checklist-item:last-child { border-bottom: none; }
+  .check-box { width: 22px; height: 22px; border: 2px solid var(--mid-grey); border-radius: 6px; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .check-box.checked { background: var(--success); border-color: var(--success); color: white; font-size: 13px; }
+  .checklist-item-name { flex: 1; font-size: 14px; color: var(--text); }
+  .checklist-item-name.done { text-decoration: line-through; color: var(--dark-grey); }
+  .checklist-item-qty { font-size: 12px; color: var(--dark-grey); margin-right: 8px; }
+  .checklist-item-link { font-size: 12px; color: var(--ocean); text-decoration: none; font-weight: 600; cursor: pointer; white-space: nowrap; }
+
+  /* ========== SCREEN 6: LOYALTY DASHBOARD ========== */
+  .loyalty-layout { padding: 32px 40px; max-width: 1200px; margin: 0 auto; }
+  .loyalty-hero { background: linear-gradient(135deg, var(--navy) 0%, var(--ocean) 100%); border-radius: 20px; padding: 40px; color: white; margin-bottom: 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+  .loyalty-tier { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+  .tier-badge { width: 64px; height: 64px; background: var(--seafoam); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+  .tier-name { font-size: 28px; font-weight: 800; }
+  .tier-sub { font-size: 14px; opacity: 0.8; }
+  .points-display { font-size: 56px; font-weight: 800; color: var(--seafoam); line-height: 1; }
+  .points-label { font-size: 14px; opacity: 0.8; margin-top: 4px; }
+  .tier-progress-section { margin-top: 16px; }
+  .tier-progress-label { display: flex; justify-content: space-between; font-size: 13px; opacity: 0.8; margin-bottom: 6px; }
+  .tier-progress-bar { height: 8px; background: rgba(255,255,255,0.2); border-radius: 4px; overflow: hidden; }
+  .tier-progress-fill { height: 100%; background: var(--seafoam); border-radius: 4px; }
+  .loyalty-right { text-align: center; }
+  .multiplier-display { font-size: 80px; font-weight: 900; color: var(--seafoam); line-height: 1; }
+  .multiplier-label { font-size: 16px; opacity: 0.8; }
+
+  .crew-section { background: white; border-radius: 16px; padding: 28px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .crew-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .crew-title { font-size: 20px; font-weight: 700; color: var(--navy); }
+  .crew-members { display: flex; gap: 16px; flex-wrap: wrap; }
+  .crew-member { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .crew-avatar { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; color: white; }
+  .crew-member-name { font-size: 12px; font-weight: 600; color: var(--navy); }
+  .crew-member-points { font-size: 11px; color: var(--dark-grey); }
+  .add-crew-btn { width: 56px; height: 56px; border-radius: 50%; border: 2px dashed var(--mid-grey); display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--dark-grey); cursor: pointer; }
+  .collective-spend { background: var(--light-grey); border-radius: 12px; padding: 16px; margin-top: 20px; }
+  .spend-row { display: flex; justify-content: space-between; align-items: center; }
+  .spend-label { font-size: 14px; color: var(--dark-grey); }
+  .spend-value { font-size: 20px; font-weight: 800; color: var(--navy); }
+  .next-tier-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--dark-grey); margin-top: 8px; }
+
+  .experiences-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+  .experience-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer; transition: transform 0.2s; }
+  .experience-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+  .experience-img { height: 160px; display: flex; align-items: center; justify-content: center; font-size: 64px; }
+  .exp-ocean { background: linear-gradient(135deg, #006994, #00b4d8); }
+  .exp-mountain { background: linear-gradient(135deg, #2d6a4f, #52b788); }
+  .exp-sunset { background: linear-gradient(135deg, #e76f51, #f4a261); }
+  .experience-body { padding: 16px; }
+  .experience-name { font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+  .experience-desc { font-size: 13px; color: var(--dark-grey); line-height: 1.4; margin-bottom: 12px; }
+  .experience-footer { display: flex; justify-content: space-between; align-items: center; }
+  .experience-points { font-size: 16px; font-weight: 800; color: var(--ocean); }
+  .experience-btn { background: var(--navy); color: white; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+
+  /* ========== SCREEN 7: HELM DASH DELIVERY ========== */
+  .delivery-layout { display: grid; grid-template-columns: 400px 1fr; height: calc(100vh - 64px); }
+  .delivery-panel { background: white; border-right: 1px solid var(--mid-grey); padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+  .delivery-title { font-size: 22px; font-weight: 800; color: var(--navy); }
+  .delivery-subtitle { font-size: 14px; color: var(--dark-grey); margin-top: 4px; }
+  .delivery-option { border: 2px solid var(--mid-grey); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s; }
+  .delivery-option.selected { border-color: var(--seafoam); background: #f0fffe; }
+  .delivery-option-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .delivery-option-icon { font-size: 28px; }
+  .delivery-option-name { font-size: 16px; font-weight: 700; color: var(--navy); }
+  .delivery-option-eta { font-size: 13px; color: var(--success); font-weight: 600; }
+  .delivery-option-price { font-size: 18px; font-weight: 800; color: var(--ocean); margin-left: auto; }
+  .delivery-option-desc { font-size: 13px; color: var(--dark-grey); }
+  .location-input-section { }
+  .location-label { font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 8px; }
+  .location-input { width: 100%; padding: 12px 16px; border: 2px solid var(--mid-grey); border-radius: 10px; font-size: 14px; margin-bottom: 8px; }
+  .location-input:focus { outline: none; border-color: var(--ocean); }
+  .location-hint { font-size: 12px; color: var(--dark-grey); }
+  .map-pin-btn { width: 100%; padding: 12px; background: var(--light-grey); border: 2px dashed var(--mid-grey); border-radius: 10px; font-size: 14px; color: var(--dark-grey); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; }
+  .order-summary { background: var(--light-grey); border-radius: 12px; padding: 16px; }
+  .order-summary-title { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 12px; }
+  .order-item { display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--mid-grey); }
+  .order-item:last-child { border-bottom: none; font-weight: 700; font-size: 15px; color: var(--navy); }
+  .confirm-delivery-btn { width: 100%; padding: 16px; background: var(--seafoam); color: var(--navy); border: none; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; }
+  .map-container { background: #e8f0f8; position: relative; overflow: hidden; }
+  .map-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; color: var(--dark-grey); }
+  .map-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(26,107,154,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(26,107,154,0.1) 1px, transparent 1px); background-size: 40px 40px; }
+  .map-water { position: absolute; inset: 0; background: linear-gradient(160deg, #b3d9f0 0%, #7ec8e3 40%, #5bb8d4 70%, #3a9fc2 100%); opacity: 0.6; }
+  .map-vessel-pin { position: absolute; top: 45%; left: 55%; transform: translate(-50%, -50%); font-size: 36px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); animation: pulse 2s infinite; }
+  .map-delivery-pin { position: absolute; top: 30%; left: 35%; transform: translate(-50%, -50%); font-size: 36px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
+  .map-route { position: absolute; top: 30%; left: 35%; width: 20%; height: 15%; border: 3px dashed var(--seafoam); border-radius: 50%; opacity: 0.8; }
+  @keyframes pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.1); } }
+  .eta-overlay { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); background: white; border-radius: 12px; padding: 12px 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); display: flex; gap: 24px; align-items: center; }
+  .eta-item { text-align: center; }
+  .eta-value { font-size: 22px; font-weight: 800; color: var(--navy); }
+  .eta-label { font-size: 11px; color: var(--dark-grey); text-transform: uppercase; }
+  .eta-divider { width: 1px; height: 40px; background: var(--mid-grey); }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero-content { grid-template-columns: 1fr; }
+    .value-grid { grid-template-columns: 1fr 1fr; }
+    .page-layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Screen Navigation -->
+<nav class="screen-nav">
+  <h1>⚓ Helm UI</h1>
+  <button class="nav-btn active" onclick="showScreen('home')">🏠 Homepage</button>
+  <button class="nav-btn" onclick="showScreen('garage')">⚓ My Vessel Garage</button>
+  <button class="nav-btn" onclick="showScreen('product')">🛒 Product Page</button>
+  <button class="nav-btn" onclick="showScreen('ai')">🤖 First Mate AI</button>
+  <button class="nav-btn" onclick="showScreen('checklist')">✅ Voyage Checklists</button>
+  <button class="nav-btn" onclick="showScreen('loyalty')">🏆 Crew Loyalty</button>
+  <button class="nav-btn" onclick="showScreen('delivery')">🚤 Helm Dash Delivery</button>
+</nav>
+
+<!-- ========== SCREEN 1: HOMEPAGE ========== -->
+<div id="screen-home" class="screen active">
+  <header class="site-header">
+    <div class="logo">helm<span>.</span></div>
+    <nav class="site-nav">
+      <a>Fishing</a>
+      <a>Engine & Drive</a>
+      <a>Electrical & Power</a>
+      <a>Plumbing & Pumps</a>
+      <a>Safety</a>
+      <a>Electronics</a>
+      <a>Deck & Anchor</a>
+      <a>Game Fishing</a>
+    </nav>
+    <div class="header-actions">
+      <div class="vessel-selector"><span class="dot"></span> My Stabi 2250</div>
+      <div class="cart-btn" style="position:relative">🛒 Cart <span class="cart-badge">3</span></div>
+    </div>
+  </header>
+  <div class="search-bar-section">
+    <div class="search-container">
+      <input class="search-input" placeholder="Search by part name, part number, or ask a question...">
+      <button class="search-btn">Search</button>
+    </div>
+    <div class="compatibility-filter">
+      <div class="toggle"></div>
+      <strong>Show only parts compatible with My Stabi 2250 (2022 Stabicraft 2250 Ultracab)</strong>
+      <span style="color: #38a169; font-weight: 600;">✓ Active</span>
+    </div>
+  </div>
+  <div class="hero">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h2>New Zealand's smartest <span>marine parts</span> platform</h2>
+        <p>The only platform that knows your boat. Get parts that fit, advice that's specific, and delivery that comes to you — wherever you're anchored.</p>
+        <div class="hero-cta">
+          <a class="btn-primary" onclick="showScreen('garage')">Add Your Vessel →</a>
+          <a class="btn-secondary" onclick="showScreen('ai')">Ask First Mate 🤖</a>
+        </div>
+      </div>
+      <div class="hero-mockup">
+        <div class="mockup-vessel-card">
+          <div class="vessel-card-header">
+            <div class="vessel-icon">⛵</div>
+            <div>
+              <div class="vessel-name">My Stabi 2250</div>
+              <div class="vessel-sub">2022 Stabicraft 2250 Ultracab WT · Yamaha F200XCA</div>
+            </div>
+            <span class="compatibility-badge">✓ Active</span>
+          </div>
+          <div style="font-size:13px; color:#4a5568; background:#f5f7fa; border-radius:8px; padding:10px;">
+            🔧 <strong>Service Due:</strong> Impeller replacement overdue by 12 hours<br>
+            ⚡ <strong>Recommendation:</strong> 3 products ready to add to cart
+          </div>
+        </div>
+        <div class="mockup-ai-bubble">
+          <strong>🤖 First Mate:</strong> "G'day! Your Yamaha F200 is due for its 100-hour service. I've found the exact service kit for your engine — shall I add it to your cart?"
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="categories-section">
+    <div class="section-title">Shop by Category</div>
+    <div class="categories-grid">
+      <div class="category-card"><div class="category-icon">🎣</div><div class="category-name">Fishing Tackle</div><div class="category-count">12,400+ products</div></div>
+      <div class="category-card"><div class="category-icon">⚙️</div><div class="category-name">Engine & Drive</div><div class="category-count">5,534 products</div></div>
+      <div class="category-card"><div class="category-icon">⚡</div><div class="category-name">Electrical & Power</div><div class="category-count">6,254 products</div></div>
+      <div class="category-card"><div class="category-icon">🚿</div><div class="category-name">Plumbing & Pumps</div><div class="category-count">2,010 products</div></div>
+      <div class="category-card"><div class="category-icon">🛡️</div><div class="category-name">Safety & Rescue</div><div class="category-count">890 products</div></div>
+      <div class="category-card"><div class="category-icon">📡</div><div class="category-name">Electronics & Nav</div><div class="category-count">3,120 products</div></div>
+      <div class="category-card"><div class="category-icon">⚓</div><div class="category-name">Deck & Anchoring</div><div class="category-count">1,840 products</div></div>
+      <div class="category-card"><div class="category-icon">🚢</div><div class="category-name">Trailer & Towing</div><div class="category-count">2,264 products</div></div>
+      <div class="category-card"><div class="category-icon">🏠</div><div class="category-name">Galley & Cabin</div><div class="category-count">1,560 products</div></div>
+      <div class="category-card"><div class="category-icon">🦈</div><div class="category-name">Game Fishing</div><div class="category-count">780 products</div></div>
+      <div class="category-card"><div class="category-icon">🔧</div><div class="category-name">Tools & Maintenance</div><div class="category-count">2,100 products</div></div>
+      <div class="category-card"><div class="category-icon">👕</div><div class="category-name">Clothing & Footwear</div><div class="category-count">940 products</div></div>
+    </div>
+  </div>
+  <div class="value-props">
+    <div class="value-grid">
+      <div class="value-card"><div class="value-icon">⚓</div><div class="value-title">My Vessel Garage</div><div class="value-desc">Add your boats and every product is filtered to show only what fits your specific make, model, and year.</div></div>
+      <div class="value-card"><div class="value-icon">🤖</div><div class="value-title">First Mate AI</div><div class="value-desc">Your personal AI expert knows your boat and gives specific, accurate advice — not generic answers.</div></div>
+      <div class="value-card"><div class="value-icon">🚤</div><div class="value-title">Helm Dash Delivery</div><div class="value-desc">Order delivered direct to your vessel in the Hauraki Gulf, Bay of Islands, Marlborough Sounds and more.</div></div>
+      <div class="value-card"><div class="value-icon">🏆</div><div class="value-title">The Crew Rewards</div><div class="value-desc">Earn points, form a crew, and unlock exclusive NZ boating experiences together.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SCREEN 2: MY VESSEL GARAGE ========== -->
+<div id="screen-garage" class="screen">
+  <header class="site-header">
+    <div class="logo">helm<span>.</span></div>
+    <nav class="site-nav"><a>← Back to Shop</a></nav>
+    <div class="header-actions">
+      <div class="vessel-selector"><span class="dot"></span> My Stabi 2250</div>
+      <div class="cart-btn" style="position:relative">🛒 Cart <span class="cart-badge">3</span></div>
+    </div>
+  </header>
+  <div class="page-layout">
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">My Vessels</div>
+        <div class="sidebar-item active"><span class="icon">⛵</span> My Stabi 2250</div>
+        <div class="sidebar-item"><span class="icon">🚤</span> The Tinnie</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Vessel Tools</div>
+        <div class="sidebar-item"><span class="icon">📋</span> OEM Equipment</div>
+        <div class="sidebar-item"><span class="icon">✅</span> Voyage Checklists</div>
+        <div class="sidebar-item"><span class="icon">🔧</span> Service History</div>
+        <div class="sidebar-item"><span class="icon">📦</span> Parts Orders</div>
+        <div class="sidebar-item"><span class="icon">🤖</span> Ask First Mate</div>
+      </div>
+    </div>
+    <div class="main-content">
+      <div class="page-header">
+        <div>
+          <div class="page-title">My Vessel Garage</div>
+          <div class="page-subtitle">Manage your boats and get personalised recommendations</div>
+        </div>
+        <button class="btn-primary">+ Add New Vessel</button>
+      </div>
+      <div class="vessel-grid">
+        <div class="vessel-card primary">
+          <div class="vessel-card-image">⛵<span class="primary-badge">★ Primary</span></div>
+          <div class="vessel-card-body">
+            <div class="vessel-card-name">My Stabi 2250</div>
+            <div class="vessel-card-model">2022 Stabicraft 2250 Ultracab WT</div>
+            <div class="vessel-stats">
+              <div class="stat"><div class="stat-label">Engine</div><div class="stat-value">Yamaha F200XCA</div></div>
+              <div class="stat"><div class="stat-label">HIN</div><div class="stat-value">STA2250A22</div></div>
+              <div class="stat"><div class="stat-label">Service Due</div><div class="stat-value" style="color:#e65100;">Overdue</div></div>
+              <div class="stat"><div class="stat-label">Checklist</div><div class="stat-value" style="color:#38a169;">78% Ready</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="vessel-card">
+          <div class="vessel-card-image">🚤</div>
+          <div class="vessel-card-body">
+            <div class="vessel-card-name">The Tinnie</div>
+            <div class="vessel-card-model">2019 Quintrex 430 Fishabout</div>
+            <div class="vessel-stats">
+              <div class="stat"><div class="stat-label">Engine</div><div class="stat-value">Yamaha F30</div></div>
+              <div class="stat"><div class="stat-label">HIN</div><div class="stat-value">QUI430B19</div></div>
+              <div class="stat"><div class="stat-label">Service Due</div><div class="stat-value" style="color:#38a169;">OK</div></div>
+              <div class="stat"><div class="stat-label">Checklist</div><div class="stat-value" style="color:#d69e2e;">45% Ready</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="add-vessel-card">
+          <div class="add-vessel-icon">➕</div>
+          <div class="add-vessel-text">Add Another Vessel</div>
+          <div style="font-size:13px; color:#718096; margin-top:8px;">Enter your HIN to get started</div>
+        </div>
+      </div>
+      <div class="vessel-detail">
+        <div class="vessel-detail-header">
+          <div class="vessel-detail-img">⛵</div>
+          <div class="vessel-detail-info">
+            <h2>My Stabi 2250</h2>
+            <p>2022 Stabicraft 2250 Ultracab WT · HIN: STA2250A22 · Helm Certified ✓</p>
+            <div class="vessel-tags">
+              <span class="tag tag-blue">Aluminium Hull</span>
+              <span class="tag tag-blue">Outboard</span>
+              <span class="tag tag-green">Yamaha F200XCA</span>
+              <span class="tag tag-orange">Service Overdue</span>
+            </div>
+          </div>
+          <button class="btn-primary" style="margin-left:auto;">🤖 Ask First Mate</button>
+        </div>
+        <div class="section-title" style="margin-bottom:16px;">Factory OEM Equipment</div>
+        <div class="equipment-grid">
+          <div class="equipment-item"><div class="equip-icon">⚙️</div><div><div class="equip-name">Main Engine</div><div class="equip-model">Yamaha F200XCA (200HP)</div><span class="tag tag-green equip-badge">Service Overdue</span></div></div>
+          <div class="equipment-item"><div class="equip-icon">📡</div><div><div class="equip-name">Chartplotter</div><div class="equip-model">Simrad NSS9 Evo3</div><span class="tag tag-blue equip-badge">OEM Fitted</span></div></div>
+          <div class="equipment-item"><div class="equip-icon">📻</div><div><div class="equip-name">VHF Radio</div><div class="equip-model">Standard Horizon GX1400</div><span class="tag tag-blue equip-badge">OEM Fitted</span></div></div>
+          <div class="equipment-item"><div class="equip-icon">⚓</div><div><div class="equip-name">Anchor Winch</div><div class="equip-model">Muir VR500 Vertical</div><span class="tag tag-blue equip-badge">OEM Fitted</span></div></div>
+          <div class="equipment-item"><div class="equip-icon">💧</div><div><div class="equip-name">Bilge Pump</div><div class="equip-model">Rule 3700 GPH Auto</div><span class="tag tag-blue equip-badge">OEM Fitted</span></div></div>
+          <div class="equipment-item"><div class="equip-icon">🔋</div><div><div class="equip-name">Battery System</div><div class="equip-model">2× AGM 120Ah</div><span class="tag tag-blue equip-badge">OEM Fitted</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SCREEN 3: PRODUCT PAGE ========== -->
+<div id="screen-product" class="screen">
+  <header class="site-header">
+    <div class="logo">helm<span>.</span></div>
+    <nav class="site-nav"><a>Engine & Drive</a><a>Outboard Service Parts</a><a>Impellers</a></nav>
+    <div class="header-actions">
+      <div class="vessel-selector"><span class="dot"></span> My Stabi 2250</div>
+      <div class="cart-btn" style="position:relative">🛒 Cart <span class="cart-badge">3</span></div>
+    </div>
+  </header>
+  <div style="background:var(--light-grey); padding:32px 40px;">
+    <div class="product-layout">
+      <div>
+        <div class="product-images">
+          <div class="main-image">🔧</div>
+          <div class="thumb-row">
+            <div class="thumb active">🔧</div>
+            <div class="thumb">📦</div>
+            <div class="thumb">📋</div>
+            <div class="thumb">🔩</div>
+          </div>
+        </div>
+        <div style="background:white; border-radius:16px; padding:24px; margin-top:20px;">
+          <div class="section-title" style="margin-bottom:16px;">Product Description</div>
+          <p style="font-size:14px; line-height:1.7; color:var(--dark-grey);">The Yamaha 6H3-44352-02 Water Pump Impeller Kit is the genuine OEM replacement impeller for the F150–F200 series outboard engines. Yamaha recommends replacing the impeller every 100 hours or annually, whichever comes first. This kit includes the impeller, wear plate, housing gasket, and all necessary O-rings for a complete service.</p>
+          <div style="margin-top:16px; display:flex; gap:12px; flex-wrap:wrap;">
+            <span class="tag tag-blue">Genuine OEM</span>
+            <span class="tag tag-green">In Stock — Ships Today</span>
+            <span class="tag tag-orange">Annual Service Item</span>
+          </div>
+        </div>
+      </div>
+      <div class="product-info">
+        <div class="product-info-card">
+          <div class="product-brand">Yamaha Marine</div>
+          <div class="product-title">Water Pump Impeller Kit — F150–F200 Series</div>
+          <div class="product-sku">SKU: YAM-6H3-44352-02 · OEM Part: 6H3-44352-02-00</div>
+          <div class="rating-row">
+            <span class="stars">★★★★★</span>
+            <span style="font-weight:700;">4.9</span>
+            <span class="rating-count">(247 reviews)</span>
+          </div>
+          <div class="price-row">
+            <span class="price">$89.95</span>
+            <span class="price-was">$109.00</span>
+            <span class="price-save">Save 17%</span>
+          </div>
+          <div class="compatibility-box compat-yes">
+            <div class="compat-header">✓ Fits My Stabi 2250</div>
+            <div class="compat-detail">Confirmed compatible with your 2022 Yamaha F200XCA engine. This is the exact OEM part specified in your engine's service manual.</div>
+          </div>
+          <div class="qty-add">
+            <div class="qty-control">
+              <button class="qty-btn">−</button>
+              <input class="qty-val" value="1" readonly>
+              <button class="qty-btn">+</button>
+            </div>
+            <button class="add-to-cart">Add to Cart</button>
+          </div>
+          <button class="ask-ai-btn">🤖 Ask First Mate about this part</button>
+        </div>
+        <div class="product-info-card">
+          <div style="font-size:14px; font-weight:700; color:var(--navy); margin-bottom:12px;">🚤 Helm Dash Available</div>
+          <div style="font-size:13px; color:var(--dark-grey);">Order by 2pm for same-day delivery to your vessel in the Hauraki Gulf. <a style="color:var(--ocean); cursor:pointer;" onclick="showScreen('delivery')">Check delivery to my location →</a></div>
+        </div>
+        <div class="product-info-card">
+          <div style="font-size:14px; font-weight:700; color:var(--navy); margin-bottom:12px;">📋 Service Reminder</div>
+          <div style="font-size:13px; color:var(--dark-grey);">Your Yamaha F200XCA is <strong style="color:#e65100;">overdue</strong> for its 100-hour impeller service. This is the correct replacement part.</div>
+          <button style="margin-top:12px; width:100%; padding:10px; background:#fff3e0; color:#e65100; border:1px solid #ffcc80; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer;">Add to Service Schedule</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SCREEN 4: FIRST MATE AI ========== -->
+<div id="screen-ai" class="screen">
+  <header class="site-header">
+    <div class="logo">helm<span>.</span></div>
+    <nav class="site-nav"><a>← Back to Shop</a></nav>
+    <div class="header-actions">
+      <div class="vessel-selector"><span class="dot"></span> My Stabi 2250</div>
+    </div>
+  </header>
+  <div class="ai-layout">
+    <div class="ai-sidebar">
+      <div class="ai-sidebar-title">Chat History</div>
+      <div class="chat-history-item active">🔧 Impeller service — F200XCA</div>
+      <div class="chat-history-item">⚡ Battery bank upgrade options</div>
+      <div class="chat-history-item">🎣 Game fishing setup advice</div>
+      <div class="chat-history-item">⚓ Anchor chain sizing</div>
+      <div class="chat-history-item">📡 Chartplotter upgrade</div>
+      <div style="margin-top:16px;">
+        <div class="ai-sidebar-title">Specialist Agents</div>
+        <div class="chat-history-item">⚙️ Engine & Propulsion Pro</div>
+        <div class="chat-history-item">⚡ Electrical & Solar Sage</div>
+        <div class="chat-history-item">🎣 Game Fishing Expert</div>
+        <div class="chat-history-item">⚓ Anchoring & Mooring Master</div>
+        <div class="chat-history-item">🚿 Plumbing & Pumps Pro</div>
+        <div class="chat-history-item">🛡️ Safety & Compliance Officer</div>
+      </div>
+    </div>
+    <div class="ai-main">
+      <div class="ai-header">
+        <div class="ai-avatar">🤖</div>
+        <div>
+          <div class="ai-name">First Mate</div>
+          <div class="ai-status">Online — Ready to help</div>
+        </div>
+        <div class="vessel-context">⛵ My Stabi 2250 · Yamaha F200XCA</div>
+      </div>
+      <div class="chat-messages">
+        <div class="message ai">
+          <div class="message-bubble">G'day! I'm your First Mate. I know your <strong>2022 Stabicraft 2250 Ultracab</strong> with the <strong>Yamaha F200XCA</strong> inside out. What can I help you with today?<br><br>I noticed your engine is overdue for its 100-hour service — want me to walk you through what's needed?</div>
+          <div class="message-meta">First Mate · Just now</div>
+        </div>
+        <div class="message user">
+          <div class="message-bubble">Yes please — what does the 100-hour service involve for my F200?</div>
+          <div class="message-meta">You · Just now</div>
+        </div>
+        <div class="message ai">
+          <div class="message-bubble">
+            For your <strong>Yamaha F200XCA</strong> at 100 hours, the service manual specifies the following:<br><br>
+            <strong>1. Water Pump Impeller</strong> — This is the most critical item. Yamaha specifies replacement every 100 hours or annually. A failed impeller causes rapid overheating.<br>
+            <strong>2. Engine Oil & Filter</strong> — 10W-30 4-stroke marine oil, 6.1 litres. Use Yamalube or equivalent FC-W certified oil.<br>
+            <strong>3. Fuel Filter</strong> — Replace the VST (Vapour Separator Tank) filter.<br>
+            <strong>4. Spark Plugs</strong> — NGK LKAR6A-9 (6 plugs). Check gap: 0.9mm.<br>
+            <strong>5. Gear Oil</strong> — Lower unit gear oil, 460ml.<br><br>
+            I've found all these parts for your exact engine. Want me to add the full service kit to your cart?
+            <div class="product-suggestion">
+              <div class="product-suggestion-img">🔧</div>
+              <div>
+                <div class="product-suggestion-name">Yamaha F200XCA 100-Hour Service Kit</div>
+                <div class="product-suggestion-price">$284.95 <span style="font-size:11px;color:#718096;">Saves $42 vs individual items</span></div>
+              </div>
+              <button class="product-suggestion-btn">Add to Cart</button>
+            </div>
+          </div>
+          <div class="message-meta">First Mate · via Engine & Propulsion Pro · Just now</div>
+        </div>
+        <div class="message user">
+          <div class="message-bubble">Can I do this service myself or do I need a mechanic?</div>
+          <div class="message-meta">You · Just now</div>
+        </div>
+        <div class="message ai">
+          <div class="message-bubble">
+            Based on your service history and the jobs you've done before, <strong>yes, you can definitely do this yourself</strong>. It's a straightforward service for someone with basic mechanical confidence.<br><br>
+            The impeller is the trickiest part — you'll need to remove the lower unit. I'd suggest watching this Yamaha F200 impeller replacement video first. The oil and filter change is very straightforward.<br><br>
+            <strong>Tools you'll need:</strong> 10mm socket, 17mm socket for drain plug, impeller puller (I can add one to your cart), and a torque wrench.<br><br>
+            If you'd prefer a professional, I can recommend <strong>3 certified Yamaha service agents</strong> near Westhaven Marina. Would you like their details?
+          </div>
+          <div class="message-meta">First Mate · via Engine & Propulsion Pro · Just now</div>
+        </div>
+        <div class="message ai">
+          <div class="typing-indicator">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <div class="agent-pills">
+          <span style="font-size:12px; color:var(--dark-grey); margin-right:4px;">Specialist:</span>
+          <div class="agent-pill active">⚙️ Engine Pro</div>
+          <div class="agent-pill">⚡ Electrical</div>
+          <div class="agent-pill">🎣 Game Fishing</div>
+          <div class="agent-pill">⚓ Anchoring</div>
+          <div class="agent-pill">🚿 Plumbing</div>
+          <div class="agent-pill">🛡️ Safety</div>
+        </div>
+        <div class="chat-input-row">
+          <textarea class="chat-input" placeholder="Ask anything about your boat..."></textarea>
+          <button class="send-btn">↑</button>
+        </div>
+      </div>
+    </div>
+    <div class="ai-context-panel">
+      <div class="context-section">
+        <div class="context-title">Active Vessel</div>
+        <div class="context-vessel">
+          <div class="context-vessel-name">⛵ My Stabi 2250</div>
+          <div class="context-vessel-detail">2022 Stabicraft 2250 Ultracab WT</div>
+          <div class="context-vessel-detail" style="margin-top:4px;">Yamaha F200XCA · HIN: STA2250A22</div>
+        </div>
+      </div>
+      <div class="context-section">
+        <div class="context-title">Engine Status</div>
+        <div class="context-item"><span class="context-item-label">Hours</span><span class="context-item-value">112 hrs</span></div>
+        <div class="context-item"><span class="context-item-label">Last Service</span><span class="context-item-value">Jan 2024</span></div>
+        <div class="context-item"><span class="context-item-label">Next Service</span><span class="context-item-value" style="color:#e65100;">Overdue</span></div>
+        <div class="context-item"><span class="context-item-label">Oil Level</span><span class="context-item-value" style="color:#38a169;">OK</span></div>
+      </div>
+      <div class="context-section">
+        <div class="context-title">Cart (3 items)</div>
+        <div class="context-item"><span class="context-item-label">Impeller Kit</span><span class="context-item-value">$89.95</span></div>
+        <div class="context-item"><span class="context-item-label">Yamalube 10W-30 6L</span><span class="context-item-value">$54.95</span></div>
+        <div class="context-item"><span class="context-item-label">Oil Filter</span><span class="context-item-value">$18.50</span></div>
+        <div class="context-item"><span class="context-item-label">Total</span><span class="context-item-value">$163.40</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SCREEN 5: VOYAGE CHECKLISTS ========== -->
+<div id="screen-checklist" class="screen">
+  <header class="site-header">
+    <div class="logo">helm<span>.</span></div>
+    <nav class="site-nav"><a>← My Vessel Garage</a></nav>
+    <div class="header-actions">
+      <div class="vessel-selector"><span class="dot"></span> My Stabi 2250</div>
+    </div>
+  </header>
+  <div class="checklist-layout">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Voyage Spare Parts Checklists</div>
+        <div class="page-subtitle">Tailored for your 2022 Stabicraft 2250 Ultracab WT with Yamaha F200XCA</div>
+      </div>
+      <button class="btn-primary">🖨️ Print Checklist</button>
+    </div>
+    <div class="checklist-tabs">
+      <div class="checklist-tab active"><span class="tab-icon">☀️</span> Day Trip</div>
+      <div class="checklist-tab"><span class="tab-icon">🌊</span> Coastal Cruising</div>
+      <div class="checklist-tab"><span class="tab-icon">🌏</span> Offshore Passage</div>
+    </div>
+    <div style="background:#e6ffed; border:1px solid #9ae6b4; border-radius:12px; padding:16px; margin-bottom:24px; display:flex; align-items:center; gap:12px;">
+      <span style="font-size:24px;">✅</span>
+      <div>
+        <div style="font-weight:700; color:#276749;">Day Trip Kit: 78% Ready</div>
+        <div style="font-size:13px; color:#38a169;">You have 14 of 18 items on board. 4 items missing — add them to your cart below.</div>
+      </div>
+      <button style="margin-left:auto; background:#276749; color:white; padding:10px 20px; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; border:none;">Add Missing Items to Cart</button>
+    </div>
+    <div class="checklist-grid">
+      <div class="checklist-category">
+        <div class="checklist-cat-header">
+          <div class="checklist-cat-icon">⚙️</div>
+          <div>
+            <div class="checklist-cat-name">Engine Spares</div>
+            <div class="checklist-cat-progress">3 / 4 items</div>
+          </div>
+          <div style="margin-left:auto; width:60px;"><div class="progress-bar"><div class="progress-fill" style="width:75%;"></div></div></div>
+        </div>
+        <div class="checklist-item"><div class="check-box checked">✓</div><div class="checklist-item-name done">Spare Propeller (17" 3-blade)</div><div class="checklist-item-qty">×1</div><div class="checklist-item-link">View</div></div>
+        <div class="checklist-item"><div class="check-box checked">✓</div><div class="checklist-item-name done">Spare Fuel Filter (VST)</div><div class="checklist-item-qty">×2</div><div class="checklist-item-link">View</div></div>
+        <div class="checklist-item"><div class="check-box checked">✓</div><div class="checklist-item-name done">Spark Plugs (NGK LKAR6A-9)</div><div class="checklist-item-qty">×6</div><div class="checklist-item-link">View</div></div>
+        <div class="checklist-item"><div class="check-box"></div><div class="checklist-item-name" style="color:#e65100; font-weight:600;">⚠ Spare Kill Switch Lanyard</div><div class="checklist-item-qty">×1</div><div class="checklist-item-link" style="color:var(--coral);">Add $12.95</div></div>
+      </div>
+      <div class="checklist-category">
+        <div class="checklist-cat-header">
+          <div class="checklist-cat-icon">⚡</div>
+          <div>
+            <div class="checklist-cat-name">Electrical</div>
+            <div class="checklist-cat-progress">4 / 4 items</div>
+          </div>
+          <div style="margin-left:auto; width:60px;"><div class="progress-bar"><div class="progress-fill" style="width:100%;"></div></div></div>
+        </div>
+        <div class="checklist-item"><div class="check-box checked">✓</div><div class="checklist-item-name done">Assorted Fuses (5A, 10A, 15A, 20A)</div><div class="checklist-item-qty">×1 pack</div><div class="checklist-item-link">View</div></div>
+        <div class="checklist-item"><div class="check-box checked">✓</div><div class="checklist-item-name done">Spare Nav Light Bulbs</div><div class="checklist-item-qty">×1 set</div><div class="checklist-item-link">View</div></div>
+        <div class="checklist-item"><div class="check-box checked">✓</div><div class="checklist-item-name done">Waterproof Torch + Spare Batteries</div><div class="checklist-item-qty">×1</div><div class="checklist-item-link">View</div></div>
+        <div class="checklist-item"><div class="check-box checked">✓</div><div class="checklist-item-name done">Duct Tape & Zip Ties</div><div class="checklist-item-qty">×1 pack</div><div class="checklist-item-link">View</div></div>
+      </div>
+      <div class="checklist-category">
+        <div class="checklist-cat-header">
+          <div class="checklist-cat-icon">🛡️</div>
+          <div>
+            <div class="checklist-cat-name">Safety (Maritime NZ)</div>
+            <div class="checklist-cat-progress">5 / 6 items</div>
+          </div>
+          <div style="margin-left:auto; width:60px;"><div class="progress-bar"><div class="progress-fill" style="width:83%;"></div></div></div>
+        </div>
+        <div class="checklist-item"><div class="check-box checked">✓</div><div class="checklist-item-name done">Lifejackets (×5, all sizes)</div><div class="checklist-item-qty">×5</div><div class="checklist-item-link">View</div></div>
+        <div class="checklist-item"><div class="check-box checked">✓</div><div class="checklist-item-name done">EPIRB (registered at beacons.org.nz)</div><div class="checklist-item-qty">×1</div><div class="checklist-item-link">View</div></div>
+        <div class="checklist-item"><div class="check-box checked">✓</div><div class="checklist-item-name done">VHF Radio (GME GX700)</div><div class="checklist-item-qty">×1</div><div class="checklist-item-link">View</div></div>
+        <div class="checklist-item"><div class="check-box checked">✓</div><div class="checklist-item-name done">Fire Extinguisher 2.5kg</div><div class="checklist-item-qty">×1</div><div class="checklist-item-link">View</div></div>
+        <div class="checklist-item"><div class="check-box checked">✓</div><div class="checklist-item-name done">First Aid Kit</div><div class="checklist-item-qty">×1</div><div class="checklist-item-link">View</div></div>
+        <div class="checklist-item"><div class="check-box"></div><div class="checklist-item-name" style="color:#e65100; font-weight:600;">⚠ Distress Flares (expired Dec 2024)</div><div class="checklist-item-qty">×3</div><div class="checklist-item-link" style="color:var(--coral);">Add $34.95</div></div>
+      </div>
+      <div class="checklist-category">
+        <div class="checklist-cat-header">
+          <div class="checklist-cat-icon">🔧</div>
+          <div>
+            <div class="checklist-cat-name">Tools & General</div>
+            <div class="checklist-cat-progress">2 / 4 items</div>
+          </div>
+          <div style="margin-left:auto; width:60px;"><div class="progress-bar"><div class="progress-fill" style="width:50%;"></div></div></div>
+        </div>
+        <div class="checklist-item"><div class="check-box checked">✓</div><div class="checklist-item-name done">Basic Tool Kit (spanners, screwdrivers)</div><div class="checklist-item-qty">×1</div><div class="checklist-item-link">View</div></div>
+        <div class="checklist-item"><div class="check-box checked">✓</div><div class="checklist-item-name done">Hose Clamps (assorted)</div><div class="checklist-item-qty">×1 pack</div><div class="checklist-item-link">View</div></div>
+        <div class="checklist-item"><div class="check-box"></div><div class="checklist-item-name" style="color:#e65100; font-weight:600;">⚠ Emergency Wooden Bungs</div><div class="checklist-item-qty">×1 set</div><div class="checklist-item-link" style="color:var(--coral);">Add $8.95</div></div>
+        <div class="checklist-item"><div class="check-box"></div><div class="checklist-item-name" style="color:#e65100; font-weight:600;">⚠ Prop Spanner & Split Pins</div><div class="checklist-item-qty">×1</div><div class="checklist-item-link" style="color:var(--coral);">Add $14.95</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SCREEN 6: LOYALTY DASHBOARD ========== -->
+<div id="screen-loyalty" class="screen">
+  <header class="site-header">
+    <div class="logo">helm<span>.</span></div>
+    <nav class="site-nav"><a>← Back to Shop</a></nav>
+    <div class="header-actions">
+      <div class="vessel-selector"><span class="dot"></span> My Stabi 2250</div>
+    </div>
+  </header>
+  <div class="loyalty-layout">
+    <div class="loyalty-hero">
+      <div>
+        <div class="loyalty-tier">
+          <div class="tier-badge">⚓</div>
+          <div>
+            <div class="tier-name">Skipper</div>
+            <div class="tier-sub">Tier 3 of 4 · Next: Captain</div>
+          </div>
+        </div>
+        <div class="points-display">14,280</div>
+        <div class="points-label">Crew Points available · Worth $142.80</div>
+        <div class="tier-progress-section">
+          <div class="tier-progress-label"><span>Progress to Captain</span><span>$1,720 to go</span></div>
+          <div class="tier-progress-bar"><div class="tier-progress-fill" style="width:63%;"></div></div>
+        </div>
+      </div>
+      <div class="loyalty-right">
+        <div class="multiplier-display">2.5×</div>
+        <div class="multiplier-label">Current Points Multiplier</div>
+        <div style="font-size:13px; opacity:0.7; margin-top:8px;">Your Crew's collective monthly spend is $3,240<br>Spend $760 more this month to unlock <strong>3.0×</strong></div>
+      </div>
+    </div>
+    <div class="crew-section">
+      <div class="crew-header">
+        <div class="crew-title">🚢 The Hauraki Crew</div>
+        <button class="btn-primary" style="font-size:13px; padding:8px 16px;">Invite a Crew Member</button>
+      </div>
+      <div class="crew-members">
+        <div class="crew-member"><div class="crew-avatar" style="background:var(--navy);">JM</div><div class="crew-member-name">James M. (You)</div><div class="crew-member-points">8,240 CP</div></div>
+        <div class="crew-member"><div class="crew-avatar" style="background:var(--ocean);">SR</div><div class="crew-member-name">Sarah R.</div><div class="crew-member-points">3,120 CP</div></div>
+        <div class="crew-member"><div class="crew-avatar" style="background:var(--seafoam); color:var(--navy);">TK</div><div class="crew-member-name">Tom K.</div><div class="crew-member-points">2,920 CP</div></div>
+        <div class="crew-member"><div class="crew-avatar" style="background:var(--coral);">PH</div><div class="crew-member-name">Pete H.</div><div class="crew-member-points">0 CP</div></div>
+        <div class="crew-member"><div class="add-crew-btn">+</div><div class="crew-member-name" style="color:var(--dark-grey);">Add Member</div></div>
+      </div>
+      <div class="collective-spend">
+        <div class="spend-row">
+          <div class="spend-label">Crew Collective Spend (This Month)</div>
+          <div class="spend-value">$3,240 / $5,000</div>
+        </div>
+        <div style="margin-top:8px;"><div class="progress-bar" style="height:8px;"><div class="progress-fill" style="width:65%;"></div></div></div>
+        <div class="next-tier-row"><span>Current: 2.5× multiplier</span><span>$1,760 more for 3.0× multiplier</span></div>
+      </div>
+    </div>
+    <div class="section-title" style="margin-bottom:20px;">🏆 Redeem for Experiences</div>
+    <div class="experiences-grid">
+      <div class="experience-card">
+        <div class="experience-img exp-ocean">🎣</div>
+        <div class="experience-body">
+          <div class="experience-name">Bay of Islands Game Fishing Charter</div>
+          <div class="experience-desc">A full day offshore with a professional skipper targeting marlin and kingfish. Includes all tackle, lunch, and transfers.</div>
+          <div class="experience-footer"><div class="experience-points">25,000 CP</div><button class="experience-btn">Redeem</button></div>
+        </div>
+      </div>
+      <div class="experience-card">
+        <div class="experience-img exp-mountain">🏔️</div>
+        <div class="experience-body">
+          <div class="experience-name">Marlborough Sounds Weekend Cruise</div>
+          <div class="experience-desc">Two nights aboard a luxury charter vessel exploring the Marlborough Sounds with your crew. Catering included.</div>
+          <div class="experience-footer"><div class="experience-points">40,000 CP</div><button class="experience-btn">Redeem</button></div>
+        </div>
+      </div>
+      <div class="experience-card">
+        <div class="experience-img exp-sunset">🌅</div>
+        <div class="experience-body">
+          <div class="experience-name">Hauraki Gulf Sunset Cruise</div>
+          <div class="experience-desc">An evening cruise for 6 people aboard a premium vessel with canapés and drinks. Perfect for the whole crew.</div>
+          <div class="experience-footer"><div class="experience-points">15,000 CP</div><button class="experience-btn">Redeem</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SCREEN 7: HELM DASH DELIVERY ========== -->
+<div id="screen-delivery" class="screen">
+  <header class="site-header">
+    <div class="logo">helm<span>.</span></div>
+    <nav class="site-nav"><a>← Back to Cart</a></nav>
+    <div class="header-actions">
+      <div class="vessel-selector"><span class="dot"></span> My Stabi 2250</div>
+    </div>
+  </header>
+  <div class="delivery-layout">
+    <div class="delivery-panel">
+      <div>
+        <div class="delivery-title">🚤 Helm Dash</div>
+        <div class="delivery-subtitle">On-demand delivery to your vessel</div>
+      </div>
+      <div>
+        <div style="font-size:13px; font-weight:700; color:var(--navy); margin-bottom:12px;">Choose Delivery Method</div>
+        <div class="delivery-option selected">
+          <div class="delivery-option-header">
+            <div class="delivery-option-icon">🚤</div>
+            <div>
+              <div class="delivery-option-name">Helm Dash — Water Delivery</div>
+              <div class="delivery-option-eta">⚡ Est. 45–60 min</div>
+            </div>
+            <div class="delivery-option-price">$29.00</div>
+          </div>
+          <div class="delivery-option-desc">Delivered direct to your vessel by our Helm Dash skipper. Drop a pin on the map to show your exact location.</div>
+        </div>
+        <div class="delivery-option" style="margin-top:12px;">
+          <div class="delivery-option-header">
+            <div class="delivery-option-icon">🚚</div>
+            <div>
+              <div class="delivery-option-name">Standard Courier</div>
+              <div class="delivery-option-eta">📅 Next business day</div>
+            </div>
+            <div class="delivery-option-price">$8.95</div>
+          </div>
+          <div class="delivery-option-desc">Delivered to your home or marina address via CourierPost or NZ Post.</div>
+        </div>
+        <div class="delivery-option" style="margin-top:12px;">
+          <div class="delivery-option-header">
+            <div class="delivery-option-icon">🏪</div>
+            <div>
+              <div class="delivery-option-name">Click & Collect</div>
+              <div class="delivery-option-eta">✓ Ready in 2 hours</div>
+            </div>
+            <div class="delivery-option-price">Free</div>
+          </div>
+          <div class="delivery-option-desc">Collect from our Auckland warehouse at 12 Beaumont St, Westhaven.</div>
+        </div>
+      </div>
+      <div class="location-input-section">
+        <div class="location-label">📍 Your Vessel Location</div>
+        <input class="location-input" placeholder="Enter anchorage name or marina...">
+        <div class="map-pin-btn">📍 Drop a Pin on the Map</div>
+        <div class="location-hint" style="margin-top:8px;">Or use your current GPS location: <a style="color:var(--ocean); cursor:pointer;">Use My Location →</a></div>
+      </div>
+      <div class="order-summary">
+        <div class="order-summary-title">Order Summary</div>
+        <div class="order-item"><span>Yamaha Impeller Kit</span><span>$89.95</span></div>
+        <div class="order-item"><span>Yamalube 10W-30 6L</span><span>$54.95</span></div>
+        <div class="order-item"><span>Oil Filter</span><span>$18.50</span></div>
+        <div class="order-item"><span>Helm Dash Delivery</span><span>$29.00</span></div>
+        <div class="order-item"><span>Total</span><span>$192.40</span></div>
+      </div>
+      <button class="confirm-delivery-btn">Confirm Helm Dash Order →</button>
+    </div>
+    <div class="map-container">
+      <div class="map-water"></div>
+      <div class="map-grid"></div>
+      <div class="map-vessel-pin" title="Your vessel location">⛵</div>
+      <div class="map-delivery-pin" title="Helm Dash warehouse">🏪</div>
+      <div class="eta-overlay">
+        <div class="eta-item"><div class="eta-value">45</div><div class="eta-label">Est. Minutes</div></div>
+        <div class="eta-divider"></div>
+        <div class="eta-item"><div class="eta-value">4.2</div><div class="eta-label">Nautical Miles</div></div>
+        <div class="eta-divider"></div>
+        <div class="eta-item"><div class="eta-value" style="color:var(--success);">✓</div><div class="eta-label">Skipper Available</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  const btns = document.querySelectorAll('.nav-btn');
+  const labels = ['home','garage','product','ai','checklist','loyalty','delivery'];
+  btns[labels.indexOf(name)].classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// Checklist tab switching
+document.querySelectorAll('.checklist-tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.checklist-tab').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Check box toggling
+document.querySelectorAll('.check-box').forEach(box => {
+  box.addEventListener('click', function() {
+    this.classList.toggle('checked');
+    if (this.classList.contains('checked')) this.textContent = '✓';
+    else this.textContent = '';
+    const nameEl = this.nextElementSibling;
+    if (nameEl) nameEl.classList.toggle('done');
+  });
+});
+
+// Delivery option selection
+document.querySelectorAll('.delivery-option').forEach(opt => {
+  opt.addEventListener('click', function() {
+    document.querySelectorAll('.delivery-option').forEach(o => o.classList.remove('selected'));
+    this.classList.add('selected');
+  });
+});
+
+// Agent pill selection
+document.querySelectorAll('.agent-pill').forEach(pill => {
+  pill.addEventListener('click', function() {
+    document.querySelectorAll('.agent-pill').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
