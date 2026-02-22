@@ -1,0 +1,107 @@
+version: "3.9"
+
+services:
+  # PostgreSQL 16 with pgvector extension
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: helm-db
+    environment:
+      POSTGRES_USER: helm
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: helm_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U helm -d helm_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis — cache, Celery broker, rate limiting
+  redis:
+    image: redis:7-alpine
+    container_name: helm-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Typesense — product search engine
+  typesense:
+    image: typesense/typesense:27.1
+    container_name: helm-typesense
+    environment:
+      TYPESENSE_API_KEY: helm-typesense-api-key
+      TYPESENSE_DATA_DIR: /data
+    ports:
+      - "8108:8108"
+    volumes:
+      - typesense_data:/data
+
+  # FastAPI backend
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: helm-api
+    environment:
+      DATABASE_URL: postgresql+asyncpg://helm:password@db:5432/helm_db
+      REDIS_URL: redis://redis:6379/0
+      TYPESENSE_HOST: typesense
+      TYPESENSE_PORT: 8108
+      TYPESENSE_API_KEY: helm-typesense-api-key
+      APP_ENV: development
+      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:8080
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      typesense:
+        condition: service_started
+    volumes:
+      - ./backend:/app
+
+  # Celery worker — background task processing
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: helm-celery-worker
+    command: celery -A app.celery_app worker --loglevel=info
+    environment:
+      DATABASE_URL: postgresql+asyncpg://helm:password@db:5432/helm_db
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Celery Beat — periodic task scheduler
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: helm-celery-beat
+    command: celery -A app.celery_app beat --loglevel=info
+    environment:
+      DATABASE_URL: postgresql+asyncpg://helm:password@db:5432/helm_db
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+  typesense_data:
