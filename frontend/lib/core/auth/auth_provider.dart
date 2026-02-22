@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:helm_marine/core/api/api_service.dart';
 import 'package:helm_marine/core/models/user.dart';
 
@@ -30,10 +31,21 @@ class AuthNotifier extends AsyncNotifier<User?> {
   Future<void> signIn({required String email, required String password}) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      // In a full implementation, this would call Supabase Auth sign-in
-      // and store the JWT. For now, store a placeholder and fetch user.
-      // The actual Supabase integration uses supabase_flutter SDK.
-      await _storage.write(key: 'access_token', value: 'pending');
+      final supabase = Supabase.instance.client;
+      final response = await supabase.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+
+      final session = response.session;
+      if (session == null) {
+        throw Exception('Sign-in failed: no session returned');
+      }
+
+      await setTokens(
+        accessToken: session.accessToken,
+        refreshToken: session.refreshToken,
+      );
 
       final apiService = ref.read(apiServiceProvider);
       return await apiService.getCurrentUser();
@@ -47,10 +59,24 @@ class AuthNotifier extends AsyncNotifier<User?> {
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      final supabase = Supabase.instance.client;
+      final response = await supabase.auth.signUp(
+        email: email,
+        password: password,
+        data: {'full_name': fullName},
+      );
+
+      final session = response.session;
+      if (session != null) {
+        await setTokens(
+          accessToken: session.accessToken,
+          refreshToken: session.refreshToken,
+        );
+      }
+
       final apiService = ref.read(apiServiceProvider);
       final user = await apiService.registerUser({
         'email': email,
-        'password': password,
         'full_name': fullName,
       });
       return user;
@@ -58,6 +84,11 @@ class AuthNotifier extends AsyncNotifier<User?> {
   }
 
   Future<void> signOut() async {
+    try {
+      await Supabase.instance.client.auth.signOut();
+    } catch (_) {
+      // Continue with local cleanup even if Supabase signout fails
+    }
     await _storage.delete(key: 'access_token');
     await _storage.delete(key: 'refresh_token');
     state = const AsyncData(null);

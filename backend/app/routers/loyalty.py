@@ -120,11 +120,52 @@ async def get_current_multiplier(
     """Get the current points multiplier for the user's crew.
 
     The multiplier is based on the collective monthly spend of all
-    crew members.
+    crew members in the current calendar month.
     """
-    # TODO: Calculate actual monthly spend from orders
-    # For now, return base multiplier
-    return _get_multiplier(0.0)
+    from datetime import datetime
+    from app.models.order import Order
+
+    # Find the user's crew team(s) — use the first team found
+    team_result = await db.execute(
+        select(CrewTeam)
+        .join(CrewTeamMember)
+        .where(CrewTeamMember.user_id == user_id)
+    )
+    team = team_result.scalar_one_or_none()
+
+    if not team:
+        # User not in any crew team — return base multiplier with solo spend
+        now = datetime.utcnow()
+        month_start = datetime(now.year, now.month, 1)
+        solo_spend_result = await db.execute(
+            select(func.coalesce(func.sum(Order.total), 0)).where(
+                Order.user_id == user_id,
+                Order.created_at >= month_start,
+                Order.status.notin_(["cancelled"]),
+            )
+        )
+        solo_spend = float(solo_spend_result.scalar() or 0)
+        return _get_multiplier(solo_spend)
+
+    # Get all member IDs of the crew team
+    members_result = await db.execute(
+        select(CrewTeamMember.user_id).where(CrewTeamMember.team_id == team.id)
+    )
+    member_ids = [row[0] for row in members_result.all()]
+
+    # Calculate collective monthly spend from orders
+    now = datetime.utcnow()
+    month_start = datetime(now.year, now.month, 1)
+    spend_result = await db.execute(
+        select(func.coalesce(func.sum(Order.total), 0)).where(
+            Order.user_id.in_(member_ids),
+            Order.created_at >= month_start,
+            Order.status.notin_(["cancelled"]),
+        )
+    )
+    monthly_spend = float(spend_result.scalar() or 0)
+
+    return _get_multiplier(monthly_spend)
 
 
 # --- Crew Team Management ---

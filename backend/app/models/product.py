@@ -23,6 +23,7 @@ class Product(Base):
     category: Mapped[str] = mapped_column(String, nullable=False, index=True)
     sub_category: Mapped[str | None] = mapped_column(String, nullable=True)
     price: Mapped[float] = mapped_column(Numeric(10, 2), nullable=False)
+    sale_price: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)
     cost_price: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)
     stock_quantity: Mapped[int] = mapped_column(Integer, default=0)
     weight_grams: Mapped[int | None] = mapped_column(Integer, nullable=True)

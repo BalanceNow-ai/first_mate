@@ -40,23 +40,13 @@ async def _get_vessel_context(vessel_id: uuid.UUID, db: AsyncSession) -> str:
     return "\n".join(context_parts)
 
 
-async def _run_first_mate_agent(
-    message: str,
-    vessel_context: str,
-    conversation_history: list[dict],
-) -> str:
-    """Run the First Mate AI agent with LangChain.
-
-    In production, this orchestrates the full LangChain agent with
-    domain-specialist tools. Falls back to a direct OpenAI call if
-    LangChain is not fully configured.
-    """
-    system_prompt = """You are the First Mate, an expert AI assistant for the Helm marine
+FIRST_MATE_SYSTEM_PROMPT = """You are the First Mate, an expert AI assistant for the Helm marine
 platform in New Zealand. You help boat owners with technical questions, product
 recommendations, maintenance advice, and voyage planning.
 
-You have access to the user's vessel information and can provide specific,
-accurate advice based on their boat's make, model, year, and equipment.
+You have access to tools to search for products in the Helm catalogue, look up
+vessel data, and query the marine knowledge base. Use these tools to provide
+accurate, specific answers rather than guessing.
 
 Always be helpful, specific, and safety-conscious. When recommending products,
 mention specific part numbers and prices when available. For safety-critical
@@ -65,14 +55,114 @@ topics, always recommend consulting a qualified marine professional.
 Respond in a conversational, friendly tone appropriate for New Zealand boaters.
 Use NZD for all prices."""
 
+
+def _build_agent_tools(db_session) -> list:
+    """Build LangChain tools the First Mate agent can call."""
+    from langchain_core.tools import tool
+
+    @tool
+    async def product_search(query: str) -> str:
+        """Search the Helm Marine product catalogue by keyword. Returns matching products with names, prices, and SKUs."""
+        from app.models.product import Product
+        from sqlalchemy import or_
+
+        search_filter = f"%{query}%"
+        result = await db_session.execute(
+            select(Product)
+            .where(
+                Product.is_active.is_(True),
+                or_(
+                    Product.name.ilike(search_filter),
+                    Product.description.ilike(search_filter),
+                    Product.brand.ilike(search_filter),
+                    Product.sku.ilike(search_filter),
+                ),
+            )
+            .limit(5)
+        )
+        products = result.scalars().all()
+        if not products:
+            return "No products found matching that query."
+
+        lines = []
+        for p in products:
+            price_str = f"${p.price:.2f}"
+            if p.sale_price:
+                price_str = f"~~${p.price:.2f}~~ ${p.sale_price:.2f} (SALE)"
+            stock = "In Stock" if p.stock_quantity > 0 else "Out of Stock"
+            lines.append(
+                f"- {p.name} ({p.brand or 'Unbranded'}) | SKU: {p.sku} | "
+                f"{price_str} | {stock}"
+            )
+        return "\n".join(lines)
+
+    @tool
+    async def vessel_data(vessel_make: str, vessel_model: str) -> str:
+        """Look up vessel specifications and compatible products for a given make and model."""
+        from app.models.product import Product, ProductCompatibility
+
+        result = await db_session.execute(
+            select(Product)
+            .join(ProductCompatibility)
+            .where(
+                Product.is_active.is_(True),
+                ProductCompatibility.vessel_make == vessel_make,
+                ProductCompatibility.vessel_model == vessel_model,
+            )
+            .limit(10)
+        )
+        products = result.scalars().all()
+        if not products:
+            return f"No specific compatible products found for {vessel_make} {vessel_model}."
+
+        lines = [f"Compatible products for {vessel_make} {vessel_model}:"]
+        for p in products:
+            lines.append(f"- {p.name} (SKU: {p.sku}) — ${p.price:.2f}")
+        return "\n".join(lines)
+
+    @tool
+    async def marine_knowledge_search(question: str) -> str:
+        """Search the marine knowledge base (RAG) for technical information about boat maintenance, safety, and regulations."""
+        # In production, this would query pgvector for semantic search.
+        # For now, return a helpful response explaining the capability.
+        from app.models.ai import RAGDocument
+
+        try:
+            result = await db_session.execute(
+                select(RAGDocument)
+                .where(RAGDocument.content.ilike(f"%{question}%"))
+                .limit(3)
+            )
+            docs = result.scalars().all()
+            if docs:
+                return "\n\n".join(
+                    f"[{d.title}]: {d.content[:500]}" for d in docs
+                )
+        except Exception:
+            pass
+        return (
+            "No specific knowledge base articles found. "
+            "I'll answer based on my general marine expertise."
+        )
+
+    return [product_search, vessel_data, marine_knowledge_search]
+
+
+async def _run_first_mate_agent(
+    message: str,
+    vessel_context: str,
+    conversation_history: list[dict],
+    db_session=None,
+) -> str:
+    """Run the First Mate AI agent with LangChain.
+
+    Uses a ReAct-style agent executor with domain-specialist tools
+    for product search, vessel data lookup, and RAG knowledge base.
+    Falls back to a dev stub if OpenAI is not configured.
+    """
+    system_prompt = FIRST_MATE_SYSTEM_PROMPT
     if vessel_context:
         system_prompt += f"\n\nUser's Active Vessel:\n{vessel_context}"
-
-    # Build messages for the LLM
-    messages = [{"role": "system", "content": system_prompt}]
-    for msg in conversation_history[-10:]:  # Last 10 messages for context
-        messages.append({"role": msg["role"], "content": msg["content"]})
-    messages.append({"role": "user", "content": message})
 
     if not settings.openai_api_key:
         # Development fallback
@@ -84,16 +174,71 @@ Use NZD for all prices."""
         )
 
     try:
-        from openai import AsyncOpenAI
+        from langchain_openai import ChatOpenAI
+        from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+        from langchain.agents import create_tool_calling_agent, AgentExecutor
+        from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
-        client = AsyncOpenAI(api_key=settings.openai_api_key)
-        response = await client.chat.completions.create(
+        llm = ChatOpenAI(
             model="gpt-4.1-mini",
-            messages=messages,
-            max_tokens=1024,
+            api_key=settings.openai_api_key,
             temperature=0.7,
+            max_tokens=1024,
         )
-        return response.choices[0].message.content or "I couldn't generate a response."
+
+        tools = _build_agent_tools(db_session) if db_session else []
+
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", system_prompt),
+            MessagesPlaceholder(variable_name="chat_history"),
+            ("human", "{input}"),
+            MessagesPlaceholder(variable_name="agent_scratchpad"),
+        ])
+
+        # Build chat history from conversation
+        chat_history = []
+        for msg in conversation_history[-10:]:
+            if msg["role"] == "user":
+                chat_history.append(HumanMessage(content=msg["content"]))
+            elif msg["role"] == "assistant":
+                chat_history.append(AIMessage(content=msg["content"]))
+
+        agent = create_tool_calling_agent(llm, tools, prompt)
+        executor = AgentExecutor(
+            agent=agent,
+            tools=tools,
+            verbose=False,
+            max_iterations=5,
+            handle_parsing_errors=True,
+        )
+
+        result = await executor.ainvoke({
+            "input": message,
+            "chat_history": chat_history,
+        })
+
+        return result.get("output", "I couldn't generate a response.")
+
+    except ImportError:
+        # LangChain not installed — fall back to direct OpenAI
+        try:
+            from openai import AsyncOpenAI
+
+            messages = [{"role": "system", "content": system_prompt}]
+            for msg in conversation_history[-10:]:
+                messages.append({"role": msg["role"], "content": msg["content"]})
+            messages.append({"role": "user", "content": message})
+
+            client = AsyncOpenAI(api_key=settings.openai_api_key)
+            response = await client.chat.completions.create(
+                model="gpt-4.1-mini",
+                messages=messages,
+                max_tokens=1024,
+                temperature=0.7,
+            )
+            return response.choices[0].message.content or "I couldn't generate a response."
+        except Exception as e:
+            return f"I'm having trouble connecting to my AI backend: {e}"
     except Exception as e:
         return f"I'm having trouble connecting to my AI backend: {e}"
 
@@ -152,11 +297,12 @@ async def chat_with_first_mate(
     history = list(conversation.messages) if conversation.messages else []
     history.append({"role": "user", "content": request.message})
 
-    # Run the AI agent
+    # Run the AI agent with DB session for tool access
     response_text = await _run_first_mate_agent(
         message=request.message,
         vessel_context=vessel_context,
         conversation_history=history,
+        db_session=db,
     )
 
     # Add assistant response to history
