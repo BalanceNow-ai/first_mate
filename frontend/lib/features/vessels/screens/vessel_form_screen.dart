@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
 import 'package:helm_marine/features/vessels/providers/vessel_provider.dart';
+import 'package:helm_marine/main.dart';
 
 class VesselFormScreen extends ConsumerStatefulWidget {
   final String? vesselId;
@@ -109,6 +110,10 @@ class _VesselFormScreenState extends ConsumerState<VesselFormScreen> {
         await notifier.updateVessel(widget.vesselId!, data);
       } else {
         await notifier.createVessel(data);
+        posthog.capture(eventName: 'vessel_created', properties: {
+          'make': data['make'],
+          'model': data['model'],
+        });
       }
       if (mounted) context.go(widget.fromOnboarding ? '/' : '/vessels');
     } catch (e) {

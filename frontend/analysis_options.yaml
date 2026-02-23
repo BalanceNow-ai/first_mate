@@ -6,3 +6,7 @@ linter:
     prefer_const_declarations: true
     avoid_print: true
     prefer_single_quotes: true
+    sized_box_for_whitespace: true
+    use_colored_box: true
+    use_decorated_box: true
+    use_key_in_widget_constructors: true

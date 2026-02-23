@@ -45,7 +45,7 @@ class VesselListNotifier extends AsyncNotifier<List<Vessel>> {
 
 /// Provider for a single vessel detail.
 final vesselDetailProvider =
-    FutureProvider.family<Vessel, String>((ref, id) async {
+    FutureProvider.autoDispose.family<Vessel, String>((ref, id) async {
   final apiService = ref.read(apiServiceProvider);
   return apiService.getVessel(id);
 });

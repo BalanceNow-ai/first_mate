@@ -1,9 +1,11 @@
 """Helm Marine Platform — FastAPI application entry point."""
 
+import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.config import get_settings
 from app.routers import (
@@ -23,6 +25,8 @@ from app.routers import (
     vessels,
 )
 
+logger = logging.getLogger(__name__)
+
 settings = get_settings()
 
 
@@ -32,8 +36,19 @@ async def lifespan(app: FastAPI):
     # Startup
     if settings.sentry_dsn:
         import sentry_sdk
+        from sentry_sdk.integrations.fastapi import FastApiIntegration
+        from sentry_sdk.integrations.starlette import StarletteIntegration
 
-        sentry_sdk.init(dsn=settings.sentry_dsn, traces_sample_rate=0.1)
+        sentry_sdk.init(
+            dsn=settings.sentry_dsn,
+            traces_sample_rate=0.1,
+            environment=settings.app_env,
+            release=f"helm-api@{app.version}",
+            integrations=[
+                StarletteIntegration(),
+                FastApiIntegration(),
+            ],
+        )
 
     yield
 
@@ -52,6 +67,25 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+
+# Sentry error-capturing middleware
+@app.middleware("http")
+async def sentry_exception_middleware(request: Request, call_next):
+    """Capture unhandled exceptions to Sentry."""
+    try:
+        return await call_next(request)
+    except Exception as exc:
+        if settings.sentry_dsn:
+            import sentry_sdk
+
+            sentry_sdk.capture_exception(exc)
+        logger.exception("Unhandled exception on %s %s", request.method, request.url)
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Internal server error"},
+        )
+
 
 # CORS middleware
 app.add_middleware(

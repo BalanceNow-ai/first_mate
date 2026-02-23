@@ -135,11 +135,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  CircleAvatar(
-                    backgroundColor: HelmTheme.primary,
-                    child: IconButton(
-                      icon: const Icon(Icons.send, color: Colors.white, size: 20),
-                      onPressed: chatState.isLoading ? null : _sendMessage,
+                  Semantics(
+                    label: 'Send message',
+                    child: CircleAvatar(
+                      backgroundColor: HelmTheme.primary,
+                      child: IconButton(
+                        icon: const Icon(Icons.send, color: Colors.white, size: 20),
+                        tooltip: 'Send message',
+                        onPressed: chatState.isLoading ? null : _sendMessage,
+                      ),
                     ),
                   ),
                 ],

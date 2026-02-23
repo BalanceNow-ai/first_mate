@@ -2,15 +2,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:helm_marine/core/api/api_service.dart';
 
 /// Fetch a single delivery by ID.
-final deliveryDetailProvider =
-    FutureProvider.family<Map<String, dynamic>, String>((ref, id) async {
+final deliveryDetailProvider = FutureProvider.autoDispose
+    .family<Map<String, dynamic>, String>((ref, id) async {
   final apiService = ref.read(apiServiceProvider);
   return apiService.getHelmDashDelivery(id);
 });
 
 /// Fetch all user deliveries.
 final deliveryListProvider =
-    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final apiService = ref.read(apiServiceProvider);
   return apiService.getHelmDashDeliveries();
 });
@@ -30,8 +30,8 @@ class DeliveryLocation {
 }
 
 /// Simulated live position provider. Moves towards destination.
-final deliveryLiveLocationProvider =
-    FutureProvider.family<DeliveryLocation, String>((ref, deliveryId) async {
+final deliveryLiveLocationProvider = FutureProvider.autoDispose
+    .family<DeliveryLocation, String>((ref, deliveryId) async {
   final delivery = await ref.watch(deliveryDetailProvider(deliveryId).future);
   final coords = delivery['delivery_coordinates'] as Map<String, dynamic>?;
   final status = delivery['status'] as String? ?? 'pending';

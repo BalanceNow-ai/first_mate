@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:helm_marine/core/api/api_service.dart';
+import 'package:helm_marine/main.dart';
 
 class ChatMessage {
   final String role; // 'user' or 'assistant'
@@ -48,12 +49,19 @@ class ChatNotifier extends StateNotifier<ChatState> {
   ChatNotifier(this._apiService, {this.vesselId}) : super(const ChatState());
 
   Future<void> sendMessage(String text) async {
+    final isNewConversation = state.conversationId == null && state.messages.isEmpty;
     final userMessage = ChatMessage(role: 'user', content: text);
     state = state.copyWith(
       messages: [...state.messages, userMessage],
       isLoading: true,
       error: null,
     );
+
+    if (isNewConversation) {
+      posthog.capture(eventName: 'ai_conversation_started', properties: {
+        'has_vessel_context': vesselId != null,
+      });
+    }
 
     try {
       final response = await _apiService.sendChatMessage(
@@ -87,8 +95,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
 }
 
 /// Provider for chat, optionally scoped to a vessel.
-final chatProvider =
-    StateNotifierProvider.family<ChatNotifier, ChatState, String?>(
+final chatProvider = StateNotifierProvider.autoDispose
+    .family<ChatNotifier, ChatState, String?>(
   (ref, vesselId) {
     final apiService = ref.read(apiServiceProvider);
     return ChatNotifier(apiService, vesselId: vesselId);
@@ -97,7 +105,7 @@ final chatProvider =
 
 /// Provider for conversation history list.
 final conversationListProvider =
-    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final apiService = ref.read(apiServiceProvider);
   return apiService.getConversations();
 });

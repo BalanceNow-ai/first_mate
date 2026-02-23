@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -61,6 +62,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear, color: Colors.white70),
+                        tooltip: 'Clear search',
                         onPressed: () {
                           _searchController.clear();
                           _onSearch('');
@@ -148,10 +150,10 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                                   width: double.infinity,
                                   color: Colors.grey[100],
                                   child: product.imageUrl != null
-                                      ? Image.network(
-                                          product.imageUrl!,
+                                      ? CachedNetworkImage(
+                                          imageUrl: product.imageUrl!,
                                           fit: BoxFit.cover,
-                                          errorBuilder: (_, __, ___) =>
+                                          errorWidget: (_, __, ___) =>
                                               const Icon(
                                             Icons.image_not_supported,
                                             size: 40,

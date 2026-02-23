@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_view/photo_view.dart';
@@ -76,6 +77,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.remove, size: 18),
+                        tooltip: 'Decrease quantity',
                         onPressed: _quantity > 1
                             ? () => setState(() => _quantity--)
                             : null,
@@ -84,6 +86,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           style: const TextStyle(fontWeight: FontWeight.bold)),
                       IconButton(
                         icon: const Icon(Icons.add, size: 18),
+                        tooltip: 'Increase quantity',
                         onPressed: () => setState(() => _quantity++),
                       ),
                     ],
@@ -315,10 +318,13 @@ class _ProductImageGallery extends StatelessWidget {
                 itemCount: imageUrls.length,
                 onPageChanged: onPageChanged,
                 itemBuilder: (context, index) {
-                  return Image.network(
-                    imageUrls[index],
+                  return CachedNetworkImage(
+                    imageUrl: imageUrls[index],
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => const Center(
+                    placeholder: (_, __) => const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    errorWidget: (_, __, ___) => const Center(
                       child: Icon(Icons.broken_image, size: 48, color: Colors.grey),
                     ),
                   );

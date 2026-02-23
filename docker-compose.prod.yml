@@ -1,0 +1,111 @@
+version: "3.9"
+
+services:
+  # PostgreSQL 16 with pgvector extension
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: helm-db-prod
+    env_file:
+      - .env.prod
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-helm} -d ${POSTGRES_DB:-helm_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis — cache, Celery broker, rate limiting
+  redis:
+    image: redis:7-alpine
+    container_name: helm-redis-prod
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --requirepass ${REDIS_PASSWORD:-changeme}
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-changeme}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Typesense — product search engine
+  typesense:
+    image: typesense/typesense:27.1
+    container_name: helm-typesense-prod
+    env_file:
+      - .env.prod
+    environment:
+      TYPESENSE_API_KEY: ${TYPESENSE_API_KEY}
+      TYPESENSE_DATA_DIR: /data
+    ports:
+      - "8108:8108"
+    volumes:
+      - typesense_data:/data
+    restart: unless-stopped
+
+  # FastAPI backend (production)
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+      target: production
+    container_name: helm-api-prod
+    env_file:
+      - .env.prod
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      typesense:
+        condition: service_started
+    restart: unless-stopped
+
+  # Celery worker — background task processing
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+      target: production
+    container_name: helm-celery-worker-prod
+    command: celery -A app.celery_app worker --loglevel=info --concurrency=4
+    env_file:
+      - .env.prod
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Celery Beat — periodic task scheduler
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+      target: production
+    command: celery -A app.celery_app beat --loglevel=info
+    container_name: helm-celery-beat-prod
+    env_file:
+      - .env.prod
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  typesense_data:

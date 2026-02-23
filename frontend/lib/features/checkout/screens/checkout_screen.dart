@@ -4,6 +4,7 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:go_router/go_router.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
 import 'package:helm_marine/features/checkout/providers/checkout_provider.dart';
+import 'package:helm_marine/main.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
@@ -56,6 +57,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         leading: state.currentStep > 0 && state.currentStep < 2
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),
+                tooltip: 'Go back',
                 onPressed: () => _goToPage(state.currentStep - 1),
               )
             : null,
@@ -152,6 +154,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           );
                         }
                         notifier.confirmPayment();
+                        posthog.capture(eventName: 'order_completed', properties: {
+                          'order_id': ref.read(checkoutProvider).orderId,
+                        });
                         _goToPage(2);
                       } on StripeException catch (e) {
                         notifier.setError(

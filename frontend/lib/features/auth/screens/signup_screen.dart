@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:helm_marine/core/auth/auth_provider.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
+import 'package:helm_marine/main.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -46,6 +47,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         ),
       );
     } else if (authState.valueOrNull != null && mounted) {
+      posthog.capture(eventName: 'sign_up');
       context.go('/onboarding');
     }
   }
