@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:helm_marine/core/api/api_service.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
 
-final orderDetailProvider =
-    FutureProvider.family<Map<String, dynamic>, String>((ref, orderId) async {
+final orderDetailProvider = FutureProvider.autoDispose
+    .family<Map<String, dynamic>, String>((ref, orderId) async {
   final apiService = ref.read(apiServiceProvider);
   return apiService.getOrder(orderId);
 });

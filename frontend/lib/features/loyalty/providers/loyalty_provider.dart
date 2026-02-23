@@ -2,28 +2,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:helm_marine/core/api/api_service.dart';
 
 /// Crew Points balance.
-final crewPointsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+final crewPointsProvider =
+    FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   final apiService = ref.read(apiServiceProvider);
   return apiService.getCrewPoints();
 });
 
 /// Current multiplier with tier info.
 final crewMultiplierProvider =
-    FutureProvider<Map<String, dynamic>>((ref) async {
+    FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   final apiService = ref.read(apiServiceProvider);
   return apiService.getCrewMultiplier();
 });
 
 /// Signature Experiences from Strapi.
 final experiencesProvider =
-    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final apiService = ref.read(apiServiceProvider);
   return apiService.getSignatureExperiences();
 });
 
 /// User's crew teams.
 final crewTeamsProvider =
-    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final apiService = ref.read(apiServiceProvider);
   return apiService.getCrewTeams();
 });

@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:helm_marine/core/api/api_service.dart';
 import 'package:helm_marine/core/models/user.dart';
+import 'package:helm_marine/main.dart';
 
 const _storage = FlutterSecureStorage();
 
@@ -48,7 +49,9 @@ class AuthNotifier extends AsyncNotifier<User?> {
       );
 
       final apiService = ref.read(apiServiceProvider);
-      return await apiService.getCurrentUser();
+      final user = await apiService.getCurrentUser();
+      posthog.capture(eventName: 'login');
+      return user;
     });
   }
 

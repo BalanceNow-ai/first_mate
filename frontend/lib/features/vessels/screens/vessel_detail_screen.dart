@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,6 +21,7 @@ class VesselDetailScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
+            tooltip: 'Edit vessel',
             onPressed: () => context.go('/vessels/$vesselId/edit'),
           ),
           IconButton(
@@ -29,6 +31,7 @@ class VesselDetailScreen extends ConsumerWidget {
           ),
           IconButton(
             icon: const Icon(Icons.delete_outline),
+            tooltip: 'Delete vessel',
             onPressed: () => _confirmDelete(context, ref),
           ),
         ],
@@ -47,7 +50,10 @@ class VesselDetailScreen extends ConsumerWidget {
               child: vessel.imageUrl != null
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(16),
-                      child: Image.network(vessel.imageUrl!, fit: BoxFit.cover),
+                      child: CachedNetworkImage(
+                          imageUrl: vessel.imageUrl!,
+                          fit: BoxFit.cover,
+                        ),
                     )
                   : const Center(
                       child: Icon(Icons.directions_boat,

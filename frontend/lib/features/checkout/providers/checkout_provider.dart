@@ -3,7 +3,7 @@ import 'package:helm_marine/core/api/api_service.dart';
 
 /// Cart data provider.
 final cartProvider =
-    FutureProvider<Map<String, dynamic>>((ref) async {
+    FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   final apiService = ref.read(apiServiceProvider);
   return apiService.getCart();
 });

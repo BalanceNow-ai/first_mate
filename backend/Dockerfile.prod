@@ -1,0 +1,48 @@
+FROM python:3.11-slim AS builder
+
+WORKDIR /app
+
+# Install system dependencies for building
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy project definition and install all dependencies (including dev for tests)
+COPY pyproject.toml .
+RUN pip install --no-cache-dir -e ".[dev]"
+
+# Copy application code
+COPY app/ app/
+COPY alembic/ alembic/
+COPY alembic.ini .
+
+# Run tests in the builder stage
+RUN python -m pytest app/tests/ -v --tb=short
+
+# --- Production stage ---
+FROM python:3.11-slim AS production
+
+WORKDIR /app
+
+# Install only runtime system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy project definition and install production dependencies only
+COPY pyproject.toml .
+RUN pip install --no-cache-dir -e .
+
+# Copy application code from builder (already tested)
+COPY --from=builder /app/app/ app/
+COPY --from=builder /app/alembic/ alembic/
+COPY --from=builder /app/alembic.ini .
+
+# Create non-root user
+RUN useradd --create-home appuser
+USER appuser
+
+EXPOSE 8000
+
+CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "app.main:app", "--bind", "0.0.0.0:8000"]

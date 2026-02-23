@@ -56,19 +56,22 @@ final productFilterProvider = StateProvider<ProductFilter>(
 );
 
 /// Available categories from backend.
-final productCategoriesProvider = FutureProvider<List<String>>((ref) async {
+final productCategoriesProvider =
+    FutureProvider.autoDispose<List<String>>((ref) async {
   final apiService = ref.read(apiServiceProvider);
   return apiService.getProductCategories();
 });
 
 /// Available brands from backend.
-final productBrandsProvider = FutureProvider<List<String>>((ref) async {
+final productBrandsProvider =
+    FutureProvider.autoDispose<List<String>>((ref) async {
   final apiService = ref.read(apiServiceProvider);
   return apiService.getProductBrands();
 });
 
 /// Product list based on current filter.
-final productListProvider = FutureProvider<List<Product>>((ref) async {
+final productListProvider =
+    FutureProvider.autoDispose<List<Product>>((ref) async {
   final filter = ref.watch(productFilterProvider);
   final apiService = ref.read(apiServiceProvider);
   return apiService.getProducts(
@@ -84,14 +87,15 @@ final productListProvider = FutureProvider<List<Product>>((ref) async {
 
 /// Single product detail.
 final productDetailProvider =
-    FutureProvider.family<Product, String>((ref, id) async {
+    FutureProvider.autoDispose.family<Product, String>((ref, id) async {
   final apiService = ref.read(apiServiceProvider);
   return apiService.getProduct(id);
 });
 
 /// Compatibility check result.
-final compatibilityProvider = FutureProvider.family<Map<String, dynamic>,
-    ({String productId, String vesselId})>((ref, params) async {
+final compatibilityProvider = FutureProvider.autoDispose
+    .family<Map<String, dynamic>, ({String productId, String vesselId})>(
+        (ref, params) async {
   final apiService = ref.read(apiServiceProvider);
   return apiService.checkCompatibility(params.productId, params.vesselId);
 });
