@@ -88,7 +88,7 @@ async def list_catalogue(
     sort: SortParam = "name",
     offset: int = Query(0, ge=0),
     limit: int | None = Query(None, ge=1),
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> ProductListResponse:
     """Browse active products. With ``vessel_id`` every item carries ``fitment``;
     ``compatible_only=true`` keeps only ``verified_fit``/``universal`` items."""
@@ -106,7 +106,7 @@ async def list_catalogue(
 
 
 @router.get("/categories", response_model=list[CategoryCount])
-async def list_categories(db: AsyncSession = Depends(get_db)) -> list[CategoryCount]:
+async def list_categories(db: AsyncSession = Depends(get_db, scope="function")) -> list[CategoryCount]:
     """Categories (with sub-categories) of active products and their counts."""
     rows = (
         await db.execute(
@@ -126,7 +126,7 @@ async def list_categories(db: AsyncSession = Depends(get_db)) -> list[CategoryCo
 
 
 @router.get("/brands", response_model=list[BrandCount])
-async def list_brands(db: AsyncSession = Depends(get_db)) -> list[BrandCount]:
+async def list_brands(db: AsyncSession = Depends(get_db, scope="function")) -> list[BrandCount]:
     rows = (
         await db.execute(
             select(Product.brand, func.count())
@@ -163,7 +163,7 @@ async def admin_list_products(
     sort: SortParam = "name",
     offset: int = Query(0, ge=0),
     limit: int | None = Query(None, ge=1),
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> AdminProductListResponse:
     filters.include_inactive = include_inactive
     limit = _page_limit(limit)
@@ -174,7 +174,7 @@ async def admin_list_products(
 
 
 @router.post("/", response_model=ProductAdminResponse, status_code=status.HTTP_201_CREATED)
-async def create_product(body: ProductCreate, admin: AdminUser, db: AsyncSession = Depends(get_db)) -> ProductAdminResponse:
+async def create_product(body: ProductCreate, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")) -> ProductAdminResponse:
     if (await db.execute(select(Product.id).where(func.lower(Product.sku) == body.sku.lower()))).first():
         raise AppError(409, "duplicate_sku", "A product with this SKU exists")
     data = body.model_dump()
@@ -191,7 +191,7 @@ async def create_product(body: ProductCreate, admin: AdminUser, db: AsyncSession
 
 @router.patch("/{product_id}", response_model=ProductAdminResponse)
 async def update_product(
-    product_id: uuid.UUID, body: ProductUpdate, admin: AdminUser, db: AsyncSession = Depends(get_db)
+    product_id: uuid.UUID, body: ProductUpdate, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
 ) -> ProductAdminResponse:
     product = await _admin_product(db, product_id, lock=True)
     data = body.model_dump(exclude_unset=True)
@@ -217,7 +217,7 @@ async def update_product(
 
 @router.post("/{product_id}/stock", response_model=ProductAdminResponse, dependencies=[Depends(mutation_limit())])
 async def adjust_stock(
-    product_id: uuid.UUID, body: StockAdjust, admin: AdminUser, db: AsyncSession = Depends(get_db)
+    product_id: uuid.UUID, body: StockAdjust, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
 ) -> ProductAdminResponse:
     """Atomically adjust stock by ``delta``; refuses to go below zero."""
     await _admin_product(db, product_id)
@@ -243,7 +243,7 @@ async def adjust_stock(
 
 
 @router.delete("/{product_id}", response_model=ProductAdminResponse)
-async def deactivate_product(product_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db)) -> ProductAdminResponse:
+async def deactivate_product(product_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")) -> ProductAdminResponse:
     """Deactivate (soft delete): hidden publicly, kept for order history."""
     product = await _admin_product(db, product_id, lock=True)
     if product.is_active:
@@ -297,7 +297,7 @@ async def list_fitment_rules(
     verification_status: Literal["unverified", "verified", "rejected"] | None = None,
     offset: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> list[FitmentRuleAdminResponse]:
     """Admin review queue (e.g. ``?verification_status=unverified``)."""
     q = select(ProductCompatibility).order_by(ProductCompatibility.created_at, ProductCompatibility.id)
@@ -309,7 +309,7 @@ async def list_fitment_rules(
 
 @router.post("/fitment-rules/{rule_id}/verify", response_model=FitmentRuleAdminResponse)
 async def verify_fitment_rule(
-    rule_id: uuid.UUID, admin: AdminUser, body: FitmentRuleVerify | None = None, db: AsyncSession = Depends(get_db)
+    rule_id: uuid.UUID, admin: AdminUser, body: FitmentRuleVerify | None = None, db: AsyncSession = Depends(get_db, scope="function")
 ) -> FitmentRuleAdminResponse:
     """Verify a rule (needs confidence ≥ FITMENT_MIN_CONFIDENCE). Only verified rules can produce a fit."""
     rule = await _rule(db, rule_id)
@@ -335,7 +335,7 @@ async def verify_fitment_rule(
 
 @router.post("/fitment-rules/{rule_id}/reject", response_model=FitmentRuleAdminResponse)
 async def reject_fitment_rule(
-    rule_id: uuid.UUID, admin: AdminUser, body: FitmentRuleReject | None = None, db: AsyncSession = Depends(get_db)
+    rule_id: uuid.UUID, admin: AdminUser, body: FitmentRuleReject | None = None, db: AsyncSession = Depends(get_db, scope="function")
 ) -> FitmentRuleAdminResponse:
     rule = await _rule(db, rule_id)
     rule.verification_status = "rejected"
@@ -351,7 +351,7 @@ async def reject_fitment_rule(
 
 
 @router.delete("/fitment-rules/{rule_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_fitment_rule(rule_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db)) -> None:
+async def delete_fitment_rule(rule_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")) -> None:
     rule = await _rule(db, rule_id)
     product_id = rule.product_id
     await audit.record(db, admin.id, "fitment_rule.delete", "product_compatibility", rule.id, _rule_snapshot(rule))
@@ -362,7 +362,7 @@ async def delete_fitment_rule(rule_id: uuid.UUID, admin: AdminUser, db: AsyncSes
 
 @router.get("/{product_id}/fitment-rules", response_model=list[FitmentRuleAdminResponse])
 async def product_fitment_rules(
-    product_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db)
+    product_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
 ) -> list[FitmentRuleAdminResponse]:
     await _admin_product(db, product_id)
     slugs = await _slug_map(db)
@@ -377,7 +377,7 @@ async def product_fitment_rules(
 
 @router.post("/{product_id}/fitment-rules", response_model=FitmentRuleAdminResponse, status_code=status.HTTP_201_CREATED)
 async def create_fitment_rule(
-    product_id: uuid.UUID, body: FitmentRuleCreate, admin: AdminUser, db: AsyncSession = Depends(get_db)
+    product_id: uuid.UUID, body: FitmentRuleCreate, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
 ) -> FitmentRuleAdminResponse:
     """New rules are always ``unverified`` (no fit until an admin verifies them)."""
     await _admin_product(db, product_id)
@@ -409,7 +409,7 @@ async def create_fitment_rule(
 @router.get("/{product_id}", response_model=ProductResponse)
 async def get_product(
     product_id: uuid.UUID, principal: OptionalPrincipal, vessel_id: uuid.UUID | None = None,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> ProductResponse:
     product = await get_active_product(db, product_id)
     profile, _ = await vessel_profile(db, principal, vessel_id)
@@ -429,14 +429,14 @@ async def _fitment_for(
 @router.get("/{product_id}/fitment", response_model=FitmentResult)
 async def product_fitment(
     product_id: uuid.UUID, principal: OptionalPrincipal, vessel_id: uuid.UUID = Query(...),
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> FitmentResult:
     """Compatibility check for one of the caller's vessels (auth + ownership required)."""
     return await _fitment_for(db, principal, product_id, vessel_id)
 
 
 @router.get("/{product_id}/compatibility", response_model=CompatibilityResponse)
-async def product_compatibility(product_id: uuid.UUID, db: AsyncSession = Depends(get_db)) -> CompatibilityResponse:
+async def product_compatibility(product_id: uuid.UUID, db: AsyncSession = Depends(get_db, scope="function")) -> CompatibilityResponse:
     """Public "known to fit" list — verified rules at or above the confidence threshold only."""
     product = await get_active_product(db, product_id)
     threshold = Decimal(str(get_settings().fitment_min_confidence))

@@ -38,7 +38,7 @@ router = APIRouter(prefix="/checklists", tags=["Voyage Checklists"])
     dependencies=[Depends(mutation_limit())],
 )
 async def generate_checklists(
-    vessel_id: uuid.UUID, user_id: CurrentUserId, regenerate: bool = False, db: AsyncSession = Depends(get_db)
+    vessel_id: uuid.UUID, user_id: CurrentUserId, regenerate: bool = False, db: AsyncSession = Depends(get_db, scope="function")
 ) -> ChecklistSetResponse:
     """Create the three tiered checklists, tailored to the vessel (409 if they exist,
     unless ``regenerate=true`` which rebuilds them and keeps checked state by template key)."""
@@ -49,7 +49,7 @@ async def generate_checklists(
 
 @router.get("/vessel/{vessel_id}", response_model=ChecklistSetResponse)
 async def get_checklists(
-    vessel_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db)
+    vessel_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
 ) -> ChecklistSetResponse:
     """All tiers; each tier lists its cumulative items with ``introduced_in``."""
     vessel = await get_owned_vessel(db, vessel_id, user_id)
@@ -58,7 +58,7 @@ async def get_checklists(
 
 @router.get("/vessel/{vessel_id}/tiers/{tier}", response_model=TierResponse)
 async def get_tier(
-    vessel_id: uuid.UUID, tier: Tier, user_id: CurrentUserId, db: AsyncSession = Depends(get_db)
+    vessel_id: uuid.UUID, tier: Tier, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
 ) -> TierResponse:
     vessel = await get_owned_vessel(db, vessel_id, user_id)
     checklists = await svc.require_checklists(db, vessel)
@@ -68,7 +68,7 @@ async def get_tier(
 
 
 @router.delete("/vessel/{vessel_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(mutation_limit())])
-async def delete_checklists(vessel_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db)) -> None:
+async def delete_checklists(vessel_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")) -> None:
     vessel = await get_owned_vessel(db, vessel_id, user_id)
     await db.execute(delete(VoyageChecklist).where(VoyageChecklist.vessel_id == vessel.id))
 
@@ -81,7 +81,7 @@ async def _item_view(db: AsyncSession, item, checklist, vessel, warning: str | N
 
 @router.patch("/items/{item_id}", response_model=ChecklistItemResponse, dependencies=[Depends(mutation_limit())])
 async def check_item(
-    item_id: uuid.UUID, body: ItemCheck, user_id: CurrentUserId, db: AsyncSession = Depends(get_db)
+    item_id: uuid.UUID, body: ItemCheck, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
 ) -> ChecklistItemResponse:
     """Set the checked ("already on board") state; shared by every tier that includes it."""
     item, checklist, vessel = await svc.owned_item(db, item_id, user_id)
@@ -91,7 +91,7 @@ async def check_item(
 
 
 @router.post("/items/{item_id}/toggle", response_model=ChecklistItemResponse, dependencies=[Depends(mutation_limit())])
-async def toggle_item(item_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db)) -> ChecklistItemResponse:
+async def toggle_item(item_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")) -> ChecklistItemResponse:
     item, checklist, vessel = await svc.owned_item(db, item_id, user_id)
     svc.set_checked(item, not item.is_checked)
     await db.flush()
@@ -100,7 +100,7 @@ async def toggle_item(item_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSessi
 
 @router.put("/items/{item_id}/link", response_model=ChecklistItemResponse, dependencies=[Depends(mutation_limit())])
 async def link_item(
-    item_id: uuid.UUID, body: ManualLink, user_id: CurrentUserId, db: AsyncSession = Depends(get_db)
+    item_id: uuid.UUID, body: ManualLink, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
 ) -> ChecklistItemResponse:
     """Owner-chosen product: verified mismatch → 409; unknown fit → ``user_linked_unverified`` + warning."""
     item, checklist, vessel = await svc.owned_item(db, item_id, user_id)
@@ -114,7 +114,7 @@ async def link_item(
     dependencies=[Depends(mutation_limit())],
 )
 async def add_missing_to_cart(
-    vessel_id: uuid.UUID, body: AddMissingRequest, user_id: CurrentUserId, db: AsyncSession = Depends(get_db)
+    vessel_id: uuid.UUID, body: AddMissingRequest, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
 ) -> AddMissingResponse:
     """Ensure the cart holds the unchecked, linked items of a tier. Repeat calls do not add more."""
     vessel = await get_owned_vessel(db, vessel_id, user_id)
@@ -124,7 +124,7 @@ async def add_missing_to_cart(
 @router.get("/vessel/{vessel_id}/export")
 async def export_checklist(
     vessel_id: uuid.UUID, user_id: CurrentUserId, tier: Tier = Query(...),
-    format: Literal["csv", "html"] = Query("html"), db: AsyncSession = Depends(get_db),
+    format: Literal["csv", "html"] = Query("html"), db: AsyncSession = Depends(get_db, scope="function"),
 ) -> Response:
     """Printable HTML or CSV of a tier (cumulative), with checkboxes and the disclaimer."""
     vessel = await get_owned_vessel(db, vessel_id, user_id)

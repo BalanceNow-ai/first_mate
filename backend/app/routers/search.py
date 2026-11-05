@@ -119,7 +119,7 @@ async def search_products(
     sort: SearchSort = "relevance",
     offset: int = Query(0, ge=0),
     limit: int | None = Query(None, ge=1),
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> SearchResponse:
     """Search active products (``q`` + filters). With ``vessel_id`` results carry fitment."""
     settings = get_settings()
