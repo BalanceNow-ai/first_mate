@@ -11,6 +11,8 @@
 # 4. leaves the application stopped; start the release that matches the restored
 #    schema (see the Operations Runbook, "Rollback").
 # =============================================================================
+# $POSTGRES_* expand inside the db container, on purpose:
+# shellcheck disable=SC2016
 set -euo pipefail
 # shellcheck source=deploy/lib.sh
 . "$(dirname "${BASH_SOURCE[0]}")/lib.sh"

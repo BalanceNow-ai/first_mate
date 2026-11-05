@@ -10,6 +10,8 @@
 # verified backup is the only line printed on stdout.
 # The dump runs inside the db container (credentials stay in the container).
 # =============================================================================
+# $POSTGRES_* expand inside the db container, on purpose:
+# shellcheck disable=SC2016
 set -euo pipefail
 # shellcheck source=deploy/lib.sh
 . "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
