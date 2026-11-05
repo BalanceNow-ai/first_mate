@@ -24,7 +24,10 @@ class CrewPoints(Base):
     """Per-user balance cache. Always updated in the same transaction as the ledger."""
 
     __tablename__ = "crew_points"
-    __table_args__ = (CheckConstraint("points_balance >= 0", name="balance_nonnegative"),)
+    __table_args__ = (
+        CheckConstraint("points_balance >= 0", name="balance_nonnegative"),
+        CheckConstraint("points_owed >= 0", name="owed_nonnegative"),
+    )
 
     id: Mapped[uuid.UUID] = uuid_pk()
     user_id: Mapped[uuid.UUID] = mapped_column(
@@ -36,6 +39,9 @@ class CrewPoints(Base):
     )
     points_balance: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     lifetime_earned: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    # Points that refunds should have reversed but had already been spent; settled from
+    # the next credits (voids, cancellations, new earnings) before they become spendable.
+    points_owed: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     # Display-only tier from trailing-12-month eligible paid spend.
     tier: Mapped[str] = mapped_column(String, nullable=False, default="deckhand", server_default="deckhand")
     updated_at: Mapped[datetime] = updated_at_col()
@@ -50,7 +56,8 @@ class PointsTransaction(Base):
     __table_args__ = (
         CheckConstraint(
             "kind IN ('earn','earn_reversal','monthly_bonus','redeem_discount','redeem_experience',"
-            "'redemption_reversal','profile_verification_bonus','adjustment')",
+            "'redemption_reversal','profile_verification_bonus','adjustment',"
+            "'monthly_bonus_reversal','owed_settlement')",
             name="valid_kind",
         ),
         CheckConstraint("points <> 0", name="points_nonzero"),

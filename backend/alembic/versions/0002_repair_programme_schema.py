@@ -532,7 +532,7 @@ def upgrade() -> None:
     op.add_column("users", sa.Column("email_verified_at", sa.DateTime(timezone=True), nullable=True))
     op.add_column("users", sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False))
     op.create_check_constraint(
-        "ck_users_valid_role", "users", "role IN ('customer','operator','dispatcher','admin')")
+        "valid_role", "users", "role IN ('customer','operator','dispatcher','admin')")
 
     # ------------------------------------------------------------------ products
     _audit(
@@ -570,15 +570,15 @@ def upgrade() -> None:
     op.alter_column("products", "created_at", server_default=sa.text("now()"))
     op.create_index("ix_products_part_role", "products", ["part_role"])
     op.create_check_constraint(
-        "ck_products_price_positive", "products", "price_cents > 0")
+        "price_positive", "products", "price_cents > 0")
     op.create_check_constraint(
-        "ck_products_sale_price_valid", "products",
+        "sale_price_valid", "products",
         "sale_price_cents IS NULL OR (sale_price_cents > 0 AND sale_price_cents < price_cents)",
     )
     op.create_check_constraint(
-        "ck_products_stock_nonnegative", "products", "stock_quantity >= 0")
+        "stock_nonnegative", "products", "stock_quantity >= 0")
     op.create_check_constraint(
-        "ck_products_valid_fitment_scope", "products", "fitment_scope IN ('universal','specific','unspecified')"
+        "valid_fitment_scope", "products", "fitment_scope IN ('universal','specific','unspecified')"
     )
 
     # ------------------------------------------------------------------ fitment rules
@@ -608,14 +608,14 @@ def upgrade() -> None:
         "product_compatibility", "equipment_categories", ["equipment_category_id"], ["id"],
     )
     op.create_check_constraint(
-        "ck_product_compatibility_valid_verification", "product_compatibility",
+        "valid_verification", "product_compatibility",
         "verification_status IN ('unverified','verified','rejected')",
     )
     op.create_check_constraint(
-        "ck_product_compatibility_confidence_range", "product_compatibility", "confidence_score >= 0 AND confidence_score <= 1"
+        "confidence_range", "product_compatibility", "confidence_score >= 0 AND confidence_score <= 1"
     )
     op.create_check_constraint(
-        "ck_product_compatibility_has_scope", "product_compatibility",
+        "has_scope", "product_compatibility",
         "vessel_make IS NOT NULL OR engine_make IS NOT NULL OR equipment_category_id IS NOT NULL",
     )
 
@@ -634,9 +634,9 @@ def upgrade() -> None:
         "fk_vessels_model_year_id_model_years", "vessels", "model_years", ["model_year_id"], ["id"], ondelete="SET NULL"
     )
     op.create_check_constraint(
-        "ck_vessels_year_range", "vessels", "year >= 1900 AND year <= 2100")
+        "year_range", "vessels", "year >= 1900 AND year <= 2100")
     op.create_check_constraint(
-        "ck_vessels_engine_hours_nonneg", "vessels", "engine_hours IS NULL OR engine_hours >= 0")
+        "engine_hours_nonneg", "vessels", "engine_hours IS NULL OR engine_hours >= 0")
 
     # ------------------------------------------------------------------ cart
     op.execute(
@@ -662,7 +662,7 @@ def upgrade() -> None:
     op.alter_column("cart_items", "created_at", server_default=sa.text("now()"))
     op.create_unique_constraint("uq_cart_items_user_id_product_id", "cart_items", ["user_id", "product_id"])
     op.create_check_constraint(
-        "ck_cart_items_quantity_positive", "cart_items", "quantity > 0")
+        "quantity_positive", "cart_items", "quantity > 0")
 
     # ------------------------------------------------------------------ orders
     for col in ("order_number", "idempotency_key"):
@@ -758,26 +758,26 @@ def upgrade() -> None:
         ["delivery_quote_id"], ["id"], ondelete="SET NULL",
     )
     op.create_check_constraint(
-        "ck_orders_valid_status", "orders",
+        "valid_status", "orders",
         "status IN ('pending_payment','paid','ready_for_dispatch','dispatched','delivered',"
         "'collected','cancelled','expired','refunded','payment_review')",
     )
     op.create_check_constraint(
-        "ck_orders_valid_payment_status", "orders",
+        "valid_payment_status", "orders",
         "payment_status IN ('unpaid','requires_action','processing','failed','succeeded',"
         "'partially_refunded','refunded')",
     )
     op.create_check_constraint(
-        "ck_orders_valid_delivery_type", "orders",
+        "valid_delivery_type", "orders",
         "delivery_type IS NULL OR delivery_type IN ('courier','helm_dash','click_and_collect')",
     )
     op.create_check_constraint(
-        "ck_orders_amounts_valid", "orders",
+        "amounts_valid", "orders",
         "subtotal_cents >= 0 AND discount_cents >= 0 AND shipping_cents >= 0 AND total_cents >= 0 "
         "AND refunded_cents >= 0 AND refunded_cents <= total_cents",
     )
     op.create_check_constraint(
-        "ck_orders_total_consistent", "orders", "total_cents = subtotal_cents - discount_cents + shipping_cents"
+        "total_consistent", "orders", "total_cents = subtotal_cents - discount_cents + shipping_cents"
     )
 
     op.create_foreign_key(
@@ -805,9 +805,9 @@ def upgrade() -> None:
     op.drop_column("order_items", "unit_price")
     op.create_index("ix_order_items_order_id", "order_items", ["order_id"])
     op.create_check_constraint(
-        "ck_order_items_quantity_positive", "order_items", "quantity > 0")
+        "quantity_positive", "order_items", "quantity > 0")
     op.create_check_constraint(
-        "ck_order_items_line_total_consistent", "order_items", "line_total_cents = unit_price_cents * quantity"
+        "line_total_consistent", "order_items", "line_total_cents = unit_price_cents * quantity"
     )
 
     # ------------------------------------------------------------------ helm dash
@@ -847,7 +847,7 @@ def upgrade() -> None:
             op.execute(f'ALTER TABLE helm_dash_deliveries RENAME CONSTRAINT "{uc["name"]}" '
                        "TO uq_helm_dash_deliveries_order_id")
     op.create_check_constraint(
-        "ck_helm_dash_deliveries_valid_status", "helm_dash_deliveries",
+        "valid_status", "helm_dash_deliveries",
         "status IN ('awaiting_dispatch','assigned','accepted','picked_up','en_route','delivered','failed','cancelled')",
     )
 
@@ -888,7 +888,7 @@ def upgrade() -> None:
     op.alter_column("crew_points", "tier", server_default="deckhand")
     op.alter_column("crew_points", "updated_at", server_default=sa.text("now()"))
     op.create_check_constraint(
-        "ck_crew_points_balance_nonnegative", "crew_points", "points_balance >= 0")
+        "balance_nonnegative", "crew_points", "points_balance >= 0")
     op.execute(
         """
         INSERT INTO points_transactions (id, user_id, kind, points, balance_after, idempotency_key, description, created_at)
@@ -946,7 +946,7 @@ def upgrade() -> None:
     op.create_index("ix_voyage_checklists_vessel_id", "voyage_checklists", ["vessel_id"])
     op.create_unique_constraint("uq_voyage_checklists_vessel_id_tier", "voyage_checklists", ["vessel_id", "tier"])
     op.create_check_constraint(
-        "ck_voyage_checklists_valid_tier", "voyage_checklists", "tier IN ('grab_and_go','coastal_cruising','offshore_passage')"
+        "valid_tier", "voyage_checklists", "tier IN ('grab_and_go','coastal_cruising','offshore_passage')"
     )
     op.add_column("checklist_items", sa.Column("template_key", sa.String(), nullable=True))
     op.add_column("checklist_items", sa.Column("position", sa.Integer(), server_default="0", nullable=False))
@@ -965,11 +965,11 @@ def upgrade() -> None:
         "fk_checklist_items_product_id_products", "checklist_items", "products", ["product_id"], ["id"], ondelete="SET NULL"
     )
     op.create_check_constraint(
-        "ck_checklist_items_valid_link_status", "checklist_items",
+        "valid_link_status", "checklist_items",
         "link_status IN ('verified_fit','universal','user_linked_unverified','unlinked')",
     )
     op.create_check_constraint(
-        "ck_checklist_items_quantity_positive", "checklist_items", "quantity > 0")
+        "quantity_positive", "checklist_items", "quantity > 0")
 
     # ------------------------------------------------------------------ users timestamps
     op.alter_column("users", "created_at", server_default=sa.text("now()"))

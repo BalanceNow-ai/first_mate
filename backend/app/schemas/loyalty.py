@@ -13,6 +13,7 @@ from app.schemas.common import APIModel, StrictInput
 class PointsSummary(APIModel):
     points_balance: int
     lifetime_earned: int
+    points_owed: int = 0
     points_value_cents: int
     currency: str
     tier: str

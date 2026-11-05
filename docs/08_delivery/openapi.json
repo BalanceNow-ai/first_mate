@@ -7622,6 +7622,11 @@
       "title": "Points Balance",
       "type": "integer"
      },
+     "points_owed": {
+      "default": 0,
+      "title": "Points Owed",
+      "type": "integer"
+     },
      "points_value_cents": {
       "title": "Points Value Cents",
       "type": "integer"
@@ -9996,6 +10001,7 @@
      "cost_cents": {
       "anyOf": [
        {
+        "maximum": 100000000.0,
         "minimum": 0.0,
         "type": "integer"
        },
@@ -10182,6 +10188,7 @@
      "cost_cents": {
       "anyOf": [
        {
+        "maximum": 100000000.0,
         "minimum": 0.0,
         "type": "integer"
        },
@@ -18540,7 +18547,7 @@
   },
   "/api/v1/orders/{order_id}/refund": {
    "post": {
-    "description": "Request a refund from the provider (admin). The order's refunded amount changes\nwhen the provider's signed ``charge.refunded`` event is processed.",
+    "description": "Request a refund from the provider (admin). The order's refunded amount changes\nwhen the provider's signed ``charge.refunded`` event is processed.\n\nRequires an ``Idempotency-Key`` header per refund request: repeating a key never\nrefunds twice, while two separate refunds of the same amount use different keys.",
     "operationId": "refund_order_api_v1_orders__order_id__refund_post",
     "parameters": [
      {
@@ -18551,6 +18558,22 @@
        "format": "uuid",
        "title": "Order Id",
        "type": "string"
+      }
+     },
+     {
+      "in": "header",
+      "name": "Idempotency-Key",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Idempotency-Key"
       }
      }
     ],

@@ -105,7 +105,7 @@ class ServiceRecordCreate(StrictInput):
     performed_on: date
     engine_hours: int | None = Field(None, ge=0, le=100000)
     provider_name: str | None = Field(None, max_length=200)
-    cost_cents: int | None = Field(None, ge=0)
+    cost_cents: int | None = Field(None, ge=0, le=100_000_000)
     notes: str | None = Field(None, max_length=4000)
     equipment_id: uuid.UUID | None = None
 
@@ -115,7 +115,7 @@ class ServiceRecordUpdate(StrictInput):
     performed_on: date | None = None
     engine_hours: int | None = Field(None, ge=0, le=100000)
     provider_name: str | None = Field(None, max_length=200)
-    cost_cents: int | None = Field(None, ge=0)
+    cost_cents: int | None = Field(None, ge=0, le=100_000_000)
     notes: str | None = Field(None, max_length=4000)
     equipment_id: uuid.UUID | None = None
 

@@ -195,19 +195,57 @@ def _citation(ref: int, chunk: RetrievedChunk) -> dict:
     }
 
 
-def _fix_fit_claims(sentence: str, refs: list[ProductRef]) -> str:
-    if not FIT_CLAIM.search(sentence) or _FIT_NEGATION.search(sentence):
+_CLAUSE = re.compile(r"[,;:]|\s(?:although|though|but|while|whereas|however|and|or)\s", re.IGNORECASE)
+_GENERIC_TOKENS = {
+    "synthetic", "marine", "engine", "outboard", "spare", "kit", "pump", "plug", "plugs", "spark",
+    "filter", "filters", "fuel", "oil", "water", "with", "for", "the", "and", "pack", "set", "litre",
+    "bilge", "impeller", "assembly", "replacement", "part", "parts", "boat",
+}
+
+
+def _product_tokens(ref: ProductRef) -> set[str]:
+    p = ref.product
+    tokens = {p.sku.lower()}
+    if getattr(p, "brand", None):
+        tokens.add(p.brand.lower())
+    for tok in re.findall(r"[a-z0-9][a-z0-9\-]{2,}", p.name.lower()):
+        if tok not in _GENERIC_TOKENS and (len(tok) >= 4 or any(c.isdigit() for c in tok)):
+            tokens.add(tok)
+    return tokens
+
+
+def _mentions(text: str, ref: ProductRef) -> bool:
+    lowered = text.lower()
+    if ref.product.name.lower() in lowered:
+        return True
+    words = set(re.findall(r"[a-z0-9][a-z0-9\-]{2,}", lowered))
+    return bool(words & _product_tokens(ref))
+
+
+def _fix_fit_claims(sentence: str, refs: list[ProductRef]) -> str | None:
+    """Enforce central fitment on compatibility claims in a grounded answer.
+
+    Each clause is judged separately (a negation elsewhere in the sentence does not
+    excuse an affirmative claim). An affirmative fit claim about a product without a
+    positive fitment result is replaced by that product's real fitment status; an
+    affirmative claim that names no positively-fitted product is dropped (None)."""
+    plain = CITATION.sub("", sentence)
+    if not FIT_CLAIM.search(plain):
         return sentence
-    lowered = sentence.lower()
+    affirmative = [
+        c for c in _CLAUSE.split(plain) if FIT_CLAIM.search(c) and not _FIT_NEGATION.search(c)
+    ]
+    if not affirmative:
+        return sentence
+    # Products are matched against the whole sentence ("…the X, which fits").
     for ref in refs:
-        if ref.positive:
-            continue
-        p = ref.product
-        if p.name.lower() in lowered or p.sku.lower() in lowered:
-            label = (
-                "fit is unknown" if ref.fitment.status == "unknown" else "does not fit this vessel"
-            )
-            return f"{p.name}: {label} — {ref.fitment.message}."
+        if not ref.positive and _mentions(plain, ref):
+            label = "fit is unknown" if ref.fitment.status == "unknown" else "does not fit this vessel"
+            return f"{ref.product.name}: {label} — {ref.fitment.message}."
+    # A positive claim must be anchored to a product verified to fit (or universal);
+    # product-agnostic claims ("will work with your vessel") are dropped.
+    if not any(ref.positive and _mentions(plain, ref) for ref in refs):
+        return None
     return sentence
 
 
@@ -286,7 +324,9 @@ def apply_guard(
                         ),
                         s,
                     )
-                kept.append(_fix_fit_claims(s, product_refs))
+                fixed = _fix_fit_claims(s, product_refs)
+                if fixed is not None:
+                    kept.append(fixed)
             lines.append(kept)
         text = _join(lines)
         if not any(int(n) in retrieved for n in CITATION.findall(text)):

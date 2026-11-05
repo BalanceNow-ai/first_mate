@@ -217,6 +217,7 @@ class Settings(BaseSettings):
     crew_max_members: int = 10  # spec: crews of 2-10 (pending invites count too)
     crew_min_members_for_multiplier: int = 2
     crew_invite_days: int = 14
+    crew_invites_per_day: int = 20
     points_per_dollar_redemption: int = 100  # 100 CP = $1 NZD
     profile_verification_bonus_points: int = 1000  # Boat DB spec §4.2
     helm_dash_location_max_age_seconds: int = 600  # reject reports older than 10 min
@@ -321,6 +322,10 @@ class Settings(BaseSettings):
             return problems
 
         # --- Non-local (staging / production) hard requirements ---------------------
+        if not self.supabase_service_role_key:
+            problems.append(
+                "SUPABASE_SERVICE_ROLE_KEY is required to verify email confirmation at provisioning"
+            )
         if self.secret_key == _DEFAULT_SECRET or len(self.secret_key) < 32:
             problems.append("SECRET_KEY must be set to a random value of at least 32 characters")
         if any(o == "*" or "localhost" in o or "127.0.0.1" in o for o in self.origins):
@@ -335,8 +340,16 @@ class Settings(BaseSettings):
             problems.append("Local AI substitutes are test-only; use openai or disable AI")
         if self.cms_provider == "local_fixture":
             problems.append("CMS_PROVIDER=local_fixture is a test-only substitute")
-        if self.email_provider == "smtp_sink":
-            problems.append("EMAIL_PROVIDER=smtp_sink is a local sink only")
+        if self.email_provider in ("smtp_sink", "log_sink"):
+            problems.append(f"EMAIL_PROVIDER={self.email_provider} is a local sink only; use resend (or disabled)")
+        if self.email_provider == "resend" and not self.resend_api_key:
+            problems.append("EMAIL_PROVIDER=resend requires RESEND_API_KEY")
+        if self.push_provider == "log_sink":
+            problems.append("PUSH_PROVIDER=log_sink is a local sink only; use fcm (or disabled)")
+        if self.push_provider == "fcm" and not (self.firebase_project_id and self.firebase_service_account_json):
+            problems.append("PUSH_PROVIDER=fcm requires FIREBASE_PROJECT_ID and FIREBASE_SERVICE_ACCOUNT_JSON")
+        if self.cms_provider == "strapi" and not (self.strapi_url and self.strapi_api_token):
+            problems.append("CMS_PROVIDER=strapi requires STRAPI_URL and STRAPI_API_TOKEN")
         if self.rate_limit_backend != "redis":
             problems.append("RATE_LIMIT_BACKEND must be redis outside development/test")
         if self.courier_rate_mode == "rate_card" and not self.courier_rate_card:

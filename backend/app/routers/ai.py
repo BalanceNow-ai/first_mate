@@ -110,7 +110,7 @@ async def chat(
             f"Message is limited to {settings.ai_max_message_chars} characters",
         )
     conversation = (
-        await _owned_conversation(db, body.conversation_id, user.id, lock=True)
+        await _owned_conversation(db, body.conversation_id, user.id)
         if body.conversation_id
         else None
     )
@@ -148,6 +148,19 @@ async def chat(
             mode="json", include={"grounding", "citations", "products", "actions", "vessel", "mode"}
         ),
     }
+    # Save in a short transaction: re-lock, re-check ownership and size against the
+    # latest stored messages, and re-check the vessel (it may have been deleted meanwhile).
+    if vessel is not None and (
+        await db.execute(select(Vessel.id).where(Vessel.id == vessel.id, Vessel.user_id == user.id))
+    ).first() is None:
+        vessel = None
+    if conversation is not None:
+        conversation = await _owned_conversation(db, conversation.id, user.id, lock=True)
+        existing = list(conversation.messages or [])
+        if len(existing) + 2 > settings.ai_max_conversation_messages:
+            raise AppError(
+                409, "conversation_full", "This conversation is full. Please start a new conversation."
+            )
     if conversation is None:
         conversation = AIConversation(
             id=response.conversation_id,

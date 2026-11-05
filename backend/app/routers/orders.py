@@ -406,11 +406,24 @@ async def update_fulfilment(
     dependencies=[Depends(mutation_limit())],
 )
 async def refund_order(
-    order_id: uuid.UUID, body: RefundRequest, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
+    order_id: uuid.UUID,
+    body: RefundRequest,
+    admin: AdminUser,
+    idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> dict:
     """Request a refund from the provider (admin). The order's refunded amount changes
-    when the provider's signed ``charge.refunded`` event is processed."""
-    result = await payments.request_refund(db, admin, order_id, body.amount_cents, body.reason)
+    when the provider's signed ``charge.refunded`` event is processed.
+
+    Requires an ``Idempotency-Key`` header per refund request: repeating a key never
+    refunds twice, while two separate refunds of the same amount use different keys."""
+    if idempotency_key is None or not IDEMPOTENCY_KEY.match(idempotency_key):
+        raise AppError(
+            400,
+            "idempotency_key_required",
+            "An Idempotency-Key header of 8-100 characters (letters, digits, _ - : .) is required",
+        )
+    result = await payments.request_refund(db, admin, order_id, body.amount_cents, body.reason, idempotency_key)
     await db.commit()
     return result
 

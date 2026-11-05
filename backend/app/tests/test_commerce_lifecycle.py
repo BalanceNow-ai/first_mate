@@ -1,5 +1,6 @@
 """Release path (expiry / cancel), late payments, refunds and staff order actions."""
 
+import uuid
 import asyncio
 
 from app.config import get_settings
@@ -216,7 +217,7 @@ async def test_partial_then_full_refund_restocks_once_before_dispatch(
     r = await client.post(
         f"{API}/orders/{order['id']}/refund",
         json={"amount_cents": 3000, "reason": "damaged lid"},
-        headers=admin.headers,
+        headers={**admin.headers, "Idempotency-Key": f"refund-{uuid.uuid4().hex}"},
     )
     assert r.status_code == 202, r.text
     assert (
@@ -229,13 +230,13 @@ async def test_partial_then_full_refund_restocks_once_before_dispatch(
     r = await client.post(
         f"{API}/orders/{order['id']}/refund",
         json={"amount_cents": 5001, "reason": "too much"},
-        headers=admin.headers,
+        headers={**admin.headers, "Idempotency-Key": f"refund-{uuid.uuid4().hex}"},
     )
     assert r.status_code == 422 and r.json()["code"] == "refund_exceeds_remaining"
     r = await client.post(
         f"{API}/orders/{order['id']}/refund",
         json={"amount_cents": 5000, "reason": "cancelled"},
-        headers=admin.headers,
+        headers={**admin.headers, "Idempotency-Key": f"refund-{uuid.uuid4().hex}"},
     )
     assert r.status_code == 202, r.text
     assert r.json()["payment_status"] == "refunded" and r.json()["order_status"] == "refunded"
@@ -250,7 +251,7 @@ async def test_partial_then_full_refund_restocks_once_before_dispatch(
     r = await client.post(
         f"{API}/orders/{order['id']}/refund",
         json={"amount_cents": 1, "reason": "again"},
-        headers=admin.headers,
+        headers={**admin.headers, "Idempotency-Key": f"refund-{uuid.uuid4().hex}"},
     )
     assert r.status_code == 409
 
@@ -275,7 +276,7 @@ async def test_full_refund_after_dispatch_does_not_restock(client, customer, adm
     r = await client.post(
         f"{API}/orders/{order['id']}/refund",
         json={"amount_cents": order["total_cents"], "reason": "lost in transit"},
-        headers=admin.headers,
+        headers={**admin.headers, "Idempotency-Key": f"refund-{uuid.uuid4().hex}"},
     )
     assert r.status_code == 202
     row = await db_order(order["id"])

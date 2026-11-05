@@ -169,3 +169,28 @@ async def test_cross_account_isolation_of_profiles(client, customer, other_custo
 async def test_actor_helper_roles():
     a = await create_actor("operator")
     assert a.role == "operator"
+
+
+async def test_provisioning_checks_email_confirmation_via_admin_api(client, monkeypatch):
+    import httpx
+
+    from app.config import get_settings
+    from app.services import identity
+
+    sub = uuid.uuid4()
+    state = {"confirmed": None}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path.endswith(f"/auth/v1/admin/users/{sub}")
+        assert request.headers["authorization"] == "Bearer service-role-test"
+        return httpx.Response(200, json={"id": str(sub), "email": "new@example.test",
+                                         "email_confirmed_at": state["confirmed"]})
+
+    monkeypatch.setattr(get_settings(), "supabase_service_role_key", "service-role-test")
+    monkeypatch.setattr(identity, "_transport", httpx.MockTransport(handler))
+    headers = auth_headers(sub, "new@example.test")
+    r = await client.post("/api/v1/auth/provision", json={}, headers=headers)
+    assert r.status_code == 403 and r.json()["code"] == "email_not_confirmed"
+    state["confirmed"] = "2026-11-05T01:02:03Z"
+    r = await client.post("/api/v1/auth/provision", json={}, headers=headers)
+    assert r.status_code == 201, r.text

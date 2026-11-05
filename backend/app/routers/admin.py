@@ -39,12 +39,16 @@ async def set_role(
     user_id: uuid.UUID, body: RoleUpdate, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
 ) -> User:
     """Change a user's role. The last remaining admin cannot be demoted."""
+    # Lock every admin row (in id order, before the target) so concurrent demotions
+    # serialise without deadlocking and at least one admin always remains.
+    admin_ids = list(
+        (await db.execute(select(User.id).where(User.role == "admin").order_by(User.id).with_for_update())).scalars()
+    )
     user = (await db.execute(select(User).where(User.id == user_id).with_for_update())).scalar_one_or_none()
     if user is None:
         raise not_found("User")
     if user.role == "admin" and body.role != "admin":
-        admins = (await db.execute(select(func.count()).where(User.role == "admin"))).scalar_one()
-        if admins <= 1:
+        if len(admin_ids) <= 1:
             raise AppError(409, "last_admin", "Cannot remove the last administrator")
     previous = user.role
     user.role = body.role

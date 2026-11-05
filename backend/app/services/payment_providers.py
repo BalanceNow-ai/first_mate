@@ -202,7 +202,7 @@ class StripeProvider(PaymentProvider):
         except stripe.StripeError:
             raise provider_error() from None
 
-    async def refund(self, order: Order, amount_cents: int) -> RefundInfo:
+    async def refund(self, order: Order, amount_cents: int, request_key: str) -> RefundInfo:
         try:
             refund = await self._call(
                 stripe.Refund.create,
@@ -213,7 +213,7 @@ class StripeProvider(PaymentProvider):
                 reason="requested_by_customer",
                 metadata={"order_id": str(order.id), "order_number": order.order_number},
                 # Repeating the same request (double click / retry) cannot refund twice.
-                idempotency_key=f"order:{order.id}:refund:{order.refunded_cents}:{amount_cents}",
+                idempotency_key=f"order:{order.id}:refund:{request_key}",
             )
         except stripe.StripeError:
             raise provider_error() from None

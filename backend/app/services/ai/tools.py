@@ -379,7 +379,13 @@ class TurnRuntime:
             return {"error": "invalid_arguments"}
         except Exception as exc:  # never leak internals to the model or the client
             logger.error("First Mate tool %s failed: %s", name, type(exc).__name__)
+            await self.db.rollback()
             return {"error": "tool_failed"}
+        finally:
+            # Tools are read-only: end the transaction so no pooled connection is held
+            # while the model thinks (sessions do not expire objects on commit).
+            if self.db.in_transaction():
+                await self.db.commit()
 
 
 _HANDLERS = {

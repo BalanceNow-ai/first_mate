@@ -214,10 +214,11 @@ async def test_stripe_refund_waits_for_webhook(client, customer, admin, fake_str
     p = await create_product(stock_quantity=3, price_cents=5000)
     order = await _order_with_intent(client, customer, p)
     await post_event(client, pi_event(order), secret=WHSEC)
+    refund_key = f"refund-{uuid.uuid4().hex}"
     r = await client.post(
         f"{API}/orders/{order['id']}/refund",
         json={"amount_cents": 2000, "reason": "goodwill"},
-        headers=admin.headers,
+        headers={**admin.headers, "Idempotency-Key": refund_key},
     )
     assert r.status_code == 202, r.text
     assert r.json()["status"] == "pending" and r.json()["refunded_cents"] == 0
@@ -227,7 +228,21 @@ async def test_stripe_refund_waits_for_webhook(client, customer, admin, fake_str
         and kw["payment_intent"] == order["payment_intent_id"]
         and kw["amount"] == 2000
     )
-    assert kw["idempotency_key"] == f"order:{order['id']}:refund:0:2000"
+    assert kw["idempotency_key"] == f"order:{order['id']}:refund:{refund_key}"
+    calls = len(fake_stripe.calls)
+    # Repeating the same request never refunds twice ...
+    again = await client.post(
+        f"{API}/orders/{order['id']}/refund",
+        json={"amount_cents": 2000, "reason": "goodwill"},
+        headers={**admin.headers, "Idempotency-Key": refund_key},
+    )
+    assert again.status_code == 202 and again.json()["status"] == "duplicate_request"
+    assert len(fake_stripe.calls) == calls
+    # ... and a refund without a key is refused.
+    nokey = await client.post(
+        f"{API}/orders/{order['id']}/refund", json={"amount_cents": 100, "reason": "no key"}, headers=admin.headers
+    )
+    assert nokey.status_code == 400
     assert (await db_order(order["id"])).refunded_cents == 0
     r = await post_event(client, refund_event(order, 2000), secret=WHSEC)
     assert r.json()["outcome"] == "applied"

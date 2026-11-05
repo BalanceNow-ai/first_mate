@@ -205,7 +205,13 @@ async def apply(
         return existing, False
     if account.points_balance + points < 0:
         raise InsufficientPointsError(account.points_balance, -points)
-    account.points_balance += points
+    settled = 0
+    if points > 0 and account.points_owed > 0:
+        # Credits first pay down points owed from earlier refunds of spent points.
+        settled = min(account.points_owed, points)
+        account.points_owed -= settled
+        description = (description + "; " if description else "") + f"{settled} CP applied to points owed"
+    account.points_balance += points - settled
     if kind in EARNING_KINDS:
         account.lifetime_earned = max(0, account.lifetime_earned + points)
     tx = PointsTransaction(
@@ -225,6 +231,52 @@ async def apply(
     db.add(tx)
     await db.flush()
     return tx, True
+
+
+async def debit_or_owe(
+    db: AsyncSession,
+    *,
+    user_id: uuid.UUID,
+    kind: str,
+    points: int,
+    idempotency_key: str,
+    description: str,
+    **fields,
+) -> tuple[int, int]:
+    """Reverse ``points`` (> 0) in ONE ledger row; the part exceeding the balance becomes
+    ``points_owed`` and is paid down by the user's next credits (see ``apply``).
+
+    Ledger invariant: sum(points) == points_balance - points_owed. Idempotent on the key.
+    Returns (debited_from_balance, owed_added)."""
+    if points <= 0:
+        return 0, 0
+    account = await lock_account(db, user_id)
+    if await get_by_key(db, idempotency_key) is not None:
+        return 0, 0
+    debited = min(points, account.points_balance)
+    owed = points - debited
+    if owed:
+        description += f"; {owed} CP had already been redeemed and are owed from future credits"
+    account.points_balance -= debited
+    account.points_owed += owed
+    if kind in EARNING_KINDS or kind == "monthly_bonus_reversal":
+        account.lifetime_earned = max(0, account.lifetime_earned - points)
+    db.add(
+        PointsTransaction(
+            user_id=user_id,
+            kind=kind,
+            points=-points,
+            balance_after=account.points_balance,
+            idempotency_key=idempotency_key,
+            description=description,
+            **fields,
+        )
+    )
+    if owed:
+        await audit.record(db, None, "points_owed", "user", user_id,
+                           {"idempotency_key": idempotency_key, "owed": owed, "kind": kind})
+    await db.flush()
+    return debited, owed
 
 
 async def crew_membership(db: AsyncSession, user_id: uuid.UUID) -> CrewTeamMember | None:
@@ -298,50 +350,96 @@ async def reverse_for_refund(db: AsyncSession, order: Order, newly_refunded_cent
     delta = target - already
     if delta <= 0:
         return
-    account = await lock_account(db, order.user_id)
-    if await get_by_key(db, key) is not None:  # re-check under the lock
-        return
-    applied = min(delta, account.points_balance)
-    shortfall = delta - applied
     spend_target = refund_share_ceil(earn.eligible_spend_cents or 0, order.refunded_cents, order.total_cents)
-    description = f"Refund on order {order.order_number}"
-    if shortfall:
-        description += f"; {shortfall} CP could not be reversed because they were already redeemed"
-    if applied > 0:
-        await apply(
-            db,
-            user_id=order.user_id,
-            kind="earn_reversal",
-            points=-applied,
-            idempotency_key=key,
-            description=description,
-            team_id=earn.team_id,
-            order_id=order.id,
-            period=earn.period,
-            eligible_spend_cents=-spend_target,
-        )
-    if shortfall:
-        await audit.record(
-            db,
-            None,
-            "points_reversal_shortfall",
-            "order",
-            order.id,
-            {"user_id": str(order.user_id), "shortfall_points": shortfall, "idempotency_key": key},
-        )
-        await db.flush()
+    await debit_or_owe(
+        db,
+        user_id=order.user_id,
+        kind="earn_reversal",
+        points=delta,
+        idempotency_key=key,
+        description=f"Refund on order {order.order_number}",
+        team_id=earn.team_id,
+        order_id=order.id,
+        period=earn.period,
+        eligible_spend_cents=-spend_target,
+    )
+    if earn.team_id and earn.period:
+        await clawback_period_bonus(db, earn.team_id, earn.period, trigger=f"{order.id}:{order.refunded_cents}")
+    if order.refunded_cents >= order.total_cents and order.discount_entitlement_id:
+        await _return_entitlement_points(db, order)
     await refresh_tier(db, order.user_id)
 
 
+async def _return_entitlement_points(db: AsyncSession, order: Order) -> None:
+    """A fully refunded order returns the points spent on the discount it consumed."""
+    ent = await db.get(DiscountEntitlement, order.discount_entitlement_id)
+    if ent is None or ent.status != "consumed" or ent.order_id != order.id:
+        return
+    await apply(
+        db,
+        user_id=order.user_id,
+        kind="redemption_reversal",
+        points=ent.points_cost,
+        idempotency_key=f"refund_entitlement:{order.id}",
+        description=f"Discount {ent.code} returned: order {order.order_number} fully refunded",
+        entitlement_id=ent.id,
+        order_id=order.id,
+    )
+
+
+async def clawback_period_bonus(db: AsyncSession, team_id: uuid.UUID, period: str, *, trigger: str) -> None:
+    """After a refund in a period whose crew bonus was already paid, recompute each
+    member's bonus from the crew's *net* spend and claw back any excess (never raise it)."""
+    paid = (
+        await db.execute(
+            select(PointsTransaction.user_id, func.sum(PointsTransaction.points))
+            .where(
+                PointsTransaction.team_id == team_id,
+                PointsTransaction.period == period,
+                PointsTransaction.kind.in_(("monthly_bonus", "monthly_bonus_reversal")),
+            )
+            .group_by(PointsTransaction.user_id)
+        )
+    ).all()
+    if not paid:
+        return
+    rows = await _earn_rows(db, PointsTransaction.team_id == team_id, PointsTransaction.period == period)
+    multiplier = multiplier_for(sum(r.net_spend for r in rows))
+    base_by_user: dict[uuid.UUID, int] = {}
+    for r in rows:
+        base_by_user[r.user_id] = base_by_user.get(r.user_id, 0) + r.net_points
+    for user_id, net_paid in paid:
+        effective = int(net_paid or 0)
+        desired = max(0, math.floor(base_by_user.get(user_id, 0) * (multiplier - 1)))
+        excess = effective - desired
+        if excess > 0:
+            await debit_or_owe(
+                db,
+                user_id=user_id,
+                kind="monthly_bonus_reversal",
+                points=excess,
+                idempotency_key=f"bonus_clawback:{team_id}:{user_id}:{period}:{trigger}",
+                description=f"Crew multiplier for {period} recalculated after a refund ({multiplier:g}x)",
+                team_id=team_id,
+                period=period,
+            )
+
+
 async def award_profile_verification_bonus(db: AsyncSession, user_id, request_id) -> None:
-    """1,000 CP once per approved crowdsourced profile (Boat DB spec §4.2)."""
+    """1,000 CP once per vessel whose crowdsourced profile is approved (Boat DB spec §4.2).
+
+    Keyed on the vessel, so re-submitting the same vessel after edits cannot earn again."""
+    from app.models.vessel import EquipmentVerificationRequest
+
+    request = await db.get(EquipmentVerificationRequest, request_id)
+    vessel_key = request.vessel_id if request is not None else request_id
     points = get_settings().profile_verification_bonus_points
     tx, created = await apply(
         db,
         user_id=user_id,
         kind="profile_verification_bonus",
         points=points,
-        idempotency_key=f"profile_verification:{request_id}",
+        idempotency_key=f"profile_verification_vessel:{vessel_key}",
         description="Vessel profile verified — thank you for contributing",
     )
     if created:
@@ -504,6 +602,7 @@ async def points_summary(db: AsyncSession, user_id: uuid.UUID) -> dict:
     return {
         "points_balance": account.points_balance,
         "lifetime_earned": account.lifetime_earned,
+        "points_owed": account.points_owed,
         "points_value_cents": account.points_balance * 100 // get_settings().points_per_dollar_redemption,
         "currency": "NZD",
         "tier": tier,

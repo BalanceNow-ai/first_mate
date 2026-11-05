@@ -14,6 +14,7 @@ import json
 import time
 import uuid
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
@@ -21,6 +22,7 @@ from app.core.errors import AppError, not_found
 from app.database import utcnow
 from app.models.order import Order
 from app.models.user import User
+from app.models.ops import AuditLog
 from app.services import audit, reservations, webhooks
 from app.services.payment_providers import CURRENCY, StripeProvider, get_provider
 
@@ -206,7 +208,7 @@ async def local_confirm(
 
 # --------------------------------------------------------------------------- refunds
 async def request_refund(
-    db: AsyncSession, actor: User, order_id: uuid.UUID, amount_cents: int, reason: str
+    db: AsyncSession, actor: User, order_id: uuid.UUID, amount_cents: int, reason: str, request_key: str
 ) -> dict:
     """Ask the provider to refund. The order changes only when the provider's signed
     ``charge.refunded`` event is processed (immediately for the local provider)."""
@@ -227,16 +229,32 @@ async def request_refund(
             extra={"refundable_cents": remaining},
         )
     provider = get_provider(order.payment_provider)
-    await audit.record(
-        db,
-        actor.id,
-        "order_refund_requested",
-        "order",
-        order.id,
-        {"amount_cents": amount_cents, "reason": reason, "provider": provider.name},
+    previous = (
+        await db.execute(
+            select(AuditLog).where(
+                AuditLog.action == "order_refund_requested",
+                AuditLog.entity_id == str(order.id),
+                AuditLog.detail["request_key"].astext == request_key,
+            )
+        )
+    ).scalar_one_or_none()
+    if previous is not None:
+        # Same request repeated (double click / retry): report, never refund again.
+        return {
+            "order_id": order.id, "provider": provider.name,
+            "refund_id": previous.detail.get("refund_id") or "", "status": "duplicate_request",
+            "amount_cents": previous.detail.get("amount_cents", amount_cents), "currency": "NZD",
+            "test_mode": provider.test_mode, "event_outcome": "duplicate",
+            "refunded_cents": order.refunded_cents, "payment_status": order.payment_status,
+            "order_status": order.status,
+        }
+    audit_row = AuditLog(
+        actor_id=actor.id, action="order_refund_requested", entity_type="order", entity_id=str(order.id),
+        detail={"amount_cents": amount_cents, "reason": reason, "provider": provider.name, "request_key": request_key},
     )
+    db.add(audit_row)
     if isinstance(provider, StripeProvider):
-        info = await provider.refund(order, amount_cents)
+        info = await provider.refund(order, amount_cents, request_key)
         refund_id, status, event_outcome = info.refund_id, info.status, None
     else:
         event = build_event(
@@ -249,6 +267,7 @@ async def request_refund(
             result["outcome"],
         )
         order = await reservations.lock_order(db, order.id)
+    audit_row.detail = {**audit_row.detail, "refund_id": refund_id}
     await db.flush()
     return {
         "order_id": order.id,

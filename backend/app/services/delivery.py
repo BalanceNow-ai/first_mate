@@ -46,9 +46,9 @@ TRANSITIONS: dict[tuple[str, str], set[str]] = {
     ("accepted", "failed"): {"operator", "dispatcher"},
     ("picked_up", "failed"): {"operator", "dispatcher"},
     ("en_route", "failed"): {"operator", "dispatcher"},
-    ("awaiting_dispatch", "cancelled"): {"dispatcher"},
-    ("assigned", "cancelled"): {"dispatcher"},
-    ("accepted", "cancelled"): {"dispatcher"},
+    ("accepted", "cancelled"): {"dispatcher", "system"},
+    ("awaiting_dispatch", "cancelled"): {"dispatcher", "system"},
+    ("assigned", "cancelled"): {"dispatcher", "system"},
 }
 OPERATOR_STATUS_TARGETS = {"picked_up", "en_route", "delivered", "failed"}
 
@@ -133,6 +133,35 @@ async def get_operator_profile(db: AsyncSession, user_id: uuid.UUID) -> Delivery
     return op
 
 
+async def require_active_operator(db: AsyncSession, user_id: uuid.UUID) -> DeliveryOperator:
+    """A deactivated operator may decline jobs but cannot progress them or report positions."""
+    op = await get_operator_profile(db, user_id)
+    if not op.active:
+        raise AppError(403, "operator_not_active", "Your operator profile is not active")
+    return op
+
+
+UNDELIVERABLE_ORDER_STATUSES = {"refunded", "cancelled", "expired", "payment_review"}
+
+
+async def _require_deliverable_order(db: AsyncSession, delivery: HelmDashDelivery) -> None:
+    order = await db.get(Order, delivery.order_id)
+    if order is None or order.status in UNDELIVERABLE_ORDER_STATUSES or order.payment_status == "refunded":
+        raise AppError(409, "order_not_deliverable", "The order for this delivery is no longer deliverable")
+
+
+async def cancel_for_refunded_order(db: AsyncSession, order: Order) -> None:
+    """A fully refunded order's delivery job is cancelled if it has not been picked up."""
+    if order.delivery_type != "helm_dash" or order.payment_status != "refunded":
+        return
+    delivery = (
+        await db.execute(select(HelmDashDelivery).where(HelmDashDelivery.order_id == order.id).with_for_update())
+    ).scalar_one_or_none()
+    if delivery is None or delivery.status not in ("awaiting_dispatch", "assigned", "accepted"):
+        return
+    await _transition(db, delivery, "cancelled", actor_id=None, actor="system", note="Order fully refunded")
+
+
 # ------------------------------------------------------------------------ transitions
 async def _transition(
     db: AsyncSession,
@@ -198,6 +227,7 @@ async def assign(
     db: AsyncSession, delivery_id: uuid.UUID, operator_user_id: uuid.UUID, dispatcher_id: uuid.UUID, note: str | None
 ) -> HelmDashDelivery:
     delivery = await get_delivery(db, delivery_id, lock=True)
+    await _require_deliverable_order(db, delivery)
     op = await db.get(DeliveryOperator, operator_user_id)
     if op is None or not op.active:
         raise AppError(409, "operator_not_active", "Assign an active Helm Dash operator")
@@ -233,10 +263,9 @@ async def dispatcher_fail(
 
 
 async def operator_accept(db: AsyncSession, operator_id: uuid.UUID, delivery_id: uuid.UUID) -> HelmDashDelivery:
-    op = await get_operator_profile(db, operator_id)
-    if not op.active:
-        raise AppError(403, "operator_not_active", "Your operator profile is not active")
+    await require_active_operator(db, operator_id)
     delivery = await get_operator_job(db, operator_id, delivery_id, lock=True)
+    await _require_deliverable_order(db, delivery)
     await _transition(db, delivery, "accepted", actor_id=operator_id, actor="operator")
     return delivery
 
@@ -256,6 +285,7 @@ async def operator_status(
 ) -> HelmDashDelivery:
     if status not in OPERATOR_STATUS_TARGETS:
         raise AppError(422, "invalid_status", "Operators can set picked_up, en_route, delivered or failed")
+    await require_active_operator(db, operator_id)
     delivery = await get_operator_job(db, operator_id, delivery_id, lock=True)
     await _transition(db, delivery, status, actor_id=operator_id, actor="operator", note=note)
     return delivery
@@ -280,6 +310,7 @@ async def record_location(
     now = now or utcnow()
     if delivery.operator_id != operator_id:
         raise not_found("Delivery")
+    await require_active_operator(db, operator_id)
     if delivery.status not in ACTIVE_TRACKING_STATUSES:
         raise AppError(409, "not_trackable", f"Positions are not accepted while the delivery is {delivery.status}")
     if recorded_at.tzinfo is None:

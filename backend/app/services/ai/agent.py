@@ -58,6 +58,9 @@ async def run_turn(
         routed_domains=routed,
         vessel_label=profile.label if profile else None,
     )
+    # Release the request's DB connection before any (possibly slow) model call.
+    if db.in_transaction():
+        await db.commit()
     draft = await provider.answer(turn, runtime)
     guarded = apply_guard(draft.content, runtime, profile, settings.ai_max_products)
 

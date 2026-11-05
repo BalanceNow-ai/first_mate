@@ -2,7 +2,7 @@ async def test_health_and_ready(client):
     assert (await client.get("/health")).json()["status"] == "healthy"
     r = await client.get("/ready")
     assert r.status_code == 200
-    assert r.json()["checks"]["database"]["migration"] == "0002"
+    assert r.json()["checks"]["database"]["migration"] == "0003"
 
 
 async def test_public_config_exposes_no_secrets(client):

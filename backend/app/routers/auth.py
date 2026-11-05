@@ -15,6 +15,7 @@ from app.core.rate_limit import auth_limit
 from app.database import get_db, utcnow
 from app.middleware.auth import CurrentPrincipal, CurrentUser
 from app.models.user import User
+from app.services import identity
 from app.schemas.user import ProvisionRequest, ProvisionResponse, UserResponse
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -37,6 +38,15 @@ async def _provision(
 
     if not principal.email:
         raise AppError(400, "email_required", "Your sign-in does not include an email address")
+    verified_at = utcnow()
+    admin_view = await identity.confirmed_email(principal.subject)
+    if admin_view is not None:
+        admin_email, confirmed_at = admin_view
+        if confirmed_at is None or admin_email != principal.email:
+            raise AppError(
+                403, "email_not_confirmed", "Confirm your email address before completing sign-up"
+            )
+        verified_at = confirmed_at
     clash = (
         await db.execute(select(User).where(func.lower(User.email) == principal.email))
     ).scalar_one_or_none()
@@ -55,7 +65,7 @@ async def _provision(
         full_name=body.full_name,
         phone=body.phone,
         role="customer",
-        email_verified_at=utcnow(),
+        email_verified_at=verified_at,
     )
     db.add(user)
     try:

@@ -5,6 +5,7 @@ checkout -> signed payment event -> points -> Helm Dash job -> dispatch -> order
 -> payout record -> notifications -> refund reversal; and AI/checklist -> cart -> order.
 """
 
+import uuid
 from datetime import UTC, datetime
 
 from sqlalchemy import select
@@ -102,7 +103,7 @@ async def test_helm_dash_purchase_to_delivery_and_refund(client, customer, admin
     # Admin full refund after delivery: points reversed, no restock after dispatch.
     r = await client.post(f"{API}/orders/{order['id']}/refund",
                           json={"amount_cents": order["total_cents"], "reason": "Integration test refund"},
-                          headers=admin.headers)
+                          headers={**admin.headers, "Idempotency-Key": f"refund-{uuid.uuid4().hex}"})
     assert r.status_code == 202, r.text
     o = (await client.get(f"{API}/orders/{order['id']}", headers=customer.headers)).json()
     assert o["payment_status"] == "refunded" and o["refunded_cents"] == order["total_cents"]

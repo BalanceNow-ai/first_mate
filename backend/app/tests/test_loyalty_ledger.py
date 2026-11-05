@@ -8,6 +8,7 @@ from sqlalchemy import select
 
 from app.database import async_session
 from app.models.loyalty import DiscountEntitlement, PointsTransaction
+from app.models.loyalty import CrewPoints
 from app.models.ops import AuditLog
 from app.models.order import Order
 from app.services import loyalty
@@ -114,13 +115,16 @@ async def test_refund_after_points_spent_records_shortfall(client, customer):
     assert await balance(customer.id) == 0
     rows = await _ledger(customer.id)
     reversal = [r for r in rows if r.kind == "earn_reversal"]
-    assert len(reversal) == 1 and reversal[0].points == -100
-    assert "200 CP could not be reversed" in reversal[0].description
+    # One full reversal row; the 200 CP already redeemed become points owed (settled
+    # from future credits), so sum(ledger) == balance - owed.
+    assert len(reversal) == 1 and reversal[0].points == -300
+    assert "200 CP had already been redeemed" in reversal[0].description
     async with async_session() as s:
-        audits = list(
-            (await s.execute(select(AuditLog).where(AuditLog.action == "points_reversal_shortfall"))).scalars()
-        )
-    assert len(audits) == 1 and audits[0].detail["shortfall_points"] == 200
+        acct = (await s.execute(select(CrewPoints).where(CrewPoints.user_id == customer.id))).scalar_one()
+        audits = list((await s.execute(select(AuditLog).where(AuditLog.action == "points_owed"))).scalars())
+    assert acct.points_owed == 200
+    assert len(audits) == 1 and audits[0].detail["owed"] == 200
+    assert sum(r.points for r in rows) == acct.points_balance - acct.points_owed
 
 
 async def test_profile_verification_bonus_once_per_request(customer):

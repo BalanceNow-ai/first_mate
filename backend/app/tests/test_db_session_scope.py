@@ -18,13 +18,32 @@ def _walk(dependant, path):
         yield from _walk(sub, path)
 
 
-def test_get_db_is_function_scoped_everywhere():
-    offenders = []
-    for route in app.routes:
+def _api_routes(routes):
+    for route in routes:
         if isinstance(route, APIRoute):
-            for path, scope in _walk(route.dependant, route.path):
-                if scope != "function":
-                    offenders.append((route.path, scope))
+            yield route
+        for attr in ("original_router", "router"):
+            inner = getattr(route, attr, None)
+            if inner is not None and hasattr(inner, "routes"):
+                yield from _api_routes(inner.routes)
+                break
+        else:
+            if hasattr(route, "routes") and not isinstance(route, APIRoute):
+                yield from _api_routes(route.routes)
+
+
+def test_get_db_is_function_scoped_everywhere():
+    routes = {(r.path, tuple(sorted(r.methods or ()))): r for r in _api_routes(app.routes)}
+    # Guard against a vacuous pass (FastAPI wraps included routers).
+    assert len(routes) > 100
+    offenders = []
+    uses_db = 0
+    for (path, _), route in routes.items():
+        for _, scope in _walk(route.dependant, path):
+            uses_db += 1
+            if scope != "function":
+                offenders.append((path, scope))
+    assert uses_db > 50
     assert offenders == []
 
 

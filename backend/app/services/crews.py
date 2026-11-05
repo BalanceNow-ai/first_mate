@@ -126,6 +126,16 @@ async def invite(db: AsyncSession, captain: User, email: str) -> CrewInvite:
     ).first()
     if duplicate is not None:
         raise AppError(409, "invite_pending", "That email already has a pending invite")
+    sent_today = (
+        await db.execute(
+            select(func.count()).select_from(CrewInvite).where(
+                CrewInvite.team_id == team.id, CrewInvite.created_at >= utcnow() - timedelta(days=1)
+            )
+        )
+    ).scalar_one()
+    if sent_today >= settings.crew_invites_per_day:
+        # Bounds invite emails even when invites are revoked and re-sent.
+        raise AppError(429, "invite_limit", "Daily invite limit reached for this crew; try again tomorrow")
     if await _count_members(db, team.id) + await _count_pending(db, team.id) >= settings.crew_max_members:
         raise AppError(
             409, "crew_full", f"A crew can have at most {settings.crew_max_members} members (including pending invites)"

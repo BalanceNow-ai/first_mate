@@ -189,3 +189,20 @@ def test_models_match_migrated_schema(upgraded):
         return diff
 
     assert _run(_diff()) == []
+
+
+def test_check_constraint_names_match_models(upgraded):
+    from sqlalchemy import CheckConstraint
+
+    expected = {
+        (t.name, c.name)
+        for t in Base.metadata.tables.values()
+        for c in t.constraints
+        if isinstance(c, CheckConstraint) and c.name
+    }
+    rows = q(
+        "SELECT conrelid::regclass::text AS t, conname FROM pg_constraint "
+        "WHERE contype = 'c' AND connamespace = 'public'::regnamespace"
+    )
+    actual = {(r["t"], r["conname"]) for r in rows}
+    assert expected <= actual, sorted(expected - actual)
