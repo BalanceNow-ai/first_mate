@@ -16,7 +16,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
 from app.database import utcnow
-from app.models.boat_db import DATA_SOURCE_CONFIDENCE, BoatModel, EquipmentCategory, Manufacturer, ModelYear, OEMEquipment
+from app.models.boat_db import (
+    DATA_SOURCE_CONFIDENCE,
+    BoatModel,
+    EquipmentCategory,
+    Manufacturer,
+    ModelYear,
+    OEMEquipment,
+)
 from app.models.product import Product, ProductCompatibility
 from app.seed.catalogue import data
 from app.services.boat_db import ensure_equipment_categories
@@ -113,13 +120,15 @@ async def seed_synthetic(db: AsyncSession) -> dict[str, int]:
 
     now = utcnow()
     for spec in data.SYNTHETIC_PRODUCTS:
+        if spec["sku"] in data.NEVER_SEED_SKUS:  # deliberate conflict fixture: never sellable
+            continue
         spec = dict(spec)
         fits = spec.pop("fits", [])
         stock = spec.pop("stock")
         product = (await db.execute(select(Product).where(Product.sku == spec["sku"]))).scalar_one_or_none()
         if product is None:
             product = Product(
-                **spec, stock_quantity=stock, oem_part_numbers=[f"{spec['sku']}-OEM"],
+                **spec, stock_quantity=stock, oem_part_numbers=[spec["sku"]],
                 description=SYNTHETIC_DESCRIPTION + spec["name"],
                 specifications={"synthetic": True},
             )

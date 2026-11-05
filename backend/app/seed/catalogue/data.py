@@ -58,42 +58,56 @@ SYNTHETIC_OEM_SAIL = [
 
 FITMENT_NOTES = "Synthetic test fixture — not real fitment data"
 
+# Codes cited by the synthetic knowledge corpus (First Mate workstream). These SKUs must
+# exist exactly; each product's SKU is also its (synthetic) OEM part number. The fictional
+# "Helmsynth HX90" codes SYN-PLUG-90A / SYN-PLUG-90B are a deliberate conflict fixture and
+# must NOT be seeded as products.
+KNOWLEDGE_CORPUS_SKUS = {
+    "SYN-PLUG-150": ("spark_plug", "Yamaha", "F150"),
+    "SYN-IMP-150": ("impeller", "Yamaha", "F150"),
+    "SYN-OILF-150": ("oil_filter", "Yamaha", "F150"),
+    "SYN-FF-150": ("fuel_filter", "Yamaha", "F150"),
+    "SYN-PLUG-140": ("spark_plug", "Suzuki", "DF140"),
+    "SYN-IMP-140": ("impeller", "Suzuki", "DF140"),
+}
+NEVER_SEED_SKUS = frozenset({"SYN-PLUG-90A", "SYN-PLUG-90B"})
+
 # ``fits`` lists (engine_make, engine_model) pairs that get a synthetic *verified* rule.
 SYNTHETIC_PRODUCTS: list[dict] = [
     # Engine service parts with synthetic verified fitment
-    dict(sku="SYN-SPK-YF150", name="Spark plug set — Yamaha F150 (synthetic)", brand="FixtureParts",
+    dict(sku="SYN-PLUG-150", name="Spark plug set — Yamaha F150 (synthetic)", brand="FixtureParts",
          category="Engine Parts", sub_category="Ignition", price_cents=8990, sale_price_cents=None, stock=25,
          weight_grams=240, part_role="spark_plug", fitment_scope="specific", fits=[("Yamaha", "F150")]),
-    dict(sku="SYN-SPK-SDF140", name="Spark plug set — Suzuki DF140 (synthetic)", brand="FixtureParts",
+    dict(sku="SYN-PLUG-140", name="Spark plug set — Suzuki DF140 (synthetic)", brand="FixtureParts",
          category="Engine Parts", sub_category="Ignition", price_cents=8490, sale_price_cents=7490, stock=18,
          weight_grams=240, part_role="spark_plug", fitment_scope="specific", fits=[("Suzuki", "DF140")]),
-    dict(sku="SYN-FF-YF150", name="Primary fuel filter — Yamaha F150 (synthetic)", brand="FixtureParts",
+    dict(sku="SYN-FF-150", name="Primary fuel filter — Yamaha F150 (synthetic)", brand="FixtureParts",
          category="Engine Parts", sub_category="Fuel System", price_cents=3990, sale_price_cents=None, stock=40,
          weight_grams=180, part_role="fuel_filter", fitment_scope="specific", fits=[("Yamaha", "F150")]),
-    dict(sku="SYN-FF-YF150-PREM", name="Premium fuel filter — Yamaha F150 (synthetic)", brand="FixtureMarine",
+    dict(sku="SYN-FF-150-PREM", name="Premium fuel filter — Yamaha F150 (synthetic)", brand="FixtureMarine",
          category="Engine Parts", sub_category="Fuel System", price_cents=5490, sale_price_cents=None, stock=6,
          weight_grams=200, part_role="fuel_filter", fitment_scope="specific", fits=[("Yamaha", "F150")]),
-    dict(sku="SYN-FF-SDF140", name="Primary fuel filter — Suzuki DF140 (synthetic)", brand="FixtureParts",
+    dict(sku="SYN-FF-140", name="Primary fuel filter — Suzuki DF140 (synthetic)", brand="FixtureParts",
          category="Engine Parts", sub_category="Fuel System", price_cents=3790, sale_price_cents=None, stock=0,
          weight_grams=180, part_role="fuel_filter", fitment_scope="specific", fits=[("Suzuki", "DF140")]),
-    dict(sku="SYN-IMP-YF150", name="Water pump impeller kit — Yamaha F150 (synthetic)", brand="FixtureParts",
+    dict(sku="SYN-IMP-150", name="Water pump impeller kit — Yamaha F150 (synthetic)", brand="FixtureParts",
          category="Engine Parts", sub_category="Cooling", price_cents=6490, sale_price_cents=5490, stock=12,
          weight_grams=150, part_role="impeller", fitment_scope="specific", fits=[("Yamaha", "F150")]),
-    dict(sku="SYN-IMP-SDF140", name="Water pump impeller kit — Suzuki DF140 (synthetic)", brand="FixtureParts",
+    dict(sku="SYN-IMP-140", name="Water pump impeller kit — Suzuki DF140 (synthetic)", brand="FixtureParts",
          category="Engine Parts", sub_category="Cooling", price_cents=6290, sale_price_cents=None, stock=9,
          weight_grams=150, part_role="impeller", fitment_scope="specific", fits=[("Suzuki", "DF140")]),
-    dict(sku="SYN-OIL-YF150", name="4-stroke outboard oil 1 L — for Yamaha F150 (synthetic)", brand="FixtureLube",
+    dict(sku="SYN-OIL-150", name="4-stroke outboard oil 1 L — for Yamaha F150 (synthetic)", brand="FixtureLube",
          category="Engine Parts", sub_category="Oil & Lubricants", price_cents=2490, sale_price_cents=None, stock=60,
          weight_grams=950, part_role="engine_oil", fitment_scope="specific", fits=[("Yamaha", "F150")]),
-    dict(sku="SYN-OIL-SDF140", name="4-stroke outboard oil 1 L — for Suzuki DF140 (synthetic)", brand="FixtureLube",
+    dict(sku="SYN-OIL-140", name="4-stroke outboard oil 1 L — for Suzuki DF140 (synthetic)", brand="FixtureLube",
          category="Engine Parts", sub_category="Oil & Lubricants", price_cents=2390, sale_price_cents=None, stock=55,
          weight_grams=950, part_role="engine_oil", fitment_scope="specific", fits=[("Suzuki", "DF140")]),
-    dict(sku="SYN-THERM-YF150", name="Thermostat & gasket — Yamaha F150 (synthetic)", brand="FixtureParts",
+    dict(sku="SYN-THERM-150", name="Thermostat & gasket — Yamaha F150 (synthetic)", brand="FixtureParts",
          category="Engine Parts", sub_category="Cooling", price_cents=7990, sale_price_cents=None, stock=4,
          weight_grams=120, part_role="thermostat", fitment_scope="specific", fits=[("Yamaha", "F150")]),
-    dict(sku="SYN-OCK-YF150", name="Oil change kit (oil + filter) — Yamaha F150 (synthetic)", brand="FixtureLube",
-         category="Engine Parts", sub_category="Oil & Lubricants", price_cents=14990, sale_price_cents=12990,
-         stock=7, weight_grams=5200, part_role="oil_change_kit", fitment_scope="specific", fits=[("Yamaha", "F150")]),
+    dict(sku="SYN-OILF-150", name="Oil filter — Yamaha F150 (synthetic)", brand="FixtureParts",
+         category="Engine Parts", sub_category="Oil & Lubricants", price_cents=2890, sale_price_cents=None,
+         stock=15, weight_grams=300, part_role="oil_filter", fitment_scope="specific", fits=[("Yamaha", "F150")]),
     # Parts with no fitment knowledge (always "unknown")
     dict(sku="SYN-PROP-AL13", name="Aluminium propeller 13 x 19 (synthetic)", brand="FixtureProp",
          category="Engine Parts", sub_category="Propellers", price_cents=24900, sale_price_cents=None, stock=3,

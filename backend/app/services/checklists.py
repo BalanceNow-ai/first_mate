@@ -33,7 +33,12 @@ from app.database import utcnow
 from app.models.checklist import TIERS, ChecklistItem, VoyageChecklist
 from app.models.product import Product
 from app.models.vessel import Vessel
-from app.schemas.checklist import ChecklistItemResponse, ChecklistSetResponse, SearchHint, TierResponse
+from app.schemas.checklist import (
+    ChecklistItemResponse,
+    ChecklistSetResponse,
+    SearchHint,
+    TierResponse,
+)
 from app.schemas.product import FitmentResult, VesselRef
 from app.services import cart_service, fitment
 from app.services.catalogue import product_response
@@ -101,7 +106,8 @@ TEMPLATES: list[TemplateItem] = [
     _t("o_fuel_pump", "offshore_passage", "Engine", "Spare fuel pump (lift or high-pressure)", 1, "each", "fuel_pump", "combustion_engine"),
     _t("o_ignition_coil", "offshore_passage", "Engine", "Spare ignition coil", 1, "each", "ignition_coil", "petrol_engine"),
     _t("o_gasket_set", "offshore_passage", "Engine", "Full gasket set", 1, "set", "gasket_set", "combustion_engine"),
-    _t("o_oil_change", "offshore_passage", "Engine", "Engine oil & filters for a full change", 1, "set", "oil_change_kit", "combustion_engine"),
+    _t("o_oil_change", "offshore_passage", "Engine", "Engine oil for a full change", 1, "set", "engine_oil", "combustion_engine"),
+    _t("o_oil_filter", "offshore_passage", "Engine", "Oil filter for a full change", 1, "each", "oil_filter", "combustion_engine"),
     _t("o_freshwater_pump", "offshore_passage", "Plumbing", "Complete spare freshwater pump", 1, "each", "freshwater_pump", "equipment:freshwater_pump"),
     _t("o_bilge_rebuild", "offshore_passage", "Plumbing", "Major bilge pump rebuild kit", 1, "kit", "bilge_pump_rebuild_kit", "equipment:bilge_pump"),
     _t("o_hose_fittings", "offshore_passage", "Plumbing", "Assorted hose & fittings", 1, "kit", "hose_fittings_kit"),
@@ -213,9 +219,7 @@ async def generate(db: AsyncSession, vessel: Vessel, *, regenerate: bool = False
     if existing:
         await db.execute(delete(VoyageChecklist).where(VoyageChecklist.vessel_id == vessel.id))
         for c in existing:
-            db.expunge(c)
-            for i in c.items:
-                db.expunge(i)
+            db.expunge(c)  # cascades to its items
     profile = await fitment.load_vessel_profile(db, vessel)
     ctx = TailorContext.from_profile(vessel, profile)
     selected = tailor(ctx)
