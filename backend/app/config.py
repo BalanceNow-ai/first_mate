@@ -189,7 +189,17 @@ class Settings(BaseSettings):
     order_number_prefix: str = "HM"
 
     # --- [catalogue workstream] additional settings -----------------------------
-
+    catalogue_default_page_size: int = 24
+    catalogue_max_page_size: int = 100
+    # Exact fitment evaluation runs over SQL-prefiltered candidates in batches.
+    catalogue_fitment_batch_size: int = 500
+    rate_limit_hin_per_minute: int = 30
+    rate_limit_search_per_minute: int = 120
+    typesense_timeout_seconds: float = 3.0
+    typesense_import_batch_size: int = 200
+    # Max Typesense hits evaluated for exact fitment when compatible_only=true.
+    typesense_compatible_window: int = 250
+    checklist_link_alternatives: int = 3
 
 
     # --- [knowledge-ai workstream] additional settings --------------------------
