@@ -107,9 +107,17 @@ async def create_for_paid_order(db: AsyncSession, order: Order) -> None:
 
 # ----------------------------------------------------------------------------- access
 async def get_delivery(db: AsyncSession, delivery_id: uuid.UUID, *, lock: bool = False) -> HelmDashDelivery:
+    """With ``lock``: the delivery's order is locked first, then the delivery (D22 —
+    the same order as refunds, which hold the order and then cancel the delivery)."""
     q = select(HelmDashDelivery).where(HelmDashDelivery.id == delivery_id)
     if lock:
-        q = q.with_for_update()
+        order_id = (
+            await db.execute(select(HelmDashDelivery.order_id).where(HelmDashDelivery.id == delivery_id))
+        ).scalar_one_or_none()
+        if order_id is None:
+            raise not_found("Delivery")
+        await db.execute(select(Order.id).where(Order.id == order_id).with_for_update())
+        q = q.with_for_update().execution_options(populate_existing=True)
     d = (await db.execute(q)).scalar_one_or_none()
     if d is None:
         raise not_found("Delivery")
