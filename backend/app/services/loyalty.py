@@ -172,6 +172,24 @@ async def lock_account(db: AsyncSession, user_id: uuid.UUID) -> CrewPoints:
     ).scalar_one()
 
 
+async def lock_accounts(db: AsyncSession, user_ids) -> None:
+    """Lock several CrewPoints rows in the one global order (D22: ascending str(user_id)).
+
+    Every path that touches more than one account takes all of them through here first,
+    so two such paths can never hold one account each while waiting for the other's."""
+    for user_id in sorted(set(user_ids), key=str):
+        await lock_account(db, user_id)
+
+
+async def lock_crew_periods(db: AsyncSession, keys) -> None:
+    """Transaction-scoped advisory locks on (crew, period), in ascending order (D22).
+
+    Serialises a period's bonus run with refunds that claw that bonus back, so the set of
+    bonus recipients a refund reads cannot change before it locks their accounts."""
+    for team_id, period in sorted(set(keys), key=lambda k: (str(k[0]), k[1])):
+        await db.execute(select(func.pg_advisory_xact_lock(func.hashtextextended(f"crew:{team_id}:{period}", 0))))
+
+
 async def get_by_key(db: AsyncSession, key: str) -> PointsTransaction | None:
     return (
         await db.execute(select(PointsTransaction).where(PointsTransaction.idempotency_key == key))
@@ -326,14 +344,35 @@ async def award_for_paid_order(db: AsyncSession, order: Order) -> None:
 
 
 async def reverse_for_refund(db: AsyncSession, order: Order, newly_refunded_cents: int) -> None:
-    """Reverse earned points in proportion to the cumulative refunded share.
+    """Refund compensation. Three independent obligations, each idempotent (FM-03):
 
-    Idempotent per cumulative refunded amount (``earn_reversal:{order}:{refunded}``)."""
+    1. reverse earned points in proportion to the cumulative refunded share
+       (``earn_reversal:{order}:{refunded}``);
+    2. recompute the crew bonus for the earn period from the crew's *net* spend, which
+       falls with every refund even when no further whole point is reversed;
+    3. on a full refund, return the points spent on the order's discount
+       (``refund_entitlement:{order}``, D14) — whether or not the order earned points
+       and whether or not an earlier partial refund already reversed them."""
     if newly_refunded_cents <= 0 and order.refunded_cents <= 0:
         return
     earn = await get_by_key(db, f"earn:{order.id}")
-    if earn is None:
-        return
+    # D22: every account this refund may debit (the customer and, for a crew bonus
+    # clawback, the crew's bonus recipients) is locked up front in the global order.
+    accounts = {order.user_id}
+    if earn is not None and earn.team_id and earn.period:
+        await lock_crew_periods(db, [(earn.team_id, earn.period)])
+        accounts |= set(await _bonus_recipients(db, earn.team_id, earn.period))
+    await lock_accounts(db, accounts)
+    if earn is not None:
+        await _reverse_earned_points(db, order, earn)
+        if earn.team_id and earn.period:
+            await clawback_period_bonus(db, earn.team_id, earn.period, trigger=f"{order.id}:{order.refunded_cents}")
+    if order.refunded_cents >= order.total_cents and order.discount_entitlement_id:
+        await _return_entitlement_points(db, order)
+    await refresh_tier(db, order.user_id)
+
+
+async def _reverse_earned_points(db: AsyncSession, order: Order, earn: PointsTransaction) -> None:
     key = f"earn_reversal:{order.id}:{order.refunded_cents}"
     if await get_by_key(db, key) is not None:
         return
@@ -364,11 +403,6 @@ async def reverse_for_refund(db: AsyncSession, order: Order, newly_refunded_cent
         period=earn.period,
         eligible_spend_cents=-spend_target,
     )
-    if earn.team_id and earn.period:
-        await clawback_period_bonus(db, earn.team_id, earn.period, trigger=f"{order.id}:{order.refunded_cents}")
-    if order.refunded_cents >= order.total_cents and order.discount_entitlement_id:
-        await _return_entitlement_points(db, order)
-    await refresh_tier(db, order.user_id)
 
 
 async def _return_entitlement_points(db: AsyncSession, order: Order) -> None:
@@ -388,6 +422,22 @@ async def _return_entitlement_points(db: AsyncSession, order: Order) -> None:
     )
 
 
+async def _bonus_recipients(db: AsyncSession, team_id: uuid.UUID, period: str) -> list[uuid.UUID]:
+    return list(
+        (
+            await db.execute(
+                select(PointsTransaction.user_id)
+                .where(
+                    PointsTransaction.team_id == team_id,
+                    PointsTransaction.period == period,
+                    PointsTransaction.kind.in_(("monthly_bonus", "monthly_bonus_reversal")),
+                )
+                .distinct()
+            )
+        ).scalars()
+    )
+
+
 async def clawback_period_bonus(db: AsyncSession, team_id: uuid.UUID, period: str, *, trigger: str) -> None:
     """After a refund in a period whose crew bonus was already paid, recompute each
     member's bonus from the crew's *net* spend and claw back any excess (never raise it)."""
@@ -404,6 +454,8 @@ async def clawback_period_bonus(db: AsyncSession, team_id: uuid.UUID, period: st
     ).all()
     if not paid:
         return
+    await lock_accounts(db, [user_id for user_id, _ in paid])
+    paid = sorted(paid, key=lambda r: str(r[0]))
     rows = await _earn_rows(db, PointsTransaction.team_id == team_id, PointsTransaction.period == period)
     multiplier = multiplier_for(sum(r.net_spend for r in rows))
     base_by_user: dict[uuid.UUID, int] = {}
@@ -523,6 +575,11 @@ async def calculate_monthly_multipliers(db: AsyncSession, period: str | None = N
     period = period or previous_period()
     parse_period(period)
     settings = get_settings()
+    rows = await _earn_rows(db, PointsTransaction.period == period, PointsTransaction.team_id.is_not(None))
+    # D22: every crew-period lock, then every account, each in one global order — and the
+    # spend is re-read under those locks.
+    await lock_crew_periods(db, [(r.team_id, period) for r in rows])
+    await lock_accounts(db, [r.user_id for r in rows])
     rows = await _earn_rows(db, PointsTransaction.period == period, PointsTransaction.team_id.is_not(None))
     by_team: dict[uuid.UUID, list[_EarnRow]] = {}
     for row in rows:
@@ -674,17 +731,21 @@ async def redeem_discount(
 
 
 async def void_entitlement(db: AsyncSession, user_id: uuid.UUID, entitlement_id: uuid.UUID) -> DiscountEntitlement:
-    """Void an unused (issued) entitlement and restore its points."""
-    await lock_account(db, user_id)
+    """Void an unused (issued) entitlement and restore its points.
+
+    D22 lock order: the entitlement before the points account — the same order as
+    payment success (order → entitlement → account), so the two cannot deadlock."""
     ent = (
         await db.execute(
             select(DiscountEntitlement)
             .where(DiscountEntitlement.id == entitlement_id, DiscountEntitlement.user_id == user_id)
             .with_for_update()
+            .execution_options(populate_existing=True)
         )
     ).scalar_one_or_none()
     if ent is None:
         raise not_found("Entitlement")
+    await lock_account(db, user_id)
     if ent.status != "issued":
         raise AppError(409, "entitlement_not_voidable", f"A {ent.status} entitlement cannot be voided")
     ent.status = "voided"

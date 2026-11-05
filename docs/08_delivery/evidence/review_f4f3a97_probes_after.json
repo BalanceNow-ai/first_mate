@@ -1,0 +1,128 @@
+{
+  "source": "42f5b757f92e032b0e5606863daf380110658615",
+  "kind": "the reviewer's focused probes (First_Mate_Review_Probes.py) re-run on the corrected code with the defect assertions removed; observations only. Changes to the probe harness: F1 records the request-schema result and evaluates the same rule as a legacy row; the R probes stub lock_accounts/refresh_tier/clawback (the fake DB cannot serve them); N1 records per-device failures returned by the adapter.",
+  "observations": [
+    {
+      "probe": "G1",
+      "expected_safe_behaviour": "Do not certify an unsupported or contradictory claim as grounded",
+      "observed": {
+        "status": "insufficient_evidence",
+        "content": "I couldn't find an admitted source that answers this for your boat, so I won't guess at part numbers, compatibility, procedures or safety requirements.\n\nWhich boat and engine is this for? If you add your vessel in My Vessel I can check sources and fitment for it."
+      }
+    },
+    {
+      "probe": "G2",
+      "expected_safe_behaviour": "Do not certify an unsupported or contradictory claim as grounded",
+      "observed": {
+        "status": "insufficient_evidence",
+        "content": "I couldn't find an admitted source that answers this for your boat, so I won't guess at part numbers, compatibility, procedures or safety requirements.\n\nWhich boat and engine is this for? If you add your vessel in My Vessel I can check sources and fitment for it."
+      }
+    },
+    {
+      "probe": "G3",
+      "expected_safe_behaviour": "Do not certify an unsupported or contradictory claim as grounded",
+      "observed": {
+        "status": "insufficient_evidence",
+        "content": "I couldn't find an admitted source that answers this for your boat, so I won't guess at part numbers, compatibility, procedures or safety requirements.\n\nWhich boat and engine is this for? If you add your vessel in My Vessel I can check sources and fitment for it."
+      }
+    },
+    {
+      "probe": "G4",
+      "expected_safe_behaviour": "Suppress unsupported actionable guidance when evidence is absent",
+      "observed": {
+        "status": "insufficient_evidence",
+        "content": "I couldn't find an admitted source that answers this for your boat, so I won't guess at part numbers, compatibility, procedures or safety requirements.\n\nWhich boat and engine is this for? If you add your vessel in My Vessel I can check sources and fitment for it."
+      }
+    },
+    {
+      "probe": "F1",
+      "expected_safe_behaviour": "Reject malformed dependent fields or enforce every declared restriction",
+      "observed": {
+        "request_schema": "rejected: Value error, Invalid fitment rule: vessel_model requires vessel_make; year_to requires vessel_make [type=value_error, input_value={'engine_make': 'Yamaha',..., 'confidence_score': 1}, input_type=dict]",
+        "legacy_rule": {
+          "engine_make": "Yamaha",
+          "engine_model": "F150",
+          "vessel_model": "2250",
+          "year_to": 2000
+        },
+        "vessel": {
+          "make": "Rayglass",
+          "model": "2500",
+          "year": 2022
+        },
+        "status": "unknown",
+        "reasons": [
+          "a fitment rule for this product is incomplete and needs review"
+        ]
+      }
+    },
+    {
+      "probe": "R1",
+      "expected_safe_behaviour": "Return consumed discount points once on a full refund",
+      "observed": {
+        "scenario": "full refund after earlier partial refund already reversed the sole earned point",
+        "restoration_calls": 1
+      }
+    },
+    {
+      "probe": "R2",
+      "expected_safe_behaviour": "Return consumed discount points once on a full refund",
+      "observed": {
+        "scenario": "full refund where net merchandise earned no base points",
+        "restoration_calls": 1
+      }
+    },
+    {
+      "probe": "AUTH valid",
+      "expected_safe_behaviour": true,
+      "observed": true
+    },
+    {
+      "probe": "AUTH wrong audience",
+      "expected_safe_behaviour": false,
+      "observed": false
+    },
+    {
+      "probe": "AUTH wrong issuer",
+      "expected_safe_behaviour": false,
+      "observed": false
+    },
+    {
+      "probe": "AUTH expired",
+      "expected_safe_behaviour": false,
+      "observed": false
+    },
+    {
+      "probe": "AUTH forged signature",
+      "expected_safe_behaviour": false,
+      "observed": false
+    },
+    {
+      "probe": "AUTH service role",
+      "expected_safe_behaviour": false,
+      "observed": false
+    },
+    {
+      "probe": "AUTH anonymous",
+      "expected_safe_behaviour": false,
+      "observed": false
+    },
+    {
+      "probe": "N1",
+      "expected_safe_behaviour": "Preserve a retry for the transiently failing second device",
+      "observed": {
+        "message_ids": [
+          "message-good"
+        ],
+        "invalid_tokens": [],
+        "failed_devices": {
+          "temporarily-failing-device": "fcm_http_500"
+        }
+      }
+    }
+  ],
+  "baseline": {
+    "source": "f4f3a97dbc774faae58a30b90db80431b794ec4a",
+    "file": "First_Mate_Review_Probe_Results.json (supplied with the review)"
+  }
+}

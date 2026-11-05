@@ -182,6 +182,13 @@ async def test_p6_cost_cents_overflow_is_500(client, customer, vessel):
 
 def test_p3d_positive_product_claim_is_kept():
     p = _product()
-    text = "The Seaflo Bilge Pump fits your boat [1]."
+    text = "Check the bilge pump every season [1]. The Seaflo Bilge Pump fits your boat [1]."
     out = apply_guard(text, _runtime(p, "verified_fit"), None)
-    assert out.status == "grounded" and "fits your boat [1]" in out.content
+    assert out.status == "grounded" and "The Seaflo Bilge Pump fits your boat" in out.content
+    # The fit statement rests on central fitment, not on the passage: no citation on it.
+    assert "every season [1]" in out.content and "fits your boat [1]" not in out.content
+    # Without a supported passage claim, the verified product statement survives the
+    # controlled insufficient-evidence reply (uncited); the answer is not "grounded".
+    alone = apply_guard("The Seaflo Bilge Pump fits your boat [1].", _runtime(p, "verified_fit"), None)
+    assert alone.status == "insufficient_evidence" and "Seaflo Bilge Pump fits your boat" in alone.content
+    assert "[1]" not in alone.content and alone.actions == []

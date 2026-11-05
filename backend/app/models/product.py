@@ -67,6 +67,38 @@ class Product(Base):
     )
 
 
+def _blank_sql(col: str) -> str:
+    return f"btrim(coalesce({col}, '')) = ''"
+
+
+def _years_sql(lo: str, hi: str) -> str:
+    return (
+        f"({lo} IS NULL OR {lo} BETWEEN 1900 AND 2100) AND ({hi} IS NULL OR {hi} BETWEEN 1900 AND 2100) "
+        f"AND ({lo} IS NULL OR {hi} IS NULL OR {lo} <= {hi})"
+    )
+
+
+# The FM-02 scope contract (app.core.fitment_rules.rule_scope_problems) in SQL: blank
+# strings are absent, dependents need their parent, years are 1900–2100 and ordered.
+FITMENT_SCOPE_CHECKS = {
+    "nonblank_scope": (
+        f"NOT {_blank_sql('vessel_make')} OR NOT {_blank_sql('engine_make')} OR equipment_category_id IS NOT NULL"
+    ),
+    "vessel_dependents": (
+        f"NOT {_blank_sql('vessel_make')} OR ({_blank_sql('vessel_model')} AND year_from IS NULL AND year_to IS NULL)"
+    ),
+    "engine_dependents": (
+        f"NOT {_blank_sql('engine_make')} OR ({_blank_sql('engine_model')} "
+        "AND engine_year_from IS NULL AND engine_year_to IS NULL)"
+    ),
+    "equipment_dependents": (
+        f"equipment_category_id IS NOT NULL OR ({_blank_sql('equipment_make')} AND {_blank_sql('equipment_model')})"
+    ),
+    "vessel_years": _years_sql("year_from", "year_to"),
+    "engine_years": _years_sql("engine_year_from", "engine_year_to"),
+}
+
+
 class ProductCompatibility(Base):
     """A fitment rule linking a product to a vessel, engine or equipment specification.
 
@@ -82,6 +114,8 @@ class ProductCompatibility(Base):
             "vessel_make IS NOT NULL OR engine_make IS NOT NULL OR equipment_category_id IS NOT NULL",
             name="has_scope",
         ),
+        # FM-02 scope contract (app.core.fitment_rules); migration 0004 quarantines violators first.
+        *(CheckConstraint(sql, name=name) for name, sql in FITMENT_SCOPE_CHECKS.items()),
     )
 
     id: Mapped[uuid.UUID] = uuid_pk()
@@ -119,3 +153,19 @@ class ProductCompatibility(Base):
     created_at: Mapped[datetime] = created_at_col()
 
     product: Mapped[Product] = relationship("Product", back_populates="compatibilities")
+
+
+class FitmentRuleQuarantine(Base):
+    """Fitment rules that broke the scope contract when migration 0004 ran (FM-02).
+
+    They are removed from ``product_compatibility`` (so they can support no fit) and kept
+    here verbatim with the reasons, for staff to recreate correctly; see ``cli fitment-audit``."""
+
+    __tablename__ = "fitment_rule_quarantine"
+
+    id: Mapped[uuid.UUID] = uuid_pk()
+    original_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    product_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    rule: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    problems: Mapped[str] = mapped_column(Text, nullable=False)
+    quarantined_at: Mapped[datetime] = created_at_col()

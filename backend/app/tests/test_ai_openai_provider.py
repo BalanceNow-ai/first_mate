@@ -135,14 +135,19 @@ async def test_invalid_citations_and_unverified_part_numbers_are_removed(client,
     def script(kwargs, n):
         if n == 1:
             return reply(None, [call("search_knowledge", {"query": "spark plugs"})])
-        return reply("Use SYN-PLUG-150 [1], replaced every 100 hours [1]. Some say ZZ-99999 works [7]. Also see [42].")
+        return reply(
+            "Use SYN-PLUG-150 [1]. The spark plugs are replaced every 100 engine hours [1]. "
+            "Some say ZZ-99999 works [7]. Also see [42]."
+        )
 
     openai_mode(script)
     body = (await chat(client, customer)).json()
     content = body["message"]["content"]
     assert "[7]" not in content and "[42]" not in content
     assert "SYN-PLUG-150 [1]" in content
-    assert "ZZ-99999" not in content and "[unverified part number removed]" in content
+    # The sentence naming an uncited, unverified part number is removed whole (D21).
+    assert "ZZ-99999" not in content and "Some say" not in content
+    assert "removed" in body["grounding"]["note"]
     assert [c["index"] for c in body["citations"]] == [1]
     assert body["grounding"]["status"] == "grounded"
 
@@ -177,6 +182,7 @@ async def test_fit_claims_follow_central_fitment_and_proposals_are_checked(clien
                 ],
             )
         return reply(
+            "Replace the spark plugs every 100 hours [1]. "
             "The Generic marine plug fits your boat perfectly [1]. "
             "The Synthetic spark plug (F150 fixture) fits your F150 [1]."
         )
@@ -186,7 +192,9 @@ async def test_fit_claims_follow_central_fitment_and_proposals_are_checked(clien
     content = body["message"]["content"]
     assert "Generic marine plug fits your boat" not in content
     assert "Generic marine plug: fit is unknown" in content
-    assert "Synthetic spark plug (F150 fixture) fits your F150 [1]" in content
+    # Fit rests on central fitment, so the passage citation is not kept on that sentence.
+    assert "Synthetic spark plug (F150 fixture) fits your F150." in content
+    assert "every 100 hours [1]" in content and body["grounding"]["status"] == "grounded"
     statuses = {p["sku"]: p["fitment"]["status"] for p in body["products"]}
     assert statuses == {"SYN-PLUG-150": "verified_fit", "GEN-PLUG-1": "unknown"}
     assert body["products"][0]["sku"] == "SYN-PLUG-150"  # verified fit listed first

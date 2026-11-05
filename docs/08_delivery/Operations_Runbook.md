@@ -265,6 +265,36 @@ deploy/deploy.sh                                               # runs 0001 -> 00
 Only stamp a database whose schema really is the Phase-7 schema. A brand-new database
 needs nothing: `migrate` creates everything from `0001`.
 
+### 7a. Schema compatibility while the previous release is serving
+
+`deploy.sh` migrates (step 5) **before** it replaces the running containers (step 6), so
+the previous release briefly serves against the new schema. Every revision must
+therefore be either backward compatible with the previous release (expand first,
+contract in a later release) or deployed under maintenance:
+
+| Revision | Compatible with the previous release while it serves? | Deploy |
+|---|---|---|
+| 0002 (Phase-7 → cents, roles, …) | **No** — rewrites money columns and data | maintenance: `docker compose … stop api worker beat` before `deploy.sh`, announce downtime, rollback = restore (§9) |
+| 0003 (points owed, ledger kinds) | yes (additive column and wider CHECK) | normal |
+| 0004 (fitment-rule scope CHECKs; malformed rules quarantined) | yes; the old release can no longer *insert* a malformed rule (it gets a database error instead of storing it) | normal; check `cli fitment-audit` afterwards |
+| 0005 (push per-device outcomes, lease token) | yes (additive columns with defaults; ignored by the old release) | normal; downgrade available |
+
+A rollback of the application across 0003–0005 is code-only (§9); the schema can stay.
+Rollback with representative writes has been exercised only on the local stack.
+
+### 7b. Fitment-rule scope audit (revision 0004)
+
+0004 moves every rule that breaks the scope contract (a dependent restriction without its
+parent, blank-only scope, years outside 1900–2100 or reversed) verbatim, with the
+reasons, into `fitment_rule_quarantine`, and then adds the constraints fully validated.
+Quarantined rules support no fit. List them and recreate each correctly through the
+admin API (new rules start unverified):
+
+```bash
+docker compose --env-file .env.prod -f docker-compose.prod.yml run --rm --no-deps api cli fitment-audit
+# exit 0 and "0 malformed fitment rule(s)" when nothing is quarantined
+```
+
 ## 8. Backup and restore
 
 ```bash

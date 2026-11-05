@@ -215,3 +215,46 @@ def test_check_constraint_names_match_models(upgraded):
     )
     actual = {(r["t"], r["conname"]) for r in rows}
     assert expected <= actual, sorted(expected - actual)
+
+
+def test_0004_quarantines_malformed_fitment_rules():
+    """FM-02: rules that break the scope contract are moved to the quarantine with their
+    reasons, everything else is kept, and the constraints end up validated."""
+    _run(_recreate_db())
+    _alembic("0003")
+    _run(
+        _exec(
+            f"INSERT INTO products (id, sku, name, category, price_cents, stock_quantity) VALUES ('{P1}', 'X-1', 'X', 'Engine', 100, 1)"
+        )
+    )
+    rows = {
+        "ok": "'Yamaha', 'F150', NULL, NULL, NULL",
+        "review": "'Yamaha', 'F150', NULL, '2250', 2000",
+        "blank_dependent": "'Yamaha', 'F150', NULL, '', NULL",  # blank = absent: well-formed
+        "blank_parent": "'Yamaha', 'F150', '  ', '2250', NULL",
+        "blank_scope": "' ', NULL, NULL, NULL, NULL",
+    }
+    for label, values in rows.items():
+        _run(
+            _exec(
+                "INSERT INTO product_compatibility (id, product_id, engine_make, engine_model, vessel_make, "
+                f"vessel_model, year_to, verification_status, confidence_score, notes) VALUES "
+                f"(gen_random_uuid(), '{P1}', {values}, 'verified', 0.9, '{label}')"
+            )
+        )
+    _alembic("head")
+    kept = q("SELECT notes FROM product_compatibility")
+    assert sorted(r["notes"] for r in kept) == ["blank_dependent", "ok"]
+    quarantined = {
+        r["notes"]: r["problems"] for r in q("SELECT rule->>'notes' AS notes, problems FROM fitment_rule_quarantine")
+    }
+    assert quarantined == {
+        "review": "vessel_dependents",
+        "blank_parent": "vessel_dependents",
+        "blank_scope": "nonblank_scope",
+    }
+    invalid = q(
+        "SELECT conname FROM pg_constraint WHERE conrelid = 'product_compatibility'::regclass "
+        "AND contype = 'c' AND NOT convalidated"
+    )
+    assert invalid == []

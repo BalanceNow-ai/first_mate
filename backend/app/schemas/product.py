@@ -4,8 +4,9 @@ import uuid
 from datetime import datetime
 from typing import Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 
+from app.core.fitment_rules import rule_scope_problems
 from app.schemas.common import APIModel, StrictInput
 
 FitmentStatus = Literal["verified_fit", "verified_mismatch", "unknown", "universal"]
@@ -118,10 +119,26 @@ class FitmentRuleCreate(StrictInput):
     confidence_score: float = Field(0.3, ge=0, le=1)
     notes: str | None = None
 
+    @field_validator(
+        "vessel_make",
+        "vessel_model",
+        "engine_make",
+        "engine_model",
+        "equipment_category",
+        "equipment_make",
+        "equipment_model",
+        mode="before",
+    )
+    @classmethod
+    def _blank_is_absent(cls, value):
+        return None if isinstance(value, str) and not value.strip() else value
+
     @model_validator(mode="after")
-    def _has_scope(self):
-        if not (self.vessel_make or self.engine_make or self.equipment_category):
-            raise ValueError("A fitment rule needs a vessel, engine or equipment scope")
+    def _well_formed_scope(self):
+        """Every declared restriction needs its parent scope (FM-02); ranges are ordered."""
+        problems = rule_scope_problems(self.model_dump())
+        if problems:
+            raise ValueError("Invalid fitment rule: " + "; ".join(problems))
         return self
 
 

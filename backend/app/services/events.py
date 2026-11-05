@@ -25,8 +25,9 @@ async def order_refunded(db: AsyncSession, order: Order, newly_refunded_cents: i
     """Additional refund amount recorded on a paid order (partial or full)."""
     from app.services import delivery, loyalty, notifications
 
-    await loyalty.reverse_for_refund(db, order, newly_refunded_cents)
+    # D22 lock order: order (held by the caller) → delivery → points accounts.
     await delivery.cancel_for_refunded_order(db, order)
+    await loyalty.reverse_for_refund(db, order, newly_refunded_cents)
     await notifications.order_refunded(db, order, newly_refunded_cents)
 
 
