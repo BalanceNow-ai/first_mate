@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:helm_marine/core/api/api_error.dart';
+import 'package:helm_marine/core/models/cart.dart';
 import 'package:helm_marine/core/models/order.dart';
 import 'package:helm_marine/core/models/payment.dart';
 import 'package:helm_marine/core/models/shipping.dart';
@@ -50,6 +51,13 @@ String newIdempotencyKey([Random? random]) {
   return 'checkout-${DateTime.now().toUtc().microsecondsSinceEpoch.toRadixString(36)}-$a$b';
 }
 
+/// Identifies a cart's contents: a different fingerprint is a different
+/// checkout attempt (and so a new Idempotency-Key).
+String cartFingerprintOf(Cart cart) {
+  final lines = [for (final l in cart.items) '${l.productId}x${l.quantity}@${l.unitPriceCents}']..sort();
+  return '${lines.join(',')}|${cart.subtotalCents}';
+}
+
 class CheckoutState {
   const CheckoutState({
     this.deliveryType,
@@ -63,6 +71,7 @@ class CheckoutState {
     this.placing = false,
     this.placeError,
     this.attemptKey,
+    this.cartFingerprint,
     this.orderId,
   });
 
@@ -81,6 +90,9 @@ class CheckoutState {
   /// "Place order" and kept for every retry until a new attempt starts.
   final String? attemptKey;
 
+  /// The cart this attempt was placed for ([cartFingerprintOf]).
+  final String? cartFingerprint;
+
   /// The order created by this attempt.
   final String? orderId;
 
@@ -96,6 +108,7 @@ class CheckoutState {
     bool? placing,
     Object? Function()? placeError,
     String? Function()? attemptKey,
+    String? Function()? cartFingerprint,
     String? Function()? orderId,
   }) =>
       CheckoutState(
@@ -110,6 +123,7 @@ class CheckoutState {
         placing: placing ?? this.placing,
         placeError: placeError == null ? this.placeError : placeError(),
         attemptKey: attemptKey == null ? this.attemptKey : attemptKey(),
+        cartFingerprint: cartFingerprint == null ? this.cartFingerprint : cartFingerprint(),
         orderId: orderId == null ? this.orderId : orderId(),
       );
 }
@@ -220,7 +234,14 @@ class CheckoutController extends Notifier<CheckoutState> {
       return null;
     }
     final key = state.attemptKey ?? newIdempotencyKey();
-    state = state.copyWith(placing: true, placeError: () => null, attemptKey: () => key);
+    final cart = ref.read(cartProvider).value;
+    final fingerprint = state.cartFingerprint ?? (cart == null ? null : cartFingerprintOf(cart));
+    state = state.copyWith(
+      placing: true,
+      placeError: () => null,
+      attemptKey: () => key,
+      cartFingerprint: () => fingerprint,
+    );
     try {
       final order = await _api.checkout(request, idempotencyKey: key);
       if (!ref.mounted) return order;
@@ -238,4 +259,42 @@ class CheckoutController extends Notifier<CheckoutState> {
 
   /// Starts a new checkout attempt (after the order was paid or cancelled).
   void reset() => state = const CheckoutState();
+
+  /// On entering `/checkout`: drop a held attempt that no longer applies, so a
+  /// stale order never hijacks a later checkout.
+  ///
+  /// - A held order that is no longer `pending_payment` (paid elsewhere,
+  ///   cancelled, expired, under review…) ends the attempt.
+  /// - A non-empty cart while an order is held is a new cart (placing the order
+  ///   moved the old one into it): a fresh attempt.
+  /// - An attempt that has a key but no order yet (e.g. a lost response) is
+  ///   kept only for the same cart, so its retries stay idempotent; an empty
+  ///   cart keeps it too (the lost response may have moved the cart).
+  Future<void> reconcileOnEntry() async {
+    final heldOrder = state.orderId;
+    final heldKey = state.attemptKey;
+    if (heldOrder == null && heldKey == null) return;
+    Cart? cart;
+    try {
+      cart = await ref.read(cartProvider.future);
+    } catch (_) {
+      cart = null;
+    }
+    if (!ref.mounted || state.orderId != heldOrder || state.attemptKey != heldKey) return;
+    final newCart = cart != null && !cart.isEmpty;
+    if (heldOrder != null) {
+      if (newCart) {
+        reset();
+        return;
+      }
+      try {
+        final order = await _api.order(heldOrder);
+        if (ref.mounted && state.orderId == heldOrder && !order.isPendingPayment) reset();
+      } catch (_) {
+        // Unknown: keep it; the payment step shows the order's own error.
+      }
+      return;
+    }
+    if (newCart && state.cartFingerprint != cartFingerprintOf(cart)) reset();
+  }
 }

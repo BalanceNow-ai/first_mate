@@ -11,6 +11,7 @@ import 'package:helm_marine/core/theme/helm_theme.dart';
 import 'package:helm_marine/core/widgets/state_views.dart';
 import 'package:helm_marine/features/cart/providers/cart_provider.dart';
 import 'package:helm_marine/features/checkout/payment/payment_panel.dart';
+import 'package:helm_marine/features/checkout/payment/payment_readiness.dart';
 import 'package:helm_marine/features/checkout/providers/checkout_provider.dart';
 import 'package:helm_marine/features/checkout/widgets/checkout_widgets.dart';
 import 'package:helm_marine/features/checkout/widgets/helm_dash_pin_picker.dart';
@@ -52,10 +53,23 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   CheckoutController get _checkout => ref.read(checkoutProvider.notifier);
 
+  /// Checking a held checkout attempt before showing it.
+  bool _entering = false;
+
   @override
   void initState() {
     super.initState();
-    if (ref.read(checkoutProvider).orderId != null) _step = 2;
+    final held = ref.read(checkoutProvider);
+    if (held.orderId != null || held.attemptKey != null) {
+      _entering = true;
+      _checkout.reconcileOnEntry().whenComplete(() {
+        if (!mounted) return;
+        setState(() {
+          _entering = false;
+          _step = ref.read(checkoutProvider).orderId != null ? 2 : 0;
+        });
+      });
+    }
   }
 
   @override
@@ -155,6 +169,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   Future<void> _placeOrder() async {
+    // Never reserve stock this device cannot pay for.
+    final readiness = ref.read(paymentReadinessProvider).value;
+    if (readiness == null || !readiness.ready) return;
     final s = ref.read(checkoutProvider);
     final order = await _checkout.placeOrder(_request(s));
     if (order != null && mounted) setState(() => _step = 2);
@@ -190,7 +207,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           children: [
             CheckoutStepHeader(step: step),
             const SizedBox(height: 16),
-            if (step == 2)
+            if (_entering)
+              const LoadingView(message: 'Loading checkout…')
+            else if (step == 2)
               PaymentPanel(orderId: s.orderId!, onFinished: _finished)
             else
               ...cart.when(
@@ -420,6 +439,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final theme = Theme.of(context);
     final entitlements = ref.watch(issuedEntitlementsProvider);
     final preview = s.preview;
+    final paymentReady = ref.watch(paymentReadinessProvider).value?.ready ?? false;
     return [
       _cartSummary(cart),
       const SizedBox(height: 12),
@@ -500,8 +520,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           onRetry: _placeOrder,
         ),
       const SizedBox(height: 16),
+      ..._paymentReadiness(context),
       FilledButton.icon(
-        onPressed: s.placing || preview == null || s.previewing ? null : _placeOrder,
+        onPressed: s.placing || preview == null || s.previewing || !paymentReady ? null : _placeOrder,
         icon: s.placing
             ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
             : const Icon(Icons.lock),
@@ -510,6 +531,72 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       const SizedBox(height: 4),
       Text('Placing the order reserves the stock; you pay on the next step.', style: theme.textTheme.bodySmall),
     ];
+  }
+}
+
+extension on _CheckoutScreenState {
+  /// Why this device cannot pay (shown before any order or reservation exists).
+  List<Widget> _paymentReadiness(BuildContext context) {
+    final readiness = ref.watch(paymentReadinessProvider);
+    return readiness.when(
+      loading: () => [
+        const LinearProgressIndicator(semanticsLabel: 'Checking payment options'),
+        const SizedBox(height: 8),
+      ],
+      error: (e, _) => [
+        _PaymentBlocked(
+          reason: 'Payment options could not be loaded: ${describeError(e)}',
+          onRetry: () => ref.invalidate(paymentReadinessProvider),
+        ),
+        const SizedBox(height: 12),
+      ],
+      data: (r) => r.ready
+          ? const []
+          : [
+              _PaymentBlocked(
+                reason: r.reason!,
+                onRetry: r.retryable ? () => ref.invalidate(paymentReadinessProvider) : null,
+              ),
+              const SizedBox(height: 12),
+            ],
+    );
+  }
+}
+
+class _PaymentBlocked extends StatelessWidget {
+  const _PaymentBlocked({required this.reason, this.onRetry});
+
+  final String reason;
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      liveRegion: true,
+      container: true,
+      child: Card(
+        color: tintedCardColor(HelmTheme.warning),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Icon(Icons.credit_card_off, color: HelmTheme.warning),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('You can\'t pay on this device right now',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(color: HelmTheme.warning)),
+                const SizedBox(height: 4),
+                Text('$reason No order has been placed and nothing is reserved.'),
+                if (onRetry != null) ...[
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(onPressed: onRetry, icon: const Icon(Icons.refresh), label: const Text('Try again')),
+                ],
+              ]),
+            ),
+          ]),
+        ),
+      ),
+    );
   }
 }
 

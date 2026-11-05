@@ -324,7 +324,7 @@ class StaffOrderDetailScreen extends ConsumerWidget {
                           if (order.tracking.shipmentStatus != null) Text('Shipment ${order.tracking.shipmentStatus}'),
                           const SizedBox(height: 8),
                           OutlinedButton.icon(
-                            onPressed: order.isPaid ? () => _label(context, ref, order) : null,
+                            onPressed: order.isPaid && !order.isUnderPaymentReview ? () => _label(context, ref, order) : null,
                             icon: const Icon(Icons.local_shipping),
                             label: const Text('Create courier label (test booking in development)'),
                           ),
@@ -337,7 +337,7 @@ class StaffOrderDetailScreen extends ConsumerWidget {
                           Text('Refunded so far ${formatCents(order.refundedCents)} of ${formatCents(order.totalCents)}.'),
                           const SizedBox(height: 8),
                           OutlinedButton.icon(
-                            onPressed: order.isPaid && order.refundedCents < order.totalCents
+                            onPressed: order.isRefundable
                                 ? () => _refund(context, ref, order)
                                 : null,
                             icon: const Icon(Icons.undo),

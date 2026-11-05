@@ -189,7 +189,25 @@ class Order {
   final String? reviewReason;
 
   bool get isPendingPayment => status == 'pending_payment';
-  bool get isPaid => paidAt != null || const {'succeeded', 'partially_refunded', 'refunded'}.contains(paymentStatus);
+  /// Order statuses that mean the payment was applied to this order.
+  static const paidStatuses = {'paid', 'ready_for_dispatch', 'dispatched', 'delivered', 'collected'};
+
+  /// Paid as far as the order is concerned: derived from the order status (and
+  /// `paid_at` for refunded orders), never from `payment_status` alone. An
+  /// order in `payment_review` can have `payment_status == 'succeeded'` with no
+  /// `paid_at` (amount mismatch, or a late payment after the reservation was
+  /// released): it is NOT paid until staff resolve it.
+  bool get isPaid => paidStatuses.contains(status) || (status == 'refunded' && paidAt != null);
+
+  /// The provider took a payment that could not be applied; staff must review.
+  bool get isUnderPaymentReview => status == 'payment_review';
+
+  /// Captured money that can still be refunded (also for orders under review),
+  /// matching the server's refund rule.
+  bool get isRefundable =>
+      const {'succeeded', 'partially_refunded'}.contains(paymentStatus) &&
+      paymentIntentId != null &&
+      refundedCents < totalCents;
   bool get isHelmDash => delivery.deliveryType == 'helm_dash';
 
   factory Order.fromJson(Map<String, dynamic> json) => Order(

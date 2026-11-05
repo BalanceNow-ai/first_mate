@@ -15,12 +15,12 @@ Future<void> ensureStripe(String publishableKey) async {
   _initialisedKey = publishableKey;
 }
 
-/// Whether this build can take Stripe card payments on this platform.
+/// Whether flutter_stripe's native PaymentSheet can be used on this platform.
 ///
-/// Web: flutter_stripe_web 8.2.0 (the release matching flutter_stripe 14.2.0)
-/// does not compile against stripe_platform_interface 14.2.0 (non-exhaustive
-/// switch on `PaymentIntentsFutureUsage`), so this build has no Payment
-/// Element and says so explicitly instead of offering a card form.
+/// Web does not use flutter_stripe: flutter_stripe_web 8.2.0 (the release
+/// matching flutter_stripe 14.2.0) does not compile against
+/// stripe_platform_interface 14.2.0. The web build instead loads Stripe.js and
+/// the Payment Element directly (`stripe_web_bridge_web.dart`).
 bool get stripeSupportedHere => !kIsWeb;
 
 /// Mobile: presents Stripe's PaymentSheet for [clientSecret].

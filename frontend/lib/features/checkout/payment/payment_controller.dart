@@ -22,6 +22,11 @@ enum PaymentPhase {
   requiresAction,
   failed,
   paid,
+
+  /// The provider took a payment the server could not apply to the order
+  /// (amount mismatch, or paid after the reservation was released). Not paid:
+  /// staff review it and contact or refund the customer.
+  underReview,
   cancelled,
   expired,
   closed,
@@ -29,6 +34,7 @@ enum PaymentPhase {
 }
 
 PaymentPhase phaseOf(Order order) {
+  if (order.isUnderPaymentReview) return PaymentPhase.underReview;
   if (order.isPaid) return PaymentPhase.paid;
   switch (order.status) {
     case 'cancelled':
