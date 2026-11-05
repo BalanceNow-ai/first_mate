@@ -162,7 +162,7 @@ containerised stack (§5), `M:` migration test.
 | B10 | Deployment branch commit; fail closed | Adapted; deploy.sh exits non-zero on build/migration/readiness failure | deploy harness | RV |
 | B11 | Production bundle API config | dart-defines; build preflight refuses localhost for production | release build checks | RV |
 | B12 | Image/error/loading states, a11y, responsive | Placeholders, retry states, semantics tree on web, rail/bottom nav | F:widget tests, browser journeys | RV (formal WCAG audit not performed) |
-| B13 | Measured performance vs targets | `scripts/perf/measure_api.py` | §5 | see §5 |
+| B13 | Measured performance vs targets (p95 < 200 ms API, < 100 ms search) | `scripts/perf/measure_api.py`; search reuses a keep-alive Typesense client, facets in one query | §5: all targets met at concurrency 1 and 10 on the local stack | RV (local evidence; production performance not measured) |
 
 ## 4. Contract conventions, decisions and defaults
 
@@ -204,9 +204,86 @@ containerised stack (§5), `M:` migration test.
 
 ## 5. Validation log
 
-Commands, environment, SHA, results.
+Environment: Linux VM, 4 vCPU / 15 GB, Python 3.11 (venv), PostgreSQL 16.15 +
+pgvector 0.6.0, Docker 29.9, Flutter 3.47.9 / Dart 3.13, Chromium + Playwright (node).
+Source: branch `claude/new-session-bkkwp6`; final numbers below were taken on the
+integrated code (head at the time of each run is recorded in the commit history).
+External providers were **never** called live: Stripe, OpenAI, Resend, FCM, Strapi and
+carriers were exercised only through fakes at the SDK/HTTP boundary or local substitutes.
 
-## 6. Checkpoint (for continuation across sessions)
+| Check | Command | Result |
+|---|---|---|
+| Backend regression (fresh DB) | `cd backend && TEST_DATABASE_URL=…/helm_test_final pytest -q` | **336 passed, 1 skipped** (SMTP-sink integration test: needs Mailpit's SMTP port on the host; container email delivery is proven by the API journey) |
+| Migrations | part of the suite: `test_migrations.py` | Phase-7 schema with representative data → 0001 → 0002 → 0003: every backfill asserted; no model/schema drift; CHECK names match models |
+| Backend lint/format | `ruff check app alembic && ruff format --check app alembic` | clean |
+| Flutter static analysis | `flutter analyze` | No issues |
+| Flutter tests | `flutter test` | **303 passed** (incl. contract tests on real server payloads) |
+| Web release build (production defines) | `flutter build web --release --dart-define=API_BASE_URL=https://… APP_ENV=production` | built; `main.dart.js` contains 0 × `localhost:8000` and the configured https API |
+| Web image preflight | `docker build --target preflight …` | refuses http URLs, loopback and missing anon key for production; accepts valid https config |
+| Clean stack install | `scripts/local_stack.sh reset --yes && scripts/local_stack.sh up && … seed && … cli sync-search` | exit 0; empty DB migrated to 0003; seed-demo; 32 products indexed; `/ready` → database 0003, redis ok, celery heartbeat fresh |
+| API journey (real GoTrue + Mailpit + proxy) | `python scripts/e2e/api_journey.py` | **39/39** |
+| Browser: catalogue / vessel / checklists | `node frontend/e2e/catalogue_journey.mjs --app http://localhost:18080` | **12/12** |
+| Browser: checkout / Helm Dash / dispatch | `HELM_WEB=http://localhost:18080 node frontend/e2e/commerce_journey.mjs` | **15/15** (decline→retry→paid; dispatcher assign; operator browser-geolocation reading shown as device report) |
+| Browser: First Mate / rewards / admin | `WEB_URL=http://localhost:18080 node frontend/e2e/engagement_journey.mjs` | **25/25** (3 consecutive runs) |
+| Stripe web Payment Element smoke | `node frontend/e2e/stripe_web_smoke.mjs` (stubbed API, real js.stripe.com, fake key) | Stripe.js injected only at payment; production CSP allows it; fake key → explicit unavailable state, never "paid"; blocked Stripe.js → unavailable state |
+| Images / compose / deploy harness | see `Operations_Runbook.md` (build & deployment workstream) | prod/dev/test images build; non-root, read-only, no published data ports; GoTrue both signup modes; `deploy.sh` exits non-zero on failed migration, readiness timeout and build failure without printing success; restore requires explicit confirmation |
+| Deploy preflight re-check | `HELM_ENV_FILE=… bash deploy/deploy.sh` (missing / empty values) | exit 1, "Deploy NOT complete", 0 × "Deploy complete" |
+| Independent backend review | separate reviewer, probes under `/tmp` | 14 findings (6 proven by failing probes) → all fixed; probes kept as `test_review_regressions.py` |
+| Independent client/contract review | separate reviewer | 12 findings → all fixed (H1/H2/M1 in checkout, others in rewards, session storage, build checks, a11y) |
+
+Performance (local stack above, 2 API workers, through nginx; 300 requests per
+endpoint; **local evidence only — not production performance**):
+
+Concurrency 1:
+```
+requests=300 concurrency=1 base=http://localhost:18080
+endpoint                                          p50     p95     p99  target  err  result
+GET /products (public, page 24)                   9.9    13.1    18.2     200    0  PASS
+GET /products (vessel, compatible_only)          16.4    19.3    21.2     200    0  PASS
+GET /products/{id}                                6.5     7.7     9.5     200    0  PASS
+GET /search/products?q=filter                    14.4    18.1    20.6     100    0  PASS
+GET /search/products?q=filter (vessel)           18.9    24.1    25.6     100    0  PASS
+GET /cart                                         6.8     9.1    10.1     200    0  PASS
+GET /vessels                                      7.3     9.4    11.8     200    0  PASS
+GET /orders                                       8.8    11.0    12.8     200    0  PASS
+GET /loyalty/points                              13.0    16.8    20.8     200    0  PASS
+```
+Concurrency 10:
+```
+requests=300 concurrency=10 base=http://localhost:18080
+endpoint                                          p50     p95     p99  target  err  result
+GET /products (public, page 24)                  30.6    50.8    95.4     200    0  PASS
+GET /products (vessel, compatible_only)          60.6    93.1   181.1     200    0  PASS
+GET /products/{id}                               17.8    33.5    44.1     200    0  PASS
+GET /search/products?q=filter                    42.8    70.1    77.8     100    0  PASS
+GET /search/products?q=filter (vessel)           50.1    92.3   108.8     100    0  PASS
+GET /cart                                        20.5    39.9    44.8     200    0  PASS
+GET /vessels                                     23.4    33.9    38.4     200    0  PASS
+GET /orders                                      29.8    44.3    49.9     200    0  PASS
+GET /loyalty/points                              60.3    97.0   111.4     200    0  PASS
+```
+
+Search is rate-limited per client address (120/min); the measurement raised
+`RATE_LIMIT_SEARCH_PER_MINUTE` for the run only. Accessibility: semantics tree enabled
+on web, labelled controls and 48 dp targets were checked by widget tests and the
+role/label-driven browser journeys; **no formal WCAG 2.1 AA audit was performed**.
+
+## 6. External setup still required (production features stay disabled until then)
+
+| Dependency | Configuration | Feature disabled / refused until provided |
+|---|---|---|
+| Supabase production project | `SUPABASE_URL`, `AUTH_MODE=jwks` (or legacy `SUPABASE_JWT_SECRET`), `SUPABASE_SERVICE_ROLE_KEY` (server only), client `SUPABASE_ANON_KEY`; enable "Confirm email" | API refuses to start without verifiable auth config / service key |
+| Stripe | `PAYMENT_PROVIDER=stripe`, `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`; webhook endpoint `/api/v1/payments/webhook` for `payment_intent.*`, `charge.refunded` | checkout shows payments unavailable; start-up refuses stripe without secrets |
+| OpenAI | `AI_ENABLED=true`, `LLM_PROVIDER=openai`, `EMBEDDING_PROVIDER=openai`, `OPENAI_API_KEY`; re-embed admitted sources | First Mate returns 503 `ai_unavailable` |
+| Licensed knowledge content | ingest via `python -m app.cli ingest-knowledge PATH …`, verify licence, admit | answers report insufficient evidence |
+| Resend / FCM | `EMAIL_PROVIDER=resend` + `RESEND_API_KEY`; `PUSH_PROVIDER=fcm` + Firebase service account | start-up refuses sinks; use `disabled` explicitly to run without |
+| Strapi CMS | `CMS_PROVIDER=strapi`, `STRAPI_URL`, `STRAPI_API_TOKEN` | experiences/articles show unavailable; no invented items |
+| Courier | `COURIER_RATE_MODE=rate_card` + `COURIER_RATE_CARD`; NZ Post/Aramex APIs not implemented | courier delivery hidden; live labels 503 |
+| Helm Dash operations | enable operating areas, vet and activate operators, set `HELM_DASH_OPERATOR_SHARE_BPS` | Helm Dash hidden without enabled areas; payouts recorded as `rate_unconfigured`; live payouts not implemented |
+| Typesense, Redis, Sentry, PostHog, Mapbox tiles | per runbook | search falls back to PostgreSQL; monitoring off; maps show areas without base tiles |
+| Hosting / TLS / DNS | host, certificates, DNS, backups location | **BLOCKED**: no authority to provision or deploy (brief §1) |
+
+## 7. Checkpoint (for continuation across sessions)
 
 - 2026-11-05: preflight complete; heads verified (`main@49877e2`,
   `claude/helm-marine-platform-Vrt0W@421deef`, unchanged since review); plan recorded.
