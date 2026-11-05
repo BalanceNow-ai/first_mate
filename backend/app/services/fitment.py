@@ -27,6 +27,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.config import get_settings
+from app.core.fitment_rules import INCOMPLETE_RULE_REASON, blank, rule_scope_problems
 from app.models.boat_db import EquipmentCategory
 from app.models.product import Product, ProductCompatibility
 from app.models.vessel import Vessel, VesselEquipment
@@ -178,31 +179,60 @@ def _combine_facts(outcomes: list[str]) -> str:
     return "mismatch"
 
 
+def rule_fields(rule: ProductCompatibility) -> dict:
+    """The scope fields of a stored rule, keyed as in the create request."""
+    return {
+        "vessel_make": rule.vessel_make,
+        "vessel_model": rule.vessel_model,
+        "year_from": rule.year_from,
+        "year_to": rule.year_to,
+        "engine_make": rule.engine_make,
+        "engine_model": rule.engine_model,
+        "engine_year_from": rule.engine_year_from,
+        "engine_year_to": rule.engine_year_to,
+        "equipment_category": rule.equipment_category_id,
+        "equipment_make": rule.equipment_make,
+        "equipment_model": rule.equipment_model,
+    }
+
+
 def _rule_outcome(rule: ProductCompatibility, profile: VesselProfile, category_slugs: dict) -> tuple[str, str]:
-    """Return (outcome, reason) for one rule against the profile."""
+    """Return (outcome, reason) for one rule against the profile.
+
+    Every declared restriction is evaluated; a malformed rule (a restriction without its
+    parent scope, a reversed range, no scope at all) is ``unknown`` until corrected, so
+    it can never produce a positive fit by ignoring part of its declaration."""
+    if rule_scope_problems(rule_fields(rule)):
+        return "unknown", INCOMPLETE_RULE_REASON
+
+    def v(value):
+        return None if blank(value) else value
+
+    vessel_make, vessel_model = v(rule.vessel_make), v(rule.vessel_model)
+    engine_make, engine_model = v(rule.engine_make), v(rule.engine_model)
     dims: list[tuple[str, str]] = []
-    if rule.vessel_make:
-        if norm(rule.vessel_make) != norm(profile.make):
-            dims.append(("mismatch", f"made for {rule.vessel_make} vessels"))
-        elif rule.vessel_model and norm(rule.vessel_model) != norm(profile.model):
-            dims.append(("mismatch", f"made for the {rule.vessel_make} {rule.vessel_model}"))
+    if vessel_make:
+        if norm(vessel_make) != norm(profile.make):
+            dims.append(("mismatch", f"made for {vessel_make} vessels"))
+        elif vessel_model and norm(vessel_model) != norm(profile.model):
+            dims.append(("mismatch", f"made for the {vessel_make} {vessel_model}"))
         else:
             o = _range_outcome(rule.year_from, rule.year_to, profile.year)
             dims.append((o, "vessel model year outside the verified range" if o == "mismatch" else "vessel matches"))
-    if rule.engine_make:
+    if engine_make:
         engines = profile.engines
         if not engines:
             dims.append(("unknown", "no engine recorded for this vessel"))
         else:
             o = _combine_facts(
                 [
-                    _fact_outcome(rule.engine_make, rule.engine_model, rule.engine_year_from, rule.engine_year_to, e)
+                    _fact_outcome(engine_make, engine_model, rule.engine_year_from, rule.engine_year_to, e)
                     for e in engines
                 ]
             )
             reason = {
                 "match": "engine matches verified fitment",
-                "mismatch": f"verified for {rule.engine_make} {rule.engine_model or ''}".strip() + " engines",
+                "mismatch": f"verified for {engine_make} {engine_model or ''}".strip() + " engines",
                 "unknown": "engine model or year needed to confirm fit",
             }[o]
             dims.append((o, reason))
@@ -217,13 +247,17 @@ def _rule_outcome(rule: ProductCompatibility, profile: VesselProfile, category_s
             )
             dims.append(("unknown", why))
         else:
-            o = _combine_facts([_fact_outcome(rule.equipment_make, rule.equipment_model, None, None, f) for f in facts])
+            o = _combine_facts(
+                [_fact_outcome(v(rule.equipment_make), v(rule.equipment_model), None, None, f) for f in facts]
+            )
             dims.append(
                 (
                     o,
                     f"{slug.replace('_', ' ')} {_EQUIPMENT_OUTCOME_TEXT[o]}",
                 )
             )
+    if not dims:
+        return "unknown", INCOMPLETE_RULE_REASON
     outcomes = [d[0] for d in dims]
     if "mismatch" in outcomes:
         return "mismatch", next(r for o, r in dims if o == "mismatch")

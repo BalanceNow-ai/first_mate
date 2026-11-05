@@ -374,6 +374,11 @@ async def verify_fitment_rule(
 ) -> FitmentRuleAdminResponse:
     """Verify a rule (needs confidence ≥ FITMENT_MIN_CONFIDENCE). Only verified rules can produce a fit."""
     rule = await _rule(db, rule_id)
+    problems = fitment.rule_scope_problems(fitment.rule_fields(rule))
+    if problems:
+        raise AppError(
+            422, "malformed_fitment_rule", "This rule cannot be verified until corrected: " + "; ".join(problems)
+        )
     body = body or FitmentRuleVerify()
     confidence = (
         Decimal(str(body.confidence_score))
@@ -465,9 +470,6 @@ async def create_fitment_rule(
         if cat is None:
             raise AppError(422, "unknown_equipment_category", f"Unknown equipment category '{slug}'")
         category_id = cat.id
-    for lo, hi in (("year_from", "year_to"), ("engine_year_from", "engine_year_to")):
-        if data[lo] is not None and data[hi] is not None and data[lo] > data[hi]:
-            raise AppError(422, "invalid_range", f"{lo} must not be after {hi}")
     data["confidence_score"] = Decimal(str(data["confidence_score"]))
     rule = ProductCompatibility(
         product_id=product_id, equipment_category_id=category_id, verification_status="unverified", **data
@@ -560,6 +562,7 @@ async def product_compatibility(
             notes=r.notes,
         )
         for r in rules
+        if not fitment.rule_scope_problems(fitment.rule_fields(r))  # malformed rules claim nothing
     ]
     return CompatibilityResponse(
         product_id=product.id,

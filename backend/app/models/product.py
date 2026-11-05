@@ -67,6 +67,24 @@ class Product(Base):
     )
 
 
+FITMENT_SCOPE_CHECKS = {
+    "nonblank_scope": (
+        "btrim(coalesce(vessel_make, '')) <> '' OR btrim(coalesce(engine_make, '')) <> '' "
+        "OR equipment_category_id IS NOT NULL"
+    ),
+    "vessel_dependents": (
+        "btrim(coalesce(vessel_make, '')) <> '' OR (vessel_model IS NULL AND year_from IS NULL AND year_to IS NULL)"
+    ),
+    "engine_dependents": (
+        "btrim(coalesce(engine_make, '')) <> '' "
+        "OR (engine_model IS NULL AND engine_year_from IS NULL AND engine_year_to IS NULL)"
+    ),
+    "equipment_dependents": "equipment_category_id IS NOT NULL OR (equipment_make IS NULL AND equipment_model IS NULL)",
+    "vessel_year_order": "year_from IS NULL OR year_to IS NULL OR year_from <= year_to",
+    "engine_year_order": "engine_year_from IS NULL OR engine_year_to IS NULL OR engine_year_from <= engine_year_to",
+}
+
+
 class ProductCompatibility(Base):
     """A fitment rule linking a product to a vessel, engine or equipment specification.
 
@@ -82,6 +100,8 @@ class ProductCompatibility(Base):
             "vessel_make IS NOT NULL OR engine_make IS NOT NULL OR equipment_category_id IS NOT NULL",
             name="has_scope",
         ),
+        # FM-02 scope contract (app.core.fitment_rules); added NOT VALID by migration 0004.
+        *(CheckConstraint(sql, name=name) for name, sql in FITMENT_SCOPE_CHECKS.items()),
     )
 
     id: Mapped[uuid.UUID] = uuid_pk()
