@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:helm_marine/core/api/api_service.dart';
-import 'package:helm_marine/core/auth/auth_provider.dart';
+import 'package:helm_marine/core/api/api_error.dart';
+import 'package:helm_marine/core/auth/auth_controller.dart';
+import 'package:helm_marine/core/models/user.dart';
+import 'package:helm_marine/core/session/session.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
@@ -28,14 +30,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   void _populateFromUser() {
     if (_populated) return;
-    final authState = ref.read(authStateProvider);
-    authState.whenData((user) {
-      if (user != null) {
-        _nameController.text = user.fullName ?? '';
-        _phoneController.text = user.phone ?? '';
-        _populated = true;
-      }
-    });
+    final user = ref.read(currentUserProvider);
+    if (user != null) {
+      _nameController.text = user.fullName ?? '';
+      _phoneController.text = user.phone ?? '';
+      _populated = true;
+    }
   }
 
   Future<void> _handleSave() async {
@@ -43,14 +43,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     setState(() => _isSaving = true);
 
     try {
-      final apiService = ref.read(apiServiceProvider);
-      await apiService.updateProfile({
-        'full_name': _nameController.text.trim(),
-        'phone': _phoneController.text.trim(),
-      });
-
-      // Refresh auth state to pick up updated user data
-      ref.invalidate(authStateProvider);
+      String? orNull(String v) => v.trim().isEmpty ? null : v.trim();
+      final user = await ref.read(userApiProvider).updateProfile(UserUpdate(
+            fullName: orNull(_nameController.text),
+            phone: orNull(_phoneController.text),
+          ));
+      ref.read(authControllerProvider.notifier).profileUpdated(user);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -65,7 +63,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to update: $e'),
+            content: Text('Failed to update: ${describeError(e)}'),
             backgroundColor: HelmTheme.error,
           ),
         );
@@ -77,7 +75,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(authStateProvider);
+    ref.watch(currentUserProvider);
     _populateFromUser();
 
     return Scaffold(

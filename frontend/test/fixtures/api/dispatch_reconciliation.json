@@ -1,0 +1,16 @@
+{
+  "period": "2026-11",
+  "currency": "NZD",
+  "delivered_count": 1,
+  "delivery_fees_cents": 6708,
+  "payouts_by_status": [
+    {
+      "status": "rate_unconfigured",
+      "count": 1,
+      "amount_cents": 0,
+      "gross_fee_cents": 6708
+    }
+  ],
+  "operator_share_bps": null,
+  "live_payouts_enabled": false
+}

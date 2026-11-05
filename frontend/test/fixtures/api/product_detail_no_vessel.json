@@ -1,0 +1,33 @@
+{
+  "id": "35161ccf-0a40-4c32-b737-f9b105578eb1",
+  "sku": "FX-IMP-B5AF329D",
+  "name": "Water Pump Impeller Kit",
+  "description": "OEM-equivalent impeller kit.",
+  "brand": "Sierra",
+  "category": "engine_parts",
+  "sub_category": "cooling",
+  "currency": "NZD",
+  "price_cents": 8990,
+  "sale_price_cents": 7490,
+  "effective_price_cents": 7490,
+  "on_sale": true,
+  "stock_quantity": 12,
+  "in_stock": true,
+  "weight_grams": 180,
+  "images": [
+    "https://cdn.example.invalid/impeller.jpg"
+  ],
+  "specifications": {
+    "vanes": 6
+  },
+  "oem_part_numbers": [
+    "47-43026Q06"
+  ],
+  "part_role": "impeller",
+  "fitment_scope": "specific",
+  "dangerous_goods": false,
+  "is_active": true,
+  "created_at": "2026-11-05T06:14:37.214705Z",
+  "updated_at": "2026-11-05T06:14:37.214711Z",
+  "fitment": null
+}

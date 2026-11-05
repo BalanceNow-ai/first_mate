@@ -1,0 +1,30 @@
+{
+  "product_id": "c91856bb-23c1-4d39-a471-e6a52808e1f9",
+  "sku": "SYN-PLUG-150",
+  "fitment_scope": "specific",
+  "universal": false,
+  "oem_part_numbers": [
+    "SYN-PLUG-150"
+  ],
+  "known_to_fit": [
+    {
+      "rule_id": "15f7c347-07c9-4583-b5dc-545eb5f84275",
+      "vessel_make": null,
+      "vessel_model": null,
+      "year_from": null,
+      "year_to": null,
+      "engine_make": "Yamaha",
+      "engine_model": "F150",
+      "engine_year_from": null,
+      "engine_year_to": null,
+      "equipment_category": null,
+      "equipment_make": null,
+      "equipment_model": null,
+      "fitment_type": "service_part",
+      "confidence_score": 0.9,
+      "data_source": "synthetic_fixture",
+      "is_synthetic": true,
+      "notes": "Synthetic test fixture — not real fitment data"
+    }
+  ]
+}

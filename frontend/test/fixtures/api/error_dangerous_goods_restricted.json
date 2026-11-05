@@ -1,0 +1,14 @@
+{
+  "detail": "Coastal distress flare kit (synthetic) cannot be sent by courier. Dangerous goods are only available via: click and collect.",
+  "code": "dangerous_goods_restricted",
+  "products": [
+    {
+      "product_id": "de608051-a6ae-41c1-82eb-926d672c15c9",
+      "name": "Coastal distress flare kit (synthetic)",
+      "sku": "SYN-FLARE-KIT"
+    }
+  ],
+  "allowed_delivery_types": [
+    "click_and_collect"
+  ]
+}

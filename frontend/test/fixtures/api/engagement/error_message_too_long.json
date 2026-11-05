@@ -1,0 +1,4 @@
+{
+  "detail": "Message is limited to 2000 characters",
+  "code": "message_too_long"
+}

@@ -1,0 +1,4 @@
+{
+  "detail": "A paid order cannot be cancelled",
+  "code": "order_not_cancellable"
+}

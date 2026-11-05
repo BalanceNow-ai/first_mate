@@ -1,0 +1,31 @@
+[
+  {
+    "id": "35051be4-d63e-4f40-a4b9-c6d1a61c9b87",
+    "order_id": "927f4f55-fba3-4ead-9017-b1774e4506d3",
+    "order_number": "HM-261105-C8MWG2",
+    "area_id": "hauraki-gulf",
+    "status": "delivered",
+    "pickup_location": {
+      "lat": -36.8406,
+      "lng": 174.753,
+      "name": "Helm warehouse"
+    },
+    "delivery_coordinates": {
+      "lat": -36.8,
+      "lng": 174.85
+    },
+    "delivery_location_name": "Motuihe Channel anchorage",
+    "nautical_miles": 5.26,
+    "delivery_fee_cents": 6708,
+    "currency": "NZD",
+    "estimated_delivery_minutes": 28,
+    "operator_id": "f83ee534-6d5f-401e-9999-72321aeef088",
+    "operator_name": "Skipper Fixture b7ab",
+    "assigned_at": "2026-11-05T07:27:27.734380Z",
+    "accepted_at": "2026-11-05T07:27:27.805437Z",
+    "picked_up_at": "2026-11-05T07:27:27.839366Z",
+    "delivered_at": "2026-11-05T07:27:31.479199Z",
+    "created_at": "2026-11-05T07:27:27.548739Z",
+    "updated_at": "2026-11-05T07:27:31.481045Z"
+  }
+]

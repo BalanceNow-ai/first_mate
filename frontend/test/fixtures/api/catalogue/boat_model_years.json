@@ -1,0 +1,26 @@
+[
+  {
+    "id": "da05b6de-1984-4fe5-9648-5e28fed50579",
+    "boat_model_id": "3020f1f1-d128-4b1e-bd55-9570cd6cdd44",
+    "year": 2021,
+    "brochure_url": null,
+    "hin_prefix": "Z9X",
+    "equipment_count": 4
+  },
+  {
+    "id": "d33e4e4a-21fc-4f36-92ee-cec175713160",
+    "boat_model_id": "3020f1f1-d128-4b1e-bd55-9570cd6cdd44",
+    "year": 2022,
+    "brochure_url": null,
+    "hin_prefix": "Z9X",
+    "equipment_count": 4
+  },
+  {
+    "id": "24b5152e-3490-40a1-93a5-7fef1555e09e",
+    "boat_model_id": "3020f1f1-d128-4b1e-bd55-9570cd6cdd44",
+    "year": 2023,
+    "brochure_url": null,
+    "hin_prefix": "Z9X",
+    "equipment_count": 4
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "id": "8954fa0e-1bd6-45b4-963b-1b53bdf199a9",
+  "code": "CREW-N7W5-G5X4-EX6F",
+  "amount_cents": 100,
+  "points_cost": 100,
+  "status": "voided",
+  "order_id": null,
+  "created_at": "2026-11-05T07:50:13.165411Z",
+  "reserved_at": null,
+  "consumed_at": null,
+  "voided_at": "2026-11-05T07:50:13.182653Z",
+  "currency": "NZD"
+}

@@ -1,0 +1,23 @@
+{
+  "id": "5d81c1ba-2648-49df-b7c4-630b597fd913",
+  "delivery_type": "courier",
+  "provider": "development_rate_card",
+  "service_name": "Standard courier",
+  "price_cents": 1290,
+  "currency": "NZD",
+  "destination": {
+    "postcode": "1010",
+    "city": "Auckland"
+  },
+  "parcel_weight_grams": 3350,
+  "merchandise_subtotal_cents": 11090,
+  "free_shipping_threshold_cents": 15000,
+  "operating_area_id": null,
+  "operating_area_name": null,
+  "nautical_miles": null,
+  "estimated_minutes": null,
+  "estimated_days": 3,
+  "development_rate_card": true,
+  "expires_at": "2026-11-05T07:46:26.727513Z",
+  "created_at": "2026-11-05T07:26:26.727513Z"
+}

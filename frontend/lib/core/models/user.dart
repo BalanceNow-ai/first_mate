@@ -1,41 +1,59 @@
+import 'package:helm_marine/core/models/json.dart';
+
+/// The local Helm profile (`UserResponse`). Identity (id, email) comes from the
+/// verified token on the server; the role is server-held and read-only here.
 class User {
+  const User({
+    required this.id,
+    required this.email,
+    required this.fullName,
+    required this.phone,
+    required this.role,
+    required this.createdAt,
+  });
+
   final String id;
   final String email;
   final String? fullName;
   final String? phone;
-  final String? avatarUrl;
+
+  /// `customer` / `operator` / `dispatcher` / `admin`.
   final String role;
   final DateTime createdAt;
 
-  User({
-    required this.id,
-    required this.email,
-    this.fullName,
-    this.phone,
-    this.avatarUrl,
-    this.role = 'customer',
-    required this.createdAt,
-  });
+  /// Name to greet the user with.
+  String get displayName =>
+      (fullName != null && fullName!.trim().isNotEmpty) ? fullName!.trim() : email;
 
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'] as String,
-      email: json['email'] as String,
-      fullName: json['full_name'] as String?,
-      phone: json['phone'] as String?,
-      avatarUrl: json['avatar_url'] as String?,
-      role: json['role'] as String? ?? 'customer',
-      createdAt: DateTime.parse(json['created_at'] as String),
-    );
-  }
+  factory User.fromJson(Map<String, dynamic> json) => User(
+        id: req<String>(json, 'id'),
+        email: req<String>(json, 'email'),
+        fullName: opt<String>(json, 'full_name'),
+        phone: opt<String>(json, 'phone'),
+        role: req<String>(json, 'role'),
+        createdAt: reqDate(json, 'created_at'),
+      );
+}
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'email': email,
-        'full_name': fullName,
-        'phone': phone,
-        'avatar_url': avatarUrl,
-        'role': role,
-        'created_at': createdAt.toIso8601String(),
-      };
+/// `ProvisionResponse`: the profile plus whether this call created it.
+class ProvisionResult {
+  const ProvisionResult({required this.user, required this.created});
+
+  final User user;
+  final bool created;
+
+  factory ProvisionResult.fromJson(Map<String, dynamic> json) => ProvisionResult(
+        user: User.fromJson(json),
+        created: opt<bool>(json, 'created') ?? false,
+      );
+}
+
+/// `UserUpdate` payload (PATCH /users/me). Only name and phone are editable.
+class UserUpdate {
+  const UserUpdate({this.fullName, this.phone});
+
+  final String? fullName;
+  final String? phone;
+
+  Map<String, dynamic> toJson() => {'full_name': fullName, 'phone': phone};
 }

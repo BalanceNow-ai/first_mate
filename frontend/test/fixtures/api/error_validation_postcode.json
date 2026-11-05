@@ -1,0 +1,46 @@
+{
+  "detail": "Request validation failed",
+  "code": "validation_error",
+  "errors": [
+    {
+      "loc": [
+        "body",
+        "destination",
+        "CourierDestination",
+        "postcode"
+      ],
+      "msg": "String should match pattern '^\\d{4}$'",
+      "type": "string_pattern_mismatch"
+    },
+    {
+      "loc": [
+        "body",
+        "destination",
+        "HelmDashDestination",
+        "lat"
+      ],
+      "msg": "Field required",
+      "type": "missing"
+    },
+    {
+      "loc": [
+        "body",
+        "destination",
+        "HelmDashDestination",
+        "lng"
+      ],
+      "msg": "Field required",
+      "type": "missing"
+    },
+    {
+      "loc": [
+        "body",
+        "destination",
+        "HelmDashDestination",
+        "postcode"
+      ],
+      "msg": "Extra inputs are not permitted",
+      "type": "extra_forbidden"
+    }
+  ]
+}

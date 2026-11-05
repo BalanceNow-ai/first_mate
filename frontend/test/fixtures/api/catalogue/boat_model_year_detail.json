@@ -1,0 +1,114 @@
+{
+  "id": "da05b6de-1984-4fe5-9648-5e28fed50579",
+  "boat_model_id": "3020f1f1-d128-4b1e-bd55-9570cd6cdd44",
+  "year": 2021,
+  "brochure_url": null,
+  "hin_prefix": "Z9X",
+  "equipment_count": 4,
+  "manufacturer": {
+    "id": "cf05ecfc-b08e-434e-a4fe-4064598a6ff5",
+    "name": "Synthetic Test Marine (fixture)",
+    "country": "NZ",
+    "website": null,
+    "mic_codes": [
+      "Z9X"
+    ],
+    "is_synthetic": true,
+    "source": "Synthetic test fixture — not a real manufacturer",
+    "model_count": 0
+  },
+  "boat_model": {
+    "id": "3020f1f1-d128-4b1e-bd55-9570cd6cdd44",
+    "manufacturer_id": "cf05ecfc-b08e-434e-a4fe-4064598a6ff5",
+    "name": "Fixture 600 Runabout",
+    "hull_type": "aluminium",
+    "propulsion_type": "outboard",
+    "length_ft": 19.7,
+    "beam_in": null,
+    "is_synthetic": true,
+    "source_url": null,
+    "years": []
+  },
+  "equipment": [
+    {
+      "id": "4d1e486d-ca00-469d-9c0f-94e2e520c58b",
+      "model_year_id": "da05b6de-1984-4fe5-9648-5e28fed50579",
+      "category": {
+        "id": "723cb1b7-35cb-4add-95cf-dd6494e4d19b",
+        "slug": "bilge_pump",
+        "name": "Bilge Pump",
+        "parent_id": "6105954d-68a1-41e0-9fc7-01f2a2adda60"
+      },
+      "equipment_make": "FixturePump",
+      "equipment_model": "FP-500 (synthetic)",
+      "part_sku": null,
+      "is_standard": true,
+      "data_source": "synthetic_fixture",
+      "source_url": null,
+      "confidence_score": 0.0,
+      "verification_status": "unverified",
+      "is_synthetic": true,
+      "reliable": false
+    },
+    {
+      "id": "19f3ff90-161e-4a05-9a95-24be9dff1235",
+      "model_year_id": "da05b6de-1984-4fe5-9648-5e28fed50579",
+      "category": {
+        "id": "22172071-dcbe-4be8-8848-5437e7231a7c",
+        "slug": "chartplotter",
+        "name": "Chartplotter / GPS",
+        "parent_id": "ea976441-1a55-4a76-96b7-066b6fa8fae1"
+      },
+      "equipment_make": "FixtureNav",
+      "equipment_model": "FN-7 (synthetic)",
+      "part_sku": null,
+      "is_standard": true,
+      "data_source": "synthetic_fixture",
+      "source_url": null,
+      "confidence_score": 0.0,
+      "verification_status": "unverified",
+      "is_synthetic": true,
+      "reliable": false
+    },
+    {
+      "id": "5bec048c-c535-4686-a333-8558a840dc2f",
+      "model_year_id": "da05b6de-1984-4fe5-9648-5e28fed50579",
+      "category": {
+        "id": "84f36a61-85c2-4d42-9b30-bce6ff856e55",
+        "slug": "engine",
+        "name": "Engine",
+        "parent_id": "aaedd4c2-9e08-42f1-9f9b-0138b865839e"
+      },
+      "equipment_make": "Yamaha",
+      "equipment_model": "F150",
+      "part_sku": null,
+      "is_standard": true,
+      "data_source": "synthetic_fixture",
+      "source_url": null,
+      "confidence_score": 0.0,
+      "verification_status": "unverified",
+      "is_synthetic": true,
+      "reliable": false
+    },
+    {
+      "id": "34cc2dee-a9bb-49b2-8c6e-2db264608f0a",
+      "model_year_id": "da05b6de-1984-4fe5-9648-5e28fed50579",
+      "category": {
+        "id": "b1d0e6da-9c3c-45de-ad86-239a069b6676",
+        "slug": "vhf_radio",
+        "name": "VHF Radio",
+        "parent_id": "ea976441-1a55-4a76-96b7-066b6fa8fae1"
+      },
+      "equipment_make": "FixtureCom",
+      "equipment_model": "FC-25 (synthetic)",
+      "part_sku": null,
+      "is_standard": true,
+      "data_source": "synthetic_fixture",
+      "source_url": null,
+      "confidence_score": 0.0,
+      "verification_status": "unverified",
+      "is_synthetic": true,
+      "reliable": false
+    }
+  ]
+}

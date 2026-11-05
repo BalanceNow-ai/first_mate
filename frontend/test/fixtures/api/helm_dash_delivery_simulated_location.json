@@ -1,0 +1,61 @@
+{
+  "id": "35051be4-d63e-4f40-a4b9-c6d1a61c9b87",
+  "order_id": "927f4f55-fba3-4ead-9017-b1774e4506d3",
+  "order_number": "HM-261105-C8MWG2",
+  "status": "picked_up",
+  "status_label": "Picked up from the warehouse",
+  "area_id": "hauraki-gulf",
+  "pickup_location": {
+    "lat": -36.8406,
+    "lng": 174.753,
+    "name": "Helm warehouse"
+  },
+  "delivery_coordinates": {
+    "lat": -36.8,
+    "lng": 174.85
+  },
+  "delivery_location_name": "Motuihe Channel anchorage",
+  "nautical_miles": 5.26,
+  "delivery_fee_cents": 6708,
+  "currency": "NZD",
+  "estimated_delivery_minutes": 28,
+  "operator_display_name": "Skipper Fixture b7ab",
+  "operator_vessel_name": "MV Fixture Runner",
+  "timeline": [
+    {
+      "status": "awaiting_dispatch",
+      "label": "Awaiting dispatch",
+      "at": "2026-11-05T07:27:27.552543Z"
+    },
+    {
+      "status": "assigned",
+      "label": "Skipper assigned",
+      "at": "2026-11-05T07:27:27.735000Z"
+    },
+    {
+      "status": "accepted",
+      "label": "Skipper accepted your delivery",
+      "at": "2026-11-05T07:27:27.806066Z"
+    },
+    {
+      "status": "picked_up",
+      "label": "Picked up from the warehouse",
+      "at": "2026-11-05T07:27:27.839747Z"
+    }
+  ],
+  "latest_location": {
+    "lat": -36.8,
+    "lng": 174.85,
+    "accuracy_m": null,
+    "heading_deg": null,
+    "speed_knots": null,
+    "recorded_at": "2026-11-05T07:27:30.811333Z",
+    "source": "simulated",
+    "is_simulated": true,
+    "source_label": "Local simulation \u2014 not a real vessel position",
+    "age_seconds": 0
+  },
+  "location_message": null,
+  "created_at": "2026-11-05T07:27:27.548739Z",
+  "updated_at": "2026-11-05T07:27:27.840678Z"
+}

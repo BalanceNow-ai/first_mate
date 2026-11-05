@@ -14,10 +14,23 @@ build/
 venv/
 env/
 
-# Environment variables
+# Environment variables (examples are committed; real values never are)
 .env
 .env.local
 .env.production
+.env.prod
+.env.prod.*
+!.env.prod.example
+
+# Local stack / deployment state
+.local/
+deploy/certs/*
+!deploy/certs/.gitkeep
+deploy/certbot-www/*
+!deploy/certbot-www/.gitkeep
+backups/
+*.dump
+*.dump.sha256
 
 # IDE
 .vscode/

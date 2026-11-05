@@ -1,0 +1,13 @@
+{
+  "currency": "NZD",
+  "delivery_type": "click_and_collect",
+  "quote_id": null,
+  "subtotal_cents": 1190,
+  "discount_cents": 100,
+  "shipping_cents": 0,
+  "total_cents": 1090,
+  "free_shipping_applied": false,
+  "free_shipping_threshold_cents": 15000,
+  "min_charge_cents": 50,
+  "pickup_location": "Helm Marine, Westhaven Marina, Auckland"
+}

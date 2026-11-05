@@ -1,0 +1,13 @@
+{
+  "points_balance": 0,
+  "lifetime_earned": 0,
+  "points_value_cents": 0,
+  "currency": "NZD",
+  "tier": "deckhand",
+  "tier_is_display_only": true,
+  "trailing_12_month_spend_cents": 0,
+  "next_tier": "mate",
+  "next_tier_threshold_cents": 50000,
+  "crew_id": null,
+  "crew_wallet_points": null
+}

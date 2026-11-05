@@ -1,0 +1,4 @@
+{
+  "detail": "Only courier orders have courier shipments",
+  "code": "not_a_courier_order"
+}

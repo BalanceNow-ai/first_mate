@@ -1,0 +1,36 @@
+{
+  "period": "2026-11",
+  "crew_id": null,
+  "member_count": 0,
+  "eligible_for_multiplier": false,
+  "min_members": 2,
+  "crew_spend_cents": 0,
+  "currency": "NZD",
+  "current_multiplier": 1.0,
+  "spend_multiplier": 1.0,
+  "next_threshold_cents": 50000,
+  "next_multiplier": 1.25,
+  "remaining_to_next_cents": 50000,
+  "tiers": [
+    {
+      "min_spend_cents": 0,
+      "multiplier": 1.0
+    },
+    {
+      "min_spend_cents": 50000,
+      "multiplier": 1.25
+    },
+    {
+      "min_spend_cents": 100000,
+      "multiplier": 1.5
+    },
+    {
+      "min_spend_cents": 200000,
+      "multiplier": 2.0
+    },
+    {
+      "min_spend_cents": 500000,
+      "multiplier": 3.0
+    }
+  ]
+}

@@ -1,342 +1,170 @@
-"""Voyage checklist management router."""
+"""Voyage spares checklists — owner-scoped (another owner's vessel or item → 404)."""
 
+from __future__ import annotations
+
+import re
 import uuid
+from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, Query, status
+from fastapi.responses import Response
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
+from app.core.rate_limit import mutation_limit
 from app.database import get_db
 from app.middleware.auth import CurrentUserId
-from app.models.checklist import ChecklistItem, VoyageChecklist
+from app.models.checklist import VoyageChecklist
 from app.models.product import Product
-from app.models.vessel import Vessel
+from app.routers.vessels import get_owned_vessel
+from app.schemas.checklist import (
+    AddMissingRequest,
+    AddMissingResponse,
+    ChecklistItemResponse,
+    ChecklistSetResponse,
+    ItemCheck,
+    ManualLink,
+    Tier,
+    TierResponse,
+)
+from app.services import checklists as svc
+from app.services import fitment
 
 router = APIRouter(prefix="/checklists", tags=["Voyage Checklists"])
 
-# Default checklist templates for each tier
-GRAB_AND_GO_ITEMS = [
-    {"system": "Engine (Outboard)", "item_name": "Spare Propeller & Prop Nut/Split Pin", "quantity": 1},
-    {"system": "Engine (Outboard)", "item_name": "Spare Engine Fuel Filter (primary)", "quantity": 2},
-    {"system": "Engine (Outboard)", "item_name": "Spare Spark Plugs", "quantity": 1},
-    {"system": "Engine (Outboard)", "item_name": "Spare Kill Switch Lanyard", "quantity": 1},
-    {"system": "Electrical", "item_name": "Spare Navigation Light Bulbs", "quantity": 1},
-    {"system": "Electrical", "item_name": "Assorted Fuses (5A, 10A, 15A)", "quantity": 1},
-    {"system": "General", "item_name": "Duct Tape", "quantity": 1},
-    {"system": "General", "item_name": "Zip Ties (assorted sizes)", "quantity": 1},
-    {"system": "General", "item_name": "Stainless Steel Hose Clamps (assorted)", "quantity": 1},
-    {"system": "General", "item_name": "Emergency Wooden Bungs (tapered)", "quantity": 1},
-    {"system": "Tools", "item_name": "Shifting Spanner, Pliers, Screwdriver Set, Prop Spanner, Spark Plug Spanner", "quantity": 1},
-]
 
-COASTAL_CRUISING_ITEMS = [
-    {"system": "Engine (Outboard)", "item_name": "Spare Water Pump Impeller & Gasket", "quantity": 1},
-    {"system": "Engine (Outboard)", "item_name": "Spare Thermostat & Gasket", "quantity": 1},
-    {"system": "Engine (Outboard)", "item_name": "Spare Alternator/Serpentine Belt", "quantity": 1},
-    {"system": "Engine (Outboard)", "item_name": "Engine Oil (1L top-up)", "quantity": 1},
-    {"system": "Plumbing", "item_name": "Spare Bilge Pump (cartridge or complete)", "quantity": 1},
-    {"system": "Plumbing", "item_name": "Spare Toilet Duckbill/Joker Valves", "quantity": 1},
-    {"system": "Electrical", "item_name": "Spare Battery Terminals", "quantity": 1},
-    {"system": "Electrical", "item_name": "Small Spool of Marine-Grade Electrical Wire", "quantity": 1},
-    {"system": "Electrical", "item_name": "Butt Connectors & Crimper", "quantity": 1},
-    {"system": "Tools", "item_name": "Full Socket Set, Multimeter, Strap Wrench", "quantity": 1},
-]
-
-OFFSHORE_PASSAGE_ITEMS = [
-    {"system": "Engine (Outboard)", "item_name": "Spare Fuel Pump", "quantity": 1},
-    {"system": "Engine (Outboard)", "item_name": "Spare Ignition Coil", "quantity": 1},
-    {"system": "Engine (Outboard)", "item_name": "Full Gasket Set", "quantity": 1},
-    {"system": "Engine (Outboard)", "item_name": "Engine Oil & Filters for full change", "quantity": 1},
-    {"system": "Plumbing", "item_name": "Complete Spare Freshwater Pump", "quantity": 1},
-    {"system": "Plumbing", "item_name": "Major Bilge Pump Rebuild Kit", "quantity": 1},
-    {"system": "Plumbing", "item_name": "Assorted Hose & Fittings", "quantity": 1},
-    {"system": "Electrical", "item_name": "Spare VHF Antenna", "quantity": 1},
-    {"system": "Electrical", "item_name": "Spare GPS Antenna", "quantity": 1},
-    {"system": "Steering", "item_name": "Spare Hydraulic Steering Fluid & Bleed Kit", "quantity": 1},
-]
-
-
-def _extract_search_keywords(item_name: str) -> list[str]:
-    """Extract meaningful search keywords from a checklist item name.
-
-    Strips common prefixes like 'Spare', 'Complete', 'Full' and returns
-    the core keywords for product matching.
-    """
-    noise = {"spare", "complete", "full", "assorted", "small", "major", "emergency"}
-    words = item_name.split(",")[0].split("&")[0].strip().split()
-    keywords = [w for w in words if w.lower().strip("()") not in noise]
-    return keywords
-
-
-async def _find_product_match(db: AsyncSession, item_name: str) -> uuid.UUID | None:
-    """Search for a single unambiguous product match for a checklist item.
-
-    Uses ILIKE keyword search against the Product name. Returns the product_id
-    only if exactly one active product matches; otherwise returns None.
-    """
-    keywords = _extract_search_keywords(item_name)
-    if not keywords:
-        return None
-
-    # Build a query that matches ALL keywords
-    query = select(Product).where(Product.is_active.is_(True))
-    for keyword in keywords[:3]:  # Use up to 3 keywords to avoid over-filtering
-        query = query.where(Product.name.ilike(f"%{keyword}%"))
-
-    result = await db.execute(query)
-    matches = result.scalars().all()
-
-    if len(matches) == 1:
-        return matches[0].id
-
-    # If too many matches, try more keywords to narrow down
-    if len(matches) > 1 and len(keywords) > 3:
-        narrow_query = select(Product).where(Product.is_active.is_(True))
-        for keyword in keywords:
-            narrow_query = narrow_query.where(Product.name.ilike(f"%{keyword}%"))
-        narrow_result = await db.execute(narrow_query)
-        narrow_matches = narrow_result.scalars().all()
-        if len(narrow_matches) == 1:
-            return narrow_matches[0].id
-
-    return None
-
-
-class LinkProductRequest(BaseModel):
-    product_id: uuid.UUID
-
-
-@router.get("/vessel/{vessel_id}", response_model=list[dict])
-async def get_vessel_checklists(
-    vessel_id: uuid.UUID,
-    user_id: CurrentUserId,
-    db: AsyncSession = Depends(get_db),
-) -> list[dict]:
-    """Get all voyage checklists for a vessel."""
-    # Verify vessel belongs to user
-    vessel_result = await db.execute(
-        select(Vessel).where(Vessel.id == vessel_id, Vessel.user_id == user_id)
-    )
-    if not vessel_result.scalar_one_or_none():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vessel not found")
-
-    result = await db.execute(
-        select(VoyageChecklist)
-        .where(VoyageChecklist.vessel_id == vessel_id)
-        .options(selectinload(VoyageChecklist.items))
-        .order_by(VoyageChecklist.tier)
-    )
-    checklists = result.scalars().all()
-
-    return [
-        {
-            "id": c.id,
-            "vessel_id": c.vessel_id,
-            "tier": c.tier,
-            "name": c.name,
-            "items": [
-                {
-                    "id": item.id,
-                    "system": item.system,
-                    "item_name": item.item_name,
-                    "description": item.description,
-                    "quantity": item.quantity,
-                    "product_id": item.product_id,
-                    "is_checked": item.is_checked,
-                }
-                for item in c.items
-            ],
-            "created_at": c.created_at,
-        }
-        for c in checklists
-    ]
-
-
-@router.post("/vessel/{vessel_id}/generate", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/vessel/{vessel_id}/generate",
+    response_model=ChecklistSetResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(mutation_limit())],
+)
 async def generate_checklists(
     vessel_id: uuid.UUID,
     user_id: CurrentUserId,
-    db: AsyncSession = Depends(get_db),
-) -> dict:
-    """Generate default voyage checklists for a vessel.
+    regenerate: bool = False,
+    db: AsyncSession = Depends(get_db, scope="function"),
+) -> ChecklistSetResponse:
+    """Create the three tiered checklists, tailored to the vessel (409 if they exist,
+    unless ``regenerate=true`` which rebuilds them and keeps checked state by template key)."""
+    vessel = await get_owned_vessel(db, vessel_id, user_id)
+    await svc.generate(db, vessel, regenerate=regenerate)
+    return await svc.build_set(db, vessel)
 
-    Creates three tiered checklists (Grab & Go, Coastal Cruising, Offshore
-    Passage) pre-populated with recommended spare parts and equipment.
-    Performs keyword search against the product catalogue to auto-link
-    matching products to checklist items.
-    """
-    # Verify vessel belongs to user
-    vessel_result = await db.execute(
-        select(Vessel).where(Vessel.id == vessel_id, Vessel.user_id == user_id)
-    )
-    vessel = vessel_result.scalar_one_or_none()
-    if not vessel:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vessel not found")
 
-    # Check if checklists already exist
-    existing = await db.execute(
-        select(VoyageChecklist).where(VoyageChecklist.vessel_id == vessel_id)
-    )
-    if existing.scalars().first():
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Checklists already exist for this vessel. Delete them first to regenerate.",
-        )
+@router.get("/vessel/{vessel_id}", response_model=ChecklistSetResponse)
+async def get_checklists(
+    vessel_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
+) -> ChecklistSetResponse:
+    """All tiers; each tier lists its cumulative items with ``introduced_in``."""
+    vessel = await get_owned_vessel(db, vessel_id, user_id)
+    return await svc.build_set(db, vessel)
 
-    tiers = [
-        ("grab_and_go", "Grab & Go Kit (Day Trips)", GRAB_AND_GO_ITEMS),
-        ("coastal_cruising", "Coastal Cruising Kit (Weekend & Multi-Day)", COASTAL_CRUISING_ITEMS),
-        ("offshore_passage", "Offshore Passage Kit (Extended Voyages)", OFFSHORE_PASSAGE_ITEMS),
-    ]
 
-    created = []
-    linked_count = 0
-    for tier_key, tier_name, items in tiers:
-        checklist = VoyageChecklist(vessel_id=vessel_id, tier=tier_key, name=tier_name)
-        db.add(checklist)
-        await db.flush()
+@router.get("/vessel/{vessel_id}/tiers/{tier}", response_model=TierResponse)
+async def get_tier(
+    vessel_id: uuid.UUID, tier: Tier, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
+) -> TierResponse:
+    vessel = await get_owned_vessel(db, vessel_id, user_id)
+    checklists = await svc.require_checklists(db, vessel)
+    profile = await fitment.load_vessel_profile(db, vessel)
+    links = await svc.refresh_links(db, profile, [i for c in checklists for i in c.items])
+    return svc.tier_response(checklists, tier, links, vessel, profile)
 
-        for item_data in items:
-            product_id = await _find_product_match(db, item_data["item_name"])
-            if product_id:
-                linked_count += 1
 
-            item = ChecklistItem(
-                checklist_id=checklist.id,
-                system=item_data["system"],
-                item_name=item_data["item_name"],
-                quantity=item_data["quantity"],
-                product_id=product_id,
-            )
-            db.add(item)
+@router.delete("/vessel/{vessel_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(mutation_limit())])
+async def delete_checklists(
+    vessel_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
+) -> None:
+    vessel = await get_owned_vessel(db, vessel_id, user_id)
+    await db.execute(delete(VoyageChecklist).where(VoyageChecklist.vessel_id == vessel.id))
 
-        created.append({"tier": tier_key, "name": tier_name, "items_count": len(items)})
 
+async def _item_view(db: AsyncSession, item, checklist, vessel, warning: str | None = None) -> ChecklistItemResponse:
+    profile = await fitment.load_vessel_profile(db, vessel)
+    links = await svc.refresh_links(db, profile, [item])
+    return svc.item_response(checklist.tier, item, links[item.id], vessel, profile, warning)
+
+
+@router.patch("/items/{item_id}", response_model=ChecklistItemResponse, dependencies=[Depends(mutation_limit())])
+async def check_item(
+    item_id: uuid.UUID, body: ItemCheck, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
+) -> ChecklistItemResponse:
+    """Set the checked ("already on board") state; shared by every tier that includes it."""
+    item, checklist, vessel = await svc.owned_item(db, item_id, user_id)
+    svc.set_checked(item, body.is_checked)
     await db.flush()
-    return {
-        "message": "Checklists generated",
-        "checklists": created,
-        "products_linked": linked_count,
-    }
+    return await _item_view(db, item, checklist, vessel)
 
 
-@router.patch("/items/{item_id}/toggle")
-async def toggle_checklist_item(
-    item_id: uuid.UUID,
+@router.post("/items/{item_id}/toggle", response_model=ChecklistItemResponse, dependencies=[Depends(mutation_limit())])
+async def toggle_item(
+    item_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
+) -> ChecklistItemResponse:
+    item, checklist, vessel = await svc.owned_item(db, item_id, user_id)
+    svc.set_checked(item, not item.is_checked)
+    await db.flush()
+    return await _item_view(db, item, checklist, vessel)
+
+
+@router.put("/items/{item_id}/link", response_model=ChecklistItemResponse, dependencies=[Depends(mutation_limit())])
+async def link_item(
+    item_id: uuid.UUID, body: ManualLink, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
+) -> ChecklistItemResponse:
+    """Owner-chosen product: verified mismatch → 409; unknown fit → ``user_linked_unverified`` + warning."""
+    item, checklist, vessel = await svc.owned_item(db, item_id, user_id)
+    profile = await fitment.load_vessel_profile(db, vessel)
+    warning = await svc.manual_link(db, profile, item, body.product_id)
+    return await _item_view(db, item, checklist, vessel, warning)
+
+
+@router.post(
+    "/vessel/{vessel_id}/add-missing-to-cart",
+    response_model=AddMissingResponse,
+    dependencies=[Depends(mutation_limit())],
+)
+async def add_missing_to_cart(
+    vessel_id: uuid.UUID,
+    body: AddMissingRequest,
     user_id: CurrentUserId,
-    db: AsyncSession = Depends(get_db),
-) -> dict:
-    """Toggle the checked state of a checklist item."""
-    result = await db.execute(
-        select(ChecklistItem)
-        .join(VoyageChecklist)
-        .join(Vessel)
-        .where(ChecklistItem.id == item_id, Vessel.user_id == user_id)
-    )
-    item = result.scalar_one_or_none()
-    if not item:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Checklist item not found",
-        )
-
-    item.is_checked = not item.is_checked
-    await db.flush()
-    return {"is_checked": item.is_checked}
+    db: AsyncSession = Depends(get_db, scope="function"),
+) -> AddMissingResponse:
+    """Ensure the cart holds the unchecked, linked items of a tier. Repeat calls do not add more."""
+    vessel = await get_owned_vessel(db, vessel_id, user_id)
+    return AddMissingResponse(**await svc.add_missing_to_cart(db, user_id, vessel, body.tier))
 
 
-@router.patch("/items/{item_id}/link-product")
-async def link_product_to_item(
-    item_id: uuid.UUID,
-    body: LinkProductRequest,
-    user_id: CurrentUserId,
-    db: AsyncSession = Depends(get_db),
-) -> dict:
-    """Link a product to a checklist item."""
-    # Verify ownership via joins
-    result = await db.execute(
-        select(ChecklistItem)
-        .join(VoyageChecklist)
-        .join(Vessel)
-        .where(ChecklistItem.id == item_id, Vessel.user_id == user_id)
-    )
-    item = result.scalar_one_or_none()
-    if not item:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Checklist item not found",
-        )
-
-    # Verify product exists
-    product_result = await db.execute(
-        select(Product).where(Product.id == body.product_id, Product.is_active.is_(True))
-    )
-    if not product_result.scalar_one_or_none():
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product not found",
-        )
-
-    item.product_id = body.product_id
-    await db.flush()
-    return {"product_id": str(item.product_id), "item_name": item.item_name}
-
-
-@router.post("/vessel/{vessel_id}/add-unchecked-to-cart")
-async def add_unchecked_to_cart(
+@router.get("/vessel/{vessel_id}/export")
+async def export_checklist(
     vessel_id: uuid.UUID,
     user_id: CurrentUserId,
-    db: AsyncSession = Depends(get_db),
-) -> dict:
-    """Add all unchecked checklist items with linked products to the cart."""
-    from app.models.cart import CartItem
-
-    # Verify vessel belongs to user
-    vessel_result = await db.execute(
-        select(Vessel).where(Vessel.id == vessel_id, Vessel.user_id == user_id)
+    tier: Tier = Query(...),
+    format: Literal["csv", "html"] = Query("html"),
+    db: AsyncSession = Depends(get_db, scope="function"),
+) -> Response:
+    """Printable HTML or CSV of a tier (cumulative), with checkboxes and the disclaimer."""
+    vessel = await get_owned_vessel(db, vessel_id, user_id)
+    checklists = await svc.require_checklists(db, vessel)
+    profile = await fitment.load_vessel_profile(db, vessel)
+    await svc.refresh_links(db, profile, [i for c in checklists for i in c.items])
+    ids = {i.product_id for c in checklists for i in c.items if i.product_id}
+    products = (
+        {p.id: p for p in (await db.execute(select(Product).where(Product.id.in_(ids)))).scalars()} if ids else {}
     )
-    if not vessel_result.scalar_one_or_none():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vessel not found")
-
-    # Get unchecked items with linked products
-    result = await db.execute(
-        select(ChecklistItem)
-        .join(VoyageChecklist)
-        .where(
-            VoyageChecklist.vessel_id == vessel_id,
-            ChecklistItem.is_checked.is_(False),
-            ChecklistItem.product_id.isnot(None),
+    rows = svc.export_rows(checklists, tier, products)
+    slug = re.sub(r"[^A-Za-z0-9]+", "-", vessel.nickname).strip("-").lower() or "vessel"
+    filename = f"{slug}-{tier}.{format}"
+    if format == "csv":
+        return Response(
+            svc.to_csv(rows, profile.label, tier),
+            media_type="text/csv; charset=utf-8",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
         )
+    return Response(
+        svc.to_html(rows, vessel, profile.label, tier),
+        media_type="text/html; charset=utf-8",
+        headers={
+            "Content-Disposition": f'inline; filename="{filename}"',
+            "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'",
+        },
     )
-    unchecked_items = result.scalars().all()
-
-    if not unchecked_items:
-        return {"message": "No items to add", "added_count": 0}
-
-    added_count = 0
-    for checklist_item in unchecked_items:
-        # Check if already in cart
-        existing_result = await db.execute(
-            select(CartItem).where(
-                CartItem.user_id == user_id,
-                CartItem.product_id == checklist_item.product_id,
-            )
-        )
-        existing = existing_result.scalar_one_or_none()
-
-        if existing:
-            existing.quantity += checklist_item.quantity
-        else:
-            cart_item = CartItem(
-                user_id=user_id,
-                product_id=checklist_item.product_id,
-                quantity=checklist_item.quantity,
-            )
-            db.add(cart_item)
-
-        added_count += 1
-
-    await db.flush()
-    return {"message": f"Added {added_count} items to cart", "added_count": added_count}

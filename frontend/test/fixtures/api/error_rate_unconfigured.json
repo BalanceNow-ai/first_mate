@@ -1,0 +1,4 @@
+{
+  "detail": "No operator share is configured, so this payout has no amount to approve",
+  "code": "rate_unconfigured"
+}

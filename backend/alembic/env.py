@@ -3,10 +3,10 @@
 import asyncio
 from logging.config import fileConfig
 
-from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+from alembic import context
 from app.config import get_settings
 from app.database import Base
 from app.models import *  # noqa: F401, F403 — import all models for autogenerate
@@ -14,11 +14,11 @@ from app.models import *  # noqa: F401, F403 — import all models for autogener
 config = context.config
 settings = get_settings()
 
-# Override sqlalchemy.url with the app's database URL
-config.set_main_option("sqlalchemy.url", settings.database_url)
+# The application's DATABASE_URL, unless a caller (e.g. the migration tests) supplies one.
+config.set_main_option("sqlalchemy.url", config.attributes.get("database_url") or settings.database_url)
 
 if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+    fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 target_metadata = Base.metadata
 
@@ -37,7 +37,7 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection):
-    context.configure(connection=connection, target_metadata=target_metadata)
+    context.configure(connection=connection, target_metadata=target_metadata, compare_type=True)
     with context.begin_transaction():
         context.run_migrations()
 

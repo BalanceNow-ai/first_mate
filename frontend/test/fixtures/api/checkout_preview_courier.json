@@ -1,0 +1,13 @@
+{
+  "currency": "NZD",
+  "delivery_type": "courier",
+  "quote_id": "5d81c1ba-2648-49df-b7c4-630b597fd913",
+  "subtotal_cents": 11090,
+  "discount_cents": 0,
+  "shipping_cents": 1290,
+  "total_cents": 12380,
+  "free_shipping_applied": false,
+  "free_shipping_threshold_cents": 15000,
+  "min_charge_cents": 50,
+  "pickup_location": null
+}

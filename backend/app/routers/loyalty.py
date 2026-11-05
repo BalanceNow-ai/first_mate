@@ -1,397 +1,258 @@
-"""Crew Rewards loyalty programme router."""
+"""Crew Rewards: points, ledger, crews & invites, multiplier, discounts, experiences."""
 
-import logging
 import uuid
+from typing import Annotated
 
-import httpx
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select, func
+from fastapi import APIRouter, Depends, Header, Query, status
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import get_settings
+from app.core.rate_limit import mutation_limit
 from app.database import get_db
-from app.middleware.auth import CurrentUserId
-from app.models.loyalty import CrewPoints, CrewTeam, CrewTeamMember
-from app.schemas.loyalty import (
-    CrewPointsResponse,
-    CrewTeamCreate,
-    CrewTeamMemberResponse,
-    CrewTeamResponse,
-    PointsMultiplier,
-    RedeemPointsRequest,
-    SignatureExperience,
+from app.middleware.auth import AdminUser, CurrentPrincipal, CurrentUser
+from app.models.loyalty import (
+    CrewTeam,
+    DiscountEntitlement,
+    ExperienceRedemption,
+    PointsTransaction,
 )
-
-logger = logging.getLogger(__name__)
+from app.models.user import User
+from app.schemas.loyalty import (
+    AdminRedemptionOut,
+    CrewCreate,
+    CrewInviteOut,
+    CrewOut,
+    DiscountRedeem,
+    EntitlementOut,
+    ExperienceCatalogue,
+    ExperienceRedeem,
+    InviteCreate,
+    LeaveResult,
+    MultiplierProgress,
+    MultiplierRun,
+    MultiplierRunResult,
+    MyInviteOut,
+    PointsSummary,
+    RedemptionAction,
+    RedemptionOut,
+    TransactionPage,
+)
+from app.services import cms, crews, loyalty
 
 router = APIRouter(prefix="/loyalty", tags=["Crew Rewards"])
-
-# Points multiplier tiers (monthly collective crew spend)
-MULTIPLIER_TIERS = [
-    {"min_spend": 5000, "multiplier": 3.0},
-    {"min_spend": 2000, "multiplier": 2.0},
-    {"min_spend": 1000, "multiplier": 1.5},
-    {"min_spend": 500, "multiplier": 1.25},
-    {"min_spend": 0, "multiplier": 1.0},
-]
-
-# Points to NZD conversion rate: 100 CP = $1 NZD
-POINTS_TO_NZD_RATE = 100
-
-# Default experiences returned when Strapi is unavailable
-DEFAULT_EXPERIENCES = [
-    SignatureExperience(
-        id="exp-harbour-cruise",
-        title="Harbour Cruise",
-        description="A guided harbour cruise around Auckland's Waitematā Harbour",
-        cost_cp=5000,
-        location="Auckland Harbour",
-        duration_hours=3.0,
-    ),
-    SignatureExperience(
-        id="exp-fishing-charter",
-        title="Fishing Charter",
-        description="Full-day deep-sea fishing charter in the Hauraki Gulf",
-        cost_cp=15000,
-        location="Hauraki Gulf",
-        duration_hours=8.0,
-    ),
-    SignatureExperience(
-        id="exp-marine-detailing",
-        title="Marine Detailing",
-        description="Professional hull and topside detail for vessels up to 30ft",
-        cost_cp=8000,
-        location="Westhaven Marina",
-        duration_hours=4.0,
-    ),
-]
+Db = Annotated[AsyncSession, Depends(get_db, scope="function")]
+Mutation = [Depends(mutation_limit())]
 
 
-async def _fetch_experiences_from_strapi() -> list[SignatureExperience]:
-    """Fetch signature experiences from Strapi CMS.
-
-    Falls back to DEFAULT_EXPERIENCES if Strapi is unavailable.
-    """
-    settings = get_settings()
-    if not settings.strapi_url or not settings.strapi_api_token:
-        return DEFAULT_EXPERIENCES
-
-    headers = {"Authorization": f"Bearer {settings.strapi_api_token}"}
-    try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            response = await client.get(
-                f"{settings.strapi_url}/api/signature-experiences",
-                headers=headers,
-            )
-            response.raise_for_status()
-            data = response.json()
-
-            experiences = []
-            for item in data.get("data", []):
-                attrs = item.get("attributes", item)
-                experiences.append(
-                    SignatureExperience(
-                        id=str(item.get("id", attrs.get("id", ""))),
-                        title=attrs.get("title", ""),
-                        description=attrs.get("description", ""),
-                        cost_cp=attrs.get("cost_cp", 0),
-                        image_url=attrs.get("image_url"),
-                        location=attrs.get("location"),
-                        duration_hours=attrs.get("duration_hours"),
-                        available=attrs.get("available", True),
-                    )
-                )
-            return experiences if experiences else DEFAULT_EXPERIENCES
-    except Exception as exc:
-        logger.warning("Failed to fetch experiences from Strapi: %s", exc)
-        return DEFAULT_EXPERIENCES
+# ------------------------------------------------------------------------- points
+@router.get("/points", response_model=PointsSummary)
+async def get_points(user: CurrentUser, db: Db) -> dict:
+    """Own balance, lifetime points, display-only tier and the Crew Wallet aggregate."""
+    return await loyalty.points_summary(db, user.id)
 
 
-async def _fetch_experience_by_id(experience_id: str) -> SignatureExperience | None:
-    """Fetch a single experience by ID from Strapi (or fallback list)."""
-    experiences = await _fetch_experiences_from_strapi()
-    for exp in experiences:
-        if exp.id == experience_id:
-            return exp
-    return None
-
-
-def _get_multiplier(monthly_spend: float) -> PointsMultiplier:
-    """Calculate the points multiplier based on monthly spend."""
-    for tier in MULTIPLIER_TIERS:
-        if monthly_spend >= tier["min_spend"]:
-            return PointsMultiplier(
-                monthly_spend=monthly_spend,
-                multiplier=tier["multiplier"],
-                effective_rate=tier["multiplier"],
-            )
-    return PointsMultiplier(monthly_spend=monthly_spend, multiplier=1.0, effective_rate=1.0)
-
-
-@router.get("/experiences", response_model=list[SignatureExperience])
-async def get_experiences() -> list[SignatureExperience]:
-    """Get available Signature Experiences from Strapi CMS.
-
-    Returns cached default list if the Strapi service is unavailable.
-    """
-    return await _fetch_experiences_from_strapi()
-
-
-@router.get("/points", response_model=CrewPointsResponse)
-async def get_points(
-    user_id: CurrentUserId,
-    db: AsyncSession = Depends(get_db),
-) -> CrewPoints:
-    """Get the current user's Crew Points balance and tier."""
-    result = await db.execute(select(CrewPoints).where(CrewPoints.user_id == user_id))
-    points = result.scalar_one_or_none()
-    if not points:
-        # Auto-create points record for new users
-        points = CrewPoints(user_id=user_id, points_balance=0, tier="deckhand")
-        db.add(points)
-        await db.flush()
-    return points
-
-
-@router.post("/points/redeem")
-async def redeem_points(
-    request: RedeemPointsRequest,
-    user_id: CurrentUserId,
-    db: AsyncSession = Depends(get_db),
+@router.get("/transactions", response_model=TransactionPage)
+async def list_transactions(
+    user: CurrentUser,
+    db: Db,
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
 ) -> dict:
-    """Redeem Crew Points for product discounts or experiences.
-
-    Rate: 100 CP = $1 NZD for product discounts.
-    Experiences have fixed CP costs defined in the experience catalogue.
-    """
-    result = await db.execute(select(CrewPoints).where(CrewPoints.user_id == user_id))
-    points = result.scalar_one_or_none()
-    if not points:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No points balance found",
+    """The user's points ledger, newest first."""
+    base = select(PointsTransaction).where(PointsTransaction.user_id == user.id)
+    total = (await db.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
+    items = (
+        (
+            await db.execute(
+                base.order_by(PointsTransaction.created_at.desc(), PointsTransaction.id).limit(limit).offset(offset)
+            )
         )
-
-    if points.points_balance < request.points:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Insufficient points. Balance: {points.points_balance}, "
-            f"requested: {request.points}",
-        )
-
-    if request.redemption_type == "product_discount":
-        discount_nzd = request.points / POINTS_TO_NZD_RATE
-        points.points_balance -= request.points
-        await db.flush()
-        return {
-            "redeemed_points": request.points,
-            "discount_nzd": round(discount_nzd, 2),
-            "remaining_balance": points.points_balance,
-        }
-    elif request.redemption_type == "experience":
-        if not request.experience_id:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="experience_id is required for experience redemptions",
-            )
-
-        # Validate against Strapi experience catalogue
-        experience = await _fetch_experience_by_id(str(request.experience_id))
-        if not experience:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Experience '{request.experience_id}' not found",
-            )
-        if not experience.available:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Experience '{experience.title}' is currently unavailable",
-            )
-        if points.points_balance < experience.cost_cp:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Insufficient points for '{experience.title}'. "
-                f"Requires: {experience.cost_cp}, balance: {points.points_balance}",
-            )
-
-        points.points_balance -= experience.cost_cp
-        await db.flush()
-        return {
-            "redeemed_points": experience.cost_cp,
-            "experience_id": experience.id,
-            "experience_title": experience.title,
-            "remaining_balance": points.points_balance,
-        }
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid redemption type. Use 'product_discount' or 'experience'.",
-        )
-
-
-@router.get("/multiplier", response_model=PointsMultiplier)
-async def get_current_multiplier(
-    user_id: CurrentUserId,
-    db: AsyncSession = Depends(get_db),
-) -> PointsMultiplier:
-    """Get the current points multiplier for the user's crew.
-
-    The multiplier is based on the collective monthly spend of all
-    crew members in the current calendar month.
-    """
-    from datetime import datetime
-    from app.models.order import Order
-
-    # Find the user's crew team(s) — use the first team found
-    team_result = await db.execute(
-        select(CrewTeam)
-        .join(CrewTeamMember)
-        .where(CrewTeamMember.user_id == user_id)
+        .scalars()
+        .all()
     )
-    team = team_result.scalar_one_or_none()
-
-    if not team:
-        # User not in any crew team — return base multiplier with solo spend
-        now = datetime.utcnow()
-        month_start = datetime(now.year, now.month, 1)
-        solo_spend_result = await db.execute(
-            select(func.coalesce(func.sum(Order.total), 0)).where(
-                Order.user_id == user_id,
-                Order.created_at >= month_start,
-                Order.status.notin_(["cancelled"]),
-            )
-        )
-        solo_spend = float(solo_spend_result.scalar() or 0)
-        return _get_multiplier(solo_spend)
-
-    # Get all member IDs of the crew team
-    members_result = await db.execute(
-        select(CrewTeamMember.user_id).where(CrewTeamMember.team_id == team.id)
-    )
-    member_ids = [row[0] for row in members_result.all()]
-
-    # Calculate collective monthly spend from orders
-    now = datetime.utcnow()
-    month_start = datetime(now.year, now.month, 1)
-    spend_result = await db.execute(
-        select(func.coalesce(func.sum(Order.total), 0)).where(
-            Order.user_id.in_(member_ids),
-            Order.created_at >= month_start,
-            Order.status.notin_(["cancelled"]),
-        )
-    )
-    monthly_spend = float(spend_result.scalar() or 0)
-
-    return _get_multiplier(monthly_spend)
+    return {"items": list(items), "total": total, "limit": limit, "offset": offset}
 
 
-# --- Crew Team Management ---
+@router.get("/multiplier", response_model=MultiplierProgress)
+async def get_multiplier(user: CurrentUser, db: Db) -> dict:
+    """Current Pacific/Auckland month crew progress (paid orders only)."""
+    return await loyalty.multiplier_progress(db, user.id)
 
 
-@router.post("/teams", response_model=CrewTeamResponse, status_code=status.HTTP_201_CREATED)
-async def create_crew_team(
-    team_data: CrewTeamCreate,
-    user_id: CurrentUserId,
-    db: AsyncSession = Depends(get_db),
-) -> dict:
-    """Create a new crew team. The creator is automatically added as a member."""
-    team = CrewTeam(name=team_data.name, created_by=user_id)
-    db.add(team)
-    await db.flush()
-
-    # Add creator as a member
-    member = CrewTeamMember(team_id=team.id, user_id=user_id)
-    db.add(member)
-    await db.flush()
-
-    return {
-        "id": team.id,
-        "name": team.name,
-        "created_by": team.created_by,
-        "crew_wallet_balance": team.crew_wallet_balance,
-        "member_count": 1,
-        "created_at": team.created_at,
-    }
+# -------------------------------------------------------------------------- crews
+@router.get("/crews/mine", response_model=CrewOut)
+async def my_crew(user: CurrentUser, db: Db) -> dict:
+    return await crews.crew_view(db, user)
 
 
-@router.get("/teams", response_model=list[CrewTeamResponse])
-async def list_my_teams(
-    user_id: CurrentUserId,
-    db: AsyncSession = Depends(get_db),
-) -> list[dict]:
-    """List all crew teams the user belongs to."""
-    result = await db.execute(
-        select(CrewTeam)
-        .join(CrewTeamMember)
-        .where(CrewTeamMember.user_id == user_id)
-    )
-    teams = result.scalars().all()
+@router.post("/crews", response_model=CrewOut, status_code=status.HTTP_201_CREATED, dependencies=Mutation)
+async def create_crew(body: CrewCreate, user: CurrentUser, db: Db) -> dict:
+    """Create a crew; the creator becomes its captain."""
+    await crews.create_crew(db, user, body.name)
+    return await crews.crew_view(db, user)
 
-    team_responses = []
-    for team in teams:
-        member_count_result = await db.execute(
-            select(func.count()).select_from(CrewTeamMember).where(
-                CrewTeamMember.team_id == team.id
-            )
-        )
-        member_count = member_count_result.scalar() or 0
-        team_responses.append(
+
+@router.post("/crews/mine/leave", response_model=LeaveResult, dependencies=Mutation)
+async def leave_crew(user: CurrentUser, db: Db) -> dict:
+    return await crews.leave(db, user)
+
+
+@router.delete("/crews/mine/members/{member_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=Mutation)
+async def remove_member(member_id: uuid.UUID, user: CurrentUser, db: Db) -> None:
+    await crews.remove_member(db, user, member_id)
+
+
+@router.get("/crews/mine/invites", response_model=list[CrewInviteOut])
+async def crew_invites(user: CurrentUser, db: Db) -> list:
+    """Pending invites of the captain's crew."""
+    return await crews.team_invites(db, user)
+
+
+@router.post(
+    "/crews/mine/invites", response_model=CrewInviteOut, status_code=status.HTTP_201_CREATED, dependencies=Mutation
+)
+async def invite_member(body: InviteCreate, user: CurrentUser, db: Db):
+    return await crews.invite(db, user, str(body.email))
+
+
+@router.delete("/crews/mine/invites/{invite_id}", response_model=CrewInviteOut, dependencies=Mutation)
+async def revoke_invite(invite_id: uuid.UUID, user: CurrentUser, db: Db):
+    return await crews.revoke_invite(db, user, invite_id)
+
+
+async def _my_invite_view(db: AsyncSession, invites) -> list[dict]:
+    out = []
+    for inv in invites:
+        team = await db.get(CrewTeam, inv.team_id)
+        inviter = await db.get(User, inv.invited_by)
+        out.append(
             {
-                "id": team.id,
-                "name": team.name,
-                "created_by": team.created_by,
-                "crew_wallet_balance": team.crew_wallet_balance,
-                "member_count": member_count,
-                "created_at": team.created_at,
+                "id": inv.id,
+                "crew_id": inv.team_id,
+                "crew_name": team.name if team else "",
+                "invited_by_name": inviter.full_name if inviter else None,
+                "status": inv.status,
+                "expires_at": inv.expires_at,
+                "created_at": inv.created_at,
             }
         )
-    return team_responses
+    return out
 
 
-@router.post("/teams/{team_id}/members", status_code=status.HTTP_201_CREATED)
-async def add_team_member(
-    team_id: uuid.UUID,
-    member_user_id: uuid.UUID,
-    user_id: CurrentUserId,
-    db: AsyncSession = Depends(get_db),
-) -> dict:
-    """Add a member to a crew team (max 10 members)."""
-    # Verify team exists and user is the creator
-    result = await db.execute(select(CrewTeam).where(CrewTeam.id == team_id))
-    team = result.scalar_one_or_none()
-    if not team:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team not found")
-    if team.created_by != user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only the team creator can add members",
-        )
+@router.get("/invites", response_model=list[MyInviteOut])
+async def my_invites(user: CurrentUser, principal: CurrentPrincipal, db: Db) -> list[dict]:
+    """Pending invites addressed to the signed-in user's verified email."""
+    return await _my_invite_view(db, await crews.my_invites(db, user, principal.email))
 
-    # Check member limit
-    member_count_result = await db.execute(
-        select(func.count())
-        .select_from(CrewTeamMember)
-        .where(CrewTeamMember.team_id == team_id)
+
+@router.post("/invites/{invite_id}/accept", response_model=CrewOut, dependencies=Mutation)
+async def accept_invite(invite_id: uuid.UUID, user: CurrentUser, principal: CurrentPrincipal, db: Db) -> dict:
+    await crews.accept(db, user, principal.email, invite_id)
+    return await crews.crew_view(db, user)
+
+
+@router.post("/invites/{invite_id}/decline", response_model=MyInviteOut, dependencies=Mutation)
+async def decline_invite(invite_id: uuid.UUID, user: CurrentUser, principal: CurrentPrincipal, db: Db) -> dict:
+    inv = await crews.decline(db, user, principal.email, invite_id)
+    return (await _my_invite_view(db, [inv]))[0]
+
+
+# ---------------------------------------------------------------------- discounts
+@router.post(
+    "/redeem/discount", response_model=EntitlementOut, status_code=status.HTTP_201_CREATED, dependencies=Mutation
+)
+async def redeem_discount(
+    body: DiscountRedeem,
+    user: CurrentUser,
+    db: Db,
+    idempotency_key: Annotated[str | None, Header(max_length=200)] = None,
+) -> DiscountEntitlement:
+    """Spend own points (multiple of 100; 100 CP = $1) for a single-use discount."""
+    return await loyalty.redeem_discount(db, user.id, body.points, idempotency_key)
+
+
+@router.get("/entitlements", response_model=list[EntitlementOut])
+async def list_entitlements(user: CurrentUser, db: Db, status_filter: str | None = Query(None, alias="status")) -> list:
+    q = select(DiscountEntitlement).where(DiscountEntitlement.user_id == user.id)
+    if status_filter:
+        q = q.where(DiscountEntitlement.status == status_filter)
+    return list((await db.execute(q.order_by(DiscountEntitlement.created_at.desc()))).scalars())
+
+
+@router.post("/entitlements/{entitlement_id}/void", response_model=EntitlementOut, dependencies=Mutation)
+async def void_entitlement(entitlement_id: uuid.UUID, user: CurrentUser, db: Db) -> DiscountEntitlement:
+    """Void an unused (issued) discount; its points are restored."""
+    return await loyalty.void_entitlement(db, user.id, entitlement_id)
+
+
+# -------------------------------------------------------------------- experiences
+@router.get("/experiences", response_model=ExperienceCatalogue)
+async def list_experiences(user: CurrentUser) -> dict:
+    """The authoritative Signature Experiences catalogue (no defaults when unavailable)."""
+    return (await cms.fetch_experiences()).as_dict()
+
+
+@router.post(
+    "/redeem/experience", response_model=RedemptionOut, status_code=status.HTTP_201_CREATED, dependencies=Mutation
+)
+async def redeem_experience(
+    body: ExperienceRedeem,
+    user: CurrentUser,
+    db: Db,
+    idempotency_key: Annotated[str | None, Header(max_length=200)] = None,
+) -> ExperienceRedemption:
+    """Redeem points for a Signature Experience (validated against a fresh catalogue).
+    Send an ``Idempotency-Key`` so a repeated or retried request never debits twice."""
+    return await loyalty.redeem_experience(db, user.id, body.experience_id, body.note, idempotency_key)
+
+
+@router.get("/redemptions", response_model=list[RedemptionOut])
+async def my_redemptions(user: CurrentUser, db: Db) -> list:
+    q = (
+        select(ExperienceRedemption)
+        .where(ExperienceRedemption.user_id == user.id)
+        .order_by(ExperienceRedemption.created_at.desc())
     )
-    if (member_count_result.scalar() or 0) >= 10:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Team is full (max 10 members)",
-        )
+    return list((await db.execute(q)).scalars())
 
-    # Check if already a member
-    existing = await db.execute(
-        select(CrewTeamMember).where(
-            CrewTeamMember.team_id == team_id, CrewTeamMember.user_id == member_user_id
-        )
+
+# -------------------------------------------------------------------------- admin
+@router.get("/admin/redemptions", response_model=list[AdminRedemptionOut])
+async def admin_redemptions(
+    admin: AdminUser,
+    db: Db,
+    status_filter: str | None = Query(None, alias="status"),
+    limit: int = Query(100, ge=1, le=500),
+) -> list:
+    q = select(ExperienceRedemption).order_by(ExperienceRedemption.created_at).limit(limit)
+    if status_filter:
+        q = q.where(ExperienceRedemption.status == status_filter)
+    return list((await db.execute(q)).scalars())
+
+
+async def _redemption_action(action: str, redemption_id: uuid.UUID, body: RedemptionAction | None, admin: User, db):
+    return await loyalty.update_experience_redemption(
+        db, redemption_id, action, admin.id, body.staff_note if body else None
     )
-    if existing.scalar_one_or_none():
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="User is already a member of this team",
-        )
 
-    member = CrewTeamMember(team_id=team_id, user_id=member_user_id)
-    db.add(member)
-    await db.flush()
-    return {"message": "Member added to team"}
+
+@router.post("/admin/redemptions/{redemption_id}/confirm", response_model=AdminRedemptionOut)
+async def confirm_redemption(redemption_id: uuid.UUID, admin: AdminUser, db: Db, body: RedemptionAction | None = None):
+    return await _redemption_action("confirm", redemption_id, body, admin, db)
+
+
+@router.post("/admin/redemptions/{redemption_id}/fulfil", response_model=AdminRedemptionOut)
+async def fulfil_redemption(redemption_id: uuid.UUID, admin: AdminUser, db: Db, body: RedemptionAction | None = None):
+    return await _redemption_action("fulfil", redemption_id, body, admin, db)
+
+
+@router.post("/admin/redemptions/{redemption_id}/cancel", response_model=AdminRedemptionOut)
+async def cancel_redemption(redemption_id: uuid.UUID, admin: AdminUser, db: Db, body: RedemptionAction | None = None):
+    """Cancel a requested/confirmed redemption; the points are restored."""
+    return await _redemption_action("cancel", redemption_id, body, admin, db)
+
+
+@router.post("/admin/multipliers/run", response_model=MultiplierRunResult)
+async def run_multipliers(body: MultiplierRun, admin: AdminUser, db: Db) -> dict:
+    """Run the monthly multiplier calculation now (idempotent; default previous month)."""
+    return await loyalty.calculate_monthly_multipliers(db, body.period)

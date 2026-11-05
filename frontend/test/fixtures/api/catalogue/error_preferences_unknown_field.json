@@ -1,0 +1,14 @@
+{
+  "detail": "Request validation failed",
+  "code": "validation_error",
+  "errors": [
+    {
+      "loc": [
+        "body",
+        "transactional"
+      ],
+      "msg": "Extra inputs are not permitted",
+      "type": "extra_forbidden"
+    }
+  ]
+}

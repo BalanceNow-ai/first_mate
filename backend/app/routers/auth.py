@@ -1,56 +1,117 @@
-"""Authentication router — delegates to Supabase Auth."""
+"""Identity: idempotent local profile provisioning bound to the verified token subject.
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+Sign-up, sign-in, refresh and sign-out happen against Supabase Auth from the client.
+This router only mirrors the verified identity into a local profile. The user id and
+email are taken from the verified access token — never from the request body.
+"""
+
+from fastapi import APIRouter, Depends, Response, status
+from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db
-from app.middleware.auth import CurrentUserId
+from app.core.errors import AppError
+from app.core.rate_limit import auth_limit
+from app.database import get_db, utcnow
+from app.middleware.auth import CurrentPrincipal, CurrentUser
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse, UserUpdate
+from app.schemas.user import ProvisionRequest, ProvisionResponse, UserResponse
+from app.services import identity
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-async def register_user(
-    user_data: UserCreate,
-    db: AsyncSession = Depends(get_db),
-) -> User:
-    """Register a new user in the local database after Supabase Auth signup.
+async def _provision(
+    body: ProvisionRequest, principal: CurrentPrincipal, response: Response, db: AsyncSession
+) -> ProvisionResponse:
+    existing = await db.get(User, principal.subject)
+    if existing is not None:
+        changed = False
+        if body.full_name and not existing.full_name:
+            existing.full_name, changed = body.full_name, True
+        if body.phone and not existing.phone:
+            existing.phone, changed = body.phone, True
+        if changed:
+            await db.flush()
+        response.status_code = status.HTTP_200_OK
+        return ProvisionResponse.model_validate(existing).model_copy(update={"created": False})
 
-    The frontend first creates the user in Supabase Auth, then calls this
-    endpoint to mirror the user record in our PostgreSQL database.
-    """
-    existing = await db.execute(select(User).where(User.email == user_data.email))
-    if existing.scalar_one_or_none():
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="User with this email already exists",
+    if not principal.email:
+        raise AppError(400, "email_required", "Your sign-in does not include an email address")
+    verified_at = utcnow()
+    admin_view = await identity.confirmed_email(principal.subject)
+    if admin_view is not None:
+        admin_email, confirmed_at = admin_view
+        if confirmed_at is None or admin_email != principal.email:
+            raise AppError(403, "email_not_confirmed", "Confirm your email address before completing sign-up")
+        verified_at = confirmed_at
+    clash = (await db.execute(select(User).where(func.lower(User.email) == principal.email))).scalar_one_or_none()
+    if clash is not None:
+        # The email belongs to a different identity (e.g. a deleted and re-created auth
+        # account). Never re-bind another account's data to this subject.
+        raise AppError(
+            409,
+            "email_bound_to_other_account",
+            "This email is already linked to a different account. Contact support.",
         )
 
     user = User(
-        id=user_data.id,
-        email=user_data.email,
-        full_name=user_data.full_name,
-        phone=user_data.phone,
+        id=principal.subject,
+        email=principal.email,
+        full_name=body.full_name,
+        phone=body.phone,
+        role="customer",
+        email_verified_at=verified_at,
     )
     db.add(user)
-    await db.flush()
-    return user
+    try:
+        await db.flush()
+    except IntegrityError:
+        # Concurrent provisioning of the same subject: return the winner's row.
+        await db.rollback()
+        winner = await db.get(User, principal.subject)
+        if winner is None:
+            raise AppError(409, "provisioning_conflict", "Account could not be provisioned") from None
+        response.status_code = status.HTTP_200_OK
+        return ProvisionResponse.model_validate(winner).model_copy(update={"created": False})
+    response.status_code = status.HTTP_201_CREATED
+    return ProvisionResponse.model_validate(user).model_copy(update={"created": True})
+
+
+@router.post(
+    "/provision",
+    response_model=ProvisionResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(auth_limit())],
+)
+async def provision_profile(
+    body: ProvisionRequest,
+    principal: CurrentPrincipal,
+    response: Response,
+    db: AsyncSession = Depends(get_db, scope="function"),
+) -> ProvisionResponse:
+    """Create (201) or return (200) the local profile for the authenticated subject."""
+    return await _provision(body, principal, response, db)
+
+
+@router.post(
+    "/register",
+    response_model=ProvisionResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(auth_limit())],
+    deprecated=True,
+)
+async def register_user(
+    body: ProvisionRequest,
+    principal: CurrentPrincipal,
+    response: Response,
+    db: AsyncSession = Depends(get_db, scope="function"),
+) -> ProvisionResponse:
+    """Deprecated alias of ``/auth/provision`` (identity always comes from the token)."""
+    return await _provision(body, principal, response, db)
 
 
 @router.get("/me", response_model=UserResponse)
-async def get_current_user(
-    user_id: CurrentUserId,
-    db: AsyncSession = Depends(get_db),
-) -> User:
-    """Get the current authenticated user's profile."""
-    result = await db.execute(select(User).where(User.id == user_id))
-    user = result.scalar_one_or_none()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
-        )
+async def get_me(user: CurrentUser) -> User:
+    """The authenticated user's profile (403 ``profile_not_provisioned`` if absent)."""
     return user

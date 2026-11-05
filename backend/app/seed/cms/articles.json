@@ -1,0 +1,22 @@
+[
+  {
+    "id": "synthetic-outboard-winter-prep",
+    "slug": "synthetic-outboard-winter-prep",
+    "title": "[SYNTHETIC] Preparing an outboard for winter lay-up",
+    "summary": "Synthetic placeholder article for local development. Not maintenance advice.",
+    "body": "This is synthetic fixture text used to exercise the content pages locally. Follow your engine manufacturer's documentation for real maintenance procedures.",
+    "category": "Maintenance",
+    "published_at": "2026-01-15T09:00:00+13:00",
+    "is_synthetic": true
+  },
+  {
+    "id": "synthetic-safety-gear-checklist",
+    "slug": "synthetic-safety-gear-checklist",
+    "title": "[SYNTHETIC] Safety gear before you leave the ramp",
+    "summary": "Synthetic placeholder article for local development. Not safety guidance.",
+    "body": "This is synthetic fixture text used to exercise the content pages locally. Consult Maritime NZ for authoritative safety requirements.",
+    "category": "Safety",
+    "published_at": "2026-02-01T09:00:00+13:00",
+    "is_synthetic": true
+  }
+]

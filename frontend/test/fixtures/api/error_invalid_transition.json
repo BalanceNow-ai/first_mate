@@ -1,0 +1,4 @@
+{
+  "detail": "Cannot move a delivery from picked_up to delivered",
+  "code": "invalid_transition"
+}

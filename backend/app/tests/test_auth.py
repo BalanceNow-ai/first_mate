@@ -1,117 +1,204 @@
-"""Tests for authentication and authorization."""
+"""Authentication, provisioning and authorization tests (no auth overrides)."""
 
+import time
 import uuid
 
+import jwt
 import pytest
-from httpx import ASGITransport, AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
+from cryptography.hazmat.primitives.asymmetric import ec
 
-from app.tests.conftest import TEST_USER_ID, TestSessionLocal
-from app.models.user import User
-from app.models.vessel import Vessel
-
-
-OTHER_USER_ID = uuid.UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
+from app.config import Settings
+from app.core.errors import AppError
+from app.middleware import auth as auth_mod
+from app.tests.conftest import TEST_ISSUER, TEST_JWT_SECRET, auth_headers, create_actor, make_token
 
 
-@pytest.fixture
-async def other_user_vessel(db_session: AsyncSession) -> Vessel:
-    """Create a vessel owned by a different user."""
-    other_user = User(
-        id=OTHER_USER_ID,
-        email="other@helm.co.nz",
-        full_name="Other User",
+async def test_missing_token_is_rejected(client):
+    r = await client.get("/api/v1/auth/me")
+    assert r.status_code == 401
+    assert r.json()["code"] == "invalid_token"
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"expires_in": -120},  # expired beyond leeway
+        {"audience": "anon"},  # wrong audience
+        {"issuer": "https://evil.example/auth/v1"},  # wrong issuer
+        {"secret": "a-different-secret-that-is-long-enough-000"},  # forged signature
+    ],
+    ids=["expired", "wrong-audience", "wrong-issuer", "forged"],
+)
+async def test_invalid_tokens_rejected(client, customer, kwargs):
+    headers = {"Authorization": f"Bearer {make_token(customer.id, customer.email, **kwargs)}"}
+    r = await client.get("/api/v1/auth/me", headers=headers)
+    assert r.status_code == 401
+    # No library/exception detail leaks to the client.
+    assert "Signature" not in r.text and "Traceback" not in r.text
+
+
+async def test_alg_none_and_anon_key_tokens_rejected(client, customer):
+    now = int(time.time())
+    claims = {"sub": str(customer.id), "aud": "authenticated", "iss": TEST_ISSUER, "iat": now, "exp": now + 60}
+    unsigned = jwt.encode(claims, key=None, algorithm="none")
+    r = await client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {unsigned}"})
+    assert r.status_code == 401
+    # A token signed with the *public anon key* must never verify.
+    anon_signed = jwt.encode(claims, "public-anon-key-value-xxxxxxxxxxxxxxxxxxxx", algorithm="HS256")
+    r = await client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {anon_signed}"})
+    assert r.status_code == 401
+
+
+async def test_missing_subject_and_service_role_rejected(client):
+    now = int(time.time())
+    base = {"aud": "authenticated", "iss": TEST_ISSUER, "iat": now, "exp": now + 60}
+    no_sub = jwt.encode(base, TEST_JWT_SECRET, algorithm="HS256")
+    assert (await client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {no_sub}"})).status_code == 401
+    svc = make_token(uuid.uuid4(), "x@example.test", extra={"role": "service_role"})
+    assert (await client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {svc}"})).status_code == 401
+
+
+async def test_provision_creates_profile_from_token_identity(client):
+    sub = uuid.uuid4()
+    headers = auth_headers(sub, "New.Skipper@Example.Test")
+    r = await client.post("/api/v1/auth/provision", json={"full_name": "New Skipper"}, headers=headers)
+    assert r.status_code == 201, r.text
+    body = r.json()
+    assert body["id"] == str(sub)
+    assert body["email"] == "new.skipper@example.test"
+    assert body["role"] == "customer" and body["created"] is True
+    # Idempotent: repeating returns the same profile with 200.
+    r2 = await client.post("/api/v1/auth/provision", json={}, headers=headers)
+    assert r2.status_code == 200 and r2.json()["id"] == str(sub) and r2.json()["created"] is False
+    me = await client.get("/api/v1/auth/me", headers=headers)
+    assert me.status_code == 200 and me.json()["full_name"] == "New Skipper"
+
+
+async def test_provision_rejects_smuggled_identity_and_role(client, customer):
+    sub = uuid.uuid4()
+    headers = auth_headers(sub, "someone@example.test")
+    for body in ({"id": str(customer.id)}, {"role": "admin"}, {"email": customer.email}):
+        r = await client.post("/api/v1/auth/provision", json=body, headers=headers)
+        assert r.status_code == 422, body
+    # The deprecated /register alias also takes identity only from the token.
+    r = await client.post("/api/v1/auth/register", json={"id": str(customer.id)}, headers=headers)
+    assert r.status_code == 422
+
+
+async def test_provision_refuses_email_bound_to_other_subject(client, customer):
+    headers = auth_headers(uuid.uuid4(), customer.email.upper())
+    r = await client.post("/api/v1/auth/provision", json={}, headers=headers)
+    assert r.status_code == 409
+    assert r.json()["code"] == "email_bound_to_other_account"
+
+
+async def test_unprovisioned_token_cannot_use_api(client):
+    headers = auth_headers(uuid.uuid4(), "ghost@example.test")
+    r = await client.get("/api/v1/vessels/", headers=headers)
+    assert r.status_code == 403
+    assert r.json()["code"] == "profile_not_provisioned"
+
+
+async def test_role_cannot_be_self_assigned(client, customer):
+    r = await client.patch("/api/v1/users/me", json={"role": "admin"}, headers=customer.headers)
+    assert r.status_code == 422
+    # Role claims inside the token are ignored for authorization.
+    forged_role = auth_headers(
+        customer.id, customer.email, extra={"user_metadata": {"role": "admin"}, "app_role": "admin"}
     )
-    db_session.add(other_user)
-    await db_session.flush()
+    r = await client.get("/api/v1/admin/users", headers=forged_role)
+    assert r.status_code == 403
 
-    vessel = Vessel(
-        user_id=OTHER_USER_ID,
-        nickname="Not My Boat",
-        make="Rayglass",
-        model="Legend 2500",
-        year=2021,
-        is_primary=True,
+
+async def test_admin_role_management_and_last_admin_guard(client, admin, customer):
+    r = await client.put(f"/api/v1/admin/users/{customer.id}/role", json={"role": "dispatcher"}, headers=admin.headers)
+    assert r.status_code == 200 and r.json()["role"] == "dispatcher"
+    r = await client.put(f"/api/v1/admin/users/{admin.id}/role", json={"role": "customer"}, headers=admin.headers)
+    assert r.status_code == 409 and r.json()["code"] == "last_admin"
+    audit = await client.get("/api/v1/admin/audit", headers=admin.headers)
+    assert any(a["action"] == "set_role" for a in audit.json())
+    r = await client.put(f"/api/v1/admin/users/{admin.id}/role", json={"role": "customer"}, headers=customer.headers)
+    assert r.status_code == 403
+
+
+async def test_auth_rate_limit(client):
+    headers = auth_headers(uuid.uuid4(), "burst@example.test")
+    codes = [(await client.post("/api/v1/auth/provision", json={}, headers=headers)).status_code for _ in range(25)]
+    assert 429 in codes
+
+
+async def test_jwks_mode_verifies_asymmetric_tokens(monkeypatch, customer):
+    key = ec.generate_private_key(ec.SECP256R1())
+    kid = "test-kid"
+    public_jwk = jwt.algorithms.ECAlgorithm.to_jwk(key.public_key(), as_dict=True)
+    public_jwk.update({"kid": kid, "alg": "ES256", "use": "sig"})
+    settings = Settings(
+        app_env="test",
+        auth_mode="jwks",
+        supabase_url="https://proj.supabase.test",
+        supabase_jwt_audience="authenticated",
     )
-    db_session.add(vessel)
-    await db_session.commit()
-    return vessel
+    monkeypatch.setattr(jwt.PyJWKClient, "fetch_data", lambda self: {"keys": [public_jwk]})
+    auth_mod._jwk_clients.clear()
+    now = int(time.time())
+    claims = {
+        "sub": str(customer.id),
+        "email": customer.email,
+        "aud": "authenticated",
+        "iss": "https://proj.supabase.test/auth/v1",
+        "iat": now,
+        "exp": now + 300,
+        "role": "authenticated",
+    }
+    good = jwt.encode(claims, key, algorithm="ES256", headers={"kid": kid})
+    principal = await auth_mod.verify_access_token(good, settings)
+    assert principal.subject == customer.id
+
+    other = ec.generate_private_key(ec.SECP256R1())
+    forged = jwt.encode(claims, other, algorithm="ES256", headers={"kid": kid})
+    with pytest.raises(AppError):
+        await auth_mod.verify_access_token(forged, settings)
+    # HS256 tokens are refused in JWKS mode (algorithm confusion).
+    hs = jwt.encode(claims, "x" * 40, algorithm="HS256", headers={"kid": kid})
+    with pytest.raises(AppError):
+        await auth_mod.verify_access_token(hs, settings)
+    wrong_aud = jwt.encode({**claims, "aud": "other"}, key, algorithm="ES256", headers={"kid": kid})
+    with pytest.raises(AppError):
+        await auth_mod.verify_access_token(wrong_aud, settings)
 
 
-@pytest.mark.asyncio
-async def test_cannot_access_other_users_vessel(
-    client: AsyncClient, test_user, other_user_vessel
-):
-    """Verify that a user cannot access vessels owned by another user.
-
-    The authenticated user (TEST_USER_ID) should get a 404 when trying to
-    access a vessel that belongs to OTHER_USER_ID, because the vessel query
-    filters by both vessel_id AND user_id.
-    """
-    response = await client.get(f"/api/v1/vessels/{other_user_vessel.id}")
-    assert response.status_code == 404
-    assert response.json()["detail"] == "Vessel not found"
+async def test_cross_account_isolation_of_profiles(client, customer, other_customer):
+    me1 = (await client.get("/api/v1/users/me", headers=customer.headers)).json()
+    me2 = (await client.get("/api/v1/users/me", headers=other_customer.headers)).json()
+    assert me1["id"] == str(customer.id) and me2["id"] == str(other_customer.id)
 
 
-@pytest.mark.asyncio
-async def test_cannot_update_other_users_vessel(
-    client: AsyncClient, test_user, other_user_vessel
-):
-    """Verify that a user cannot update another user's vessel."""
-    response = await client.patch(
-        f"/api/v1/vessels/{other_user_vessel.id}",
-        json={"nickname": "Hijacked Boat"},
-    )
-    assert response.status_code == 404
+async def test_actor_helper_roles():
+    a = await create_actor("operator")
+    assert a.role == "operator"
 
 
-@pytest.mark.asyncio
-async def test_cannot_delete_other_users_vessel(
-    client: AsyncClient, test_user, other_user_vessel
-):
-    """Verify that a user cannot delete another user's vessel."""
-    response = await client.delete(f"/api/v1/vessels/{other_user_vessel.id}")
-    assert response.status_code == 404
+async def test_provisioning_checks_email_confirmation_via_admin_api(client, monkeypatch):
+    import httpx
 
+    from app.config import get_settings
+    from app.services import identity
 
-@pytest.mark.asyncio
-async def test_list_vessels_only_returns_own(
-    client: AsyncClient, test_user, test_vessel, other_user_vessel
-):
-    """Verify that listing vessels only returns the authenticated user's vessels."""
-    response = await client.get("/api/v1/vessels/")
-    assert response.status_code == 200
-    data = response.json()
-    assert len(data) == 1
-    assert data[0]["nickname"] == "My Stabi"
-    # Ensure the other user's vessel is not in the list
-    vessel_ids = [v["id"] for v in data]
-    assert str(other_user_vessel.id) not in vessel_ids
+    sub = uuid.uuid4()
+    state = {"confirmed": None}
 
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path.endswith(f"/auth/v1/admin/users/{sub}")
+        assert request.headers["authorization"] == "Bearer service-role-test"
+        return httpx.Response(
+            200, json={"id": str(sub), "email": "new@example.test", "email_confirmed_at": state["confirmed"]}
+        )
 
-@pytest.mark.asyncio
-async def test_request_without_token_returns_403():
-    """Verify that a request without an Authorization header is rejected.
-
-    We temporarily remove the mock auth override so the real HTTPBearer
-    dependency runs, which rejects requests without a Bearer token.
-    """
-    from app.main import app
-    from app.middleware.auth import get_current_user_id
-    from app.database import get_db
-
-    # Save and remove the mock override so real auth runs
-    saved_override = app.dependency_overrides.pop(get_current_user_id, None)
-    try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app),
-            base_url="http://test",
-        ) as no_auth_client:
-            response = await no_auth_client.get("/api/v1/vessels/")
-            # HTTPBearer returns 403 (Not Authenticated) when no token is
-            # provided, or 401 if the auth dependency itself raises it.
-            assert response.status_code in (401, 403)
-    finally:
-        # Restore the mock so other tests are unaffected
-        if saved_override:
-            app.dependency_overrides[get_current_user_id] = saved_override
+    monkeypatch.setattr(get_settings(), "supabase_service_role_key", "service-role-test")
+    monkeypatch.setattr(identity, "_transport", httpx.MockTransport(handler))
+    headers = auth_headers(sub, "new@example.test")
+    r = await client.post("/api/v1/auth/provision", json={}, headers=headers)
+    assert r.status_code == 403 and r.json()["code"] == "email_not_confirmed"
+    state["confirmed"] = "2026-11-05T01:02:03Z"
+    r = await client.post("/api/v1/auth/provision", json={}, headers=headers)
+    assert r.status_code == 201, r.text

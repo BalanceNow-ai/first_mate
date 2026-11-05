@@ -1,0 +1,13 @@
+{
+  "detail": "Request validation failed",
+  "code": "validation_error",
+  "errors": [
+    {
+      "loc": [
+        "body"
+      ],
+      "msg": "Value error, Set due_on and/or due_engine_hours",
+      "type": "value_error"
+    }
+  ]
+}

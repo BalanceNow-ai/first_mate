@@ -1,0 +1,64 @@
+{
+  "conversation_id": "57c5af7d-e2a6-41ff-86c0-7c2b63790375",
+  "message": {
+    "role": "assistant",
+    "content": "For Kahawai (2021 Stabicraft 2050 Supercab), here is what the admitted sources say:\n**Synthetic Yamaha F150 service notes > Engine oil and oil filter (Yamaha F150)**\n- Oil filter (synthetic code): SYN-OILF-150 [1]\n- In this synthetic schedule the engine oil and oil filter are changed every 100 engine hours or every season, with the engine warm and level. [1]\n**Matching products in our catalogue**\n- Oil filter — Yamaha F150 (synthetic) (SYN-OILF-150): Fits Kahawai (2021 Stabicraft 2050 Supercab); in stock.",
+    "created_at": "2026-11-05T07:50:12.412241Z"
+  },
+  "grounding": {
+    "status": "grounded",
+    "specialists_consulted": [
+      "engine"
+    ],
+    "note": "Based on 1 admitted source passage(s). Cited sources include synthetic test fixtures — not real maintenance, safety or regulatory guidance."
+  },
+  "citations": [
+    {
+      "index": 1,
+      "source_id": "173a932f-8b77-4e94-bd7d-b9cfa44d3ec6",
+      "chunk_id": "33e50f7f-4c6f-45af-afe1-cd0a8fdab18e",
+      "title": "Synthetic service notes — Yamaha F150 outboard",
+      "publisher": "Helm synthetic test fixture",
+      "url": null,
+      "licence": "Synthetic test fixture (no third-party content)",
+      "excerpt": "The synthetic oil filter code for the Yamaha F150 is SYN-OILF-150. In this synthetic schedule the engine oil and oil filter are changed every 100 engine hours or every season, with the engine warm and level.",
+      "is_synthetic": true
+    }
+  ],
+  "products": [
+    {
+      "id": "4e5d0f2a-c94e-45b2-98be-ca2ac5867f68",
+      "name": "Oil filter — Yamaha F150 (synthetic)",
+      "sku": "SYN-OILF-150",
+      "brand": "FixtureParts",
+      "effective_price_cents": 2890,
+      "currency": "NZD",
+      "in_stock": true,
+      "image": null,
+      "fitment": {
+        "status": "verified_fit",
+        "vessel_id": "e1080e35-be26-4bb5-8bf3-4f23b5f5ec5f",
+        "message": "Fits Kahawai (2021 Stabicraft 2050 Supercab)",
+        "reasons": [
+          "engine matches verified fitment"
+        ],
+        "matched_rule_ids": [
+          "0ef08618-a0b2-488a-be55-8dc7809bebd1"
+        ]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "type": "add_to_cart",
+      "product_id": "4e5d0f2a-c94e-45b2-98be-ca2ac5867f68",
+      "quantity": 1,
+      "label": "Add 1 × Oil filter — Yamaha F150 (synthetic) to cart"
+    }
+  ],
+  "vessel": {
+    "id": "e1080e35-be26-4bb5-8bf3-4f23b5f5ec5f",
+    "label": "Kahawai (2021 Stabicraft 2050 Supercab)"
+  },
+  "mode": "local_extractive"
+}

@@ -1,146 +1,68 @@
-"""Shipping rate calculation router (NZ Post + Aramex)."""
+"""Server-owned delivery quotes and options for the current cart."""
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
-from app.schemas.shipping import ShippingRate, ShippingRateRequest, ShippingRatesResponse
+from app.core.errors import AppError
+from app.core.rate_limit import rate_limit, user_rate_limit
+from app.database import get_db
+from app.middleware.auth import CurrentUserId
+from app.schemas.shipping import (
+    CourierDestination,
+    DeliveryOptionsResponse,
+    EstimateRequest,
+    EstimateResponse,
+    QuoteRequest,
+    QuoteResponse,
+)
+from app.services import shipping_quotes
 
-router = APIRouter(prefix="/shipping", tags=["Shipping"])
-settings = get_settings()
+router = APIRouter(prefix="/shipping", tags=["Shipping & Quotes"])
 
 
-async def _get_nzpost_rate(request: ShippingRateRequest) -> ShippingRate | None:
-    """Fetch shipping rate from NZ Post API.
-
-    In production, this calls the NZ Post Rate Card API.
-    Returns a fallback rate structure for development.
-    """
-    if not settings.nzpost_client_id:
-        # Development fallback rates based on weight
-        weight_kg = request.weight_grams / 1000
-        if weight_kg <= 1:
-            price = 7.50
-        elif weight_kg <= 5:
-            price = 12.90
-        elif weight_kg <= 15:
-            price = 18.50
-        else:
-            price = 29.90
-
-        return ShippingRate(
-            provider="nz_post",
-            service_name="NZ Post CourierPost",
-            price_nzd=price,
-            estimated_days=2,
+@router.post(
+    "/quotes",
+    response_model=QuoteResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(user_rate_limit("quote", lambda: get_settings().rate_limit_quote_per_minute))],
+)
+async def create_quote(
+    body: QuoteRequest, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
+) -> dict:
+    """Price the current cart for a delivery type and destination. The quote is bound to
+    this user and cart, expires after ``QUOTE_TTL_MINUTES`` and can be used once."""
+    is_courier_dest = isinstance(body.destination, CourierDestination)
+    if is_courier_dest != (body.delivery_type == "courier"):
+        raise AppError(
+            422,
+            "invalid_destination",
+            "Courier quotes need {postcode}; Helm Dash quotes need {lat, lng}",
         )
-
-    # TODO: Implement actual NZ Post API call
-    # Use httpx to call https://api.nzpost.co.nz/ratecard/v1/rates
-    try:
-        import httpx
-
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                "https://api.nzpost.co.nz/ratecard/v1/rates",
-                headers={"Authorization": f"Bearer {settings.nzpost_client_id}"},
-                json={
-                    "destination_postcode": request.destination_postcode,
-                    "weight_grams": request.weight_grams,
-                    "length_cm": request.length_cm,
-                    "width_cm": request.width_cm,
-                    "height_cm": request.height_cm,
-                },
-            )
-            if response.status_code == 200:
-                data = response.json()
-                return ShippingRate(
-                    provider="nz_post",
-                    service_name=data.get("service_name", "NZ Post CourierPost"),
-                    price_nzd=data.get("price", 12.90),
-                    estimated_days=data.get("estimated_days", 2),
-                )
-    except Exception:
-        pass
-
-    return None
+    view = await shipping_quotes.create_quote(db, user_id, body.delivery_type, body.destination.model_dump())
+    await db.commit()
+    return shipping_quotes.quote_payload(view)
 
 
-async def _get_aramex_rate(request: ShippingRateRequest) -> ShippingRate | None:
-    """Fetch shipping rate from Aramex NZ API.
-
-    In production, this calls the Aramex rate API.
-    Returns a fallback rate structure for development.
-    """
-    if not settings.aramex_api_key:
-        # Development fallback rates
-        weight_kg = request.weight_grams / 1000
-        if weight_kg <= 1:
-            price = 8.20
-        elif weight_kg <= 5:
-            price = 13.50
-        elif weight_kg <= 15:
-            price = 19.90
-        else:
-            price = 32.00
-
-        return ShippingRate(
-            provider="aramex",
-            service_name="Aramex Fastway Couriers",
-            price_nzd=price,
-            estimated_days=3,
-        )
-
-    # TODO: Implement actual Aramex API call
-    try:
-        import httpx
-
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                "https://api.aramex.co.nz/api/rate",
-                headers={"api-key": settings.aramex_api_key},
-                json={
-                    "destination_postcode": request.destination_postcode,
-                    "weight_grams": request.weight_grams,
-                },
-            )
-            if response.status_code == 200:
-                data = response.json()
-                return ShippingRate(
-                    provider="aramex",
-                    service_name=data.get("service_name", "Aramex Fastway"),
-                    price_nzd=data.get("price", 13.50),
-                    estimated_days=data.get("estimated_days", 3),
-                )
-    except Exception:
-        pass
-
-    return None
+@router.get("/options", response_model=DeliveryOptionsResponse)
+async def delivery_options(user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")) -> dict:
+    """Which delivery types the current cart can use, with the reason when it cannot."""
+    return await shipping_quotes.delivery_options(db, user_id)
 
 
-@router.post("/rates", response_model=ShippingRatesResponse)
-async def calculate_shipping_rates(
-    request: ShippingRateRequest,
-) -> ShippingRatesResponse:
-    """Calculate shipping rates from both NZ Post and Aramex.
-
-    Returns rates from both providers and identifies the cheapest option.
-    """
-    rates: list[ShippingRate] = []
-
-    nzpost_rate = await _get_nzpost_rate(request)
-    if nzpost_rate:
-        rates.append(nzpost_rate)
-
-    aramex_rate = await _get_aramex_rate(request)
-    if aramex_rate:
-        rates.append(aramex_rate)
-
-    if not rates:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Unable to calculate shipping rates at this time",
-        )
-
-    cheapest = min(rates, key=lambda r: r.price_nzd)
-
-    return ShippingRatesResponse(rates=rates, cheapest=cheapest)
+@router.post(
+    "/estimate",
+    response_model=EstimateResponse,
+    dependencies=[
+        Depends(rate_limit("shipping_estimate", lambda: get_settings().rate_limit_shipping_estimate_per_minute))
+    ],
+)
+async def estimate(body: EstimateRequest, db: AsyncSession = Depends(get_db, scope="function")) -> dict:
+    """Public, informational price for product pages. Not a quote: it cannot be used at
+    checkout (``bindable: false``)."""
+    return await shipping_quotes.estimate(
+        db,
+        body.delivery_type,
+        [(i.product_id, i.quantity) for i in body.items],
+        body.destination.model_dump() if body.destination else None,
+    )

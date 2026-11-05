@@ -1,0 +1,111 @@
+{
+  "tier": "grab_and_go",
+  "added_count": 0,
+  "lines": [
+    {
+      "item_id": "6935fbee-b444-4aa0-b336-ebdb9325af85",
+      "template_key": "g_fuel_filter",
+      "item_name": "Spare engine fuel filter (primary)",
+      "product_id": "678aefb3-1dee-4ec1-b1d8-2452afb937e7",
+      "requested": 2,
+      "added": 0,
+      "quantity_in_cart": 2,
+      "status": "already_satisfied",
+      "message": null
+    },
+    {
+      "item_id": "262633f8-ef18-4a81-a0c3-3633137e27da",
+      "template_key": "g_spark_plugs",
+      "item_name": "Spare spark plugs",
+      "product_id": "c91856bb-23c1-4d39-a471-e6a52808e1f9",
+      "requested": 1,
+      "added": 0,
+      "quantity_in_cart": 1,
+      "status": "already_satisfied",
+      "message": null
+    },
+    {
+      "item_id": "053268b9-ed10-445c-9f88-e332f62ab34d",
+      "template_key": "g_fuses",
+      "item_name": "Assorted fuses (5A, 10A, 15A)",
+      "product_id": "aacae832-25d4-42a2-94c4-df3335ce4190",
+      "requested": 1,
+      "added": 0,
+      "quantity_in_cart": 1,
+      "status": "already_satisfied",
+      "message": null
+    },
+    {
+      "item_id": "5e08d678-b514-43a3-b542-e068d34f6443",
+      "template_key": "g_duct_tape",
+      "item_name": "Duct tape",
+      "product_id": "739f5df1-c546-4d3a-a8ad-4e90fc4d467d",
+      "requested": 1,
+      "added": 0,
+      "quantity_in_cart": 1,
+      "status": "already_satisfied",
+      "message": null
+    },
+    {
+      "item_id": "d392424a-c89c-4764-87b0-152a76421972",
+      "template_key": "g_zip_ties",
+      "item_name": "Zip ties (assorted sizes)",
+      "product_id": "480aabd1-b340-4025-95f7-b5d8bdc6ff71",
+      "requested": 1,
+      "added": 0,
+      "quantity_in_cart": 1,
+      "status": "already_satisfied",
+      "message": null
+    },
+    {
+      "item_id": "5e72829a-7460-4613-9f06-31d68182d134",
+      "template_key": "g_hose_clamps",
+      "item_name": "Stainless steel hose clamps (assorted sizes)",
+      "product_id": "56419b8e-0126-4b73-8a9a-3134820c8739",
+      "requested": 1,
+      "added": 0,
+      "quantity_in_cart": 1,
+      "status": "already_satisfied",
+      "message": null
+    },
+    {
+      "item_id": "c07b6a6a-7124-4545-8fc4-985c3e4d46ae",
+      "template_key": "g_bungs",
+      "item_name": "Emergency wooden bungs (tapered)",
+      "product_id": "0199c619-4fdf-410c-8cc8-557ad5d6cef0",
+      "requested": 1,
+      "added": 0,
+      "quantity_in_cart": 1,
+      "status": "already_satisfied",
+      "message": null
+    },
+    {
+      "item_id": "24106d2a-0938-4e4f-829a-cebb1467954b",
+      "template_key": "g_tools",
+      "item_name": "Shifting spanner, pliers, screwdriver set, prop spanner, spark plug spanner",
+      "product_id": "19aeef46-4547-4c19-826f-556124ce5095",
+      "requested": 1,
+      "added": 0,
+      "quantity_in_cart": 1,
+      "status": "already_satisfied",
+      "message": null
+    }
+  ],
+  "skipped": [
+    {
+      "item_id": "90fd3cd8-ee7d-435e-8246-8fb40de08de4",
+      "item_name": "Spare propeller with prop nut and split pin",
+      "reason": "unlinked"
+    },
+    {
+      "item_id": "e75d8450-7611-49c7-a8cf-6159ba8379a7",
+      "item_name": "Spare kill switch lanyard",
+      "reason": "unlinked"
+    },
+    {
+      "item_id": "bca686ba-8df3-4501-a9b5-db971a9e454d",
+      "item_name": "Spare navigation light bulbs (if not LED)",
+      "reason": "unlinked"
+    }
+  ]
+}

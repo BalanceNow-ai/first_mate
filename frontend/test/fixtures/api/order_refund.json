@@ -1,0 +1,13 @@
+{
+  "order_id": "313dec26-cc8b-4e84-a618-e9df023eb676",
+  "provider": "local",
+  "refund_id": "re_local_aa2f1bb09fe64771b3556eaf",
+  "status": "succeeded",
+  "amount_cents": 500,
+  "currency": "NZD",
+  "test_mode": true,
+  "event_outcome": "applied",
+  "refunded_cents": 500,
+  "payment_status": "partially_refunded",
+  "order_status": "ready_for_dispatch"
+}

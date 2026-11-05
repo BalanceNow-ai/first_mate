@@ -1,0 +1,148 @@
+[
+  {
+    "category": "Electrical",
+    "count": 4,
+    "sub_categories": [
+      {
+        "name": "Batteries",
+        "count": 1
+      },
+      {
+        "name": "Fuses",
+        "count": 1
+      },
+      {
+        "name": "Lighting",
+        "count": 1
+      },
+      {
+        "name": "Wire",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "category": "Electronics",
+    "count": 1,
+    "sub_categories": [
+      {
+        "name": "Antennas",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "category": "Engine Parts",
+    "count": 14,
+    "sub_categories": [
+      {
+        "name": "Belts",
+        "count": 1
+      },
+      {
+        "name": "Controls",
+        "count": 1
+      },
+      {
+        "name": "Cooling",
+        "count": 3
+      },
+      {
+        "name": "Fuel System",
+        "count": 3
+      },
+      {
+        "name": "Ignition",
+        "count": 2
+      },
+      {
+        "name": "Oil & Lubricants",
+        "count": 3
+      },
+      {
+        "name": "Propellers",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "category": "General",
+    "count": 3,
+    "sub_categories": [
+      {
+        "name": "Hardware",
+        "count": 1
+      },
+      {
+        "name": "Repair",
+        "count": 2
+      }
+    ]
+  },
+  {
+    "category": "Plumbing",
+    "count": 3,
+    "sub_categories": [
+      {
+        "name": "Bilge Pumps",
+        "count": 1
+      },
+      {
+        "name": "Hose",
+        "count": 1
+      },
+      {
+        "name": "Toilets",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "category": "Safety",
+    "count": 2,
+    "sub_categories": [
+      {
+        "name": "Damage Control",
+        "count": 1
+      },
+      {
+        "name": "Flares",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "category": "Sailing",
+    "count": 1,
+    "sub_categories": [
+      {
+        "name": "Repair",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "category": "Steering",
+    "count": 1,
+    "sub_categories": [
+      {
+        "name": "Hydraulic",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "category": "Tools",
+    "count": 3,
+    "sub_categories": [
+      {
+        "name": "Electrical",
+        "count": 1
+      },
+      {
+        "name": "Kits",
+        "count": 2
+      }
+    ]
+  }
+]

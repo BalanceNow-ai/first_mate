@@ -1,0 +1,10 @@
+{
+  "email_enabled": true,
+  "push_enabled": false,
+  "order_updates": true,
+  "delivery_updates": true,
+  "service_reminders": true,
+  "rewards_updates": true,
+  "marketing": true,
+  "transactional_note": "Order confirmations and refund receipts are always sent by email."
+}

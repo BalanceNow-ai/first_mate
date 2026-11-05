@@ -1,0 +1,194 @@
+{
+  "items": [
+    {
+      "id": "56419b8e-0126-4b73-8a9a-3134820c8739",
+      "sku": "SYN-HOSE-CLAMP",
+      "name": "316 stainless hose clamp assortment (synthetic)",
+      "description": "Synthetic test product — not a real catalogue item. 316 stainless hose clamp assortment (synthetic)",
+      "brand": "FixtureGeneral",
+      "category": "General",
+      "sub_category": "Hardware",
+      "currency": "NZD",
+      "price_cents": 2490,
+      "sale_price_cents": null,
+      "effective_price_cents": 2490,
+      "on_sale": false,
+      "stock_quantity": 34,
+      "in_stock": true,
+      "weight_grams": 400,
+      "images": [],
+      "specifications": {
+        "synthetic": true
+      },
+      "oem_part_numbers": [
+        "SYN-HOSE-CLAMP"
+      ],
+      "part_role": "hose_clamp_assortment",
+      "fitment_scope": "universal",
+      "dangerous_goods": false,
+      "is_active": true,
+      "created_at": "2026-11-05T07:10:53.338362Z",
+      "updated_at": "2026-11-05T07:12:52.059928Z",
+      "fitment": null
+    },
+    {
+      "id": "e4c15f37-c227-4d39-83b1-bee8587806fe",
+      "sku": "SYN-OIL-140",
+      "name": "4-stroke outboard oil 1 L — for Suzuki DF140 (synthetic)",
+      "description": "Synthetic test product — not a real catalogue item. 4-stroke outboard oil 1 L — for Suzuki DF140 (synthetic)",
+      "brand": "FixtureLube",
+      "category": "Engine Parts",
+      "sub_category": "Oil & Lubricants",
+      "currency": "NZD",
+      "price_cents": 2390,
+      "sale_price_cents": null,
+      "effective_price_cents": 2390,
+      "on_sale": false,
+      "stock_quantity": 55,
+      "in_stock": true,
+      "weight_grams": 950,
+      "images": [],
+      "specifications": {
+        "synthetic": true
+      },
+      "oem_part_numbers": [
+        "SYN-OIL-140"
+      ],
+      "part_role": "engine_oil",
+      "fitment_scope": "specific",
+      "dangerous_goods": false,
+      "is_active": true,
+      "created_at": "2026-11-05T07:10:53.311688Z",
+      "updated_at": "2026-11-05T07:10:53.311690Z",
+      "fitment": null
+    },
+    {
+      "id": "9653e8ef-7cef-40cf-9b5d-bce0dff70dbc",
+      "sku": "SYN-OIL-150",
+      "name": "4-stroke outboard oil 1 L — for Yamaha F150 (synthetic)",
+      "description": "Synthetic test product — not a real catalogue item. 4-stroke outboard oil 1 L — for Yamaha F150 (synthetic)",
+      "brand": "FixtureLube",
+      "category": "Engine Parts",
+      "sub_category": "Oil & Lubricants",
+      "currency": "NZD",
+      "price_cents": 2490,
+      "sale_price_cents": null,
+      "effective_price_cents": 2490,
+      "on_sale": false,
+      "stock_quantity": 60,
+      "in_stock": true,
+      "weight_grams": 950,
+      "images": [],
+      "specifications": {
+        "synthetic": true
+      },
+      "oem_part_numbers": [
+        "SYN-OIL-150"
+      ],
+      "part_role": "engine_oil",
+      "fitment_scope": "specific",
+      "dangerous_goods": false,
+      "is_active": true,
+      "created_at": "2026-11-05T07:10:53.308969Z",
+      "updated_at": "2026-11-05T07:26:17.990750Z",
+      "fitment": null
+    },
+    {
+      "id": "af2b2166-1487-404e-acb4-931214894486",
+      "sku": "SYN-BELT-UNI",
+      "name": "Alternator belt (synthetic)",
+      "description": "Synthetic test product — not a real catalogue item. Alternator belt (synthetic)",
+      "brand": "FixtureParts",
+      "category": "Engine Parts",
+      "sub_category": "Belts",
+      "currency": "NZD",
+      "price_cents": 4590,
+      "sale_price_cents": null,
+      "effective_price_cents": 4590,
+      "on_sale": false,
+      "stock_quantity": 5,
+      "in_stock": true,
+      "weight_grams": 150,
+      "images": [],
+      "specifications": {
+        "synthetic": true
+      },
+      "oem_part_numbers": [
+        "SYN-BELT-UNI"
+      ],
+      "part_role": "drive_belt",
+      "fitment_scope": "unspecified",
+      "dangerous_goods": false,
+      "is_active": true,
+      "created_at": "2026-11-05T07:10:53.325114Z",
+      "updated_at": "2026-11-05T07:10:53.325117Z",
+      "fitment": null
+    },
+    {
+      "id": "b095d503-2922-491f-9151-88f3f9adae94",
+      "sku": "SYN-PROP-AL13",
+      "name": "Aluminium propeller 13 x 19 (synthetic)",
+      "description": "Synthetic test product — not a real catalogue item. Aluminium propeller 13 x 19 (synthetic)",
+      "brand": "FixtureProp",
+      "category": "Engine Parts",
+      "sub_category": "Propellers",
+      "currency": "NZD",
+      "price_cents": 24900,
+      "sale_price_cents": null,
+      "effective_price_cents": 24900,
+      "on_sale": false,
+      "stock_quantity": 3,
+      "in_stock": true,
+      "weight_grams": 2600,
+      "images": [],
+      "specifications": {
+        "synthetic": true
+      },
+      "oem_part_numbers": [
+        "SYN-PROP-AL13"
+      ],
+      "part_role": "propeller",
+      "fitment_scope": "unspecified",
+      "dangerous_goods": false,
+      "is_active": true,
+      "created_at": "2026-11-05T07:10:53.321058Z",
+      "updated_at": "2026-11-05T07:10:53.321061Z",
+      "fitment": null
+    },
+    {
+      "id": "0ce2127c-0faf-4060-a3cb-c572e768a47a",
+      "sku": "SYN-HOSE-FIT",
+      "name": "Assorted hose & fittings kit (synthetic)",
+      "description": "Synthetic test product — not a real catalogue item. Assorted hose & fittings kit (synthetic)",
+      "brand": "FixtureGeneral",
+      "category": "Plumbing",
+      "sub_category": "Hose",
+      "currency": "NZD",
+      "price_cents": 5490,
+      "sale_price_cents": null,
+      "effective_price_cents": 5490,
+      "on_sale": false,
+      "stock_quantity": 6,
+      "in_stock": true,
+      "weight_grams": 1500,
+      "images": [],
+      "specifications": {
+        "synthetic": true
+      },
+      "oem_part_numbers": [
+        "SYN-HOSE-FIT"
+      ],
+      "part_role": "hose_fittings_kit",
+      "fitment_scope": "universal",
+      "dangerous_goods": false,
+      "is_active": true,
+      "created_at": "2026-11-05T07:10:53.350583Z",
+      "updated_at": "2026-11-05T07:10:53.350586Z",
+      "fitment": null
+    }
+  ],
+  "total": 32,
+  "offset": 0,
+  "limit": 6,
+  "vessel": null
+}

@@ -1,278 +1,109 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:helm_marine/core/api/api_client.dart';
-import 'package:helm_marine/core/models/vessel.dart';
-import 'package:helm_marine/core/models/product.dart';
+import 'package:helm_marine/core/api/api_error.dart';
+import 'package:helm_marine/core/config/public_config.dart';
+import 'package:helm_marine/core/models/cart.dart';
 import 'package:helm_marine/core/models/user.dart';
+import 'package:helm_marine/core/models/vessel.dart';
 
 final apiServiceProvider = Provider<ApiService>((ref) {
   return ApiService(ref.watch(dioProvider));
 });
 
+/// Typed access to the Helm API. Every failure surfaces as an [ApiError]
+/// carrying the server's `{detail, code}`.
 class ApiService {
-  final Dio _dio;
-
   ApiService(this._dio);
 
-  // --- Auth ---
+  final Dio _dio;
 
-  Future<User> getCurrentUser() async {
-    final response = await _dio.get('/auth/me');
-    return User.fromJson(response.data);
+  Future<T> _call<T>(Future<Response<dynamic>> Function() send, T Function(dynamic) parse) async {
+    try {
+      final response = await send();
+      return parse(response.data);
+    } on DioException catch (e) {
+      throw ApiError.from(e)!;
+    }
   }
 
-  Future<User> registerUser(Map<String, dynamic> data) async {
-    final response = await _dio.post('/auth/register', data: data);
-    return User.fromJson(response.data);
-  }
+  Map<String, dynamic> _map(dynamic data) => (data as Map).cast<String, dynamic>();
+
+  List<Map<String, dynamic>> _list(dynamic data) =>
+      [for (final e in data as List) (e as Map).cast<String, dynamic>()];
+
+  // --- Configuration ---
+
+  /// `GET /api/v1/config/public` (no authentication).
+  Future<PublicConfig> getPublicConfig() => _call(
+        () => _dio.get('/config/public',
+            options: Options(extra: {AuthInterceptor.skipAuthKey: true})),
+        (d) => PublicConfig.fromJson(_map(d)),
+      );
+
+  // --- Identity ---
+
+  /// Idempotently creates the local profile for the signed-in subject. Only
+  /// profile hints are sent — identity and role come from the verified token.
+  Future<ProvisionResult> provision({String? fullName}) => _call(
+        () => _dio.post('/auth/provision', data: {
+          if (fullName != null && fullName.trim().isNotEmpty) 'full_name': fullName.trim(),
+        }),
+        (d) => ProvisionResult.fromJson(_map(d)),
+      );
+
+  Future<User> getCurrentUser() => _call(() => _dio.get('/auth/me'), (d) => User.fromJson(_map(d)));
+
+  Future<User> updateProfile(UserUpdate update) => _call(
+        () => _dio.patch('/users/me', data: update.toJson()),
+        (d) => User.fromJson(_map(d)),
+      );
 
   // --- Vessels ---
 
-  Future<List<Vessel>> getVessels() async {
-    final response = await _dio.get('/vessels/');
-    return (response.data as List)
-        .map((json) => Vessel.fromJson(json))
-        .toList();
-  }
+  Future<List<Vessel>> getVessels() => _call(
+        () => _dio.get('/vessels/'),
+        (d) => [for (final v in _list(d)) Vessel.fromJson(v)],
+      );
 
-  Future<Vessel> getVessel(String id) async {
-    final response = await _dio.get('/vessels/$id');
-    return Vessel.fromJson(response.data);
-  }
+  Future<Vessel> getVessel(String id) =>
+      _call(() => _dio.get('/vessels/$id'), (d) => Vessel.fromJson(_map(d)));
 
-  Future<Vessel> createVessel(Map<String, dynamic> data) async {
-    final response = await _dio.post('/vessels/', data: data);
-    return Vessel.fromJson(response.data);
-  }
+  Future<Vessel> createVessel(VesselDraft draft) => _call(
+        () => _dio.post('/vessels/', data: draft.toCreateJson()),
+        (d) => Vessel.fromJson(_map(d)),
+      );
 
-  Future<Vessel> updateVessel(String id, Map<String, dynamic> data) async {
-    final response = await _dio.patch('/vessels/$id', data: data);
-    return Vessel.fromJson(response.data);
-  }
+  Future<Vessel> updateVessel(String id, VesselDraft draft) => _call(
+        () => _dio.patch('/vessels/$id', data: draft.toUpdateJson()),
+        (d) => Vessel.fromJson(_map(d)),
+      );
 
-  Future<void> deleteVessel(String id) async {
-    await _dio.delete('/vessels/$id');
-  }
+  Future<void> deleteVessel(String id) => _call(() => _dio.delete('/vessels/$id'), (_) {});
 
-  // --- Products ---
-
-  Future<List<String>> getProductCategories() async {
-    final response = await _dio.get('/products/categories');
-    return (response.data as List).cast<String>();
-  }
-
-  Future<List<String>> getProductBrands() async {
-    final response = await _dio.get('/products/brands');
-    return (response.data as List).cast<String>();
-  }
-
-  Future<List<Product>> getProducts({
-    String? category,
-    String? brand,
-    String? vesselId,
-    String? search,
-    bool? onSale,
-    int offset = 0,
-    int limit = 20,
-  }) async {
-    final params = <String, dynamic>{
-      'offset': offset,
-      'limit': limit,
-    };
-    if (category != null) params['category'] = category;
-    if (brand != null) params['brand'] = brand;
-    if (vesselId != null) params['vessel_id'] = vesselId;
-    if (search != null) params['search'] = search;
-    if (onSale == true) params['on_sale'] = true;
-
-    final response = await _dio.get('/products/', queryParameters: params);
-    return (response.data as List)
-        .map((json) => Product.fromJson(json))
-        .toList();
-  }
-
-  Future<Product> getProduct(String id) async {
-    final response = await _dio.get('/products/$id');
-    return Product.fromJson(response.data);
-  }
-
-  Future<Map<String, dynamic>> checkCompatibility(
-      String productId, String vesselId) async {
-    final response = await _dio.get(
-      '/products/$productId/check-compatibility',
-      queryParameters: {'vessel_id': vesselId},
-    );
-    return response.data;
-  }
-
-  // --- AI Chat ---
-
-  Future<Map<String, dynamic>> sendChatMessage({
-    required String message,
-    String? vesselId,
-    String? conversationId,
-  }) async {
-    final data = <String, dynamic>{'message': message};
-    if (vesselId != null) data['vessel_id'] = vesselId;
-    if (conversationId != null) data['conversation_id'] = conversationId;
-
-    final response = await _dio.post('/ai/chat', data: data);
-    return response.data;
-  }
-
-  Future<List<Map<String, dynamic>>> getConversations() async {
-    final response = await _dio.get('/ai/conversations');
-    return (response.data as List).cast<Map<String, dynamic>>();
-  }
-
-  Future<Map<String, dynamic>> getConversation(String id) async {
-    final response = await _dio.get('/ai/conversations/$id');
-    return response.data;
-  }
-
-  // --- Checklists ---
-
-  Future<List<Map<String, dynamic>>> getVesselChecklists(String vesselId) async {
-    final response = await _dio.get('/checklists/vessel/$vesselId');
-    return (response.data as List).cast<Map<String, dynamic>>();
-  }
-
-  Future<Map<String, dynamic>> generateChecklists(String vesselId) async {
-    final response = await _dio.post('/checklists/vessel/$vesselId/generate');
-    return response.data;
-  }
-
-  Future<Map<String, dynamic>> toggleChecklistItem(String itemId) async {
-    final response = await _dio.patch('/checklists/items/$itemId/toggle');
-    return response.data;
-  }
-
-  Future<Map<String, dynamic>> linkProductToItem(
-      String itemId, String productId) async {
-    final response = await _dio.patch(
-      '/checklists/items/$itemId/link-product',
-      data: {'product_id': productId},
-    );
-    return response.data;
-  }
-
-  Future<Map<String, dynamic>> addUncheckedToCart(String vesselId) async {
-    final response =
-        await _dio.post('/checklists/vessel/$vesselId/add-unchecked-to-cart');
-    return response.data;
-  }
+  // --- Products: see features/products/data/catalogue_api.dart (CatalogueApi).
 
   // --- Cart ---
 
-  Future<Map<String, dynamic>> getCart() async {
-    final response = await _dio.get('/cart/');
-    return response.data;
-  }
+  Future<Cart> getCart() => _call(() => _dio.get('/cart/'), (d) => Cart.fromJson(_map(d)));
 
-  Future<void> addToCart(String productId, {int quantity = 1}) async {
-    await _dio.post('/cart/items', data: {
-      'product_id': productId,
-      'quantity': quantity,
-    });
-  }
+  Future<Cart> addToCart(String productId, {int quantity = 1}) => _call(
+        () => _dio.post('/cart/items', data: {'product_id': productId, 'quantity': quantity}),
+        (d) => Cart.fromJson(_map(d)),
+      );
 
-  Future<void> updateCartItem(String itemId, int quantity) async {
-    await _dio.patch('/cart/items/$itemId', data: {'quantity': quantity});
-  }
+  Future<Cart> updateCartItem(String itemId, int quantity) => _call(
+        () => _dio.patch('/cart/items/$itemId', data: {'quantity': quantity}),
+        (d) => Cart.fromJson(_map(d)),
+      );
 
-  Future<void> removeCartItem(String itemId) async {
-    await _dio.delete('/cart/items/$itemId');
-  }
+  Future<Cart> removeCartItem(String itemId) =>
+      _call(() => _dio.delete('/cart/items/$itemId'), (d) => Cart.fromJson(_map(d)));
 
-  Future<void> clearCart() async {
-    await _dio.delete('/cart/');
-  }
+  Future<void> clearCart() => _call(() => _dio.delete('/cart/'), (_) {});
 
-  // --- Orders ---
-
-  Future<List<Map<String, dynamic>>> getOrders() async {
-    final response = await _dio.get('/orders/');
-    return (response.data as List).cast<Map<String, dynamic>>();
-  }
-
-  Future<Map<String, dynamic>> createOrder(Map<String, dynamic> data) async {
-    final response = await _dio.post('/orders/', data: data);
-    return response.data;
-  }
-
-  Future<Map<String, dynamic>> getOrder(String orderId) async {
-    final response = await _dio.get('/orders/$orderId');
-    return response.data;
-  }
-
-  // --- Payments ---
-
-  Future<Map<String, dynamic>> createPaymentIntent(String orderId) async {
-    final response = await _dio.post('/payments/$orderId/create-intent');
-    return response.data;
-  }
-
-  // --- Users ---
-
-  Future<Map<String, dynamic>> updateProfile(
-      Map<String, dynamic> data) async {
-    final response = await _dio.patch('/users/me', data: data);
-    return response.data;
-  }
-
-  // --- Shipping ---
-
-  Future<Map<String, dynamic>> getShippingRates(
-      Map<String, dynamic> data) async {
-    final response = await _dio.post('/shipping/rates', data: data);
-    return response.data;
-  }
-
-  // --- Loyalty ---
-
-  Future<List<Map<String, dynamic>>> getSignatureExperiences() async {
-    final response = await _dio.get('/loyalty/experiences');
-    return (response.data as List).cast<Map<String, dynamic>>();
-  }
-
-  Future<Map<String, dynamic>> getCrewPoints() async {
-    final response = await _dio.get('/loyalty/points');
-    return response.data;
-  }
-
-  Future<Map<String, dynamic>> getCrewMultiplier() async {
-    final response = await _dio.get('/loyalty/multiplier');
-    return response.data;
-  }
-
-  Future<List<Map<String, dynamic>>> getCrewTeams() async {
-    final response = await _dio.get('/loyalty/teams');
-    return (response.data as List).cast<Map<String, dynamic>>();
-  }
-
-  Future<Map<String, dynamic>> redeemPoints(Map<String, dynamic> data) async {
-    final response = await _dio.post('/loyalty/points/redeem', data: data);
-    return response.data;
-  }
-
-  // --- Helm Dash ---
-
-  Future<Map<String, dynamic>> getHelmDashQuote(
-      double lat, double lng) async {
-    final response = await _dio.post('/helm-dash/quote', data: {
-      'delivery_lat': lat,
-      'delivery_lng': lng,
-    });
-    return response.data;
-  }
-
-  Future<List<Map<String, dynamic>>> getHelmDashDeliveries() async {
-    final response = await _dio.get('/helm-dash/deliveries');
-    return (response.data as List).cast<Map<String, dynamic>>();
-  }
-
-  Future<Map<String, dynamic>> getHelmDashDelivery(String id) async {
-    final response = await _dio.get('/helm-dash/deliveries/$id');
-    return response.data;
-  }
+  // Feature contracts live in typed feature clients: catalogue (features/products/data),
+  // garage (features/vessels/data), checklists (features/checklists/data), First Mate
+  // (features/ai_chat/data), Crew Rewards (features/loyalty/data), commerce
+  // (features/orders/data) and dispatch/staff (features/dispatch/data).
 }

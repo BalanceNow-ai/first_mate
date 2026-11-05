@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
+import 'package:helm_marine/core/widgets/state_views.dart';
 import 'package:helm_marine/features/vessels/providers/vessel_provider.dart';
 
 class VesselListScreen extends ConsumerWidget {
@@ -12,144 +13,79 @@ class VesselListScreen extends ConsumerWidget {
     final vesselsState = ref.watch(vesselListProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Vessels'),
-      ),
-      floatingActionButton: FloatingActionButton(
+      appBar: AppBar(title: const Text('My Vessels')),
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.go('/vessels/new'),
-        backgroundColor: HelmTheme.primary,
-        child: const Icon(Icons.add, color: Colors.white),
+        icon: const Icon(Icons.add),
+        label: const Text('Add vessel'),
+        tooltip: 'Add a vessel',
       ),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(vesselListProvider),
         child: vesselsState.when(
           data: (vessels) {
             if (vessels.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.directions_boat_outlined,
-                        size: 80, color: Colors.grey[300]),
-                    const SizedBox(height: 16),
-                    Text(
-                      'No vessels in your garage',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Add your first vessel to get personalised\nproduct recommendations.',
+              return ListView(
+                padding: const EdgeInsets.all(32),
+                children: [
+                  const Icon(Icons.directions_boat_outlined, size: 80, color: HelmTheme.mutedText),
+                  const SizedBox(height: 16),
+                  Text('No vessels in your garage',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton.icon(
-                      onPressed: () => context.go('/vessels/new'),
-                      icon: const Icon(Icons.add),
-                      label: const Text('Add Vessel'),
-                    ),
-                  ],
-                ),
+                      style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Add your first vessel to see which parts fit it.',
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               );
             }
-
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: vessels.length,
-              itemBuilder: (context, index) {
-                final vessel = vessels[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  child: InkWell(
-                    onTap: () => context.go('/vessels/${vessel.id}'),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
+            return ContentWidth(
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+                itemCount: vessels.length,
+                itemBuilder: (context, index) {
+                  final vessel = vessels[index];
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      leading: CircleAvatar(
+                        backgroundColor: HelmTheme.primary.withValues(alpha: 0.12),
+                        child: const Icon(Icons.directions_boat, color: HelmTheme.primary),
+                      ),
+                      title: Text(vessel.nickname,
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text([
+                        vessel.description,
+                        if (vessel.hasEngine)
+                          [vessel.engineMake, vessel.engineModel].whereType<String>().join(' '),
+                      ].join('\n')),
+                      isThreeLine: vessel.hasEngine,
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Container(
-                            width: 56,
-                            height: 56,
-                            decoration: BoxDecoration(
-                              color: HelmTheme.primary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
+                          if (vessel.isPrimary)
+                            const Chip(
+                              label: Text('Primary'),
+                              visualDensity: VisualDensity.compact,
                             ),
-                            child: const Icon(Icons.directions_boat,
-                                color: HelmTheme.primary),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        vessel.name,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleSmall
-                                            ?.copyWith(
-                                                fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                    if (vessel.isPrimary)
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 2,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color:
-                                              HelmTheme.primary.withOpacity(0.1),
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                        ),
-                                        child: const Text(
-                                          'Primary',
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            color: HelmTheme.primary,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${vessel.make} ${vessel.model}${vessel.year != null ? ' (${vessel.year})' : ''}',
-                                  style: TextStyle(color: Colors.grey[600]),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const Icon(Icons.chevron_right, color: Colors.grey),
+                          const Icon(Icons.chevron_right),
                         ],
                       ),
+                      onTap: () => context.go('/vessels/${vessel.id}'),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             );
           },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 48, color: HelmTheme.error),
-                const SizedBox(height: 16),
-                Text('Failed to load vessels\n$error',
-                    textAlign: TextAlign.center),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => ref.invalidate(vesselListProvider),
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
+          loading: () => const LoadingView(message: 'Loading vessels'),
+          error: (error, _) => ErrorView(
+            error: error,
+            title: 'Could not load vessels',
+            onRetry: () => ref.invalidate(vesselListProvider),
           ),
         ),
       ),

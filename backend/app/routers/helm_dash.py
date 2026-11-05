@@ -1,131 +1,97 @@
-"""Helm Dash on-demand maritime delivery router."""
+"""Helm Dash customer side: public operating areas and owner-only delivery tracking.
 
-import math
+Tracking shows the latest position *reported* by the assigned skipper's device (or a
+clearly labelled local simulation) with its age. It never interpolates or invents a
+position: with no report yet the location is ``null`` with an explanatory message.
+"""
+
 import uuid
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import get_settings
+from app.core.errors import not_found
 from app.database import get_db
-from app.middleware.auth import CurrentUserId
-from app.models.helm_dash import HelmDashDelivery
+from app.middleware.auth import CurrentUser
+from app.models.helm_dash import DeliveryOperator, HelmDashDelivery, OperatingArea
 from app.models.order import Order
-from app.schemas.helm_dash import (
-    HelmDashDeliveryResponse,
-    HelmDashQuoteRequest,
-    HelmDashQuoteResponse,
-    HelmDashStatusUpdate,
-)
+from app.schemas.helm_dash import AreaPublic, TrackingOut
+from app.services import delivery
+from app.services.notification_templates import DELIVERY_STATUS_LABELS
 
 router = APIRouter(prefix="/helm-dash", tags=["Helm Dash Delivery"])
-settings = get_settings()
+Db = Annotated[AsyncSession, Depends(get_db, scope="function")]
+AWAITING_POSITION = "Awaiting first position report"
 
 
-def _calculate_nautical_miles(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
-    """Calculate distance in nautical miles between two points using Haversine formula."""
-    R_NM = 3440.065  # Earth radius in nautical miles
-
-    lat1_r, lat2_r = math.radians(lat1), math.radians(lat2)
-    dlat = math.radians(lat2 - lat1)
-    dlng = math.radians(lng2 - lng1)
-
-    a = math.sin(dlat / 2) ** 2 + math.cos(lat1_r) * math.cos(lat2_r) * math.sin(dlng / 2) ** 2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-
-    return round(R_NM * c, 2)
+@router.get("/areas", response_model=list[AreaPublic])
+async def list_areas(db: Db) -> list:
+    """Enabled operating areas for the delivery map (public)."""
+    q = select(OperatingArea).where(OperatingArea.enabled.is_(True)).order_by(OperatingArea.name)
+    return list((await db.execute(q)).scalars())
 
 
-@router.post("/quote", response_model=HelmDashQuoteResponse)
-async def get_delivery_quote(
-    request: HelmDashQuoteRequest,
-) -> HelmDashQuoteResponse:
-    """Get a delivery quote for Helm Dash.
+async def _tracking(db: AsyncSession, d: HelmDashDelivery, order: Order) -> dict:
+    events = await delivery.timeline(db, d.id)
+    vessel_name = None
+    if d.operator_id is not None:
+        op = await db.get(DeliveryOperator, d.operator_id)
+        vessel_name = op.vessel_name if op else None
+    location = delivery.location_view(await delivery.latest_location(db, d))
+    message = None
+    if location is None:
+        if d.status in delivery.ACTIVE_TRACKING_STATUSES:
+            message = AWAITING_POSITION
+        elif d.status in ("awaiting_dispatch", "assigned"):
+            message = "Tracking starts once a skipper accepts the delivery"
+    return {
+        "id": d.id,
+        "order_id": d.order_id,
+        "order_number": order.order_number,
+        "status": d.status,
+        "status_label": DELIVERY_STATUS_LABELS.get(d.status, d.status),
+        "area_id": d.area_id,
+        "pickup_location": d.pickup_location,
+        "delivery_coordinates": d.delivery_coordinates,
+        "delivery_location_name": d.delivery_location_name,
+        "nautical_miles": float(d.nautical_miles) if d.nautical_miles is not None else None,
+        "delivery_fee_cents": d.delivery_fee_cents,
+        "estimated_delivery_minutes": d.estimated_delivery_minutes,
+        "operator_display_name": d.operator_name,
+        "operator_vessel_name": vessel_name,
+        "timeline": [
+            {"status": e.to_status, "label": DELIVERY_STATUS_LABELS.get(e.to_status, e.to_status), "at": e.created_at}
+            for e in events
+        ],
+        "latest_location": location,
+        "location_message": message,
+        "created_at": d.created_at,
+        "updated_at": d.updated_at,
+    }
 
-    Calculates the fee based on nautical distance from the warehouse
-    to the delivery coordinates, and estimates delivery time based
-    on average vessel speed.
-    """
-    nm = _calculate_nautical_miles(
-        settings.warehouse_lat, settings.warehouse_lng,
-        request.delivery_lat, request.delivery_lng,
-    )
 
-    delivery_fee = round(settings.helm_dash_base_fee + (nm * settings.helm_dash_per_nm_fee), 2)
-    estimated_minutes = max(15, int((nm / settings.helm_dash_speed_knots) * 60) + 15)
-
-    return HelmDashQuoteResponse(
-        delivery_fee=delivery_fee,
-        estimated_minutes=estimated_minutes,
-        nautical_miles=nm,
-    )
-
-
-@router.get("/deliveries", response_model=list[HelmDashDeliveryResponse])
-async def list_deliveries(
-    user_id: CurrentUserId,
-    db: AsyncSession = Depends(get_db),
-) -> list[HelmDashDelivery]:
-    """List the user's Helm Dash deliveries."""
-    result = await db.execute(
-        select(HelmDashDelivery)
-        .join(Order)
-        .where(Order.user_id == user_id)
+@router.get("/deliveries", response_model=list[TrackingOut])
+async def my_deliveries(user: CurrentUser, db: Db) -> list[dict]:
+    rows = await db.execute(
+        select(HelmDashDelivery, Order)
+        .join(Order, Order.id == HelmDashDelivery.order_id)
+        .where(Order.user_id == user.id)
         .order_by(HelmDashDelivery.created_at.desc())
     )
-    return list(result.scalars().all())
+    return [await _tracking(db, d, o) for d, o in rows.all()]
 
 
-@router.get("/deliveries/{delivery_id}", response_model=HelmDashDeliveryResponse)
-async def get_delivery(
-    delivery_id: uuid.UUID,
-    user_id: CurrentUserId,
-    db: AsyncSession = Depends(get_db),
-) -> HelmDashDelivery:
-    """Get a specific Helm Dash delivery."""
-    result = await db.execute(
-        select(HelmDashDelivery)
-        .join(Order)
-        .where(HelmDashDelivery.id == delivery_id, Order.user_id == user_id)
-    )
-    delivery = result.scalar_one_or_none()
-    if not delivery:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Delivery not found",
+@router.get("/deliveries/{delivery_id}", response_model=TrackingOut)
+async def my_delivery(delivery_id: uuid.UUID, user: CurrentUser, db: Db) -> dict:
+    row = (
+        await db.execute(
+            select(HelmDashDelivery, Order)
+            .join(Order, Order.id == HelmDashDelivery.order_id)
+            .where(HelmDashDelivery.id == delivery_id, Order.user_id == user.id)
         )
-    return delivery
-
-
-@router.patch("/deliveries/{delivery_id}/status", response_model=HelmDashDeliveryResponse)
-async def update_delivery_status(
-    delivery_id: uuid.UUID,
-    status_update: HelmDashStatusUpdate,
-    user_id: CurrentUserId,
-    db: AsyncSession = Depends(get_db),
-) -> HelmDashDelivery:
-    """Update the status of a Helm Dash delivery (operator/admin)."""
-    result = await db.execute(
-        select(HelmDashDelivery).where(HelmDashDelivery.id == delivery_id)
-    )
-    delivery = result.scalar_one_or_none()
-    if not delivery:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Delivery not found",
-        )
-
-    valid_statuses = {"pending", "assigned", "pickup", "en_route", "delivered", "cancelled"}
-    if status_update.status not in valid_statuses:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}",
-        )
-
-    delivery.status = status_update.status
-    if status_update.operator_name:
-        delivery.operator_name = status_update.operator_name
-
-    await db.flush()
-    return delivery
+    ).first()
+    if row is None:
+        raise not_found("Delivery")
+    return await _tracking(db, row[0], row[1])

@@ -1,0 +1,142 @@
+{
+  "conversation_id": "1aa680be-ed45-417c-ba14-d391fc6c67e4",
+  "message": {
+    "role": "assistant",
+    "content": "For Synth Test (2020 Testcraft T5), here is what the admitted sources say:\n**Synthetic Helmsynth HX90 service guide A > Spark plugs (Helmsynth HX90)**\n- In this synthetic schedule the HX90 spark plugs are replaced every 100 engine hours. [1]\n**Synthetic Helmsynth HX90 service guide B > Spark plugs (Helmsynth HX90)**\n- In this synthetic schedule the HX90 spark plugs are replaced every 100 engine hours. [2]\n\nThe admitted sources I found disagree about the spark plug ([1] and [2]), so I can't give you a reliable answer on that.\n\nCould you confirm your engine's exact model, year and serial number (or check with an authorised dealer) so I can narrow this down?",
+    "created_at": "2026-11-05T07:50:12.480117Z"
+  },
+  "grounding": {
+    "status": "conflicting",
+    "specialists_consulted": [
+      "engine"
+    ],
+    "note": "Admitted sources conflict on: spark plug. Cited sources include synthetic test fixtures — not real maintenance, safety or regulatory guidance."
+  },
+  "citations": [
+    {
+      "index": 1,
+      "source_id": "a2ad2df1-f6af-44bc-bb24-5e270661d64a",
+      "chunk_id": "8cb9af27-163c-4b1a-b500-c95aebd43fbc",
+      "title": "Synthetic Helmsynth HX90 service guide A",
+      "publisher": "Helm synthetic test fixture",
+      "url": null,
+      "licence": "Synthetic test fixture (no third-party content)",
+      "excerpt": "Guide A states that the synthetic spark plug code for the fictional Helmsynth HX90 outboard is SYN-PLUG-90A. In this synthetic schedule the HX90 spark plugs are replaced every 100 engine hours.",
+      "is_synthetic": true
+    },
+    {
+      "index": 2,
+      "source_id": "0e460dcb-83b8-4763-8473-af9221e2abd0",
+      "chunk_id": "79ab248d-bb16-41b7-ada0-90cba689674f",
+      "title": "Synthetic Helmsynth HX90 service guide B",
+      "publisher": "Helm synthetic test fixture",
+      "url": null,
+      "licence": "Synthetic test fixture (no third-party content)",
+      "excerpt": "Guide B states that the synthetic spark plug code for the fictional Helmsynth HX90 outboard is SYN-PLUG-90B. In this synthetic schedule the HX90 spark plugs are replaced every 100 engine hours.",
+      "is_synthetic": true
+    }
+  ],
+  "products": [
+    {
+      "id": "56419b8e-0126-4b73-8a9a-3134820c8739",
+      "name": "316 stainless hose clamp assortment (synthetic)",
+      "sku": "SYN-HOSE-CLAMP",
+      "brand": "FixtureGeneral",
+      "effective_price_cents": 2490,
+      "currency": "NZD",
+      "in_stock": true,
+      "image": null,
+      "fitment": {
+        "status": "universal",
+        "vessel_id": "970634e4-1570-4f32-879e-81b3b0c04f65",
+        "message": "Suitable for any vessel, including Synth Test (2020 Testcraft T5)",
+        "reasons": [
+          "product is verified as universal"
+        ],
+        "matched_rule_ids": []
+      }
+    },
+    {
+      "id": "d0a4934b-ad17-426d-b645-aaba9e92eb9e",
+      "name": "Spark plug set — Suzuki DF140 (synthetic)",
+      "sku": "SYN-PLUG-140",
+      "brand": "FixtureParts",
+      "effective_price_cents": 7490,
+      "currency": "NZD",
+      "in_stock": true,
+      "image": null,
+      "fitment": {
+        "status": "verified_mismatch",
+        "vessel_id": "970634e4-1570-4f32-879e-81b3b0c04f65",
+        "message": "Does not fit Synth Test (2020 Testcraft T5)",
+        "reasons": [
+          "verified for Suzuki DF140 engines"
+        ],
+        "matched_rule_ids": []
+      }
+    },
+    {
+      "id": "c91856bb-23c1-4d39-a471-e6a52808e1f9",
+      "name": "Spark plug set — Yamaha F150 (synthetic)",
+      "sku": "SYN-PLUG-150",
+      "brand": "FixtureParts",
+      "effective_price_cents": 8990,
+      "currency": "NZD",
+      "in_stock": true,
+      "image": null,
+      "fitment": {
+        "status": "verified_mismatch",
+        "vessel_id": "970634e4-1570-4f32-879e-81b3b0c04f65",
+        "message": "Does not fit Synth Test (2020 Testcraft T5)",
+        "reasons": [
+          "verified for Yamaha F150 engines"
+        ],
+        "matched_rule_ids": []
+      }
+    },
+    {
+      "id": "e4c15f37-c227-4d39-83b1-bee8587806fe",
+      "name": "4-stroke outboard oil 1 L — for Suzuki DF140 (synthetic)",
+      "sku": "SYN-OIL-140",
+      "brand": "FixtureLube",
+      "effective_price_cents": 2390,
+      "currency": "NZD",
+      "in_stock": true,
+      "image": null,
+      "fitment": {
+        "status": "verified_mismatch",
+        "vessel_id": "970634e4-1570-4f32-879e-81b3b0c04f65",
+        "message": "Does not fit Synth Test (2020 Testcraft T5)",
+        "reasons": [
+          "verified for Suzuki DF140 engines"
+        ],
+        "matched_rule_ids": []
+      }
+    },
+    {
+      "id": "9653e8ef-7cef-40cf-9b5d-bce0dff70dbc",
+      "name": "4-stroke outboard oil 1 L — for Yamaha F150 (synthetic)",
+      "sku": "SYN-OIL-150",
+      "brand": "FixtureLube",
+      "effective_price_cents": 2490,
+      "currency": "NZD",
+      "in_stock": true,
+      "image": null,
+      "fitment": {
+        "status": "verified_mismatch",
+        "vessel_id": "970634e4-1570-4f32-879e-81b3b0c04f65",
+        "message": "Does not fit Synth Test (2020 Testcraft T5)",
+        "reasons": [
+          "verified for Yamaha F150 engines"
+        ],
+        "matched_rule_ids": []
+      }
+    }
+  ],
+  "actions": [],
+  "vessel": {
+    "id": "970634e4-1570-4f32-879e-81b3b0c04f65",
+    "label": "Synth Test (2020 Testcraft T5)"
+  },
+  "mode": "local_extractive"
+}

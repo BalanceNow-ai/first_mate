@@ -1,0 +1,146 @@
+[
+  {
+    "id": "083b0ab3-f09e-4655-9746-57a9b254e6e2",
+    "slug": "anchor_winch",
+    "name": "Anchor Winch",
+    "parent_id": "8cb41f89-c380-4885-a9f0-f05019c06d59"
+  },
+  {
+    "id": "78211767-2c4a-42dc-a96c-6730a9e58af1",
+    "slug": "autopilot",
+    "name": "Autopilot",
+    "parent_id": "ea976441-1a55-4a76-96b7-066b6fa8fae1"
+  },
+  {
+    "id": "55d97efd-b81d-4332-bd12-d0e8d79d5262",
+    "slug": "battery",
+    "name": "Battery",
+    "parent_id": "039d204a-61df-4794-8a81-0f850e9400f4"
+  },
+  {
+    "id": "723cb1b7-35cb-4add-95cf-dd6494e4d19b",
+    "slug": "bilge_pump",
+    "name": "Bilge Pump",
+    "parent_id": "6105954d-68a1-41e0-9fc7-01f2a2adda60"
+  },
+  {
+    "id": "78cf9f86-0c72-42ae-b345-9d6c339e2837",
+    "slug": "steering_cable",
+    "name": "Cable Steering",
+    "parent_id": "7b965cf8-17a9-4028-a755-b7e8790f9502"
+  },
+  {
+    "id": "22172071-dcbe-4be8-8848-5437e7231a7c",
+    "slug": "chartplotter",
+    "name": "Chartplotter / GPS",
+    "parent_id": "ea976441-1a55-4a76-96b7-066b6fa8fae1"
+  },
+  {
+    "id": "8cb41f89-c380-4885-a9f0-f05019c06d59",
+    "slug": "deck",
+    "name": "Deck & Anchoring",
+    "parent_id": null
+  },
+  {
+    "id": "039d204a-61df-4794-8a81-0f850e9400f4",
+    "slug": "electrical",
+    "name": "Electrical",
+    "parent_id": null
+  },
+  {
+    "id": "ea976441-1a55-4a76-96b7-066b6fa8fae1",
+    "slug": "electronics",
+    "name": "Electronics",
+    "parent_id": null
+  },
+  {
+    "id": "84f36a61-85c2-4d42-9b30-bce6ff856e55",
+    "slug": "engine",
+    "name": "Engine",
+    "parent_id": "aaedd4c2-9e08-42f1-9f9b-0138b865839e"
+  },
+  {
+    "id": "bff2a3a1-5188-40cc-bb7d-3b0103e5e677",
+    "slug": "fish_finder",
+    "name": "Fish Finder / Sounder",
+    "parent_id": "ea976441-1a55-4a76-96b7-066b6fa8fae1"
+  },
+  {
+    "id": "f245ef52-833c-4420-961f-910d5f468cb3",
+    "slug": "freshwater_pump",
+    "name": "Freshwater Pump",
+    "parent_id": "6105954d-68a1-41e0-9fc7-01f2a2adda60"
+  },
+  {
+    "id": "6559caf2-ff2b-4178-a132-c43313d71af7",
+    "slug": "galley",
+    "name": "Galley",
+    "parent_id": null
+  },
+  {
+    "id": "28be0f72-70af-48d2-abdc-78752208a7c1",
+    "slug": "galley_stove",
+    "name": "Galley Stove",
+    "parent_id": "6559caf2-ff2b-4178-a132-c43313d71af7"
+  },
+  {
+    "id": "26aa8d33-b484-4184-86d1-50c4391328c0",
+    "slug": "steering_hydraulic",
+    "name": "Hydraulic Steering",
+    "parent_id": "7b965cf8-17a9-4028-a755-b7e8790f9502"
+  },
+  {
+    "id": "26a5b6fd-d01a-4c18-b35b-21e522eceac6",
+    "slug": "inverter",
+    "name": "Inverter / Charger",
+    "parent_id": "039d204a-61df-4794-8a81-0f850e9400f4"
+  },
+  {
+    "id": "93b39168-c37c-4d03-b8fb-e292bac1aabc",
+    "slug": "toilet",
+    "name": "Marine Toilet",
+    "parent_id": "6105954d-68a1-41e0-9fc7-01f2a2adda60"
+  },
+  {
+    "id": "6105954d-68a1-41e0-9fc7-01f2a2adda60",
+    "slug": "plumbing",
+    "name": "Plumbing",
+    "parent_id": null
+  },
+  {
+    "id": "aaedd4c2-9e08-42f1-9f9b-0138b865839e",
+    "slug": "propulsion",
+    "name": "Propulsion",
+    "parent_id": null
+  },
+  {
+    "id": "8ffb2c33-1a08-4bcb-ae70-f38bd9036898",
+    "slug": "rig",
+    "name": "Rig & Sails",
+    "parent_id": null
+  },
+  {
+    "id": "bcc75196-c6aa-40da-9317-07a4fdc4b618",
+    "slug": "sail_rig",
+    "name": "Sail Rig",
+    "parent_id": "8ffb2c33-1a08-4bcb-ae70-f38bd9036898"
+  },
+  {
+    "id": "531dd9f9-165a-426a-ac34-3e38fcf42660",
+    "slug": "solar",
+    "name": "Solar Panel / Controller",
+    "parent_id": "039d204a-61df-4794-8a81-0f850e9400f4"
+  },
+  {
+    "id": "7b965cf8-17a9-4028-a755-b7e8790f9502",
+    "slug": "steering",
+    "name": "Steering",
+    "parent_id": null
+  },
+  {
+    "id": "b1d0e6da-9c3c-45de-ad86-239a069b6676",
+    "slug": "vhf_radio",
+    "name": "VHF Radio",
+    "parent_id": "ea976441-1a55-4a76-96b7-066b6fa8fae1"
+  }
+]

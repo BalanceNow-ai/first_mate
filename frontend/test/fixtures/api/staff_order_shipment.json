@@ -1,0 +1,11 @@
+{
+  "id": "6dc16089-fde0-433d-8302-98afd6209c37",
+  "order_id": "313dec26-cc8b-4e84-a618-e9df023eb676",
+  "provider": "local_contract",
+  "service_name": "Standard courier (test booking)",
+  "label_reference": "TEST-LABEL-HM-261105-QZQG4Q",
+  "tracking_number": "TEST-0721EA66BB",
+  "status": "label_created",
+  "is_test": true,
+  "created_at": "2026-11-05T07:27:31.623884Z"
+}

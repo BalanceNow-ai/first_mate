@@ -1,139 +1,300 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:helm_marine/core/api/api_service.dart';
+import 'dart:math';
 
-/// Cart data provider.
-final cartProvider =
-    FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
-  final apiService = ref.read(apiServiceProvider);
-  return apiService.getCart();
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:helm_marine/core/api/api_error.dart';
+import 'package:helm_marine/core/models/cart.dart';
+import 'package:helm_marine/core/models/order.dart';
+import 'package:helm_marine/core/models/payment.dart';
+import 'package:helm_marine/core/models/shipping.dart';
+import 'package:helm_marine/core/session/session.dart';
+import 'package:helm_marine/features/cart/providers/cart_provider.dart';
+import 'package:helm_marine/features/orders/data/commerce_api.dart';
+
+/// Delivery options for the *current* cart (re-fetched whenever the cart changes).
+final deliveryOptionsProvider = FutureProvider.autoDispose<DeliveryOptions>((ref) async {
+  // Depend on the cart so availability (dangerous goods, weights, totals) follows it.
+  await ref.watch(cartProvider.future);
+  return ref.watch(commerceApiProvider).deliveryOptions();
 });
 
-/// Checkout state managed across the 3-step flow.
-class CheckoutState {
-  final int currentStep;
-  final String deliveryType; // courier, helm_dash, click_and_collect
-  final Map<String, String> shippingAddress;
-  final Map<String, double>? helmDashCoordinates;
-  final String paymentMethod; // card, afterpay, laybuy
-  final String? orderId;
-  final String? clientSecret;
-  final bool isProcessing;
-  final String? error;
+/// Enabled Helm Dash operating areas (public).
+final helmDashAreasProvider = FutureProvider.autoDispose<List<OperatingAreaSummary>>((ref) {
+  return ref.watch(commerceApiProvider).helmDashAreas();
+});
 
-  const CheckoutState({
-    this.currentStep = 0,
-    this.deliveryType = 'courier',
-    this.shippingAddress = const {},
-    this.helmDashCoordinates,
-    this.paymentMethod = 'card',
-    this.orderId,
-    this.clientSecret,
-    this.isProcessing = false,
-    this.error,
-  });
+/// The user's unused Crew Rewards discounts.
+final issuedEntitlementsProvider = FutureProvider.autoDispose<List<DiscountEntitlement>>((ref) {
+  return ref.watch(commerceApiProvider).issuedEntitlements();
+});
 
-  CheckoutState copyWith({
-    int? currentStep,
-    String? deliveryType,
-    Map<String, String>? shippingAddress,
-    Map<String, double>? helmDashCoordinates,
-    String? paymentMethod,
-    String? orderId,
-    String? clientSecret,
-    bool? isProcessing,
-    String? error,
-  }) {
-    return CheckoutState(
-      currentStep: currentStep ?? this.currentStep,
-      deliveryType: deliveryType ?? this.deliveryType,
-      shippingAddress: shippingAddress ?? this.shippingAddress,
-      helmDashCoordinates: helmDashCoordinates ?? this.helmDashCoordinates,
-      paymentMethod: paymentMethod ?? this.paymentMethod,
-      orderId: orderId ?? this.orderId,
-      clientSecret: clientSecret ?? this.clientSecret,
-      isProcessing: isProcessing ?? this.isProcessing,
-      error: error,
-    );
-  }
+/// The clock used for quote expiry (overridable in tests).
+final checkoutClockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
+
+/// Error codes that mean the delivery quote must be fetched again.
+const requoteCodes = {
+  'quote_cart_changed',
+  'quote_expired',
+  'quote_used',
+  'quote_not_found',
+  'quote_required',
+  'quote_type_mismatch',
+  'quote_destination_mismatch',
+};
+
+/// A fresh Idempotency-Key: 8-100 chars of `A-Z a-z 0-9 _ - : .`.
+String newIdempotencyKey([Random? random]) {
+  final r = random ?? Random.secure();
+  // 31-bit bounds: on the web `1 << 32` is 0 (JS 32-bit shifts), which made
+  // nextInt throw and silently broke "Place order" in the browser.
+  final a = r.nextInt(0x7fffffff).toRadixString(36);
+  final b = r.nextInt(0x7fffffff).toRadixString(36);
+  return 'checkout-${DateTime.now().toUtc().microsecondsSinceEpoch.toRadixString(36)}-$a$b';
 }
 
-class CheckoutNotifier extends StateNotifier<CheckoutState> {
-  final ApiService _apiService;
+/// Identifies a cart's contents: a different fingerprint is a different
+/// checkout attempt (and so a new Idempotency-Key).
+String cartFingerprintOf(Cart cart) {
+  final lines = [for (final l in cart.items) '${l.productId}x${l.quantity}@${l.unitPriceCents}']..sort();
+  return '${lines.join(',')}|${cart.subtotalCents}';
+}
 
-  CheckoutNotifier(this._apiService) : super(const CheckoutState());
+class CheckoutState {
+  const CheckoutState({
+    this.deliveryType,
+    this.quote,
+    this.quoting = false,
+    this.quoteError,
+    this.entitlementId,
+    this.preview,
+    this.previewing = false,
+    this.previewError,
+    this.placing = false,
+    this.placeError,
+    this.attemptKey,
+    this.cartFingerprint,
+    this.orderId,
+  });
 
-  void setDeliveryType(String type) {
-    state = state.copyWith(deliveryType: type);
+  final String? deliveryType;
+  final DeliveryQuote? quote;
+  final bool quoting;
+  final Object? quoteError;
+  final String? entitlementId;
+  final CheckoutPreview? preview;
+  final bool previewing;
+  final Object? previewError;
+  final bool placing;
+  final Object? placeError;
+
+  /// The Idempotency-Key of this checkout attempt. Generated on the first
+  /// "Place order" and kept for every retry until a new attempt starts.
+  final String? attemptKey;
+
+  /// The cart this attempt was placed for ([cartFingerprintOf]).
+  final String? cartFingerprint;
+
+  /// The order created by this attempt.
+  final String? orderId;
+
+  CheckoutState copyWith({
+    String? Function()? deliveryType,
+    DeliveryQuote? Function()? quote,
+    bool? quoting,
+    Object? Function()? quoteError,
+    String? Function()? entitlementId,
+    CheckoutPreview? Function()? preview,
+    bool? previewing,
+    Object? Function()? previewError,
+    bool? placing,
+    Object? Function()? placeError,
+    String? Function()? attemptKey,
+    String? Function()? cartFingerprint,
+    String? Function()? orderId,
+  }) =>
+      CheckoutState(
+        deliveryType: deliveryType == null ? this.deliveryType : deliveryType(),
+        quote: quote == null ? this.quote : quote(),
+        quoting: quoting ?? this.quoting,
+        quoteError: quoteError == null ? this.quoteError : quoteError(),
+        entitlementId: entitlementId == null ? this.entitlementId : entitlementId(),
+        preview: preview == null ? this.preview : preview(),
+        previewing: previewing ?? this.previewing,
+        previewError: previewError == null ? this.previewError : previewError(),
+        placing: placing ?? this.placing,
+        placeError: placeError == null ? this.placeError : placeError(),
+        attemptKey: attemptKey == null ? this.attemptKey : attemptKey(),
+        cartFingerprint: cartFingerprint == null ? this.cartFingerprint : cartFingerprint(),
+        orderId: orderId == null ? this.orderId : orderId(),
+      );
+}
+
+/// Server-driven checkout. The client never prices anything: options, quotes,
+/// totals and the order all come from the API. Kept alive for the signed-in
+/// user so leaving and re-opening checkout (or retrying after a lost response)
+/// keeps the same attempt and Idempotency-Key.
+final checkoutProvider = NotifierProvider<CheckoutController, CheckoutState>(CheckoutController.new);
+
+class CheckoutController extends Notifier<CheckoutState> {
+  @override
+  CheckoutState build() {
+    ref.watch(currentUserIdProvider);
+    return const CheckoutState();
   }
 
-  void setShippingAddress(Map<String, String> address) {
-    state = state.copyWith(shippingAddress: address);
-  }
+  CommerceApi get _api => ref.read(commerceApiProvider);
 
-  void setHelmDashCoordinates(double lat, double lng) {
+  void selectDelivery(String type) {
+    if (state.deliveryType == type) return;
     state = state.copyWith(
-      helmDashCoordinates: {'lat': lat, 'lng': lng},
+      deliveryType: () => type,
+      quote: () => null,
+      quoteError: () => null,
+      preview: () => null,
+      previewError: () => null,
+      placeError: () => null,
     );
   }
 
-  void setPaymentMethod(String method) {
-    state = state.copyWith(paymentMethod: method);
+  /// Drops the current quote (address / pin changed, or the server refused it).
+  void clearQuote() {
+    state = state.copyWith(quote: () => null, preview: () => null, previewError: () => null);
   }
 
-  void goToStep(int step) {
-    state = state.copyWith(currentStep: step);
-  }
-
-  Future<bool> createOrder() async {
-    state = state.copyWith(isProcessing: true, error: null);
+  Future<DeliveryQuote?> _quote(Future<DeliveryQuote> Function() request) async {
+    if (state.quoting) return null;
+    state = state.copyWith(
+      quoting: true,
+      quote: () => null,
+      quoteError: () => null,
+      preview: () => null,
+      previewError: () => null,
+      placeError: () => null,
+    );
     try {
-      final orderData = <String, dynamic>{
-        'delivery_type': state.deliveryType,
-      };
-      if (state.shippingAddress.isNotEmpty) {
-        orderData['shipping_address'] = state.shippingAddress;
-      }
-      if (state.deliveryType == 'helm_dash' &&
-          state.helmDashCoordinates != null) {
-        orderData['helm_dash_coordinates'] = state.helmDashCoordinates;
-      }
-
-      final order = await _apiService.createOrder(orderData);
-      final orderId = order['id'] as String;
-
-      // Create payment intent
-      final paymentResult = await _apiService.createPaymentIntent(orderId);
-      final clientSecret = paymentResult['client_secret'] as String;
-
-      state = state.copyWith(
-        orderId: orderId,
-        clientSecret: clientSecret,
-        isProcessing: false,
-      );
-      return true;
+      final quote = await request();
+      if (ref.mounted) state = state.copyWith(quoting: false, quote: () => quote);
+      return quote;
     } catch (e) {
-      state = state.copyWith(
-        isProcessing: false,
-        error: e.toString(),
-      );
-      return false;
+      if (ref.mounted) state = state.copyWith(quoting: false, quoteError: () => e);
+      return null;
     }
   }
 
-  void confirmPayment() {
-    state = state.copyWith(currentStep: 2);
+  Future<DeliveryQuote?> quoteCourier({required String postcode, String? city, String? suburb}) =>
+      _quote(() => _api.courierQuote(postcode: postcode, city: city, suburb: suburb));
+
+  Future<DeliveryQuote?> quoteHelmDash({required double lat, required double lng, String? locationName}) =>
+      _quote(() => _api.helmDashQuote(lat: lat, lng: lng, locationName: locationName));
+
+  void selectEntitlement(String? id) {
+    state = state.copyWith(entitlementId: () => id, preview: () => null, previewError: () => null);
   }
 
-  void setError(String message) {
-    state = state.copyWith(isProcessing: false, error: message);
+  /// `POST /orders/checkout/preview` for [request].
+  Future<CheckoutPreview?> preview(CheckoutRequest request) async {
+    final quote = state.quote;
+    if (quote != null && quote.isExpired(ref.read(checkoutClockProvider)())) {
+      state = state.copyWith(previewError: () => _quoteExpired, preview: () => null);
+      return null;
+    }
+    state = state.copyWith(previewing: true, previewError: () => null);
+    try {
+      final preview = await _api.previewCheckout(request);
+      if (ref.mounted) state = state.copyWith(previewing: false, preview: () => preview);
+      return preview;
+    } catch (e) {
+      if (!ref.mounted) return null;
+      state = state.copyWith(previewing: false, previewError: () => e, preview: () => null);
+      _afterServerError(e);
+      return null;
+    }
   }
 
-  void reset() {
-    state = const CheckoutState();
+  static const _quoteExpired = ApiError(
+    statusCode: 409,
+    code: 'quote_expired',
+    detail: 'This delivery quote has expired. Please get a new quote.',
+  );
+
+  void _afterServerError(Object e) {
+    final api = ApiError.from(e);
+    if (api != null && requoteCodes.contains(api.code)) {
+      state = state.copyWith(quote: () => null);
+    }
+  }
+
+  /// Places the order once. Double taps while in flight are ignored and every
+  /// retry of this attempt reuses the same Idempotency-Key, so a lost response
+  /// can never create a second order.
+  Future<Order?> placeOrder(CheckoutRequest request) async {
+    if (state.placing) return null;
+    final quote = state.quote;
+    if (quote != null && quote.isExpired(ref.read(checkoutClockProvider)())) {
+      state = state.copyWith(placeError: () => _quoteExpired, quote: () => null);
+      return null;
+    }
+    final key = state.attemptKey ?? newIdempotencyKey();
+    final cart = ref.read(cartProvider).value;
+    final fingerprint = state.cartFingerprint ?? (cart == null ? null : cartFingerprintOf(cart));
+    state = state.copyWith(
+      placing: true,
+      placeError: () => null,
+      attemptKey: () => key,
+      cartFingerprint: () => fingerprint,
+    );
+    try {
+      final order = await _api.checkout(request, idempotencyKey: key);
+      if (!ref.mounted) return order;
+      state = state.copyWith(placing: false, orderId: () => order.id);
+      // The server moved the cart into the order.
+      ref.invalidate(cartProvider);
+      return order;
+    } catch (e) {
+      if (!ref.mounted) return null;
+      state = state.copyWith(placing: false, placeError: () => e);
+      _afterServerError(e);
+      return null;
+    }
+  }
+
+  /// Starts a new checkout attempt (after the order was paid or cancelled).
+  void reset() => state = const CheckoutState();
+
+  /// On entering `/checkout`: drop a held attempt that no longer applies, so a
+  /// stale order never hijacks a later checkout.
+  ///
+  /// - A held order that is no longer `pending_payment` (paid elsewhere,
+  ///   cancelled, expired, under review…) ends the attempt.
+  /// - A non-empty cart while an order is held is a new cart (placing the order
+  ///   moved the old one into it): a fresh attempt.
+  /// - An attempt that has a key but no order yet (e.g. a lost response) is
+  ///   kept only for the same cart, so its retries stay idempotent; an empty
+  ///   cart keeps it too (the lost response may have moved the cart).
+  Future<void> reconcileOnEntry() async {
+    final heldOrder = state.orderId;
+    final heldKey = state.attemptKey;
+    if (heldOrder == null && heldKey == null) return;
+    Cart? cart;
+    try {
+      cart = await ref.read(cartProvider.future);
+    } catch (_) {
+      cart = null;
+    }
+    if (!ref.mounted || state.orderId != heldOrder || state.attemptKey != heldKey) return;
+    final newCart = cart != null && !cart.isEmpty;
+    if (heldOrder != null) {
+      if (newCart) {
+        reset();
+        return;
+      }
+      try {
+        final order = await _api.order(heldOrder);
+        if (ref.mounted && state.orderId == heldOrder && !order.isPendingPayment) reset();
+      } catch (_) {
+        // Unknown: keep it; the payment step shows the order's own error.
+      }
+      return;
+    }
+    if (newCart && state.cartFingerprint != cartFingerprintOf(cart)) reset();
   }
 }
-
-final checkoutProvider =
-    StateNotifierProvider<CheckoutNotifier, CheckoutState>((ref) {
-  return CheckoutNotifier(ref.read(apiServiceProvider));
-});
