@@ -1,0 +1,163 @@
+"""Seed data for the catalogue / boat database.
+
+* ``SPEC_MANUFACTURERS`` — real brand and model-family *names* from the priority table in
+  docs/03_product_design/Helm_Boat_Database_Design_Specification.md §3. No MIC codes, model
+  years, dimensions or equipment are recorded for them: none are attributable yet.
+* Everything else is SYNTHETIC test data. Synthetic products use the ``SYN-`` SKU prefix and
+  say so in their description; synthetic fitment rules and OEM equipment carry
+  ``data_source = "synthetic_fixture"``. No real OEM part numbers are used.
+"""
+
+from __future__ import annotations
+
+SPEC_SOURCE = "Helm_Boat_Database_Design_Specification §3 priority table (names only)"
+
+# (brand, country, [model families])
+SPEC_MANUFACTURERS: list[tuple[str, str, list[str]]] = [
+    ("Stabicraft", "NZ", ["1550 Frontier", "1850 Frontier", "2050 Supercab", "2250 Ultracab"]),
+    ("Haines Hunter", "Australia", ["SF545", "SF585", "R6", "V17", "V19", "650R"]),
+    ("Quintrex", "Australia", ["430 Fishabout", "481 Fishabout", "530 Renegade"]),
+    ("Rayglass", "NZ", ["Legend 2200", "Legend 2500", "Legend 2700", "Legend 3000", "Legend 3500"]),
+    ("Stessco", "Australia", ["490 Catcher", "540 Catcher", "600 Catcher"]),
+    ("Extreme Boats", "NZ", ["529 Game King", "599 Game King", "699 Game King"]),
+    ("Buccaneer", "NZ", ["540 Offshore", "580 Offshore"]),
+    ("Protector", "NZ", ["650 Offshore", "720 Offshore"]),
+    ("Riviera", "Australia", ["4400 Sport Yacht", "5400 Sport Yacht"]),
+    ("Maritimo", "Australia", ["M50", "M55", "M60"]),
+]
+
+# A clearly synthetic manufacturer. Its MIC contains a digit, so it cannot collide with
+# a real USCG-assigned (all-letter) manufacturer identification code.
+SYNTHETIC_MANUFACTURER = {
+    "name": "Synthetic Test Marine (fixture)",
+    "country": "NZ",
+    "mic_codes": ["Z9X"],
+    "is_synthetic": True,
+    "source": "Synthetic test fixture — not a real manufacturer",
+}
+
+SYNTHETIC_MODELS = [
+    {"name": "Fixture 600 Runabout", "hull_type": "aluminium", "propulsion_type": "outboard", "length_ft": 19.7,
+     "years": [2021, 2022, 2023], "engine": ("Yamaha", "F150")},
+    {"name": "Fixture 580 Cuddy", "hull_type": "fibreglass", "propulsion_type": "outboard", "length_ft": 19.0,
+     "years": [2022, 2023], "engine": ("Suzuki", "DF140")},
+    {"name": "Fixture 32 Sloop", "hull_type": "fibreglass", "propulsion_type": "sail", "length_ft": 32.0,
+     "years": [2020], "engine": None},
+]
+
+# Synthetic factory equipment (category slug, make, model) added to every synthetic model year.
+SYNTHETIC_OEM_COMMON = [
+    ("chartplotter", "FixtureNav", "FN-7 (synthetic)"),
+    ("vhf_radio", "FixtureCom", "FC-25 (synthetic)"),
+    ("bilge_pump", "FixturePump", "FP-500 (synthetic)"),
+]
+SYNTHETIC_OEM_SAIL = [
+    ("sail_rig", "FixtureRig", "Masthead sloop (synthetic)"),
+    ("toilet", "FixtureHead", "Manual marine toilet (synthetic)"),
+]
+
+FITMENT_NOTES = "Synthetic test fixture — not real fitment data"
+
+# ``fits`` lists (engine_make, engine_model) pairs that get a synthetic *verified* rule.
+SYNTHETIC_PRODUCTS: list[dict] = [
+    # Engine service parts with synthetic verified fitment
+    dict(sku="SYN-SPK-YF150", name="Spark plug set — Yamaha F150 (synthetic)", brand="FixtureParts",
+         category="Engine Parts", sub_category="Ignition", price_cents=8990, sale_price_cents=None, stock=25,
+         weight_grams=240, part_role="spark_plug", fitment_scope="specific", fits=[("Yamaha", "F150")]),
+    dict(sku="SYN-SPK-SDF140", name="Spark plug set — Suzuki DF140 (synthetic)", brand="FixtureParts",
+         category="Engine Parts", sub_category="Ignition", price_cents=8490, sale_price_cents=7490, stock=18,
+         weight_grams=240, part_role="spark_plug", fitment_scope="specific", fits=[("Suzuki", "DF140")]),
+    dict(sku="SYN-FF-YF150", name="Primary fuel filter — Yamaha F150 (synthetic)", brand="FixtureParts",
+         category="Engine Parts", sub_category="Fuel System", price_cents=3990, sale_price_cents=None, stock=40,
+         weight_grams=180, part_role="fuel_filter", fitment_scope="specific", fits=[("Yamaha", "F150")]),
+    dict(sku="SYN-FF-YF150-PREM", name="Premium fuel filter — Yamaha F150 (synthetic)", brand="FixtureMarine",
+         category="Engine Parts", sub_category="Fuel System", price_cents=5490, sale_price_cents=None, stock=6,
+         weight_grams=200, part_role="fuel_filter", fitment_scope="specific", fits=[("Yamaha", "F150")]),
+    dict(sku="SYN-FF-SDF140", name="Primary fuel filter — Suzuki DF140 (synthetic)", brand="FixtureParts",
+         category="Engine Parts", sub_category="Fuel System", price_cents=3790, sale_price_cents=None, stock=0,
+         weight_grams=180, part_role="fuel_filter", fitment_scope="specific", fits=[("Suzuki", "DF140")]),
+    dict(sku="SYN-IMP-YF150", name="Water pump impeller kit — Yamaha F150 (synthetic)", brand="FixtureParts",
+         category="Engine Parts", sub_category="Cooling", price_cents=6490, sale_price_cents=5490, stock=12,
+         weight_grams=150, part_role="impeller", fitment_scope="specific", fits=[("Yamaha", "F150")]),
+    dict(sku="SYN-IMP-SDF140", name="Water pump impeller kit — Suzuki DF140 (synthetic)", brand="FixtureParts",
+         category="Engine Parts", sub_category="Cooling", price_cents=6290, sale_price_cents=None, stock=9,
+         weight_grams=150, part_role="impeller", fitment_scope="specific", fits=[("Suzuki", "DF140")]),
+    dict(sku="SYN-OIL-YF150", name="4-stroke outboard oil 1 L — for Yamaha F150 (synthetic)", brand="FixtureLube",
+         category="Engine Parts", sub_category="Oil & Lubricants", price_cents=2490, sale_price_cents=None, stock=60,
+         weight_grams=950, part_role="engine_oil", fitment_scope="specific", fits=[("Yamaha", "F150")]),
+    dict(sku="SYN-OIL-SDF140", name="4-stroke outboard oil 1 L — for Suzuki DF140 (synthetic)", brand="FixtureLube",
+         category="Engine Parts", sub_category="Oil & Lubricants", price_cents=2390, sale_price_cents=None, stock=55,
+         weight_grams=950, part_role="engine_oil", fitment_scope="specific", fits=[("Suzuki", "DF140")]),
+    dict(sku="SYN-THERM-YF150", name="Thermostat & gasket — Yamaha F150 (synthetic)", brand="FixtureParts",
+         category="Engine Parts", sub_category="Cooling", price_cents=7990, sale_price_cents=None, stock=4,
+         weight_grams=120, part_role="thermostat", fitment_scope="specific", fits=[("Yamaha", "F150")]),
+    dict(sku="SYN-OCK-YF150", name="Oil change kit (oil + filter) — Yamaha F150 (synthetic)", brand="FixtureLube",
+         category="Engine Parts", sub_category="Oil & Lubricants", price_cents=14990, sale_price_cents=12990,
+         stock=7, weight_grams=5200, part_role="oil_change_kit", fitment_scope="specific", fits=[("Yamaha", "F150")]),
+    # Parts with no fitment knowledge (always "unknown")
+    dict(sku="SYN-PROP-AL13", name="Aluminium propeller 13 x 19 (synthetic)", brand="FixtureProp",
+         category="Engine Parts", sub_category="Propellers", price_cents=24900, sale_price_cents=None, stock=3,
+         weight_grams=2600, part_role="propeller", fitment_scope="unspecified"),
+    dict(sku="SYN-KILL-LAN", name="Kill switch lanyard (synthetic)", brand="FixtureParts",
+         category="Engine Parts", sub_category="Controls", price_cents=2990, sale_price_cents=None, stock=20,
+         weight_grams=60, part_role="kill_switch_lanyard", fitment_scope="unspecified"),
+    dict(sku="SYN-NAVBULB", name="Navigation light bulb set 12 V (synthetic)", brand="FixtureLight",
+         category="Electrical", sub_category="Lighting", price_cents=1990, sale_price_cents=None, stock=30,
+         weight_grams=80, part_role="nav_light_bulb", fitment_scope="unspecified"),
+    dict(sku="SYN-BELT-UNI", name="Alternator belt (synthetic)", brand="FixtureParts",
+         category="Engine Parts", sub_category="Belts", price_cents=4590, sale_price_cents=None, stock=5,
+         weight_grams=150, part_role="drive_belt", fitment_scope="unspecified"),
+    dict(sku="SYN-BILGE-500", name="Bilge pump 500 GPH (synthetic)", brand="FixturePump",
+         category="Plumbing", sub_category="Bilge Pumps", price_cents=5990, sale_price_cents=None, stock=0,
+         weight_grams=700, part_role="bilge_pump", fitment_scope="unspecified"),
+    dict(sku="SYN-TOILET-VALVE", name="Toilet joker valve set (synthetic)", brand="FixtureHead",
+         category="Plumbing", sub_category="Toilets", price_cents=3490, sale_price_cents=None, stock=8,
+         weight_grams=90, part_role="toilet_valve", fitment_scope="unspecified"),
+    dict(sku="SYN-VHF-ANT", name="VHF antenna 0.9 m (synthetic)", brand="FixtureCom",
+         category="Electronics", sub_category="Antennas", price_cents=12900, sale_price_cents=None, stock=4,
+         weight_grams=800, part_role="vhf_antenna", fitment_scope="unspecified"),
+    dict(sku="SYN-HYD-FLUID", name="Hydraulic steering fluid 1 L (synthetic)", brand="FixtureSteer",
+         category="Steering", sub_category="Hydraulic", price_cents=3990, sale_price_cents=None, stock=10,
+         weight_grams=1000, part_role="hydraulic_steering_fluid", fitment_scope="unspecified"),
+    # Universal consumables and tools
+    dict(sku="SYN-FUSE-ASST", name="Blade fuse assortment 5/10/15 A (synthetic)", brand="FixtureElec",
+         category="Electrical", sub_category="Fuses", price_cents=1290, sale_price_cents=None, stock=50,
+         weight_grams=90, part_role="fuse_assortment", fitment_scope="universal"),
+    dict(sku="SYN-DUCT-TAPE", name="Marine duct tape 25 m (synthetic)", brand="FixtureGeneral",
+         category="General", sub_category="Repair", price_cents=1490, sale_price_cents=1190, stock=80,
+         weight_grams=350, part_role="duct_tape", fitment_scope="universal"),
+    dict(sku="SYN-ZIP-TIES", name="UV-stable zip ties, assorted 200 pack (synthetic)", brand="FixtureGeneral",
+         category="General", sub_category="Repair", price_cents=990, sale_price_cents=None, stock=100,
+         weight_grams=300, part_role="zip_ties", fitment_scope="universal"),
+    dict(sku="SYN-HOSE-CLAMP", name="316 stainless hose clamp assortment (synthetic)", brand="FixtureGeneral",
+         category="General", sub_category="Hardware", price_cents=2490, sale_price_cents=None, stock=35,
+         weight_grams=400, part_role="hose_clamp_assortment", fitment_scope="universal"),
+    dict(sku="SYN-BUNGS", name="Tapered softwood emergency bung set (synthetic)", brand="FixtureGeneral",
+         category="Safety", sub_category="Damage Control", price_cents=1990, sale_price_cents=None, stock=25,
+         weight_grams=450, part_role="wooden_bungs", fitment_scope="universal"),
+    dict(sku="SYN-TOOLKIT-BASIC", name="Grab-bag basic tool kit (synthetic)", brand="FixtureTools",
+         category="Tools", sub_category="Kits", price_cents=8990, sale_price_cents=None, stock=10,
+         weight_grams=2100, part_role="basic_toolkit", fitment_scope="universal"),
+    dict(sku="SYN-BATT-TERM", name="Marine battery terminal pair (synthetic)", brand="FixtureElec",
+         category="Electrical", sub_category="Batteries", price_cents=1890, sale_price_cents=None, stock=40,
+         weight_grams=200, part_role="battery_terminal", fitment_scope="universal"),
+    dict(sku="SYN-WIRE-TINNED", name="Tinned marine wire 2.5 mm², 10 m (synthetic)", brand="FixtureElec",
+         category="Electrical", sub_category="Wire", price_cents=2990, sale_price_cents=None, stock=22,
+         weight_grams=600, part_role="marine_wire", fitment_scope="universal"),
+    dict(sku="SYN-CRIMP-KIT", name="Heat-shrink butt connector & crimper kit (synthetic)", brand="FixtureTools",
+         category="Tools", sub_category="Electrical", price_cents=4990, sale_price_cents=None, stock=0,
+         weight_grams=700, part_role="crimp_kit", fitment_scope="universal"),
+    dict(sku="SYN-TOOLKIT-COASTAL", name="Coastal tool kit: sockets, multimeter, strap wrench (synthetic)",
+         brand="FixtureTools", category="Tools", sub_category="Kits", price_cents=18990, sale_price_cents=15990,
+         stock=5, weight_grams=4800, part_role="coastal_toolkit", fitment_scope="universal"),
+    dict(sku="SYN-HOSE-FIT", name="Assorted hose & fittings kit (synthetic)", brand="FixtureGeneral",
+         category="Plumbing", sub_category="Hose", price_cents=5490, sale_price_cents=None, stock=6,
+         weight_grams=1500, part_role="hose_fittings_kit", fitment_scope="universal"),
+    dict(sku="SYN-SAIL-REPAIR", name="Sail repair kit (synthetic)", brand="FixtureRig",
+         category="Sailing", sub_category="Repair", price_cents=6990, sale_price_cents=None, stock=4,
+         weight_grams=500, part_role="sail_repair_kit", fitment_scope="universal"),
+    # Dangerous goods (click & collect only — see D9)
+    dict(sku="SYN-FLARE-KIT", name="Coastal distress flare kit (synthetic)", brand="FixtureSafety",
+         category="Safety", sub_category="Flares", price_cents=18900, sale_price_cents=None, stock=6,
+         weight_grams=1200, part_role="flare_kit", fitment_scope="universal", dangerous_goods=True),
+]

@@ -146,3 +146,99 @@ class FitmentRuleResponse(APIModel):
     source_url: str | None
     notes: str | None
     verified_at: datetime | None
+
+
+class FitmentRuleAdminResponse(FitmentRuleResponse):
+    equipment_category: str | None = None  # slug
+    verified_by: uuid.UUID | None = None
+    created_at: datetime
+
+
+class FitmentRuleVerify(StrictInput):
+    """Optional adjustments applied when an admin verifies a rule."""
+
+    confidence_score: float | None = Field(None, ge=0, le=1)
+    notes: str | None = None
+    source_url: str | None = None
+
+
+class FitmentRuleReject(StrictInput):
+    notes: str | None = None
+
+
+class StockAdjust(StrictInput):
+    delta: int = Field(description="Signed change to stock_quantity (non-zero)")
+    reason: str = Field(min_length=1, max_length=200)
+
+    @model_validator(mode="after")
+    def _non_zero(self):
+        if self.delta == 0:
+            raise ValueError("delta must not be zero")
+        return self
+
+
+class VesselRef(APIModel):
+    id: uuid.UUID
+    label: str
+
+
+class ProductListResponse(APIModel):
+    items: list[ProductResponse]
+    total: int
+    offset: int
+    limit: int
+    vessel: VesselRef | None = None
+
+
+class AdminProductListResponse(APIModel):
+    items: list[ProductAdminResponse]
+    total: int
+    offset: int
+    limit: int
+
+
+class SubCategoryCount(APIModel):
+    name: str
+    count: int
+
+
+class CategoryCount(APIModel):
+    category: str
+    count: int
+    sub_categories: list[SubCategoryCount] = []
+
+
+class BrandCount(APIModel):
+    brand: str
+    count: int
+
+
+class KnownFit(APIModel):
+    """A verified fitment rule, presented as "known to fit"."""
+
+    rule_id: uuid.UUID
+    vessel_make: str | None
+    vessel_model: str | None
+    year_from: int | None
+    year_to: int | None
+    engine_make: str | None
+    engine_model: str | None
+    engine_year_from: int | None
+    engine_year_to: int | None
+    equipment_category: str | None
+    equipment_make: str | None
+    equipment_model: str | None
+    fitment_type: str
+    confidence_score: float
+    data_source: str | None
+    is_synthetic: bool
+    notes: str | None
+
+
+class CompatibilityResponse(APIModel):
+    product_id: uuid.UUID
+    sku: str
+    fitment_scope: str
+    universal: bool
+    oem_part_numbers: list[str]
+    known_to_fit: list[KnownFit]
