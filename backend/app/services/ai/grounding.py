@@ -1,19 +1,30 @@
 """Server-side grounding guard applied to every First Mate answer (both providers).
 
-* Citations ``[n]`` survive only when ``n`` is a passage retrieved in this turn.
-* ``grounded``              — at least one valid citation and no conflicting evidence.
-* ``conflicting``           — admitted, applicable passages retrieved in this turn declare
-                              different values for the same fact key (with overlapping
-                              applicability scopes).
-* ``insufficient_evidence`` — no valid citation.
+The guard never trusts the model's own citations. Every sentence of the draft is
+classified clause by clause (decision D21, ``app.services.ai.support``):
 
-When the status is not ``grounded`` the reply may not assert part numbers,
-compatibility guarantees or safety/regulatory claims: such sentences are removed and
-an explanation plus a relevant clarifying question is appended. Cart proposals are
-withdrawn. In a grounded answer part numbers must come from retrieved passages or
-product tool results, a product may be described as fitting only when its central
-fitment status is ``verified_fit``/``universal``, and uncited safety/regulatory
-claims are removed. Instruction-like text (prompt injection echoes) is always removed.
+* **framing** — clauses made only of framing/clarification vocabulary and the vessel's
+  own identifiers (no numbers, no advice/safety/regulatory wording);
+* **product statements** — clauses about a product returned by the product tools in
+  this turn; compatibility wording must match central fitment (``verified_fit`` /
+  ``universal`` to say it fits) and the clause may only add catalogue vocabulary;
+* **claims** — everything else. A claim survives only when a passage that the same
+  sentence cites (retrieved in this turn, admitted) supports it: same numbers, units
+  and identifiers, same polarity, and the claim's content words.
+
+A sentence with any unsupported clause is removed, never certified. Citations stay
+only on sentences whose claims they support.
+
+Status:
+
+* ``conflicting``           — admitted, applicable passages retrieved in this turn declare
+                              different values for the same fact key (overlapping scopes);
+* ``grounded``              — at least one supported claim survives and nothing conflicts;
+* ``insufficient_evidence`` — otherwise.
+
+When the status is not ``grounded`` the model's draft is discarded: the reply is a
+controlled limitation plus a relevant clarifying question, and cart proposals are
+withdrawn. Instruction-like text (prompt-injection echoes) is always removed.
 """
 
 from __future__ import annotations
@@ -21,6 +32,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
+from app.services.ai import support
 from app.services.ai.tools import ProductRef, TurnRuntime
 from app.services.fitment import VesselProfile, norm
 from app.services.rag.retrieval import RetrievedChunk
@@ -45,6 +57,14 @@ SAFETY_CLAIM = re.compile(
     r"certified|approved by|maritime nz (?:requires|rules|says))\b",
     re.IGNORECASE,
 )
+# Advice, obligation, safety or regulatory wording: never mere framing.
+ADVICE = re.compile(
+    r"\b(must|should|shall|need(?:s|ed)?\s+to|have\s+to|has\s+to|recommend\w*|advis\w*|ensure|"
+    r"make\s+sure|always|never|avoid\w*|do\s+not|don'?t|required?|requires|requirement\w*|law|laws|"
+    r"legal\w*|illegal|regulat\w*|rules?|safe\w*|unsafe|danger\w*|hazard\w*|warning|caution|"
+    r"mandatory|compulsory|permit\w*|allowed|forbidden|prohibit\w*)\b",
+    re.IGNORECASE,
+)
 INJECTION = re.compile(
     r"(ignore\s+(?:all\s+|any\s+|the\s+|your\s+)?(?:previous|prior|above|earlier|other)\s+"
     r"(?:instructions|rules|prompts?)|disregard\s+(?:all\s+|any\s+|the\s+|your\s+)?"
@@ -54,6 +74,32 @@ INJECTION = re.compile(
     re.IGNORECASE,
 )
 _SENTENCE = re.compile(r"(?<=[.!?])\s+")
+# "… hours. [1]" → "… hours [1]." so a trailing citation stays with its sentence.
+_TRAILING_CITATION = re.compile(r"([.!?])((?:\s*\[\d{1,3}\])+)")
+_HEADING = re.compile(r"^\s*(?:#{1,6}\s+(?P<a>.+?)|\*\*(?P<b>.+?)\*\*:?)\s*$")
+_MARKDOWN = re.compile(r"[*_`#>]|^\s*(?:[-•]|\d+[.)])\s+")
+
+# Words that frame, clarify or ask — they assert nothing about the boat or the world.
+FRAMING_VOCAB = support.content_tokens(
+    "here is are what admitted source sources say says said found find passage passages answer "
+    "question help hope check checked confirm confirmed apply applies boat vessel selected select "
+    "fit information detail details relevant following below above let know like want tell more "
+    "about sorry unfortunately note synthetic test fixture fixtures real guidance maintenance "
+    "according look looked searched search show shows mention mentions cover covers couldn't "
+    "could unable sure narrow down add added adding my exact make model year serial number "
+    "engine symptom symptoms seeing component system part type size hull dealer authorised "
+    "garage profile record records helm first mate catalogue product products matching store "
+    "happy thanks thank great question questions else anything rely relied relying based "
+    "manual manuals guide guides document documents documentation handbook notes owner owners "
+    "information specific particular which kind sort these those following steps one"
+)
+# Extra words allowed in a statement about a tool-returned product.
+PRODUCT_VOCAB = support.content_tokens(
+    "fit fits fitting fitted compatible compatibility suit suits suitable verified verify unknown "
+    "match matches matched fitment stock available availability price priced cost costs each nzd "
+    "sku code item listed list sell sells sold have we our order buy cart add tap press button "
+    "option options alternative choice range brand made by part number"
+)
 
 
 @dataclass
@@ -66,6 +112,8 @@ class GuardResult:
     products: list[dict]
     actions: list[dict]
     conflicts: dict[str, list[str]] = field(default_factory=dict)
+    claims: list[dict] = field(default_factory=list)
+    removed_statements: int = 0
 
 
 def is_instruction_like(text: str) -> bool:
@@ -130,23 +178,22 @@ def _join(lines: list[list[str]]) -> str:
     return re.sub(r"\n{3,}", "\n\n", text).strip()
 
 
-def _filter(text: str, keep) -> str:
-    return _join([[s for s in sentences if keep(s)] for sentences in _split(text)])
-
-
 def _vessel_tokens(profile: VesselProfile | None) -> set[str]:
     if profile is None:
         return set()
     values = [
+        profile.nickname,
+        profile.label,
         profile.make,
         profile.model,
+        str(profile.year or ""),
         *(f.model or "" for f in profile.facts),
         *(f.make for f in profile.facts),
+        *(str(f.year or "") for f in profile.facts),
     ]
     tokens: set[str] = set()
     for value in values:
-        tokens |= _codes(value or "")
-        tokens |= {t.upper() for t in re.findall(r"[A-Za-z0-9-]+", value or "")}
+        tokens |= support.content_tokens(value or "")
     return tokens
 
 
@@ -191,7 +238,7 @@ def _citation(ref: int, chunk: RetrievedChunk) -> dict:
     }
 
 
-_CLAUSE = re.compile(r"[,;:]|\s(?:although|though|but|while|whereas|however|and|or)\s", re.IGNORECASE)
+_FIT_CLAUSE = re.compile(r"[,;:]|\s(?:although|though|but|while|whereas|however|and|or)\s", re.IGNORECASE)
 _GENERIC_TOKENS = {
     "synthetic",
     "marine",
@@ -244,8 +291,29 @@ def _mentions(text: str, ref: ProductRef) -> bool:
     return bool(words & _product_tokens(ref))
 
 
+def _product_identity(ref: ProductRef) -> set[str]:
+    """Every token the catalogue itself states about a product (name, codes, price, fitment)."""
+    p = ref.product
+    response = ref.to_response()
+    cents = int(response["effective_price_cents"] or 0)
+    texts = [
+        p.name,
+        p.sku,
+        p.brand or "",
+        " ".join(str(n) for n in (p.oem_part_numbers or [])),
+        ref.fitment.message,
+        f"{cents / 100:.2f}",
+        str(cents // 100) if cents % 100 == 0 else "",
+        str(p.stock_quantity or 0),
+    ]
+    tokens: set[str] = set()
+    for text in texts:
+        tokens |= support.content_tokens(text)
+    return tokens
+
+
 def _fix_fit_claims(sentence: str, refs: list[ProductRef]) -> str | None:
-    """Enforce central fitment on compatibility claims in a grounded answer.
+    """Enforce central fitment on compatibility claims.
 
     Each clause is judged separately (a negation elsewhere in the sentence does not
     excuse an affirmative claim). An affirmative fit claim about a product without a
@@ -254,7 +322,7 @@ def _fix_fit_claims(sentence: str, refs: list[ProductRef]) -> str | None:
     plain = CITATION.sub("", sentence)
     if not FIT_CLAIM.search(plain):
         return sentence
-    affirmative = [c for c in _CLAUSE.split(plain) if FIT_CLAIM.search(c) and not _FIT_NEGATION.search(c)]
+    affirmative = [c for c in _FIT_CLAUSE.split(plain) if FIT_CLAIM.search(c) and not _FIT_NEGATION.search(c)]
     if not affirmative:
         return sentence
     # Products are matched against the whole sentence ("…the X, which fits").
@@ -269,104 +337,163 @@ def _fix_fit_claims(sentence: str, refs: list[ProductRef]) -> str | None:
     return sentence
 
 
+@dataclass
+class _Context:
+    retrieved: dict[int, RetrievedChunk]
+    product_refs: list[ProductRef]
+    vessel_tokens: set[str]
+    heading_tokens: set[str]
+    units: dict[int, list[support.Unit]] = field(default_factory=dict)
+
+    def units_for(self, refs: list[int]) -> list[support.Unit]:
+        out: list[support.Unit] = []
+        for ref in refs:
+            if ref not in self.units:
+                chunk = self.retrieved[ref]
+                self.units[ref] = support.passage_units(ref, chunk.content, chunk.facts)
+            out += self.units[ref]
+        return out
+
+
+def _plain(sentence: str) -> str:
+    text = CITATION.sub("", sentence)
+    text = _MARKDOWN.sub(" ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _benign(clause: support.Clause, allowed: set[str], *, product: bool) -> bool:
+    """Framing (or, in a product statement, catalogue wording) that asserts nothing else."""
+    if ADVICE.search(clause.text) or SAFETY_CLAIM.search(clause.text):
+        return False
+    if not product and FIT_CLAIM.search(clause.text) and not _FIT_NEGATION.search(clause.text):
+        return False
+    vocab = FRAMING_VOCAB | PRODUCT_VOCAB if product else FRAMING_VOCAB
+    return clause.tokens <= (vocab | allowed)
+
+
+def _judge(sentence: str, ctx: _Context) -> tuple[str | None, dict | None, str]:
+    """Return (sentence to keep or None, claim record or None, kind).
+
+    ``kind`` is ``claim`` (passage-supported), ``product`` (checked against the catalogue
+    and central fitment) or ``framing``."""
+    if is_instruction_like(sentence):
+        return None, None, ""
+    refs = sorted({int(n) for n in CITATION.findall(sentence) if int(n) in ctx.retrieved})
+    plain = _plain(sentence)
+    if not plain:
+        return None, None, ""
+
+    heading = _HEADING.match(sentence)
+    if heading and not refs:
+        text = heading.group("a") or heading.group("b") or ""
+        if not ADVICE.search(text) and support.content_tokens(text) <= (
+            ctx.heading_tokens | ctx.vessel_tokens | FRAMING_VOCAB
+        ):
+            return sentence, None, "framing"
+        return None, None, ""
+
+    mentioned = [r for r in ctx.product_refs if _mentions(plain, r)]
+    if mentioned or FIT_CLAIM.search(plain):
+        fixed = _fix_fit_claims(sentence, ctx.product_refs)
+        if fixed is None:
+            return None, None, ""
+        if fixed != sentence:
+            return fixed, None, "product"  # server-generated fitment statement
+    allowed = set(ctx.vessel_tokens)
+    for ref in mentioned:
+        allowed |= _product_identity(ref)
+
+    units = ctx.units_for(refs)
+    evidence: list[support.Unit] = []
+    claim_texts: list[str] = []
+    body = plain
+    lead, colon, rest = plain.partition(":")
+    lead_clause = support.Clause(lead, support.content_tokens(lead), set(), False)
+    if colon and rest.strip() and _benign(lead_clause, allowed, product=False):
+        body = rest  # "Here is what the manual says: …" — judge what follows the framing
+    for clause in support.clauses(body):
+        # Passage support first, so a cited fact keeps its citation even when it also
+        # names a catalogue product; otherwise it must be framing/catalogue wording.
+        found = support.support(clause, units) if clause.tokens else support.Support(False)
+        if found.supported:
+            evidence += found.evidence
+            claim_texts.append(clause.text)
+        elif not _benign(clause, allowed, product=bool(mentioned)):
+            return None, None, ""
+    if not evidence:
+        # Nothing here needed a passage: citations would overstate what it rests on.
+        kind = "product" if mentioned else "framing"
+        return re.sub(r"[ \t]+([.,;:!?])", r"\1", CITATION.sub("", sentence)).rstrip(), None, kind
+    used = sorted({u.ref for u in evidence})
+    kept = CITATION.sub(lambda m: m.group(0) if int(m.group(1)) in used else "", sentence)
+    kept = re.sub(r"[ \t]+([.,;:!?])", r"\1", kept)
+    claim = {
+        "text": plain,
+        "refs": used,
+        "evidence": [
+            {
+                "ref": u.ref,
+                "passage": u.text,
+                "applicability": ctx.retrieved[u.ref].applicability,
+                "applies_to": ctx.retrieved[u.ref].applies_to,
+            }
+            for u in dict.fromkeys(evidence)
+        ],
+    }
+    return kept, claim, "claim"
+
+
 def apply_guard(
     content: str, runtime: TurnRuntime, profile: VesselProfile | None, max_products: int = 5
 ) -> GuardResult:
     retrieved = runtime.retrieved
-    text = content or ""
-
-    # 1. Instruction-like text never survives, whatever its origin.
-    text = _filter(text, lambda s: not is_instruction_like(s))
-
-    # 2. Only citations of passages retrieved in this turn survive.
-    text = CITATION.sub(lambda m: m.group(0) if int(m.group(1)) in retrieved else "", text)
-    text = re.sub(r"[ \t]+([.,;:!?])", r"\1", text)
+    text = _TRAILING_CITATION.sub(lambda m: f"{m.group(2)}{m.group(1)}", content or "")
 
     conflicts, conflict_refs = detect_conflicts(sorted(retrieved.items()))
-    conflict_values = {norm(v) for values in conflicts.values() for v in values}
-    vessel_tokens = _vessel_tokens(profile)
     product_refs = list(runtime.products.values())
-    allowed_codes = set(vessel_tokens)
+    heading_tokens: set[str] = set()
     for chunk in retrieved.values():
-        allowed_codes |= _codes(chunk.content)
-        allowed_codes |= {str(f.get("value", "")).upper() for f in chunk.facts}
-    for ref in product_refs:
-        allowed_codes.add(ref.product.sku.upper())
-        allowed_codes |= {str(n).upper() for n in (ref.product.oem_part_numbers or [])}
+        heading_tokens |= support.content_tokens(f"{chunk.title} {chunk.heading or ''}")
+        for value in chunk.applies_to.values():
+            heading_tokens |= support.content_tokens(" ".join(value) if isinstance(value, list) else str(value))
+    ctx = _Context(retrieved, product_refs, _vessel_tokens(profile), heading_tokens)
 
-    def cited(s: str) -> bool:
-        return any(int(n) in retrieved for n in CITATION.findall(s))
+    claims: list[dict] = []
+    removed = 0
+    lines: list[list[str]] = []
+    product_statements: list[str] = []
+    for sentences in _split(text):
+        kept_line = []
+        for sentence in sentences:
+            if not sentence.strip():
+                continue
+            kept, claim, kind = _judge(sentence, ctx)
+            if kept is None:
+                removed += 1
+                continue
+            kept_line.append(kept)
+            if claim:
+                claims.append(claim)
+            if kind == "product":
+                product_statements.append(_MARKDOWN.sub("", kept).strip())
+        lines.append(kept_line)
 
-    def has_unverified_code(s: str, allowed: set[str]) -> bool:
-        return any(code not in allowed for code in _codes(CITATION.sub("", s)))
-
-    status = (
-        "conflicting"
-        if conflicts
-        else ("grounded" if any(int(n) in retrieved for n in CITATION.findall(text)) else "insufficient_evidence")
-    )
+    if conflicts:
+        status = "conflicting"
+    elif claims:
+        status = "grounded"
+    else:
+        status = "insufficient_evidence"
 
     if status == "grounded":
-        product_names = [n for r in product_refs for n in (r.product.name.lower(), r.product.sku.lower())]
-
-        def keep(s: str) -> bool:
-            if SAFETY_CLAIM.search(s) and not cited(s):
-                return False
-            # An uncited compatibility claim that names no tool-returned product has no
-            # basis (claims naming a product are checked against fitment below).
-            if (
-                FIT_CLAIM.search(s)
-                and not _FIT_NEGATION.search(s)
-                and not cited(s)
-                and not any(n in s.lower() for n in product_names)
-            ):
-                return False
-            return True
-
-        lines = []
-        for sentences in _split(text):
-            kept = []
-            for s in sentences:
-                if not keep(s):
-                    continue
-                if has_unverified_code(s, allowed_codes):
-                    s = _CODE.sub(
-                        lambda m: (
-                            m.group(0)
-                            if (m.group(0).upper() in allowed_codes or not _is_code(m.group(0)))
-                            else "[unverified part number removed]"
-                        ),
-                        s,
-                    )
-                fixed = _fix_fit_claims(s, product_refs)
-                if fixed is not None:
-                    kept.append(fixed)
-            lines.append(kept)
         text = _join(lines)
-        if not any(int(n) in retrieved for n in CITATION.findall(text)):
-            status = "insufficient_evidence"
-
-    if status != "grounded":
-
-        def keep_limited(s: str) -> bool:
-            plain = CITATION.sub("", s)
-            if has_unverified_code(plain, vessel_tokens):
-                return False
-            if FIT_CLAIM.search(plain) and not _FIT_NEGATION.search(plain):
-                return False
-            if SAFETY_CLAIM.search(plain):
-                return False
-            if conflict_values and any(v and v in norm(plain) for v in conflict_values):
-                return False
-            return True
-
-        text = _filter(text, keep_limited)
+    else:
+        claims = []
         if status == "insufficient_evidence":
-            text = CITATION.sub("", text).strip()
             label = profile.label if profile else "your boat"
             limit = (
                 f"I couldn't find an admitted source that answers this for {label}, so I won't "
-                "guess at part numbers, compatibility or safety requirements."
+                "guess at part numbers, compatibility, procedures or safety requirements."
             )
         else:
             keys = ", ".join(_fact_label(k) for k in conflicts)
@@ -375,8 +502,10 @@ def apply_guard(
                 f"The admitted sources I found disagree about the {keys} ({refs}), so I can't "
                 "give you a reliable answer on that."
             )
-        question = _clarifying_question(profile, conflicts)
-        text = "\n\n".join(p for p in (text, limit, question) if p)
+        # Statements checked against the catalogue and central fitment remain true without
+        # passages (not when sources conflict: the conflict may be about the part itself).
+        checked = "\n".join(f"- {s}" for s in product_statements) if status == "insufficient_evidence" else ""
+        text = "\n\n".join(p for p in (checked, limit, _clarifying_question(profile, conflicts)) if p)
 
     cited_refs = sorted({int(n) for n in CITATION.findall(text) if int(n) in retrieved})
     citations = [_citation(r, retrieved[r]) for r in cited_refs]
@@ -386,13 +515,15 @@ def apply_guard(
     actions = list(runtime.proposals) if status == "grounded" else []
 
     if status == "grounded":
-        note = f"Based on {len(cited_refs)} admitted source passage(s)."
+        note = f"{len(claims)} statement(s) checked against {len(cited_refs)} admitted source passage(s)."
         if any(retrieved[r].applicability == "unconfirmed" for r in cited_refs):
             note += " Some passages could not be confirmed against your vessel's details."
     elif status == "conflicting":
         note = "Admitted sources conflict on: " + ", ".join(_fact_label(k) for k in conflicts) + "."
     else:
         note = "No admitted source passage supported an answer."
+    if removed:
+        note += f" {removed} statement(s) without support in the cited sources were removed."
     if any(retrieved[r].is_synthetic for r in cited_refs):
         note += " Cited sources include synthetic test fixtures — not real maintenance, safety or regulatory guidance."
-    return GuardResult(text, status, note, cited_refs, citations, products, actions, conflicts)
+    return GuardResult(text, status, note, cited_refs, citations, products, actions, conflicts, claims, removed)

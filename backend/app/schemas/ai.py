@@ -25,10 +25,28 @@ class AssistantMessage(APIModel):
     created_at: datetime
 
 
+class ClaimEvidence(APIModel):
+    """The admitted passage unit that supports one checked statement (decision D21)."""
+
+    ref: int
+    passage: str
+    applicability: str
+    applies_to: dict
+
+
+class CheckedClaim(APIModel):
+    text: str
+    refs: list[int]
+    evidence: list[ClaimEvidence]
+
+
 class Grounding(APIModel):
     status: GroundingStatus
     specialists_consulted: list[str]
     note: str
+    # Older stored messages predate these fields.
+    claims: list[CheckedClaim] = []
+    removed_statements: int = 0
 
 
 class Citation(APIModel):
