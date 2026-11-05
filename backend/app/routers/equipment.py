@@ -370,7 +370,7 @@ def _request_response(r: EquipmentVerificationRequest, rows: list[VesselEquipmen
     return VerificationRequestResponse(
         id=r.id, vessel_id=r.vessel_id, user_id=r.user_id, status=r.status, submitted_note=r.submitted_note,
         evidence_url=r.evidence_url, reviewed_at=r.reviewed_at, review_note=r.review_note,
-        created_at=r.created_at, equipment_ids=[e.id for e in rows] if r.status == "pending" else [],
+        created_at=r.created_at, equipment_ids=[e.id for e in rows],
     )
 
 
@@ -432,7 +432,7 @@ async def list_verification_requests(
         )
     ).scalars()
     rows = await _pending_rows(db, vessel.id)
-    return [_request_response(r, rows) for r in reqs]
+    return [_request_response(r, rows if r.status == "pending" else []) for r in reqs]
 
 
 @boat_router.get("/verification-requests", response_model=list[AdminVerificationItem])
@@ -494,7 +494,7 @@ async def approve_verification(
                        {"vessel_id": str(req.vessel_id), "equipment_ids": [str(r.id) for r in rows]})
     await db.flush()
     await loyalty.award_profile_verification_bonus(db, req.user_id, req.id)
-    return _request_response(req, [])
+    return _request_response(req, rows)
 
 
 @boat_router.post("/verification-requests/{request_id}/reject", response_model=VerificationRequestResponse)
@@ -514,7 +514,7 @@ async def reject_verification(
     await audit.record(db, admin.id, "equipment_verification.reject", "equipment_verification_request", req.id,
                        {"vessel_id": str(req.vessel_id), "equipment_ids": [str(r.id) for r in rows]})
     await db.flush()
-    return _request_response(req, [])
+    return _request_response(req, rows)
 
 
 # =========================================================================== service records

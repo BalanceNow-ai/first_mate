@@ -58,6 +58,25 @@ void main() {
       }
     });
 
+    test('an explicit development release build (local stack) may use loopback', () {
+      final dev = AppConfig.resolve(
+        isRelease: true,
+        appEnv: 'development',
+        apiBaseUrl: 'http://localhost:18080/api/v1',
+        supabaseUrl: 'http://localhost:18080',
+        supabaseAnonKey: 'anon',
+      );
+      expect(dev.problems(), isEmpty);
+      final prod = AppConfig.resolve(
+        isRelease: true,
+        appEnv: 'production',
+        apiBaseUrl: 'http://localhost:18080/api/v1',
+        supabaseUrl: 'http://localhost:18080',
+        supabaseAnonKey: 'anon',
+      );
+      expect(prod.problems(), hasLength(2));
+    });
+
     test('Supabase configuration is required', () {
       final c = AppConfig.resolve(isRelease: true, apiBaseUrl: 'https://api.helm.nz/api/v1');
       final problems = c.problems();

@@ -111,7 +111,7 @@ class AppConfig {
         !(api.scheme == 'http' || api.scheme == 'https') ||
         api.host.isEmpty) {
       out.add('API_BASE_URL is not a valid http(s) URL: $apiBaseUrl');
-    } else if (isRelease && _isLoopback(api.host)) {
+    } else if (isRelease && !_localDevelopment && _isLoopback(api.host)) {
       out.add('API_BASE_URL points at ${api.host}; release builds need the '
           'public API address.');
     }
@@ -122,7 +122,7 @@ class AppConfig {
         !(supa.scheme == 'http' || supa.scheme == 'https') ||
         supa.host.isEmpty) {
       out.add('SUPABASE_URL is not a valid http(s) URL: $supabaseUrl');
-    } else if (isRelease && _isLoopback(supa.host)) {
+    } else if (isRelease && !_localDevelopment && _isLoopback(supa.host)) {
       out.add('SUPABASE_URL points at ${supa.host}; release builds need the '
           'hosted Supabase project.');
     }
@@ -131,6 +131,11 @@ class AppConfig {
     }
     return out;
   }
+
+  /// A release build explicitly made for the local acceptance stack
+  /// (`APP_ENV=development`, as scripts/local_stack.sh does) may use loopback
+  /// addresses; every other release build must point at public hosts.
+  bool get _localDevelopment => appEnv == 'development';
 
   static bool _isLoopback(String host) {
     final h = host.toLowerCase();
