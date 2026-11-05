@@ -29,7 +29,13 @@ def test_decode_formats(raw, fmt, mic, serial, month, prod_year, model_year):
     r = decode_structure(raw, TODAY)
     assert r.valid and r.status == "valid", r.warnings
     assert (r.format, r.mic, r.serial, r.production_month, r.production_year, r.model_year) == (
-        fmt, mic, serial, month, prod_year, model_year)
+        fmt,
+        mic,
+        serial,
+        month,
+        prod_year,
+        model_year,
+    )
     assert r.manufacturer is None  # structural decode never names a manufacturer
 
 
@@ -81,12 +87,19 @@ async def test_endpoint_manufacturer_only_when_mic_recorded(client, monkeypatch)
 
     assert (await client.post(f"{API}/boat-db/hin/decode", json={"hin": "x", "extra": 1})).status_code == 422
     monkeypatch.setattr(get_settings(), "rate_limit_hin_per_minute", 2)
-    codes = [(await client.post(f"{API}/boat-db/hin/decode", json={"hin": "ABC12345D404"})).status_code for _ in range(3)]
+    codes = [
+        (await client.post(f"{API}/boat-db/hin/decode", json={"hin": "ABC12345D404"})).status_code for _ in range(3)
+    ]
     assert codes[-1] == 429
 
 
-VESSEL = {"nickname": "Fixture", "make": "stabicraft", "model": "2050-SUPERCAB", "year": 2022,
-          "propulsion_type": "outboard"}
+VESSEL = {
+    "nickname": "Fixture",
+    "make": "stabicraft",
+    "model": "2050-SUPERCAB",
+    "year": 2022,
+    "propulsion_type": "outboard",
+}
 
 
 async def test_vessel_hook_stores_suggestion_only_and_links_model_year(client, customer):

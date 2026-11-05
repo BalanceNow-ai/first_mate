@@ -46,17 +46,12 @@ async def test_local_success_marks_paid_once_and_consumes(client, customer, monk
     assert pi["client_secret"].startswith(pi["payment_intent_id"] + "_secret_")
     # Intent creation is idempotent.
     again = (await intent(client, customer, order["id"])).json()
-    assert (
-        again["payment_intent_id"] == pi["payment_intent_id"]
-        and again["client_secret"] == pi["client_secret"]
-    )
+    assert again["payment_intent_id"] == pi["payment_intent_id"] and again["client_secret"] == pi["client_secret"]
 
     r = await confirm(client, customer, pi["payment_intent_id"], "succeed")
     assert r.status_code == 200, r.text
     body = r.json()
-    assert (
-        body["test_mode"] and body["event_outcome"] == "applied" and body["order_status"] == "paid"
-    )
+    assert body["test_mode"] and body["event_outcome"] == "applied" and body["order_status"] == "paid"
     assert body["event_id"].startswith("evt_local_")
     assert await stock(p.id) == 2
     assert await reservation_statuses(order["id"]) == ["consumed"]
@@ -151,11 +146,7 @@ async def test_refund_before_success_is_deferred_without_record(client, customer
     r = await post_event(client, refund)  # Stripe retries the same event
     assert r.status_code == 200 and r.json()["outcome"] == "applied"
     row = await db_order(order["id"])
-    assert (
-        row.refunded_cents == 1000
-        and row.payment_status == "partially_refunded"
-        and row.status == "paid"
-    )
+    assert row.refunded_cents == 1000 and row.payment_status == "partially_refunded" and row.status == "paid"
     assert len(spy.calls) == 1
 
 
@@ -183,9 +174,7 @@ async def test_signature_is_required_and_verified(client, customer):
     assert r.status_code == 400 and r.json()["code"] == "invalid_event"
 
 
-async def test_amount_and_currency_mismatch_go_to_review_without_effects(
-    client, customer, monkeypatch
-):
+async def test_amount_and_currency_mismatch_go_to_review_without_effects(client, customer, monkeypatch):
     spy = EventSpy(monkeypatch)
     p = await create_product(stock_quantity=5, price_cents=5000)
     for change in ({"amount": 4999, "amount_received": 4999}, {"currency": "aud"}):

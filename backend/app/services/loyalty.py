@@ -273,8 +273,9 @@ async def debit_or_owe(
         )
     )
     if owed:
-        await audit.record(db, None, "points_owed", "user", user_id,
-                           {"idempotency_key": idempotency_key, "owed": owed, "kind": kind})
+        await audit.record(
+            db, None, "points_owed", "user", user_id, {"idempotency_key": idempotency_key, "owed": owed, "kind": kind}
+        )
     await db.flush()
     return debited, owed
 

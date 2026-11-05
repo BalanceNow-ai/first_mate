@@ -58,13 +58,11 @@ class Vessel(Base):
     created_at: Mapped[datetime] = created_at_col()
     updated_at: Mapped[datetime] = updated_at_col()
 
-    user: Mapped["User"] = relationship("User", back_populates="vessels")  # noqa: F821
-    ai_conversations: Mapped[list["AIConversation"]] = relationship(  # noqa: F821
+    user: Mapped[User] = relationship("User", back_populates="vessels")  # noqa: F821
+    ai_conversations: Mapped[list[AIConversation]] = relationship(  # noqa: F821
         "AIConversation", back_populates="vessel", passive_deletes=True
     )
-    equipment: Mapped[list["VesselEquipment"]] = relationship(
-        back_populates="vessel", cascade="all, delete-orphan"
-    )
+    equipment: Mapped[list[VesselEquipment]] = relationship(back_populates="vessel", cascade="all, delete-orphan")
 
 
 class VesselEquipment(Base):
@@ -106,7 +104,7 @@ class VesselEquipment(Base):
     updated_at: Mapped[datetime] = updated_at_col()
 
     vessel: Mapped[Vessel] = relationship(back_populates="equipment")
-    category: Mapped["EquipmentCategory"] = relationship()  # noqa: F821
+    category: Mapped[EquipmentCategory] = relationship()  # noqa: F821
 
 
 class EquipmentVerificationRequest(Base):
@@ -151,9 +149,7 @@ class ServiceRecord(Base):
 
 class ServiceReminder(Base):
     __tablename__ = "service_reminders"
-    __table_args__ = (
-        CheckConstraint("status IN ('active','completed','dismissed')", name="valid_status"),
-    )
+    __table_args__ = (CheckConstraint("status IN ('active','completed','dismissed')", name="valid_status"),)
 
     id: Mapped[uuid.UUID] = uuid_pk()
     vessel_id: Mapped[uuid.UUID] = mapped_column(

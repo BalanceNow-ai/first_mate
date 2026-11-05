@@ -148,7 +148,5 @@ async def retrieve(
         )
     # Sources confirmed for this vessel rank slightly ahead of general ones at similar
     # similarity; the evidence threshold above is always applied to the raw similarity.
-    results.sort(
-        key=lambda c: -(c.similarity + (MATCH_BOOST if c.applicability == "matches" else 0.0))
-    )
+    results.sort(key=lambda c: -(c.similarity + (MATCH_BOOST if c.applicability == "matches" else 0.0)))
     return results[:top_k]

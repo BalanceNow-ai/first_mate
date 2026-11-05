@@ -10,7 +10,7 @@ from app.config import get_settings
 from app.database import async_session
 from app.models.boat_db import EquipmentCategory, Manufacturer, OEMEquipment
 from app.models.product import Product, ProductCompatibility
-from app.seed.catalogue import SeedRefused, data, seed_synthetic
+from app.seed.catalogue import SeedRefusedError, data, seed_synthetic
 from app.services.checklists import TEMPLATES
 from app.tests.test_catalogue_support import API
 
@@ -72,7 +72,7 @@ async def test_synthetic_seed_is_idempotent_and_honest():
 async def test_synthetic_seed_refused_outside_local(monkeypatch):
     monkeypatch.setattr(get_settings(), "app_env", "production")
     async with async_session() as s:
-        with pytest.raises(SeedRefused):
+        with pytest.raises(SeedRefusedError):
             await seed_synthetic(s)
     assert (await _counts())["products"] == 0
 

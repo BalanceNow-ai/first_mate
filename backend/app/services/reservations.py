@@ -68,9 +68,7 @@ async def increment_stock(db: AsyncSession, lines: list[tuple[uuid.UUID, int]]) 
         )
 
 
-async def _transition(
-    db: AsyncSession, order_id: uuid.UUID, src: str, dst: str
-) -> list[tuple[uuid.UUID, int]]:
+async def _transition(db: AsyncSession, order_id: uuid.UUID, src: str, dst: str) -> list[tuple[uuid.UUID, int]]:
     rows = await db.execute(
         update(StockReservation)
         .where(StockReservation.order_id == order_id, StockReservation.status == src)
@@ -84,9 +82,7 @@ async def _transition(
 async def reservation_count(db: AsyncSession, order_id: uuid.UUID) -> int:
     return (
         await db.execute(
-            select(func.count())
-            .select_from(StockReservation)
-            .where(StockReservation.order_id == order_id)
+            select(func.count()).select_from(StockReservation).where(StockReservation.order_id == order_id)
         )
     ).scalar_one()
 
@@ -143,9 +139,7 @@ async def restore_cart(db: AsyncSession, order: Order) -> None:
         stmt = stmt.on_conflict_do_update(
             index_elements=[CartItem.user_id, CartItem.product_id],
             set_={
-                "quantity": func.least(
-                    CartItem.quantity + stmt.excluded.quantity, MAX_LINE_QUANTITY
-                ),
+                "quantity": func.least(CartItem.quantity + stmt.excluded.quantity, MAX_LINE_QUANTITY),
                 "updated_at": utcnow(),
             },
         )
@@ -166,9 +160,7 @@ async def remove_from_cart(db: AsyncSession, order: Order) -> None:
 
 
 # --------------------------------------------------------------------------- orders
-async def lock_order(
-    db: AsyncSession, order_id: uuid.UUID, *, user_id: uuid.UUID | None = None
-) -> Order | None:
+async def lock_order(db: AsyncSession, order_id: uuid.UUID, *, user_id: uuid.UUID | None = None) -> Order | None:
     """Load and row-lock an order (fresh attributes, items loaded)."""
     q = select(Order).where(Order.id == order_id)
     if user_id is not None:
@@ -248,16 +240,11 @@ async def release_expired(db: AsyncSession, *, now=None, limit: int | None = Non
     )
     released = 0
     for order in orders:
-        if (
-            order.payment_status in ("processing", "requires_action")
-            and order.expires_at + grace > now
-        ):
+        if order.payment_status in ("processing", "requires_action") and order.expires_at + grace > now:
             continue
         try:
             async with db.begin_nested():
-                if await release_order(
-                    db, order, new_status="expired", reason="reservation_expired"
-                ):
+                if await release_order(db, order, new_status="expired", reason="reservation_expired"):
                     released += 1
         except AppError:
             logger.warning("Order %s could not be released now; will retry", order.id)

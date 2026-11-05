@@ -60,9 +60,7 @@ def _can_retry_payment(order: Order) -> bool:
     )
 
 
-async def _load_full(
-    db: AsyncSession, order_id: uuid.UUID, *, user_id: uuid.UUID | None = None
-) -> Order | None:
+async def _load_full(db: AsyncSession, order_id: uuid.UUID, *, user_id: uuid.UUID | None = None) -> Order | None:
     q = select(Order).where(Order.id == order_id).options(selectinload(Order.items))
     if user_id is not None:
         q = q.where(Order.user_id == user_id)
@@ -71,9 +69,7 @@ async def _load_full(
 
 async def order_view(db: AsyncSession, order: Order, *, staff: bool = False) -> dict:
     shipment = await courier.existing_shipment(db, order.id)
-    quote = (
-        await db.get(DeliveryQuote, order.delivery_quote_id) if order.delivery_quote_id else None
-    )
+    quote = await db.get(DeliveryQuote, order.delivery_quote_id) if order.delivery_quote_id else None
     helm = order.helm_dash_coordinates
     data = {
         "id": order.id,
@@ -163,9 +159,7 @@ async def _page(db: AsyncSession, q, page: int, page_size: int, *, staff: bool =
     orders = list(
         (
             await db.execute(
-                q.order_by(Order.created_at.desc(), Order.id)
-                .offset((page - 1) * page_size)
-                .limit(page_size)
+                q.order_by(Order.created_at.desc(), Order.id).offset((page - 1) * page_size).limit(page_size)
             )
         ).scalars()
     )
@@ -202,9 +196,7 @@ def _checkout_request(body: CheckoutRequest) -> checkout.CheckoutRequest:
     "/checkout",
     response_model=OrderResponse,
     status_code=status.HTTP_201_CREATED,
-    responses={
-        200: {"model": OrderResponse, "description": "Existing order for this Idempotency-Key"}
-    },
+    responses={200: {"model": OrderResponse, "description": "Existing order for this Idempotency-Key"}},
     dependencies=[Depends(checkout_limit())],
 )
 async def create_checkout(
@@ -256,9 +248,7 @@ async def preview_checkout(
         "free_shipping_applied": pricing.free_shipping_applied,
         "free_shipping_threshold_cents": s.free_shipping_threshold_cents,
         "min_charge_cents": s.min_charge_cents,
-        "pickup_location": s.click_and_collect_location
-        if req.delivery_type == "click_and_collect"
-        else None,
+        "pickup_location": s.click_and_collect_location if req.delivery_type == "click_and_collect" else None,
     }
 
 
@@ -304,9 +294,7 @@ async def admin_list_orders(
     if user_id:
         q = q.where(Order.user_id == user_id)
     if order_number:
-        q = q.where(
-            Order.order_number.ilike(order_number.replace("%", "").replace("_", r"\_") + "%")
-        )
+        q = q.where(Order.order_number.ilike(order_number.replace("%", "").replace("_", r"\_") + "%"))
     return await _page(db, q, page, page_size, staff=True)
 
 
@@ -322,9 +310,7 @@ async def get_order(
     return await order_view(db, order)
 
 
-@router.post(
-    "/{order_id}/cancel", response_model=OrderResponse, dependencies=[Depends(mutation_limit())]
-)
+@router.post("/{order_id}/cancel", response_model=OrderResponse, dependencies=[Depends(mutation_limit())])
 async def cancel_order(
     order_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
 ) -> dict:
@@ -335,12 +321,8 @@ async def cancel_order(
     if order.status != "pending_payment" or order.payment_status == "succeeded":
         raise AppError(409, "order_not_cancellable", f"A {order.status} order cannot be cancelled")
     if order.payment_status == "processing":
-        raise AppError(
-            409, "payment_processing", "This payment is being processed and cannot be cancelled now"
-        )
-    released = await reservations.release_order(
-        db, order, new_status="cancelled", reason="customer_cancelled"
-    )
+        raise AppError(409, "payment_processing", "This payment is being processed and cannot be cancelled now")
+    released = await reservations.release_order(db, order, new_status="cancelled", reason="customer_cancelled")
     if not released:
         raise AppError(
             409,
@@ -392,9 +374,7 @@ async def update_fulfilment(
         tracking_number=body.tracking_number,
         courier=body.courier,
     )
-    await audit.record(
-        db, staff.id, "order_fulfilment", "order", order.id, {"from": previous, "to": body.status}
-    )
+    await audit.record(db, staff.id, "order_fulfilment", "order", order.id, {"from": previous, "to": body.status})
     await db.commit()
     return await order_view(db, await _load_full(db, order.id), staff=True)
 

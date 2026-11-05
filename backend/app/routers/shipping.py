@@ -25,9 +25,7 @@ router = APIRouter(prefix="/shipping", tags=["Shipping & Quotes"])
     "/quotes",
     response_model=QuoteResponse,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[
-        Depends(user_rate_limit("quote", lambda: get_settings().rate_limit_quote_per_minute))
-    ],
+    dependencies=[Depends(user_rate_limit("quote", lambda: get_settings().rate_limit_quote_per_minute))],
 )
 async def create_quote(
     body: QuoteRequest, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
@@ -41,9 +39,7 @@ async def create_quote(
             "invalid_destination",
             "Courier quotes need {postcode}; Helm Dash quotes need {lat, lng}",
         )
-    view = await shipping_quotes.create_quote(
-        db, user_id, body.delivery_type, body.destination.model_dump()
-    )
+    view = await shipping_quotes.create_quote(db, user_id, body.delivery_type, body.destination.model_dump())
     await db.commit()
     return shipping_quotes.quote_payload(view)
 
@@ -58,11 +54,7 @@ async def delivery_options(user_id: CurrentUserId, db: AsyncSession = Depends(ge
     "/estimate",
     response_model=EstimateResponse,
     dependencies=[
-        Depends(
-            rate_limit(
-                "shipping_estimate", lambda: get_settings().rate_limit_shipping_estimate_per_minute
-            )
-        )
+        Depends(rate_limit("shipping_estimate", lambda: get_settings().rate_limit_shipping_estimate_per_minute))
     ],
 )
 async def estimate(body: EstimateRequest, db: AsyncSession = Depends(get_db, scope="function")) -> dict:

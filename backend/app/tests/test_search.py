@@ -59,7 +59,7 @@ class FakeTypesense:
             return httpx.Response(200, text="\n".join(out))
         if parts[2:] == ["documents"] and request.method == "DELETE":
             flt = parse_qs(request.url.query.decode())["filter_by"][0]
-            ids = flt[len("id:["):-1].split(",")
+            ids = flt[len("id:[") : -1].split(",")
             for i in ids:
                 store.pop(i, None)
             return httpx.Response(200, json={"num_deleted": len(ids)})
@@ -67,21 +67,27 @@ class FakeTypesense:
             params = {k: v[0] for k, v in parse_qs(request.url.query.decode()).items()}
             self.search_params.append(params)
             ids = self.canned_hits if self.canned_hits is not None else list(store)
-            return httpx.Response(200, json={
-                "found": len(ids), "hits": [{"document": {"id": i}} for i in ids],
-                "facet_counts": [{"field_name": "brand", "counts": [{"value": "FixtureParts", "count": len(ids)}]}],
-            })
+            return httpx.Response(
+                200,
+                json={
+                    "found": len(ids),
+                    "hits": [{"document": {"id": i}} for i in ids],
+                    "facet_counts": [{"field_name": "brand", "counts": [{"value": "FixtureParts", "count": len(ids)}]}],
+                },
+            )
         return httpx.Response(400, json={"message": "unexpected"})
 
     def client(self, collection: str = "products") -> search_index.TypesenseClient:
-        return search_index.TypesenseClient("http://ts.fake:8108", "fake-key", collection,
-                                            transport=httpx.MockTransport(self.handler))
+        return search_index.TypesenseClient(
+            "http://ts.fake:8108", "fake-key", collection, transport=httpx.MockTransport(self.handler)
+        )
 
 
 # =========================================================================== postgres
 async def test_postgres_search_ranking_facets_and_fitment(client, customer):
-    exact = await create_product(sku="IMP-100", name="Water pump impeller", brand="FixtureParts",
-                                 part_role="impeller", fitment_scope="specific")
+    exact = await create_product(
+        sku="IMP-100", name="Water pump impeller", brand="FixtureParts", part_role="impeller", fitment_scope="specific"
+    )
     await add_fitment_rule(exact.id)
     desc = await create_product(sku="KIT-9", name="Service kit", description="Includes an impeller", brand="Other")
     oem = await create_product(sku="X-1", name="Gasket", oem_part_numbers=["IMP-100-OEM"], brand="Other")
@@ -97,12 +103,20 @@ async def test_postgres_search_ranking_facets_and_fitment(client, customer):
     assert [i["id"] for i in r["items"]][:2] == [str(exact.id), str(oem.id)]  # SKU, then OEM number
 
     vessel = await create_vessel(customer.id)
-    r = (await client.get(f"{API}/search/products", params={"q": "impeller", "vessel_id": str(vessel.id)},
-                          headers=customer.headers)).json()
+    r = (
+        await client.get(
+            f"{API}/search/products", params={"q": "impeller", "vessel_id": str(vessel.id)}, headers=customer.headers
+        )
+    ).json()
     status = {i["id"]: i["fitment"]["status"] for i in r["items"]}
     assert status == {str(exact.id): "verified_fit", str(desc.id): "unknown"}
-    r = (await client.get(f"{API}/search/products", params={"q": "impeller", "vessel_id": str(vessel.id),
-                          "compatible_only": "true"}, headers=customer.headers)).json()
+    r = (
+        await client.get(
+            f"{API}/search/products",
+            params={"q": "impeller", "vessel_id": str(vessel.id), "compatible_only": "true"},
+            headers=customer.headers,
+        )
+    ).json()
     assert [i["id"] for i in r["items"]] == [str(exact.id)] and r["total"] == 1
     r = (await client.get(f"{API}/search/products", params={"brand": "Other", "sort": "name"})).json()
     assert [i["name"] for i in r["items"]] == ["Gasket", "Service kit", "Unrelated anchor"]
@@ -166,7 +180,9 @@ def test_celery_task_names_match_schedule():
 
     assert "app.tasks.search.sync_products_to_typesense" in celery.tasks
     assert "app.tasks.search.sync_product" in celery.tasks
-    assert celery.conf.beat_schedule["sync-products-to-typesense"]["task"] == "app.tasks.search.sync_products_to_typesense"
+    assert (
+        celery.conf.beat_schedule["sync-products-to-typesense"]["task"] == "app.tasks.search.sync_products_to_typesense"
+    )
 
 
 def test_task_runs_and_skips_when_not_configured(monkeypatch):
@@ -180,11 +196,19 @@ def test_filter_by_mirrors_candidate_prefilter():
     from app.services.fitment import EquipmentFact, VesselProfile
     from app.services.product_catalogue import ProductFilters
 
-    profile = VesselProfile(vessel_id=uuid.uuid4(), nickname="n", make="Stabi Craft", model="m", year=2022,
-                            facts=[EquipmentFact("engine", "Yamaha", "F150", 2022, 1, "vessel_record")])
+    profile = VesselProfile(
+        vessel_id=uuid.uuid4(),
+        nickname="n",
+        make="Stabi Craft",
+        model="m",
+        year=2022,
+        facts=[EquipmentFact("engine", "Yamaha", "F150", 2022, 1, "vessel_record")],
+    )
     f = search_index.filter_by(ProductFilters(brand="x`y", in_stock=True, min_price_cents=100), profile, True)
     assert "brand:=`xy`" in f and "in_stock:=true" in f and "effective_price_cents:>=100" in f
-    assert "universal:=true" in f and "fitment_engine_keys:=[`YAMAHA`]" in f and "fitment_vessel_keys:=`STABICRAFT`" in f
+    assert (
+        "universal:=true" in f and "fitment_engine_keys:=[`YAMAHA`]" in f and "fitment_vessel_keys:=`STABICRAFT`" in f
+    )
 
 
 # =========================================================================== search (fake)
@@ -194,7 +218,9 @@ def typesense_backend(monkeypatch):
     monkeypatch.setattr(settings, "search_backend", "typesense")
     monkeypatch.setattr(settings, "typesense_api_key", "fake-key")
     fake = FakeTypesense()
-    monkeypatch.setattr(search_index.TypesenseClient, "from_settings", classmethod(lambda cls, s=None, **k: fake.client()))
+    monkeypatch.setattr(
+        search_index.TypesenseClient, "from_settings", classmethod(lambda cls, s=None, **k: fake.client())
+    )
     return fake
 
 
@@ -208,8 +234,11 @@ async def test_typesense_search_results_pass_through_fitment(client, customer, t
     fake.canned_hits = [str(unknown.id), str(inactive.id), str(fits.id)]
     fake.collections["products"] = search_index.collection_schema("products")
     fake.docs["products"] = {}
-    r = await client.get(f"{API}/search/products", params={"q": "plug", "vessel_id": str(vessel.id), "brand": "Yamaha"},
-                         headers=customer.headers)
+    r = await client.get(
+        f"{API}/search/products",
+        params={"q": "plug", "vessel_id": str(vessel.id), "brand": "Yamaha"},
+        headers=customer.headers,
+    )
     body = r.json()
     assert r.status_code == 200 and body["engine"] == "typesense"
     assert [i["id"] for i in body["items"]] == [str(unknown.id), str(fits.id)]  # stale hit dropped, index order kept
@@ -217,8 +246,13 @@ async def test_typesense_search_results_pass_through_fitment(client, customer, t
     assert body["facets"]["brand"][0]["value"] == "FixtureParts"
     params = fake.search_params[-1]
     assert params["q"] == "plug" and "brand:=`Yamaha`" in params["filter_by"]
-    r = (await client.get(f"{API}/search/products", params={"vessel_id": str(vessel.id), "compatible_only": "true"},
-                          headers=customer.headers)).json()
+    r = (
+        await client.get(
+            f"{API}/search/products",
+            params={"vessel_id": str(vessel.id), "compatible_only": "true"},
+            headers=customer.headers,
+        )
+    ).json()
     assert [i["id"] for i in r["items"]] == [str(fits.id)] and r["total"] == 1  # exact evaluation after prefilter
     assert "fitment_engine_keys" in fake.search_params[-1]["filter_by"]
 
@@ -247,12 +281,20 @@ async def test_live_typesense_sync_and_search(client, customer, monkeypatch):
     url = urlparse(TS_URL)
     settings = get_settings()
     collection = f"products_test_{uuid.uuid4().hex[:8]}"
-    for k, v in {"search_backend": "typesense", "typesense_api_key": TS_KEY, "typesense_host": url.hostname,
-                 "typesense_port": url.port or 8108, "typesense_protocol": url.scheme, "typesense_collection": collection}.items():
+    for k, v in {
+        "search_backend": "typesense",
+        "typesense_api_key": TS_KEY,
+        "typesense_host": url.hostname,
+        "typesense_port": url.port or 8108,
+        "typesense_protocol": url.scheme,
+        "typesense_collection": collection,
+    }.items():
         monkeypatch.setattr(settings, k, v)
     fits = await create_product(sku="LIVE-1", name="Impeller kit F150", fitment_scope="specific", brand="FixtureParts")
     await add_fitment_rule(fits.id)
-    wrong = await create_product(sku="LIVE-2", name="Impeller kit DF140", fitment_scope="specific", brand="FixtureParts")
+    wrong = await create_product(
+        sku="LIVE-2", name="Impeller kit DF140", fitment_scope="specific", brand="FixtureParts"
+    )
     await add_fitment_rule(wrong.id, engine_make="Suzuki", engine_model="DF140")
     await create_product(sku="LIVE-3", name="Impeller retired", is_active=False)
     vessel = await create_vessel(customer.id)
@@ -263,8 +305,13 @@ async def test_live_typesense_sync_and_search(client, customer, monkeypatch):
         r = (await client.get(f"{API}/search/products", params={"q": "impeller"})).json()
         assert r["engine"] == "typesense" and {i["sku"] for i in r["items"]} == {"LIVE-1", "LIVE-2"}
         assert any(f["value"] == "FixtureParts" for f in r["facets"]["brand"])
-        r = (await client.get(f"{API}/search/products", params={"q": "impeller", "vessel_id": str(vessel.id),
-                              "compatible_only": "true"}, headers=customer.headers)).json()
+        r = (
+            await client.get(
+                f"{API}/search/products",
+                params={"q": "impeller", "vessel_id": str(vessel.id), "compatible_only": "true"},
+                headers=customer.headers,
+            )
+        ).json()
         assert [i["sku"] for i in r["items"]] == ["LIVE-1"] and r["items"][0]["fitment"]["status"] == "verified_fit"
         async with async_session() as db:
             await search_index.sync_one(db, wrong.id)  # still active → upsert is idempotent

@@ -40,11 +40,7 @@ def parse_front_matter(text: str) -> tuple[dict, str]:
             raise FrontMatterError(f"Invalid front matter line: {line[:60]!r}")
         key, raw = line.split(":", 1)
         key, raw = key.strip(), raw.strip()
-        if (
-            raw[:1] in '[{"'
-            or raw in ("true", "false", "null")
-            or re.fullmatch(r"-?\d+(\.\d+)?", raw)
-        ):
+        if raw[:1] in '[{"' or raw in ("true", "false", "null") or re.fullmatch(r"-?\d+(\.\d+)?", raw):
             try:
                 meta[key] = json.loads(raw)
                 continue

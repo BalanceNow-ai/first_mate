@@ -40,10 +40,21 @@ async def _run(_args) -> int:
     rc = await catalogue._seed(argparse.Namespace(synthetic=True))
     if rc:
         return rc
-    rc = await knowledge.run(argparse.Namespace(
-        path=None, synthetic=True, admit=True, title=None, publisher=None, licence=None, domain=None,
-        url=None, version=None, licence_verified=False, applies_to_json=None,
-    ))
+    rc = await knowledge.run(
+        argparse.Namespace(
+            path=None,
+            synthetic=True,
+            admit=True,
+            title=None,
+            publisher=None,
+            licence=None,
+            domain=None,
+            url=None,
+            version=None,
+            licence_verified=False,
+            applies_to_json=None,
+        )
+    )
     if rc:
         return rc
     created = await seed_demo_area()

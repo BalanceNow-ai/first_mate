@@ -67,9 +67,7 @@ class DeliveryOperator(Base):
 class HelmDashDelivery(Base):
     __tablename__ = "helm_dash_deliveries"
     __table_args__ = (
-        CheckConstraint(
-            "status IN (" + ",".join(f"'{s}'" for s in DELIVERY_STATUSES) + ")", name="valid_status"
-        ),
+        CheckConstraint("status IN (" + ",".join(f"'{s}'" for s in DELIVERY_STATUSES) + ")", name="valid_status"),
     )
 
     id: Mapped[uuid.UUID] = uuid_pk()
@@ -152,7 +150,9 @@ class OperatorPayout(Base):
     delivery_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("helm_dash_deliveries.id"), nullable=False, unique=True
     )
-    operator_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+    operator_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
+    )
     gross_fee_cents: Mapped[int] = mapped_column(Integer, nullable=False)
     share_bps: Mapped[int | None] = mapped_column(Integer, nullable=True)
     amount_cents: Mapped[int | None] = mapped_column(Integer, nullable=True)

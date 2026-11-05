@@ -1,7 +1,7 @@
 """Release path (expiry / cancel), late payments, refunds and staff order actions."""
 
-import uuid
 import asyncio
+import uuid
 
 from app.config import get_settings
 from app.database import async_session
@@ -38,9 +38,7 @@ async def _run_expiry() -> int:
         return n
 
 
-async def test_expiry_restores_stock_cart_and_entitlement_exactly_once(
-    client, customer, monkeypatch
-):
+async def test_expiry_restores_stock_cart_and_entitlement_exactly_once(client, customer, monkeypatch):
     released = EventSpy(monkeypatch, "order_released")
     p = await create_product(stock_quantity=5, price_cents=3000)
     await add(client, customer, p, 2)
@@ -69,9 +67,7 @@ async def test_expiry_restores_stock_cart_and_entitlement_exactly_once(
     ent_row = await entitlement(ent.id)
     assert ent_row.status == "issued" and ent_row.order_id is None
     row = await db_order(order["id"])
-    assert (
-        row.status == "expired" and row.cancel_reason == "reservation_expired" and row.cancelled_at
-    )
+    assert row.status == "expired" and row.cancel_reason == "reservation_expired" and row.cancelled_at
     assert len(released.calls) == 1
     detail = (await client.get(f"{API}/orders/{order['id']}", headers=customer.headers)).json()
     assert detail["can_cancel"] is False and detail["can_retry_payment"] is False
@@ -184,9 +180,7 @@ async def test_success_after_expiry_rereserves_when_possible(client, customer, m
     assert len(spy.calls) == 1
 
 
-async def test_success_after_expiry_without_stock_needs_review(
-    client, customer, other_customer, monkeypatch
-):
+async def test_success_after_expiry_without_stock_needs_review(client, customer, other_customer, monkeypatch):
     spy = EventSpy(monkeypatch)
     p = await create_product(stock_quantity=1)
     order = await placed_order(client, customer, p)
@@ -206,9 +200,7 @@ async def test_success_after_expiry_without_stock_needs_review(
     assert spy.calls == []
 
 
-async def test_partial_then_full_refund_restocks_once_before_dispatch(
-    client, customer, admin, monkeypatch
-):
+async def test_partial_then_full_refund_restocks_once_before_dispatch(client, customer, admin, monkeypatch):
     refunds = EventSpy(monkeypatch, "order_refunded")
     p = await create_product(stock_quantity=5, price_cents=4000)
     order = await paid_order(client, customer, p, 2)  # 8000
@@ -220,10 +212,7 @@ async def test_partial_then_full_refund_restocks_once_before_dispatch(
         headers={**admin.headers, "Idempotency-Key": f"refund-{uuid.uuid4().hex}"},
     )
     assert r.status_code == 202, r.text
-    assert (
-        r.json()["event_outcome"] == "applied"
-        and r.json()["payment_status"] == "partially_refunded"
-    )
+    assert r.json()["event_outcome"] == "applied" and r.json()["payment_status"] == "partially_refunded"
     assert r.json()["refunded_cents"] == 3000 and r.json()["order_status"] == "paid"
     assert await stock(p.id) == 3  # partial refunds never restock
 
@@ -285,9 +274,7 @@ async def test_full_refund_after_dispatch_does_not_restock(client, customer, adm
     assert await reservation_statuses(order["id"]) == ["consumed"]
 
 
-async def test_customers_and_operators_cannot_fulfil_or_refund(
-    client, customer, operator, dispatcher
-):
+async def test_customers_and_operators_cannot_fulfil_or_refund(client, customer, operator, dispatcher):
     p = await create_product()
     order = await paid_order(client, customer, p)
     for actor in (customer, operator):
@@ -303,9 +290,7 @@ async def test_customers_and_operators_cannot_fulfil_or_refund(
             headers=actor.headers,
         )
         assert r.status_code == 403
-        assert (
-            await client.get(f"{API}/orders/admin/all", headers=actor.headers)
-        ).status_code == 403
+        assert (await client.get(f"{API}/orders/admin/all", headers=actor.headers)).status_code == 403
     r = await client.post(
         f"{API}/orders/{order['id']}/refund",
         json={"amount_cents": 100, "reason": "nope"},
@@ -347,23 +332,13 @@ async def test_fulfilment_follows_the_state_machine(client, customer, dispatcher
 async def test_order_access_is_owner_only(client, customer, other_customer, dispatcher):
     p = await create_product()
     order = await placed_order(client, customer, p)
-    assert (
-        await client.get(f"{API}/orders/{order['id']}", headers=other_customer.headers)
-    ).status_code == 404
-    assert (
-        await client.get(f"{API}/orders/{order['id']}", headers=dispatcher.headers)
-    ).status_code == 404
+    assert (await client.get(f"{API}/orders/{order['id']}", headers=other_customer.headers)).status_code == 404
+    assert (await client.get(f"{API}/orders/{order['id']}", headers=dispatcher.headers)).status_code == 404
     assert (await intent(client, other_customer, order["id"])).status_code == 404
     mine = (await client.get(f"{API}/orders/", headers=customer.headers)).json()
-    assert (
-        mine["total"] == 1
-        and mine["items"][0]["id"] == order["id"]
-        and mine["items"][0]["item_count"] == 1
-    )
+    assert mine["total"] == 1 and mine["items"][0]["id"] == order["id"] and mine["items"][0]["item_count"] == 1
     assert (await client.get(f"{API}/orders/", headers=other_customer.headers)).json()["total"] == 0
-    staff = (
-        await client.get(f"{API}/orders/admin/{order['id']}", headers=dispatcher.headers)
-    ).json()
+    staff = (await client.get(f"{API}/orders/admin/{order['id']}", headers=dispatcher.headers)).json()
     assert staff["user_id"] == str(customer.id)
 
 
@@ -385,9 +360,7 @@ async def test_order_list_pagination_and_admin_filters(client, customer, admin):
     ).json()
     assert pending["total"] == 2
     number = (await db_order(ids[1])).order_number
-    found = (
-        await client.get(f"{API}/orders/admin/all?order_number={number}", headers=admin.headers)
-    ).json()
+    found = (await client.get(f"{API}/orders/admin/all?order_number={number}", headers=admin.headers)).json()
     assert [o["id"] for o in found["items"]] == [ids[1]]
     r = await client.get(f"{API}/orders/admin/all?status=bogus", headers=admin.headers)
     assert r.status_code == 422

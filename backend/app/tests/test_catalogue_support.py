@@ -24,8 +24,13 @@ async def categories() -> dict[str, uuid.UUID]:
 
 
 async def make_boat(
-    maker: str = "Stabicraft", model: str = "2050 Supercab", year: int = 2022, *, mic_codes=None,
-    is_synthetic: bool = False, oem: list[tuple[str, str, str | None, str, float, str]] | None = None,
+    maker: str = "Stabicraft",
+    model: str = "2050 Supercab",
+    year: int = 2022,
+    *,
+    mic_codes=None,
+    is_synthetic: bool = False,
+    oem: list[tuple[str, str, str | None, str, float, str]] | None = None,
 ) -> dict:
     """Create manufacturer → model → year (+ OEM rows: slug, make, model, data_source, conf, status)."""
     async with async_session() as s:
@@ -44,9 +49,15 @@ async def make_boat(
         await s.flush()
         oem_ids = []
         for slug, make, eq_model, source, conf, status in oem or []:
-            o = OEMEquipment(model_year_id=my.id, category_id=cats[slug], equipment_make=make,
-                             equipment_model=eq_model, data_source=source, confidence_score=conf,
-                             verification_status=status)
+            o = OEMEquipment(
+                model_year_id=my.id,
+                category_id=cats[slug],
+                equipment_make=make,
+                equipment_model=eq_model,
+                data_source=source,
+                confidence_score=conf,
+                verification_status=status,
+            )
             s.add(o)
             await s.flush()
             oem_ids.append(o.id)

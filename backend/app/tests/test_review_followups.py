@@ -20,8 +20,11 @@ L = "/api/v1/loyalty"
 
 async def _invariant(user_id) -> tuple[int, int, int]:
     async with async_session() as s:
-        total = (await s.execute(select(func.coalesce(func.sum(PointsTransaction.points), 0))
-                                 .where(PointsTransaction.user_id == user_id))).scalar_one()
+        total = (
+            await s.execute(
+                select(func.coalesce(func.sum(PointsTransaction.points), 0)).where(PointsTransaction.user_id == user_id)
+            )
+        ).scalar_one()
         acct = (await s.execute(select(CrewPoints).where(CrewPoints.user_id == user_id))).scalar_one()
     return total, acct.points_balance, acct.points_owed
 
@@ -80,8 +83,9 @@ async def test_full_refund_cancels_undispatched_helm_dash_job(client, customer, 
     await refund(order.id, order.total_cents)
     d = await delivery_for(order.id)
     assert d.status == "cancelled"
-    r = await client.post(f"/api/v1/dispatch/deliveries/{d.id}/assign",
-                          json={"operator_id": str(operator.id)}, headers=dispatcher.headers)
+    r = await client.post(
+        f"/api/v1/dispatch/deliveries/{d.id}/assign", json={"operator_id": str(operator.id)}, headers=dispatcher.headers
+    )
     assert r.status_code == 409
 
 

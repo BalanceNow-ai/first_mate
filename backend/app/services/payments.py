@@ -20,10 +20,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import get_settings
 from app.core.errors import AppError, not_found
 from app.database import utcnow
+from app.models.ops import AuditLog
 from app.models.order import Order
 from app.models.user import User
-from app.models.ops import AuditLog
-from app.services import audit, reservations, webhooks
+from app.services import reservations, webhooks
 from app.services.payment_providers import CURRENCY, StripeProvider, get_provider
 
 LOCAL_OUTCOMES = ("succeed", "decline", "requires_action", "authenticate", "processing")
@@ -38,9 +38,7 @@ def ensure_card(payment_method: str) -> None:
     reason = {"afterpay": AFTERPAY_REASON, "laybuy": LAYBUY_REASON}.get(
         payment_method.lower(), "Only card payments are available."
     )
-    raise AppError(
-        422, "payment_method_unavailable", reason, extra={"payment_method": payment_method[:32]}
-    )
+    raise AppError(422, "payment_method_unavailable", reason, extra={"payment_method": payment_method[:32]})
 
 
 # --------------------------------------------------------------------------- intents
@@ -72,9 +70,7 @@ async def create_intent(db: AsyncSession, user_id: uuid.UUID, order_id: uuid.UUI
         "status": info.status,
         "amount_cents": info.amount_cents,
         "currency": "NZD",
-        "publishable_key": provider.publishable_key
-        if isinstance(provider, StripeProvider)
-        else None,
+        "publishable_key": provider.publishable_key if isinstance(provider, StripeProvider) else None,
         "test_mode": provider.test_mode,
         "expires_at": order.expires_at,
     }
@@ -150,9 +146,7 @@ def local_mode_active() -> bool:
 
 
 # --------------------------------------------------------------------------- local confirm
-async def local_confirm(
-    db: AsyncSession, user_id: uuid.UUID, payment_intent_id: str, outcome: str
-) -> dict:
+async def local_confirm(db: AsyncSession, user_id: uuid.UUID, payment_intent_id: str, outcome: str) -> dict:
     """Simulate the customer completing (or failing) a local test-mode payment."""
     if not local_mode_active():
         raise not_found("Payment")
@@ -215,10 +209,7 @@ async def request_refund(
     order = await reservations.lock_order(db, order_id)
     if order is None:
         raise not_found("Order")
-    if (
-        order.payment_status not in ("succeeded", "partially_refunded")
-        or not order.payment_intent_id
-    ):
+    if order.payment_status not in ("succeeded", "partially_refunded") or not order.payment_intent_id:
         raise AppError(409, "order_not_refundable", "Only paid orders can be refunded")
     remaining = order.total_cents - order.refunded_cents
     if amount_cents > remaining:
@@ -241,15 +232,23 @@ async def request_refund(
     if previous is not None:
         # Same request repeated (double click / retry): report, never refund again.
         return {
-            "order_id": order.id, "provider": provider.name,
-            "refund_id": previous.detail.get("refund_id") or "", "status": "duplicate_request",
-            "amount_cents": previous.detail.get("amount_cents", amount_cents), "currency": "NZD",
-            "test_mode": provider.test_mode, "event_outcome": "duplicate",
-            "refunded_cents": order.refunded_cents, "payment_status": order.payment_status,
+            "order_id": order.id,
+            "provider": provider.name,
+            "refund_id": previous.detail.get("refund_id") or "",
+            "status": "duplicate_request",
+            "amount_cents": previous.detail.get("amount_cents", amount_cents),
+            "currency": "NZD",
+            "test_mode": provider.test_mode,
+            "event_outcome": "duplicate",
+            "refunded_cents": order.refunded_cents,
+            "payment_status": order.payment_status,
             "order_status": order.status,
         }
     audit_row = AuditLog(
-        actor_id=actor.id, action="order_refund_requested", entity_type="order", entity_id=str(order.id),
+        actor_id=actor.id,
+        action="order_refund_requested",
+        entity_type="order",
+        entity_id=str(order.id),
         detail={"amount_cents": amount_cents, "reason": reason, "provider": provider.name, "request_key": request_key},
     )
     db.add(audit_row)
@@ -257,9 +256,7 @@ async def request_refund(
         info = await provider.refund(order, amount_cents, request_key)
         refund_id, status, event_outcome = info.refund_id, info.status, None
     else:
-        event = build_event(
-            "charge.refunded", charge_object(order, order.refunded_cents + amount_cents)
-        )
+        event = build_event("charge.refunded", charge_object(order, order.refunded_cents + amount_cents))
         result = await deliver_local_event(db, event)
         refund_id, status, event_outcome = (
             f"re_local_{uuid.uuid4().hex[:24]}",

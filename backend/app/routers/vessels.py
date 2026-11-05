@@ -38,15 +38,15 @@ async def _clear_other_primary(db: AsyncSession, user_id: uuid.UUID, keep: uuid.
 async def list_vessels(user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")) -> list[Vessel]:
     """List the current user's vessels (primary first)."""
     result = await db.execute(
-        select(Vessel)
-        .where(Vessel.user_id == user_id)
-        .order_by(Vessel.is_primary.desc(), Vessel.created_at.desc())
+        select(Vessel).where(Vessel.user_id == user_id).order_by(Vessel.is_primary.desc(), Vessel.created_at.desc())
     )
     return list(result.scalars())
 
 
 @router.post(
-    "/", response_model=VesselResponse, status_code=status.HTTP_201_CREATED,
+    "/",
+    response_model=VesselResponse,
+    status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(mutation_limit())],
 )
 async def create_vessel(
@@ -68,14 +68,19 @@ async def create_vessel(
 
 
 @router.get("/{vessel_id}", response_model=VesselResponse)
-async def get_vessel(vessel_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")) -> Vessel:
+async def get_vessel(
+    vessel_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
+) -> Vessel:
     """Get one of the current user's vessels."""
     return await get_owned_vessel(db, vessel_id, user_id)
 
 
 @router.patch("/{vessel_id}", response_model=VesselResponse, dependencies=[Depends(mutation_limit())])
 async def update_vessel(
-    vessel_id: uuid.UUID, updates: VesselUpdate, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
+    vessel_id: uuid.UUID,
+    updates: VesselUpdate,
+    user_id: CurrentUserId,
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> Vessel:
     """Update a vessel. Setting ``is_primary`` clears it on the owner's other vessels."""
     vessel = await get_owned_vessel(db, vessel_id, user_id)
@@ -94,7 +99,9 @@ async def update_vessel(
 
 
 @router.delete("/{vessel_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(mutation_limit())])
-async def delete_vessel(vessel_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")) -> None:
+async def delete_vessel(
+    vessel_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
+) -> None:
     """Remove a vessel (and its equipment, checklists and service history)."""
     vessel = await get_owned_vessel(db, vessel_id, user_id)
     await db.delete(vessel)

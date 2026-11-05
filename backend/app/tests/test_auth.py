@@ -103,7 +103,9 @@ async def test_role_cannot_be_self_assigned(client, customer):
     r = await client.patch("/api/v1/users/me", json={"role": "admin"}, headers=customer.headers)
     assert r.status_code == 422
     # Role claims inside the token are ignored for authorization.
-    forged_role = auth_headers(customer.id, customer.email, extra={"user_metadata": {"role": "admin"}, "app_role": "admin"})
+    forged_role = auth_headers(
+        customer.id, customer.email, extra={"user_metadata": {"role": "admin"}, "app_role": "admin"}
+    )
     r = await client.get("/api/v1/admin/users", headers=forged_role)
     assert r.status_code == 403
 
@@ -121,9 +123,7 @@ async def test_admin_role_management_and_last_admin_guard(client, admin, custome
 
 async def test_auth_rate_limit(client):
     headers = auth_headers(uuid.uuid4(), "burst@example.test")
-    codes = [
-        (await client.post("/api/v1/auth/provision", json={}, headers=headers)).status_code for _ in range(25)
-    ]
+    codes = [(await client.post("/api/v1/auth/provision", json={}, headers=headers)).status_code for _ in range(25)]
     assert 429 in codes
 
 
@@ -133,15 +133,22 @@ async def test_jwks_mode_verifies_asymmetric_tokens(monkeypatch, customer):
     public_jwk = jwt.algorithms.ECAlgorithm.to_jwk(key.public_key(), as_dict=True)
     public_jwk.update({"kid": kid, "alg": "ES256", "use": "sig"})
     settings = Settings(
-        app_env="test", auth_mode="jwks", supabase_url="https://proj.supabase.test",
+        app_env="test",
+        auth_mode="jwks",
+        supabase_url="https://proj.supabase.test",
         supabase_jwt_audience="authenticated",
     )
     monkeypatch.setattr(jwt.PyJWKClient, "fetch_data", lambda self: {"keys": [public_jwk]})
     auth_mod._jwk_clients.clear()
     now = int(time.time())
     claims = {
-        "sub": str(customer.id), "email": customer.email, "aud": "authenticated",
-        "iss": "https://proj.supabase.test/auth/v1", "iat": now, "exp": now + 300, "role": "authenticated",
+        "sub": str(customer.id),
+        "email": customer.email,
+        "aud": "authenticated",
+        "iss": "https://proj.supabase.test/auth/v1",
+        "iat": now,
+        "exp": now + 300,
+        "role": "authenticated",
     }
     good = jwt.encode(claims, key, algorithm="ES256", headers={"kid": kid})
     principal = await auth_mod.verify_access_token(good, settings)
@@ -183,8 +190,9 @@ async def test_provisioning_checks_email_confirmation_via_admin_api(client, monk
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.path.endswith(f"/auth/v1/admin/users/{sub}")
         assert request.headers["authorization"] == "Bearer service-role-test"
-        return httpx.Response(200, json={"id": str(sub), "email": "new@example.test",
-                                         "email_confirmed_at": state["confirmed"]})
+        return httpx.Response(
+            200, json={"id": str(sub), "email": "new@example.test", "email_confirmed_at": state["confirmed"]}
+        )
 
     monkeypatch.setattr(get_settings(), "supabase_service_role_key", "service-role-test")
     monkeypatch.setattr(identity, "_transport", httpx.MockTransport(handler))

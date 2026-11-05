@@ -14,7 +14,6 @@ from app.services import loyalty
 from app.services.ai.grounding import apply_guard
 from app.services.ai.tools import ProductRef, TurnRuntime
 from app.services.rag.retrieval import RetrievedChunk
-from app.tests.conftest import create_actor
 from app.tests.test_loyalty_support import (
     balance,
     delivery_for,
@@ -63,9 +62,19 @@ async def test_p2_spend_points_then_refund_then_void_keeps_points(client, custom
 # ---------------------------------------------------------------- P3 grounding fit-claim bypass
 def _chunk() -> RetrievedChunk:
     return RetrievedChunk(
-        chunk_id=uuid.uuid4(), source_id=uuid.uuid4(), title="Bilge guide", publisher=None, url=None,
-        licence="test", is_synthetic=False, domain="maintenance", heading=None,
-        content="Check the bilge pump every season.", similarity=0.9, applies_to={}, applicability="general",
+        chunk_id=uuid.uuid4(),
+        source_id=uuid.uuid4(),
+        title="Bilge guide",
+        publisher=None,
+        url=None,
+        licence="test",
+        is_synthetic=False,
+        domain="maintenance",
+        heading=None,
+        content="Check the bilge pump every season.",
+        similarity=0.9,
+        applies_to={},
+        applicability="general",
     )
 
 
@@ -80,8 +89,16 @@ def _runtime(product: Product, status: str) -> TurnRuntime:
 
 def _product() -> Product:
     return Product(
-        id=uuid.uuid4(), sku="SEAFLO-BP", name="Seaflo Bilge Pump", brand="Seaflo", price_cents=5000,
-        stock_quantity=5, is_active=True, images=[], oem_part_numbers=[], fitment_scope="unspecified",
+        id=uuid.uuid4(),
+        sku="SEAFLO-BP",
+        name="Seaflo Bilge Pump",
+        brand="Seaflo",
+        price_cents=5000,
+        stock_quantity=5,
+        is_active=True,
+        images=[],
+        oem_part_numbers=[],
+        fitment_scope="unspecified",
     )
 
 
@@ -115,8 +132,9 @@ async def test_p4_deactivated_operator_can_complete_delivery(client, customer, d
     await make_operator_profile(operator.id)
     order = await pay(await helm_dash_order(customer.id))
     d = await delivery_for(order.id)
-    r = await client.post(f"{D}/deliveries/{d.id}/assign", json={"operator_id": str(operator.id)},
-                          headers=dispatcher.headers)
+    r = await client.post(
+        f"{D}/deliveries/{d.id}/assign", json={"operator_id": str(operator.id)}, headers=dispatcher.headers
+    )
     assert r.status_code == 200, r.text
     r = await client.post(f"{D}/jobs/{d.id}/accept", headers=operator.headers)
     assert r.status_code == 200, r.text
@@ -135,19 +153,18 @@ async def test_p4_deactivated_operator_can_complete_delivery(client, customer, d
 
 # ---------------------------------------------------------------- P5 verification bonus farmable per request
 async def test_p5_profile_bonus_repeatable_for_same_vessel(client, customer, admin, vessel):
-    V = f"/api/v1/vessels/{vessel.id}/equipment"
+    eq_url = f"/api/v1/vessels/{vessel.id}/equipment"
     await client.get("/api/v1/boat-db/equipment-categories")
-    r = await client.post(V, json={"category": "anchor_winch", "make": "Lewmar"}, headers=customer.headers)
+    r = await client.post(eq_url, json={"category": "anchor_winch", "make": "Lewmar"}, headers=customer.headers)
     assert r.status_code == 201, r.text
     eq_id = r.json()["id"]
     for i in range(2):
-        r = await client.post(f"{V}/verification-requests", json={}, headers=customer.headers)
+        r = await client.post(f"{eq_url}/verification-requests", json={}, headers=customer.headers)
         assert r.status_code == 201, r.text
-        r = await client.post(f"/api/v1/boat-db/verification-requests/{r.json()['id']}/approve",
-                              headers=admin.headers)
+        r = await client.post(f"/api/v1/boat-db/verification-requests/{r.json()['id']}/approve", headers=admin.headers)
         assert r.status_code == 200, r.text
         # trivial owner edit resets the row to unverified so it can be resubmitted
-        r = await client.patch(f"{V}/{eq_id}", json={"notes": f"edit {i}"}, headers=customer.headers)
+        r = await client.patch(f"{eq_url}/{eq_id}", json={"notes": f"edit {i}"}, headers=customer.headers)
         assert r.status_code == 200, r.text
     # Correct (per docstring "once per approved profile"): 1000, not 2000
     assert await balance(customer.id) == 1000, f"balance={await balance(customer.id)}"
@@ -155,9 +172,11 @@ async def test_p5_profile_bonus_repeatable_for_same_vessel(client, customer, adm
 
 # ---------------------------------------------------------------- P6 unbounded int -> 500
 async def test_p6_cost_cents_overflow_is_500(client, customer, vessel):
-    r = await client.post(f"/api/v1/vessels/{vessel.id}/service-records",
-                          json={"service_type": "Oil", "performed_on": "2026-01-01", "cost_cents": 3_000_000_000},
-                          headers=customer.headers)
+    r = await client.post(
+        f"/api/v1/vessels/{vessel.id}/service-records",
+        json={"service_type": "Oil", "performed_on": "2026-01-01", "cost_cents": 3_000_000_000},
+        headers=customer.headers,
+    )
     assert r.status_code == 422, (r.status_code, r.text)
 
 

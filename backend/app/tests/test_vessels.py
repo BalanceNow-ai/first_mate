@@ -23,7 +23,9 @@ async def test_create_read_update_delete(client, customer):
     assert v["is_primary"] is True  # first vessel becomes primary
     assert "name" not in v
     vid = v["id"]
-    r = await client.patch(f"/api/v1/vessels/{vid}", json={"engine_model": "F200", "engine_year": 2023}, headers=customer.headers)
+    r = await client.patch(
+        f"/api/v1/vessels/{vid}", json={"engine_model": "F200", "engine_year": 2023}, headers=customer.headers
+    )
     assert r.status_code == 200 and r.json()["engine_model"] == "F200"
     assert len((await client.get("/api/v1/vessels/", headers=customer.headers)).json()) == 1
     assert (await client.delete(f"/api/v1/vessels/{vid}", headers=customer.headers)).status_code == 204
@@ -49,6 +51,10 @@ async def test_owner_isolation(client, customer, other_customer):
 
 async def test_single_primary(client, customer):
     a = (await client.post("/api/v1/vessels/", json=VESSEL, headers=customer.headers)).json()
-    b = (await client.post("/api/v1/vessels/", json={**VESSEL, "nickname": "Tender", "is_primary": True}, headers=customer.headers)).json()
+    b = (
+        await client.post(
+            "/api/v1/vessels/", json={**VESSEL, "nickname": "Tender", "is_primary": True}, headers=customer.headers
+        )
+    ).json()
     vessels = {v["id"]: v for v in (await client.get("/api/v1/vessels/", headers=customer.headers)).json()}
     assert vessels[b["id"]]["is_primary"] and not vessels[a["id"]]["is_primary"]

@@ -41,31 +41,23 @@ class BulkAddResult:
 
 
 async def _get_product(db: AsyncSession, product_id: uuid.UUID) -> Product | None:
-    return (
-        await db.execute(select(Product).where(Product.id == product_id))
-    ).scalar_one_or_none()
+    return (await db.execute(select(Product).where(Product.id == product_id))).scalar_one_or_none()
 
 
 async def _get_line(db: AsyncSession, user_id: uuid.UUID, product_id: uuid.UUID) -> CartItem | None:
     return (
         await db.execute(
-            select(CartItem)
-            .where(CartItem.user_id == user_id, CartItem.product_id == product_id)
-            .with_for_update()
+            select(CartItem).where(CartItem.user_id == user_id, CartItem.product_id == product_id).with_for_update()
         )
     ).scalar_one_or_none()
 
 
 def _validate_quantity(quantity: int) -> None:
     if quantity < 1 or quantity > MAX_LINE_QUANTITY:
-        raise AppError(
-            422, "invalid_quantity", f"Quantity must be between 1 and {MAX_LINE_QUANTITY}"
-        )
+        raise AppError(422, "invalid_quantity", f"Quantity must be between 1 and {MAX_LINE_QUANTITY}")
 
 
-async def add_item(
-    db: AsyncSession, user_id: uuid.UUID, product_id: uuid.UUID, quantity: int
-) -> CartItem:
+async def add_item(db: AsyncSession, user_id: uuid.UUID, product_id: uuid.UUID, quantity: int) -> CartItem:
     """Add ``quantity`` to the cart line (raises AppError on any rule violation)."""
     _validate_quantity(quantity)
     product = await _get_product(db, product_id)
@@ -94,9 +86,7 @@ async def add_item(
 async def set_quantity(db: AsyncSession, user_id: uuid.UUID, item_id: uuid.UUID, quantity: int) -> CartItem:
     _validate_quantity(quantity)
     line = (
-        await db.execute(
-            select(CartItem).where(CartItem.id == item_id, CartItem.user_id == user_id).with_for_update()
-        )
+        await db.execute(select(CartItem).where(CartItem.id == item_id, CartItem.user_id == user_id).with_for_update())
     ).scalar_one_or_none()
     if line is None:
         raise AppError(404, "not_found", "Cart item not found")
@@ -115,9 +105,7 @@ async def set_quantity(db: AsyncSession, user_id: uuid.UUID, item_id: uuid.UUID,
     return line
 
 
-async def ensure_quantities(
-    db: AsyncSession, user_id: uuid.UUID, wanted: list[tuple[uuid.UUID, int]]
-) -> BulkAddResult:
+async def ensure_quantities(db: AsyncSession, user_id: uuid.UUID, wanted: list[tuple[uuid.UUID, int]]) -> BulkAddResult:
     """Ensure the cart holds *at least* each wanted quantity (idempotent bulk add).
 
     Repeating the call does not keep increasing quantities. Lines that cannot be
@@ -142,8 +130,9 @@ async def ensure_quantities(
         target = min(want, product.stock_quantity)
         if target <= have:
             result.lines.append(
-                CartLineResult(product_id, want, 0, have, "insufficient_stock",
-                               f"Only {product.stock_quantity} available")
+                CartLineResult(
+                    product_id, want, 0, have, "insufficient_stock", f"Only {product.stock_quantity} available"
+                )
             )
             continue
         if line is None:

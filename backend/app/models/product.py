@@ -31,9 +31,7 @@ class Product(Base):
             name="sale_price_valid",
         ),
         CheckConstraint("stock_quantity >= 0", name="stock_nonnegative"),
-        CheckConstraint(
-            "fitment_scope IN ('universal','specific','unspecified')", name="valid_fitment_scope"
-        ),
+        CheckConstraint("fitment_scope IN ('universal','specific','unspecified')", name="valid_fitment_scope"),
     )
 
     id: Mapped[uuid.UUID] = uuid_pk()
@@ -64,7 +62,7 @@ class Product(Base):
     created_at: Mapped[datetime] = created_at_col()
     updated_at: Mapped[datetime] = updated_at_col()
 
-    compatibilities: Mapped[list["ProductCompatibility"]] = relationship(
+    compatibilities: Mapped[list[ProductCompatibility]] = relationship(
         "ProductCompatibility", back_populates="product", cascade="all, delete-orphan"
     )
 
@@ -78,9 +76,7 @@ class ProductCompatibility(Base):
 
     __tablename__ = "product_compatibility"
     __table_args__ = (
-        CheckConstraint(
-            "verification_status IN ('unverified','verified','rejected')", name="valid_verification"
-        ),
+        CheckConstraint("verification_status IN ('unverified','verified','rejected')", name="valid_verification"),
         CheckConstraint("confidence_score >= 0 AND confidence_score <= 1", name="confidence_range"),
         CheckConstraint(
             "vessel_make IS NOT NULL OR engine_make IS NOT NULL OR equipment_category_id IS NOT NULL",

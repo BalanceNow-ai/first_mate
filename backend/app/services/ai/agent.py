@@ -52,9 +52,7 @@ async def run_turn(
     routed = route(message, settings.ai_max_specialists)
     turn = TurnInput(
         message=message,
-        history=history[-settings.ai_history_messages :]
-        if settings.ai_history_messages > 0
-        else [],
+        history=history[-settings.ai_history_messages :] if settings.ai_history_messages > 0 else [],
         routed_domains=routed,
         vessel_label=profile.label if profile else None,
     )
@@ -82,9 +80,7 @@ async def run_turn(
         citations=guarded.citations,
         products=guarded.products,
         actions=guarded.actions,
-        vessel={"id": str(vessel.id), "label": profile.label}
-        if vessel is not None and profile
-        else None,
+        vessel={"id": str(vessel.id), "label": profile.label} if vessel is not None and profile else None,
         mode=provider.mode,
         runtime=runtime,
     )

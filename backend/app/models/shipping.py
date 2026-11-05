@@ -32,9 +32,7 @@ class DeliveryQuote(Base):
     destination: Mapped[dict] = mapped_column(JSONB, nullable=False)
     parcel_weight_grams: Mapped[int] = mapped_column(Integer, nullable=False)
     cart_fingerprint: Mapped[str] = mapped_column(String, nullable=False)
-    operating_area_id: Mapped[str | None] = mapped_column(
-        String, ForeignKey("operating_areas.id"), nullable=True
-    )
+    operating_area_id: Mapped[str | None] = mapped_column(String, ForeignKey("operating_areas.id"), nullable=True)
     nautical_miles: Mapped[Decimal | None] = mapped_column(Numeric(7, 2), nullable=True)
     estimated_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
     estimated_days: Mapped[int | None] = mapped_column(Integer, nullable=True)

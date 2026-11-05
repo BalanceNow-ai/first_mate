@@ -65,9 +65,7 @@ def get_adapter() -> CourierAdapter:
 
 
 async def existing_shipment(db: AsyncSession, order_id) -> CourierShipment | None:
-    return (
-        await db.execute(select(CourierShipment).where(CourierShipment.order_id == order_id))
-    ).scalar_one_or_none()
+    return (await db.execute(select(CourierShipment).where(CourierShipment.order_id == order_id))).scalar_one_or_none()
 
 
 async def book_shipment(db: AsyncSession, order: Order) -> tuple[CourierShipment, bool]:
@@ -75,9 +73,7 @@ async def book_shipment(db: AsyncSession, order: Order) -> tuple[CourierShipment
     if order.delivery_type != "courier":
         raise AppError(409, "not_a_courier_order", "Only courier orders have courier shipments")
     if order.status not in ("paid", "ready_for_dispatch"):
-        raise AppError(
-            409, "order_not_ready", f"A {order.status} order cannot be booked with a courier"
-        )
+        raise AppError(409, "order_not_ready", f"A {order.status} order cannot be booked with a courier")
     shipment = await existing_shipment(db, order.id)
     if shipment is not None:
         return shipment, False

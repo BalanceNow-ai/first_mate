@@ -96,9 +96,7 @@ class TurnRuntime:
         return ref
 
     def _unknown(self, reason: str) -> FitmentResult:
-        return FitmentResult(
-            status="unknown", vessel_id=None, message=f"Fit is unknown — {reason}", reasons=[reason]
-        )
+        return FitmentResult(status="unknown", vessel_id=None, message=f"Fit is unknown — {reason}", reasons=[reason])
 
     async def _fitments(self, products: list[Product]) -> dict[uuid.UUID, FitmentResult]:
         if self.profile is None:
@@ -239,9 +237,7 @@ class TurnRuntime:
         candidates = list((await self.db.execute(stmt)).scalars())
 
         def is_exact(p: Product) -> bool:
-            return p.sku.upper() == exact or exact in {
-                str(n).upper() for n in (p.oem_part_numbers or [])
-            }
+            return p.sku.upper() == exact or exact in {str(n).upper() for n in (p.oem_part_numbers or [])}
 
         exact_hits = [p for p in candidates if is_exact(p)]
         if exact_hits:
@@ -249,14 +245,10 @@ class TurnRuntime:
         else:
 
             def score(p: Product) -> int:
-                hay = " ".join(
-                    filter(None, [p.name, p.sku, p.brand, p.part_role, p.description])
-                ).lower()
+                hay = " ".join(filter(None, [p.name, p.sku, p.brand, p.part_role, p.description])).lower()
                 return sum(1 for t in terms if t in hay)
 
-            ranked = sorted(
-                (p for p in candidates if score(p) > 0), key=lambda p: (-score(p), p.name)
-            )
+            ranked = sorted((p for p in candidates if score(p) > 0), key=lambda p: (-score(p), p.name))
         ranked = ranked[: settings.ai_max_products]
         fits = await self._fitments(ranked)
         refs = [self._record(p, fits[p.id]) for p in ranked]
@@ -361,11 +353,7 @@ class TurnRuntime:
         if handler is None:
             return {"error": "unknown_tool"}
         try:
-            args = (
-                raw_arguments
-                if isinstance(raw_arguments, dict)
-                else json.loads(raw_arguments or "{}")
-            )
+            args = raw_arguments if isinstance(raw_arguments, dict) else json.loads(raw_arguments or "{}")
             if not isinstance(args, dict):
                 raise ValueError
         except (ValueError, TypeError):
@@ -518,9 +506,7 @@ def wrap_tool_result(name: str, payload: dict, max_chars: int | None = None) -> 
     max_chars = max_chars or get_settings().ai_tool_result_max_chars
     data = json.loads(json.dumps(payload, default=str))
     while True:
-        envelope = {
-            "untrusted_tool_result": {"tool": name, "notice": UNTRUSTED_NOTICE, "data": data}
-        }
+        envelope = {"untrusted_tool_result": {"tool": name, "notice": UNTRUSTED_NOTICE, "data": data}}
         text = json.dumps(envelope, ensure_ascii=False)
         if len(text) <= max_chars or not _shrink(data):
             break

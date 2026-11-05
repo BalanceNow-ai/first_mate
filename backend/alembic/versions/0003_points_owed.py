@@ -10,6 +10,7 @@ Create Date: 2026-11-05
 """
 
 import sqlalchemy as sa
+
 from alembic import op
 
 revision = "0003"
@@ -45,9 +46,7 @@ def upgrade() -> None:
         END $$;
         """
     )
-    op.add_column(
-        "crew_points", sa.Column("points_owed", sa.Integer(), server_default="0", nullable=False)
-    )
+    op.add_column("crew_points", sa.Column("points_owed", sa.Integer(), server_default="0", nullable=False))
     op.create_check_constraint("owed_nonnegative", "crew_points", "points_owed >= 0")
     op.drop_constraint(op.f("ck_points_transactions_valid_kind"), "points_transactions", type_="check")
     op.create_check_constraint("valid_kind", "points_transactions", f"kind IN ({KINDS_V3})")

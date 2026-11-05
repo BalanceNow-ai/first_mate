@@ -28,9 +28,7 @@ from app.services.rag import ingestion
 router = APIRouter(prefix="/knowledge", tags=["Knowledge Corpus"])
 
 
-async def _responses(
-    db: AsyncSession, sources: list[KnowledgeSource]
-) -> list[KnowledgeSourceResponse]:
+async def _responses(db: AsyncSession, sources: list[KnowledgeSource]) -> list[KnowledgeSourceResponse]:
     stats = await ingestion.chunk_stats(db, [s.id for s in sources])
     out = []
     for s in sources:
@@ -38,11 +36,7 @@ async def _responses(
         out.append(
             KnowledgeSourceResponse.model_validate(
                 {
-                    **{
-                        c: getattr(s, c)
-                        for c in KnowledgeSourceResponse.model_fields
-                        if hasattr(s, c)
-                    },
+                    **{c: getattr(s, c) for c in KnowledgeSourceResponse.model_fields if hasattr(s, c)},
                     "chunk_count": count,
                     "embedding_models": models,
                 }
@@ -60,9 +54,7 @@ async def _one(db: AsyncSession, source: KnowledgeSource) -> KnowledgeSourceResp
 async def list_sources(
     _: AdminUser,
     db: AsyncSession = Depends(get_db, scope="function"),
-    admission_status: Literal["pending", "admitted", "revoked"] | None = Query(
-        None, alias="status"
-    ),
+    admission_status: Literal["pending", "admitted", "revoked"] | None = Query(None, alias="status"),
     domain: str | None = Query(None, max_length=40),
     limit: int = Query(100, ge=1, le=500),
 ) -> list[KnowledgeSourceResponse]:
@@ -160,9 +152,7 @@ async def delete_source(
     response_model=KnowledgeReembedResponse,
     dependencies=[Depends(mutation_limit())],
 )
-async def reembed_source(
-    source_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
-):
+async def reembed_source(source_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")):
     """Recompute the source's chunk embeddings with the active embedding model."""
     source, count = await ingestion.reembed(db, source_id, admin.id)
     return KnowledgeReembedResponse(source=await _one(db, source), chunks_embedded=count)

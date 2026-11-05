@@ -16,9 +16,7 @@ class NotificationOutbox(Base):
     __tablename__ = "notification_outbox"
     __table_args__ = (
         CheckConstraint("channel IN ('email','push')", name="valid_channel"),
-        CheckConstraint(
-            "status IN ('pending','sending','sent','failed','dead','suppressed')", name="valid_status"
-        ),
+        CheckConstraint("status IN ('pending','sending','sent','failed','dead','suppressed')", name="valid_status"),
     )
 
     id: Mapped[uuid.UUID] = uuid_pk()

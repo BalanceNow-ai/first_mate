@@ -46,9 +46,7 @@ def install_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(StarletteHTTPException)
     async def _http_error(_: Request, exc: StarletteHTTPException) -> JSONResponse:
         detail = exc.detail if isinstance(exc.detail, str) else "Request failed"
-        code = {404: "not_found", 405: "method_not_allowed", 401: "invalid_token"}.get(
-            exc.status_code, "http_error"
-        )
+        code = {404: "not_found", 405: "method_not_allowed", 401: "invalid_token"}.get(exc.status_code, "http_error")
         return JSONResponse(
             status_code=exc.status_code,
             content={"detail": detail, "code": code},
@@ -58,8 +56,7 @@ def install_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(RequestValidationError)
     async def _validation_error(_: Request, exc: RequestValidationError) -> JSONResponse:
         errors = [
-            {"loc": list(e.get("loc", [])), "msg": e.get("msg", ""), "type": e.get("type", "")}
-            for e in exc.errors()
+            {"loc": list(e.get("loc", [])), "msg": e.get("msg", ""), "type": e.get("type", "")} for e in exc.errors()
         ]
         return JSONResponse(
             status_code=422,
@@ -70,9 +67,10 @@ def install_error_handlers(app: FastAPI) -> None:
     async def _unhandled(request: Request, exc: Exception) -> JSONResponse:
         # Log the type and route only; never echo provider/internal messages to clients.
         logger.error(
-            "Unhandled %s on %s %s", type(exc).__name__, request.method, request.url.path,
+            "Unhandled %s on %s %s",
+            type(exc).__name__,
+            request.method,
+            request.url.path,
             exc_info=exc,
         )
-        return JSONResponse(
-            status_code=500, content={"detail": "Internal server error", "code": "internal_error"}
-        )
+        return JSONResponse(status_code=500, content={"detail": "Internal server error", "code": "internal_error"})

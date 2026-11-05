@@ -31,24 +31,16 @@ async def test_courier_quote_from_current_cart(client, customer):
     assert ttl == timedelta(minutes=get_settings().quote_ttl_minutes)
     expected = hashlib.sha256(",".join(sorted([f"{a.id}:2", f"{b.id}:1"])).encode()).hexdigest()
     async with async_session() as s:
-        row = (
-            await s.execute(select(DeliveryQuote).where(DeliveryQuote.id == q["id"]))
-        ).scalar_one()
+        row = (await s.execute(select(DeliveryQuote).where(DeliveryQuote.id == q["id"]))).scalar_one()
     assert row.cart_fingerprint == expected and row.user_id == customer.id
 
 
 async def test_explicit_rate_card_is_not_labelled_development(client, customer, monkeypatch):
-    monkeypatch.setattr(
-        get_settings(), "courier_rate_card", '[{"max_grams": 10000, "price_cents": 999}]'
-    )
+    monkeypatch.setattr(get_settings(), "courier_rate_card", '[{"max_grams": 10000, "price_cents": 999}]')
     p = await create_product(weight_grams=9000)
     await add(client, customer, p)
     q = (await quote(client, customer)).json()
-    assert (
-        q["price_cents"] == 999
-        and q["provider"] == "rate_card"
-        and q["development_rate_card"] is False
-    )
+    assert q["price_cents"] == 999 and q["provider"] == "rate_card" and q["development_rate_card"] is False
 
 
 async def test_courier_refuses_unknown_weight_and_heavy_parcels(client, customer, other_customer):
@@ -94,19 +86,16 @@ async def test_helm_dash_quote_inside_operating_area(client, customer):
     assert r.status_code == 201, r.text
     q = r.json()
     s = get_settings()
-    nm = Decimal(
-        str(haversine_nm(s.warehouse_lat, s.warehouse_lng, WAIHEKE["lat"], WAIHEKE["lng"]))
-    ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    nm = Decimal(str(haversine_nm(s.warehouse_lat, s.warehouse_lng, WAIHEKE["lat"], WAIHEKE["lng"]))).quantize(
+        Decimal("0.01"), rounding=ROUND_HALF_UP
+    )
     assert 10 < nm < 25
     assert q["nautical_miles"] == float(nm)
     fee = s.helm_dash_base_fee_cents + int(
         (Decimal(s.helm_dash_per_nm_fee_cents) * nm).quantize(Decimal(1), ROUND_HALF_UP)
     )
     assert q["price_cents"] == fee
-    eta = (
-        int((nm / Decimal(str(s.helm_dash_speed_knots)) * 60).quantize(Decimal(1), ROUND_HALF_UP))
-        + 15
-    )
+    eta = int((nm / Decimal(str(s.helm_dash_speed_knots)) * 60).quantize(Decimal(1), ROUND_HALF_UP)) + 15
     assert q["estimated_minutes"] == eta
     assert q["operating_area_id"] == "hauraki-gulf" and q["operating_area_name"] == "Hauraki Gulf"
     assert q["provider"] == "helm_dash" and q["free_shipping_threshold_cents"] is None
@@ -115,9 +104,7 @@ async def test_helm_dash_quote_inside_operating_area(client, customer):
 async def test_helm_dash_outside_or_disabled(client, customer, monkeypatch):
     p = await create_product()
     await add(client, customer, p)
-    await seed_area(
-        "disabled-area", name="Bay of Islands", center_lat=-41.29, center_lng=174.78, enabled=False
-    )
+    await seed_area("disabled-area", name="Bay of Islands", center_lat=-41.29, center_lng=174.78, enabled=False)
     r = await quote(client, customer, "helm_dash", WELLINGTON)
     assert r.status_code == 422 and r.json()["code"] == "outside_operating_area"
     await seed_area()
@@ -154,20 +141,11 @@ async def test_delivery_options_report_reasons(client, customer):
     await add(client, customer, plain)
     options = (await client.get(f"{API}/shipping/options", headers=customer.headers)).json()
     by_type = {o["delivery_type"]: o for o in options["options"]}
-    assert (
-        by_type["click_and_collect"]["available"]
-        and by_type["click_and_collect"]["price_cents"] == 0
-    )
-    assert (
-        by_type["courier"]["available"] is False
-        and by_type["courier"]["reason_code"] == "weight_unknown"
-    )
+    assert by_type["click_and_collect"]["available"] and by_type["click_and_collect"]["price_cents"] == 0
+    assert by_type["courier"]["available"] is False and by_type["courier"]["reason_code"] == "weight_unknown"
     assert by_type["helm_dash"]["available"] and by_type["helm_dash"]["requires_quote"]
     assert by_type["helm_dash"]["operating_areas"][0]["id"] == "hauraki-gulf"
-    assert (
-        options["total_weight_grams"] is None
-        and options["missing_weight_products"][0]["name"] == "Chart Book"
-    )
+    assert options["total_weight_grams"] is None and options["missing_weight_products"][0]["name"] == "Chart Book"
 
     dg = await create_product(dangerous_goods=True, name="Flare Kit")
     await add(client, customer, dg)
@@ -187,10 +165,7 @@ async def test_delivery_options_courier_price_and_disabled_helm_dash(client, cus
     assert by_type["courier"]["available"] and by_type["courier"]["price_cents"] == 750
     assert by_type["courier"]["development_rate_card"] is True
     assert by_type["helm_dash"]["available"] is False  # no enabled operating area
-    assert (
-        options["total_weight_grams"] == 600
-        and options["merchandise_subtotal_cents"] == p.price_cents
-    )
+    assert options["total_weight_grams"] == 600 and options["merchandise_subtotal_cents"] == p.price_cents
 
 
 async def test_public_estimate_is_informational_and_rate_limited(client, monkeypatch):
@@ -202,9 +177,7 @@ async def test_public_estimate_is_informational_and_rate_limited(client, monkeyp
         json={"delivery_type": "courier", "items": [{"product_id": str(p.id), "quantity": 2}]},
     )
     assert r.status_code == 200, r.text
-    assert (
-        r.json()["price_cents"] == 1850 and r.json()["bindable"] is False and r.json()["available"]
-    )
+    assert r.json()["price_cents"] == 1850 and r.json()["bindable"] is False and r.json()["available"]
     r = await client.post(
         f"{API}/shipping/estimate",
         json={
@@ -218,9 +191,7 @@ async def test_public_estimate_is_informational_and_rate_limited(client, monkeyp
         f"{API}/shipping/estimate",
         json={"delivery_type": "courier", "items": [{"product_id": str(dg.id)}]},
     )
-    assert (
-        r.json()["available"] is False and r.json()["reason_code"] == "dangerous_goods_restricted"
-    )
+    assert r.json()["available"] is False and r.json()["reason_code"] == "dangerous_goods_restricted"
     monkeypatch.setattr(get_settings(), "rate_limit_shipping_estimate_per_minute", 3)
     r = await client.post(
         f"{API}/shipping/estimate",

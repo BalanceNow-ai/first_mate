@@ -35,9 +35,7 @@ async def lock_for_checkout(
     if ent is None or ent.user_id != user_id:
         raise AppError(404, "entitlement_not_found", "Discount not found")
     if ent.status != "issued":
-        raise AppError(
-            409, "entitlement_unavailable", "This discount has already been used or is in use"
-        )
+        raise AppError(409, "entitlement_unavailable", "This discount has already been used or is in use")
     if ent.amount_cents > merchandise_subtotal_cents:
         raise AppError(
             422,

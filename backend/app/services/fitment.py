@@ -142,6 +142,9 @@ async def load_vessel_profile(db: AsyncSession, vessel: Vessel) -> VesselProfile
     return profile
 
 
+_EQUIPMENT_OUTCOME_TEXT = {"match": "matches", "mismatch": "does not match", "unknown": "details needed"}
+
+
 def _range_outcome(lo: int | None, hi: int | None, value: int | None) -> str:
     if lo is None and hi is None:
         return "match"
@@ -154,8 +157,9 @@ def _range_outcome(lo: int | None, hi: int | None, value: int | None) -> str:
     return "match"
 
 
-def _fact_outcome(rule_make: str | None, rule_model: str | None, lo: int | None, hi: int | None,
-                  fact: EquipmentFact) -> str:
+def _fact_outcome(
+    rule_make: str | None, rule_model: str | None, lo: int | None, hi: int | None, fact: EquipmentFact
+) -> str:
     if rule_make and norm(rule_make) != norm(fact.make):
         return "mismatch"
     if rule_model:
@@ -190,10 +194,12 @@ def _rule_outcome(rule: ProductCompatibility, profile: VesselProfile, category_s
         if not engines:
             dims.append(("unknown", "no engine recorded for this vessel"))
         else:
-            o = _combine_facts([
-                _fact_outcome(rule.engine_make, rule.engine_model, rule.engine_year_from, rule.engine_year_to, e)
-                for e in engines
-            ])
+            o = _combine_facts(
+                [
+                    _fact_outcome(rule.engine_make, rule.engine_model, rule.engine_year_from, rule.engine_year_to, e)
+                    for e in engines
+                ]
+            )
             reason = {
                 "match": "engine matches verified fitment",
                 "mismatch": f"verified for {rule.engine_make} {rule.engine_model or ''}".strip() + " engines",
@@ -204,15 +210,20 @@ def _rule_outcome(rule: ProductCompatibility, profile: VesselProfile, category_s
         slug = category_slugs.get(rule.equipment_category_id, "equipment")
         facts = profile.facts_for(slug)
         if not facts:
-            why = "installed equipment data is unverified" if slug in profile.uncertain_categories else (
-                f"no {slug.replace('_', ' ')} recorded for this vessel"
+            why = (
+                "installed equipment data is unverified"
+                if slug in profile.uncertain_categories
+                else (f"no {slug.replace('_', ' ')} recorded for this vessel")
             )
             dims.append(("unknown", why))
         else:
-            o = _combine_facts([
-                _fact_outcome(rule.equipment_make, rule.equipment_model, None, None, f) for f in facts
-            ])
-            dims.append((o, f"{slug.replace('_', ' ')} {'matches' if o == 'match' else 'does not match' if o == 'mismatch' else 'details needed'}"))
+            o = _combine_facts([_fact_outcome(rule.equipment_make, rule.equipment_model, None, None, f) for f in facts])
+            dims.append(
+                (
+                    o,
+                    f"{slug.replace('_', ' ')} {_EQUIPMENT_OUTCOME_TEXT[o]}",
+                )
+            )
     outcomes = [d[0] for d in dims]
     if "mismatch" in outcomes:
         return "mismatch", next(r for o, r in dims if o == "mismatch")
@@ -232,21 +243,20 @@ def evaluate(
     category_slugs = category_slugs or {}
     if product.fitment_scope == "universal":
         return FitmentResult(
-            status="universal", vessel_id=profile.vessel_id,
+            status="universal",
+            vessel_id=profile.vessel_id,
             message=f"Suitable for any vessel, including {profile.label}",
             reasons=["product is verified as universal"],
         )
-    usable = [
-        r for r in rules
-        if r.verification_status == "verified" and Decimal(str(r.confidence_score)) >= threshold
-    ]
+    usable = [r for r in rules if r.verification_status == "verified" and Decimal(str(r.confidence_score)) >= threshold]
     unverified = [r for r in rules if r not in usable and r.verification_status != "rejected"]
     if not usable:
         reasons = ["no verified fitment data for this product"]
         if unverified:
             reasons.append("unverified fitment data exists and is awaiting review")
         return FitmentResult(
-            status="unknown", vessel_id=profile.vessel_id,
+            status="unknown",
+            vessel_id=profile.vessel_id,
             message=f"Fit for {profile.label} is unknown — no verified fitment data",
             reasons=reasons,
         )
@@ -254,7 +264,8 @@ def evaluate(
     matches = [r for r, o, _ in results if o == "match"]
     if matches:
         return FitmentResult(
-            status="verified_fit", vessel_id=profile.vessel_id,
+            status="verified_fit",
+            vessel_id=profile.vessel_id,
             message=f"Fits {profile.label}",
             reasons=[reason for r, o, reason in results if o == "match"][:3],
             matched_rule_ids=[r.id for r in matches],
@@ -262,12 +273,14 @@ def evaluate(
     unknowns = [(r, reason) for r, o, reason in results if o == "unknown"]
     if unknowns:
         return FitmentResult(
-            status="unknown", vessel_id=profile.vessel_id,
+            status="unknown",
+            vessel_id=profile.vessel_id,
             message=f"Fit for {profile.label} is unknown — {unknowns[0][1]}",
             reasons=[reason for _, reason in unknowns][:3],
         )
     return FitmentResult(
-        status="verified_mismatch", vessel_id=profile.vessel_id,
+        status="verified_mismatch",
+        vessel_id=profile.vessel_id,
         message=f"Does not fit {profile.label}",
         reasons=[reason for _, _, reason in results][:3],
     )
@@ -316,7 +329,8 @@ def candidate_clause(profile: VesselProfile):
         and_(
             ProductCompatibility.equipment_category_id.isnot(None),
             or_(ProductCompatibility.equipment_make.is_(None), n(ProductCompatibility.equipment_make).in_(fact_makes))
-            if fact_makes else ProductCompatibility.equipment_make.is_(None),
+            if fact_makes
+            else ProductCompatibility.equipment_make.is_(None),
         ),
     )
     return or_(

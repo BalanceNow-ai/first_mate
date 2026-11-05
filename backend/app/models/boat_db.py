@@ -46,7 +46,7 @@ class Manufacturer(Base):
     source: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = created_at_col()
 
-    models: Mapped[list["BoatModel"]] = relationship(back_populates="manufacturer")
+    models: Mapped[list[BoatModel]] = relationship(back_populates="manufacturer")
 
 
 class BoatModel(Base):
@@ -67,7 +67,7 @@ class BoatModel(Base):
     created_at: Mapped[datetime] = created_at_col()
 
     manufacturer: Mapped[Manufacturer] = relationship(back_populates="models")
-    years: Mapped[list["ModelYear"]] = relationship(back_populates="boat_model")
+    years: Mapped[list[ModelYear]] = relationship(back_populates="boat_model")
 
 
 class ModelYear(Base):
@@ -84,7 +84,7 @@ class ModelYear(Base):
     created_at: Mapped[datetime] = created_at_col()
 
     boat_model: Mapped[BoatModel] = relationship(back_populates="years")
-    equipment: Mapped[list["OEMEquipment"]] = relationship(back_populates="model_year")
+    equipment: Mapped[list[OEMEquipment]] = relationship(back_populates="model_year")
 
 
 class EquipmentCategory(Base):
@@ -100,9 +100,7 @@ class EquipmentCategory(Base):
 
 class OEMEquipment(Base):
     __tablename__ = "oem_equipment"
-    __table_args__ = (
-        CheckConstraint("confidence_score >= 0 AND confidence_score <= 1", name="confidence_range"),
-    )
+    __table_args__ = (CheckConstraint("confidence_score >= 0 AND confidence_score <= 1", name="confidence_range"),)
 
     id: Mapped[uuid.UUID] = uuid_pk()
     model_year_id: Mapped[uuid.UUID] = mapped_column(

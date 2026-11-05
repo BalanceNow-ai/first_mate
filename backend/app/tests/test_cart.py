@@ -15,7 +15,9 @@ async def test_add_uses_sale_price_and_validates(client, customer):
     r = await client.post("/api/v1/cart/items", json={"product_id": str(p.id), "quantity": 2}, headers=customer.headers)
     assert r.status_code == 409 and r.json()["code"] == "insufficient_stock"
     for qty in (0, -1, 100):
-        r = await client.post("/api/v1/cart/items", json={"product_id": str(p.id), "quantity": qty}, headers=customer.headers)
+        r = await client.post(
+            "/api/v1/cart/items", json={"product_id": str(p.id), "quantity": qty}, headers=customer.headers
+        )
         assert r.status_code == 422
 
 
@@ -37,10 +39,16 @@ async def test_update_remove_and_isolation(client, customer, other_customer):
     p = await create_product(stock_quantity=10)
     cart = (await client.post("/api/v1/cart/items", json={"product_id": str(p.id)}, headers=customer.headers)).json()
     item_id = cart["items"][0]["id"]
-    assert (await client.patch(f"/api/v1/cart/items/{item_id}", json={"quantity": 4}, headers=customer.headers)).json()["item_count"] == 4
-    assert (await client.patch(f"/api/v1/cart/items/{item_id}", json={"quantity": 11}, headers=customer.headers)).status_code == 409
+    assert (await client.patch(f"/api/v1/cart/items/{item_id}", json={"quantity": 4}, headers=customer.headers)).json()[
+        "item_count"
+    ] == 4
+    assert (
+        await client.patch(f"/api/v1/cart/items/{item_id}", json={"quantity": 11}, headers=customer.headers)
+    ).status_code == 409
     # Other customers cannot touch this line.
-    assert (await client.patch(f"/api/v1/cart/items/{item_id}", json={"quantity": 1}, headers=other_customer.headers)).status_code == 404
+    assert (
+        await client.patch(f"/api/v1/cart/items/{item_id}", json={"quantity": 1}, headers=other_customer.headers)
+    ).status_code == 404
     await client.delete(f"/api/v1/cart/items/{item_id}", headers=other_customer.headers)
     assert (await client.get("/api/v1/cart/", headers=customer.headers)).json()["item_count"] == 4
     assert (await client.delete(f"/api/v1/cart/items/{item_id}", headers=customer.headers)).json()["items"] == []

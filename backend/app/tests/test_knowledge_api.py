@@ -58,19 +58,13 @@ async def test_ingest_admit_revoke_reembed_delete(client, admin):
 
     r = await client.post(f"{SOURCES}/{sid}/admit", headers=admin.headers)
     assert r.status_code == 409 and r.json()["code"] == "licence_not_verified"
-    r = await client.post(
-        f"{SOURCES}/{sid}/admit", json={"licence_verified": True}, headers=admin.headers
-    )
+    r = await client.post(f"{SOURCES}/{sid}/admit", json={"licence_verified": True}, headers=admin.headers)
     assert r.status_code == 200
     assert r.json()["admission_status"] == "admitted" and r.json()["admitted_by"] == str(admin.id)
 
-    listed = (
-        await client.get(SOURCES, params={"status": "admitted"}, headers=admin.headers)
-    ).json()
+    listed = (await client.get(SOURCES, params={"status": "admitted"}, headers=admin.headers)).json()
     assert [s["id"] for s in listed] == [sid]
-    assert (
-        await client.get(SOURCES, params={"domain": "safety"}, headers=admin.headers)
-    ).json() == []
+    assert (await client.get(SOURCES, params={"domain": "safety"}, headers=admin.headers)).json() == []
 
     r = await client.post(f"{SOURCES}/{sid}/reembed", headers=admin.headers)
     assert r.status_code == 200 and r.json()["chunks_embedded"] == 1
@@ -87,12 +81,7 @@ async def test_ingest_admit_revoke_reembed_delete(client, admin):
     assert (await client.delete(f"{SOURCES}/{sid}", headers=admin.headers)).status_code == 204
     assert (await client.get(f"{SOURCES}/{sid}", headers=admin.headers)).status_code == 404
     async with async_session() as db:
-        assert (
-            await db.scalar(
-                select(func.count()).select_from(RAGDocument).where(RAGDocument.source_id == sid)
-            )
-            == 0
-        )
+        assert await db.scalar(select(func.count()).select_from(RAGDocument).where(RAGDocument.source_id == sid)) == 0
         actions = set((await db.execute(select(AuditLog.action))).scalars())
     assert {
         "knowledge_ingest",
@@ -106,21 +95,15 @@ async def test_ingest_admit_revoke_reembed_delete(client, admin):
 async def test_ingest_validation_and_bounds(client, admin, monkeypatch):
     r = await client.post(SOURCES, json={**DOC, "domain": "astrology"}, headers=admin.headers)
     assert r.status_code == 422 and r.json()["code"] == "invalid_domain"
-    r = await client.post(
-        SOURCES, json={**DOC, "admission_status": "admitted"}, headers=admin.headers
-    )
+    r = await client.post(SOURCES, json={**DOC, "admission_status": "admitted"}, headers=admin.headers)
     assert r.status_code == 422  # unknown fields rejected
-    r = await client.post(
-        SOURCES, json={**DOC, "applies_to": {"colour": "red"}}, headers=admin.headers
-    )
+    r = await client.post(SOURCES, json={**DOC, "applies_to": {"colour": "red"}}, headers=admin.headers)
     assert r.status_code == 422
     monkeypatch.setattr(get_settings(), "knowledge_max_document_chars", 50)
     r = await client.post(SOURCES, json=DOC, headers=admin.headers)
     assert r.status_code == 413 and r.json()["code"] == "document_too_large"
     assert (
-        await client.post(
-            f"{SOURCES}/00000000-0000-0000-0000-000000000009/admit", headers=admin.headers
-        )
+        await client.post(f"{SOURCES}/00000000-0000-0000-0000-000000000009/admit", headers=admin.headers)
     ).status_code == 404
 
 
@@ -183,12 +166,8 @@ async def test_cli_real_document_stays_pending(tmp_path):
     assert code == 0
     async with async_session() as db:
         source = (await db.execute(select(KnowledgeSource))).scalar_one()
-    assert (
-        source.admission_status == "pending" and source.licence_verified and not source.is_synthetic
-    )
-    assert (
-        await knowledge_cli.run(_args(path=str(path), admit=True)) == 2
-    )  # no --admit for real content
+    assert source.admission_status == "pending" and source.licence_verified and not source.is_synthetic
+    assert await knowledge_cli.run(_args(path=str(path), admit=True)) == 2  # no --admit for real content
     assert await knowledge_cli.run(_args(path=str(path))) == 2  # metadata required
 
 

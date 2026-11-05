@@ -16,11 +16,7 @@ ROLES = ("customer", "operator", "dispatcher", "admin")
 
 class User(Base):
     __tablename__ = "users"
-    __table_args__ = (
-        CheckConstraint(
-            "role IN ('customer','operator','dispatcher','admin')", name="valid_role"
-        ),
-    )
+    __table_args__ = (CheckConstraint("role IN ('customer','operator','dispatcher','admin')", name="valid_role"),)
 
     # Primary key == the verified `sub` claim of the Supabase access token.
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
@@ -29,25 +25,21 @@ class User(Base):
     phone: Mapped[str | None] = mapped_column(String, nullable=True)
     # Authorization role. Only changed by an admin action / CLI; never from a token
     # claim, user metadata or the profile endpoints.
-    role: Mapped[str] = mapped_column(
-        String, nullable=False, default="customer", server_default="customer"
-    )
-    email_verified_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    role: Mapped[str] = mapped_column(String, nullable=False, default="customer", server_default="customer")
+    email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = created_at_col()
     updated_at: Mapped[datetime] = updated_at_col()
 
-    vessels: Mapped[list["Vessel"]] = relationship(  # noqa: F821
+    vessels: Mapped[list[Vessel]] = relationship(  # noqa: F821
         "Vessel", back_populates="user", cascade="all, delete-orphan"
     )
-    orders: Mapped[list["Order"]] = relationship("Order", back_populates="user")  # noqa: F821
-    cart_items: Mapped[list["CartItem"]] = relationship(  # noqa: F821
+    orders: Mapped[list[Order]] = relationship("Order", back_populates="user")  # noqa: F821
+    cart_items: Mapped[list[CartItem]] = relationship(  # noqa: F821
         "CartItem", back_populates="user", cascade="all, delete-orphan"
     )
-    crew_points: Mapped["CrewPoints | None"] = relationship(  # noqa: F821
+    crew_points: Mapped[CrewPoints | None] = relationship(  # noqa: F821
         "CrewPoints", back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
-    ai_conversations: Mapped[list["AIConversation"]] = relationship(  # noqa: F821
+    ai_conversations: Mapped[list[AIConversation]] = relationship(  # noqa: F821
         "AIConversation", back_populates="user", cascade="all, delete-orphan"
     )

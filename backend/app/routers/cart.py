@@ -65,7 +65,10 @@ async def add_to_cart(
 
 @router.patch("/items/{item_id}", response_model=CartResponse, dependencies=[Depends(mutation_limit())])
 async def update_cart_item(
-    item_id: uuid.UUID, updates: CartItemUpdate, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
+    item_id: uuid.UUID,
+    updates: CartItemUpdate,
+    user_id: CurrentUserId,
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> CartResponse:
     """Set the quantity of a cart line."""
     await cart_service.set_quantity(db, user_id, item_id, updates.quantity)

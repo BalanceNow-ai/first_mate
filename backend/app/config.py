@@ -200,7 +200,6 @@ class Settings(BaseSettings):
     typesense_compatible_window: int = 250
     checklist_link_alternatives: int = 3
 
-
     # --- [knowledge-ai workstream] additional settings --------------------------
     knowledge_max_document_chars: int = 200_000  # per ingested document (API / CLI)
     knowledge_chunk_chars: int = 800  # target chunk size (heading-aware)
@@ -211,7 +210,6 @@ class Settings(BaseSettings):
     ai_tool_result_max_chars: int = 6000  # size bound of one tool result given to the model
     ai_max_products: int = 5  # product references returned per answer
     ai_max_specialists: int = 2  # keyword-routed specialist domains per turn
-
 
     # --- [rewards-delivery workstream] additional settings ----------------------
     crew_max_members: int = 10  # spec: crews of 2-10 (pending invites count too)
@@ -230,8 +228,6 @@ class Settings(BaseSettings):
     notification_claim_lease_seconds: int = 300
     notification_http_timeout_seconds: float = 10.0
     service_reminder_renotify_days: int = 7
-
-
 
     # --- end of workstream settings ---------------------------------------------
 
@@ -323,9 +319,7 @@ class Settings(BaseSettings):
 
         # --- Non-local (staging / production) hard requirements ---------------------
         if not self.supabase_service_role_key:
-            problems.append(
-                "SUPABASE_SERVICE_ROLE_KEY is required to verify email confirmation at provisioning"
-            )
+            problems.append("SUPABASE_SERVICE_ROLE_KEY is required to verify email confirmation at provisioning")
         if self.secret_key == _DEFAULT_SECRET or len(self.secret_key) < 32:
             problems.append("SECRET_KEY must be set to a random value of at least 32 characters")
         if any(o == "*" or "localhost" in o or "127.0.0.1" in o for o in self.origins):
@@ -364,9 +358,7 @@ class Settings(BaseSettings):
         """Raise ConfigurationError when the configuration must not be started."""
         problems = self.configuration_problems()
         if problems:
-            raise ConfigurationError(
-                "Refusing to start with unsafe configuration: " + "; ".join(problems)
-            )
+            raise ConfigurationError("Refusing to start with unsafe configuration: " + "; ".join(problems))
 
 
 # Development-only courier rate card (values carried over from the Phase-7 code). It is

@@ -108,9 +108,7 @@ class StripeProvider(PaymentProvider):
 
     async def _call(self, fn, *args, op: str, order_id: uuid.UUID, **kwargs):
         try:
-            return await asyncio.to_thread(
-                fn, *args, api_key=self.settings.stripe_secret_key, **kwargs
-            )
+            return await asyncio.to_thread(fn, *args, api_key=self.settings.stripe_secret_key, **kwargs)
         except stripe.StripeError as exc:
             logger.warning("Stripe %s failed for order %s (%s)", op, order_id, type(exc).__name__)
             raise
@@ -154,13 +152,8 @@ class StripeProvider(PaymentProvider):
                 "payment_intent_canceled",
                 "This payment was cancelled. Please check out again.",
             )
-        if (
-            _get(pi, "amount") != order.total_cents
-            or str(_get(pi, "currency", "")).lower() != CURRENCY
-        ):
-            logger.error(
-                "Stripe intent for order %s does not match the order amount/currency", order.id
-            )
+        if _get(pi, "amount") != order.total_cents or str(_get(pi, "currency", "")).lower() != CURRENCY:
+            logger.error("Stripe intent for order %s does not match the order amount/currency", order.id)
             raise AppError(
                 409,
                 "payment_intent_mismatch",
@@ -239,9 +232,7 @@ class LocalProvider(PaymentProvider):
         return self.settings.local_payment_webhook_secret
 
     def client_secret(self, payment_intent_id: str) -> str:
-        mac = hmac.new(
-            self.webhook_secret.encode(), payment_intent_id.encode(), hashlib.sha256
-        ).hexdigest()
+        mac = hmac.new(self.webhook_secret.encode(), payment_intent_id.encode(), hashlib.sha256).hexdigest()
         return f"{payment_intent_id}_secret_{mac[:24]}"
 
     async def ensure_intent(self, order: Order) -> IntentInfo:

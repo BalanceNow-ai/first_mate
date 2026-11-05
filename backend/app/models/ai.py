@@ -30,8 +30,8 @@ class AIConversation(Base):
     created_at: Mapped[datetime] = created_at_col()
     updated_at: Mapped[datetime] = updated_at_col()
 
-    user: Mapped["User"] = relationship("User", back_populates="ai_conversations")  # noqa: F821
-    vessel: Mapped["Vessel | None"] = relationship(  # noqa: F821
+    user: Mapped[User] = relationship("User", back_populates="ai_conversations")  # noqa: F821
+    vessel: Mapped[Vessel | None] = relationship(  # noqa: F821
         "Vessel", back_populates="ai_conversations"
     )
 
@@ -40,11 +40,7 @@ class KnowledgeSource(Base):
     """A document admitted (or not) to the knowledge corpus, with licence provenance."""
 
     __tablename__ = "knowledge_sources"
-    __table_args__ = (
-        CheckConstraint(
-            "admission_status IN ('pending','admitted','revoked')", name="valid_admission"
-        ),
-    )
+    __table_args__ = (CheckConstraint("admission_status IN ('pending','admitted','revoked')", name="valid_admission"),)
 
     id: Mapped[uuid.UUID] = uuid_pk()
     title: Mapped[str] = mapped_column(String, nullable=False)
@@ -64,7 +60,7 @@ class KnowledgeSource(Base):
     created_at: Mapped[datetime] = created_at_col()
     updated_at: Mapped[datetime] = updated_at_col()
 
-    chunks: Mapped[list["RAGDocument"]] = relationship(back_populates="knowledge_source")
+    chunks: Mapped[list[RAGDocument]] = relationship(back_populates="knowledge_source")
 
 
 class RAGDocument(Base):

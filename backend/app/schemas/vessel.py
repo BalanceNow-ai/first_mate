@@ -30,8 +30,14 @@ class VesselFields(StrictInput):
     engine_hours: int | None = Field(None, ge=0, le=100000)
 
     _blank = field_validator(
-        "hin", "hull_type", "primary_use", "propulsion_type", "engine_make", "engine_model",
-        "engine_serial", mode="before",
+        "hin",
+        "hull_type",
+        "primary_use",
+        "propulsion_type",
+        "engine_make",
+        "engine_model",
+        "engine_serial",
+        mode="before",
     )(_blank_to_none)
 
 

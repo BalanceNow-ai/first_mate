@@ -46,9 +46,7 @@ async def list_specialists() -> list[dict]:
 async def _owned_conversation(
     db: AsyncSession, conversation_id: uuid.UUID, user_id: uuid.UUID, *, lock: bool = False
 ) -> AIConversation:
-    stmt = select(AIConversation).where(
-        AIConversation.id == conversation_id, AIConversation.user_id == user_id
-    )
+    stmt = select(AIConversation).where(AIConversation.id == conversation_id, AIConversation.user_id == user_id)
     if lock:
         stmt = stmt.with_for_update()
     conversation = (await db.execute(stmt)).scalar_one_or_none()
@@ -67,9 +65,7 @@ async def _resolve_vessel(
             return None
         # Re-check ownership every turn; a deleted/transferred vessel gives no context.
         return (
-            await db.execute(
-                select(Vessel).where(Vessel.id == conversation.vessel_id, Vessel.user_id == user_id)
-            )
+            await db.execute(select(Vessel).where(Vessel.id == conversation.vessel_id, Vessel.user_id == user_id))
         ).scalar_one_or_none()
     return (
         await db.execute(
@@ -86,12 +82,8 @@ async def _resolve_vessel(
     response_model=ChatResponse,
     dependencies=[
         Depends(require_ai),
-        Depends(
-            user_rate_limit("ai_chat_minute", lambda: get_settings().rate_limit_ai_per_minute, 60)
-        ),
-        Depends(
-            user_rate_limit("ai_chat_day", lambda: get_settings().rate_limit_ai_per_day, 86_400)
-        ),
+        Depends(user_rate_limit("ai_chat_minute", lambda: get_settings().rate_limit_ai_per_minute, 60)),
+        Depends(user_rate_limit("ai_chat_day", lambda: get_settings().rate_limit_ai_per_day, 86_400)),
     ],
 )
 async def chat(
@@ -109,16 +101,10 @@ async def chat(
             "message_too_long",
             f"Message is limited to {settings.ai_max_message_chars} characters",
         )
-    conversation = (
-        await _owned_conversation(db, body.conversation_id, user.id)
-        if body.conversation_id
-        else None
-    )
+    conversation = await _owned_conversation(db, body.conversation_id, user.id) if body.conversation_id else None
     existing = list(conversation.messages or []) if conversation else []
     if len(existing) + 2 > settings.ai_max_conversation_messages:
-        raise AppError(
-            409, "conversation_full", "This conversation is full. Please start a new conversation."
-        )
+        raise AppError(409, "conversation_full", "This conversation is full. Please start a new conversation.")
     vessel = await _resolve_vessel(db, user.id, body, conversation)
     history = [
         {"role": m.get("role"), "content": m.get("content", "")}
@@ -144,23 +130,21 @@ async def chat(
         "role": "assistant",
         "content": result.content,
         "created_at": now.isoformat(),
-        **response.model_dump(
-            mode="json", include={"grounding", "citations", "products", "actions", "vessel", "mode"}
-        ),
+        **response.model_dump(mode="json", include={"grounding", "citations", "products", "actions", "vessel", "mode"}),
     }
     # Save in a short transaction: re-lock, re-check ownership and size against the
     # latest stored messages, and re-check the vessel (it may have been deleted meanwhile).
-    if vessel is not None and (
-        await db.execute(select(Vessel.id).where(Vessel.id == vessel.id, Vessel.user_id == user.id))
-    ).first() is None:
+    if (
+        vessel is not None
+        and (await db.execute(select(Vessel.id).where(Vessel.id == vessel.id, Vessel.user_id == user.id))).first()
+        is None
+    ):
         vessel = None
     if conversation is not None:
         conversation = await _owned_conversation(db, conversation.id, user.id, lock=True)
         existing = list(conversation.messages or [])
         if len(existing) + 2 > settings.ai_max_conversation_messages:
-            raise AppError(
-                409, "conversation_full", "This conversation is full. Please start a new conversation."
-            )
+            raise AppError(409, "conversation_full", "This conversation is full. Please start a new conversation.")
     if conversation is None:
         conversation = AIConversation(
             id=response.conversation_id,

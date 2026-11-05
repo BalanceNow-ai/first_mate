@@ -73,9 +73,7 @@ async def verify_access_token(token: str, settings: Settings | None = None) -> P
         else:
             if alg not in ASYMMETRIC_ALGORITHMS or not settings.jwks_url:
                 raise _unauthorized()
-            signing_key = await run_in_threadpool(
-                _jwk_client(settings.jwks_url).get_signing_key_from_jwt, token
-            )
+            signing_key = await run_in_threadpool(_jwk_client(settings.jwks_url).get_signing_key_from_jwt, token)
             key = signing_key.key
             algorithms = [alg]
         claims = jwt.decode(

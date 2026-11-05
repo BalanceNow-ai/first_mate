@@ -31,7 +31,7 @@ from app.services.boat_db import ensure_equipment_categories
 SYNTHETIC_DESCRIPTION = "Synthetic test product — not a real catalogue item. "
 
 
-class SeedRefused(RuntimeError):
+class SeedRefusedError(RuntimeError):
     pass
 
 
@@ -70,7 +70,7 @@ async def seed_reference(db: AsyncSession) -> dict[str, int]:
 
 async def seed_synthetic(db: AsyncSession) -> dict[str, int]:
     if not get_settings().is_local:
-        raise SeedRefused("Synthetic catalogue data may only be seeded when APP_ENV is development or test")
+        raise SeedRefusedError("Synthetic catalogue data may only be seeded when APP_ENV is development or test")
     counts = await seed_reference(db)
     counts.update({"model_years": 0, "oem_equipment": 0, "products": 0, "fitment_rules": 0})
     cats = {c.slug: c for c in (await db.execute(select(EquipmentCategory))).scalars()}
@@ -81,8 +81,13 @@ async def seed_synthetic(db: AsyncSession) -> dict[str, int]:
     counts["manufacturers"] += created
     for m in data.SYNTHETIC_MODELS:
         model, created = await _model(
-            db, maker, m["name"], hull_type=m["hull_type"], propulsion_type=m["propulsion_type"],
-            length_ft=Decimal(str(m["length_ft"])), is_synthetic=True,
+            db,
+            maker,
+            m["name"],
+            hull_type=m["hull_type"],
+            propulsion_type=m["propulsion_type"],
+            length_ft=Decimal(str(m["length_ft"])),
+            is_synthetic=True,
         )
         counts["boat_models"] += created
         equipment = list(data.SYNTHETIC_OEM_COMMON)
@@ -103,18 +108,27 @@ async def seed_synthetic(db: AsyncSession) -> dict[str, int]:
                 exists = (
                     await db.execute(
                         select(OEMEquipment.id).where(
-                            OEMEquipment.model_year_id == my.id, OEMEquipment.category_id == cats[slug].id,
-                            OEMEquipment.equipment_make == make, OEMEquipment.equipment_model == model_name,
+                            OEMEquipment.model_year_id == my.id,
+                            OEMEquipment.category_id == cats[slug].id,
+                            OEMEquipment.equipment_make == make,
+                            OEMEquipment.equipment_model == model_name,
                         )
                     )
                 ).first()
                 if exists:
                     continue
-                db.add(OEMEquipment(
-                    model_year_id=my.id, category_id=cats[slug].id, equipment_make=make,
-                    equipment_model=model_name, is_standard=True, data_source="synthetic_fixture",
-                    confidence_score=synthetic_conf, verification_status="unverified",
-                ))
+                db.add(
+                    OEMEquipment(
+                        model_year_id=my.id,
+                        category_id=cats[slug].id,
+                        equipment_make=make,
+                        equipment_model=model_name,
+                        is_standard=True,
+                        data_source="synthetic_fixture",
+                        confidence_score=synthetic_conf,
+                        verification_status="unverified",
+                    )
+                )
                 counts["oem_equipment"] += 1
     await db.flush()
 
@@ -128,7 +142,9 @@ async def seed_synthetic(db: AsyncSession) -> dict[str, int]:
         product = (await db.execute(select(Product).where(Product.sku == spec["sku"]))).scalar_one_or_none()
         if product is None:
             product = Product(
-                **spec, stock_quantity=stock, oem_part_numbers=[spec["sku"]],
+                **spec,
+                stock_quantity=stock,
+                oem_part_numbers=[spec["sku"]],
                 description=SYNTHETIC_DESCRIPTION + spec["name"],
                 specifications={"synthetic": True},
             )
@@ -148,11 +164,19 @@ async def seed_synthetic(db: AsyncSession) -> dict[str, int]:
             ).first()
             if exists:
                 continue
-            db.add(ProductCompatibility(
-                product_id=product.id, engine_make=engine_make, engine_model=engine_model,
-                fitment_type="service_part", verification_status="verified", confidence_score=Decimal("0.90"),
-                data_source="synthetic_fixture", notes=data.FITMENT_NOTES, verified_at=now,
-            ))
+            db.add(
+                ProductCompatibility(
+                    product_id=product.id,
+                    engine_make=engine_make,
+                    engine_model=engine_model,
+                    fitment_type="service_part",
+                    verification_status="verified",
+                    confidence_score=Decimal("0.90"),
+                    data_source="synthetic_fixture",
+                    notes=data.FITMENT_NOTES,
+                    verified_at=now,
+                )
+            )
             counts["fitment_rules"] += 1
     await db.flush()
     return counts

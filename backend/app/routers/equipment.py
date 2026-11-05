@@ -109,9 +109,7 @@ def _installed_item(eq: VesselEquipment, oem: OEMEquipment | None = None) -> Equ
         reliability, note = "high_confidence", None
     else:
         reliability = "unconfirmed"
-        note = (
-            f"Factory record with low confidence ({conf:.2f}); confirm it is fitted before relying on it"
-        )
+        note = f"Factory record with low confidence ({conf:.2f}); confirm it is fitted before relying on it"
     return EquipmentItem(
         id=eq.id,
         source="installed",
@@ -218,7 +216,9 @@ async def list_equipment(
         factory = (
             await db.execute(
                 select(OEMEquipment)
-                .where(OEMEquipment.model_year_id == vessel.model_year_id, OEMEquipment.verification_status != "rejected")
+                .where(
+                    OEMEquipment.model_year_id == vessel.model_year_id, OEMEquipment.verification_status != "rejected"
+                )
                 .options(selectinload(OEMEquipment.category))
                 .order_by(OEMEquipment.created_at, OEMEquipment.id)
             )
@@ -228,19 +228,29 @@ async def list_equipment(
 
 
 @router.post(
-    "/vessels/{vessel_id}/equipment", response_model=EquipmentItem, status_code=status.HTTP_201_CREATED,
+    "/vessels/{vessel_id}/equipment",
+    response_model=EquipmentItem,
+    status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(mutation_limit())],
 )
 async def add_equipment(
-    vessel_id: uuid.UUID, body: EquipmentCreate, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
+    vessel_id: uuid.UUID,
+    body: EquipmentCreate,
+    user_id: CurrentUserId,
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> EquipmentItem:
     """Owner-declared equipment (origin user_added, confidence 1.0, unverified)."""
     vessel = await get_owned_vessel(db, vessel_id, user_id)
     cat = await _category_or_422(db, body.category)
     data = body.model_dump(exclude={"category"})
     eq = VesselEquipment(
-        vessel_id=vessel.id, category_id=cat.id, origin="user_added", provenance="owner_declared",
-        confidence_score=Decimal("1.0"), verification_status="unverified", **data,
+        vessel_id=vessel.id,
+        category_id=cat.id,
+        origin="user_added",
+        provenance="owner_declared",
+        confidence_score=Decimal("1.0"),
+        verification_status="unverified",
+        **data,
     )
     db.add(eq)
     await db.flush()
@@ -249,11 +259,15 @@ async def add_equipment(
 
 
 @router.patch(
-    "/vessels/{vessel_id}/equipment/{equipment_id}", response_model=EquipmentItem,
+    "/vessels/{vessel_id}/equipment/{equipment_id}",
+    response_model=EquipmentItem,
     dependencies=[Depends(mutation_limit())],
 )
 async def update_equipment(
-    vessel_id: uuid.UUID, equipment_id: uuid.UUID, body: EquipmentUpdate, user_id: CurrentUserId,
+    vessel_id: uuid.UUID,
+    equipment_id: uuid.UUID,
+    body: EquipmentUpdate,
+    user_id: CurrentUserId,
     db: AsyncSession = Depends(get_db, scope="function"),
 ) -> EquipmentItem:
     """Edit installed equipment. Any owner edit makes the row an owner declaration again."""
@@ -280,11 +294,15 @@ async def update_equipment(
 
 
 @router.delete(
-    "/vessels/{vessel_id}/equipment/{equipment_id}", status_code=status.HTTP_204_NO_CONTENT,
+    "/vessels/{vessel_id}/equipment/{equipment_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(mutation_limit())],
 )
 async def remove_equipment(
-    vessel_id: uuid.UUID, equipment_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
+    vessel_id: uuid.UUID,
+    equipment_id: uuid.UUID,
+    user_id: CurrentUserId,
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> None:
     """Soft remove (kept for service history; ignored by fitment and checklists)."""
     vessel = await get_owned_vessel(db, vessel_id, user_id)
@@ -295,11 +313,14 @@ async def remove_equipment(
 
 
 @router.post(
-    "/vessels/{vessel_id}/equipment/apply-oem", response_model=ApplyOEMResponse,
+    "/vessels/{vessel_id}/equipment/apply-oem",
+    response_model=ApplyOEMResponse,
     dependencies=[Depends(mutation_limit())],
 )
 async def apply_oem_equipment(
-    vessel_id: uuid.UUID, user_id: CurrentUserId, body: ApplyOEMRequest | None = None,
+    vessel_id: uuid.UUID,
+    user_id: CurrentUserId,
+    body: ApplyOEMRequest | None = None,
     db: AsyncSession = Depends(get_db, scope="function"),
 ) -> ApplyOEMResponse:
     """Copy factory OEM records into installed equipment, carrying the source confidence."""
@@ -335,11 +356,17 @@ async def apply_oem_equipment(
             skipped.append(o.id)
             continue
         eq = VesselEquipment(
-            vessel_id=vessel.id, category_id=o.category_id, make=o.equipment_make, model=o.equipment_model,
-            origin="oem", oem_equipment_id=o.id, provenance="oem_database",
+            vessel_id=vessel.id,
+            category_id=o.category_id,
+            make=o.equipment_make,
+            model=o.equipment_model,
+            origin="oem",
+            oem_equipment_id=o.id,
+            provenance="oem_database",
             confidence_score=o.confidence_score,
-            verification_status="verified" if o.verification_status == "verified" and boat_db.is_reliable(
-                o.confidence_score, o.verification_status) else "unverified",
+            verification_status="verified"
+            if o.verification_status == "verified" and boat_db.is_reliable(o.confidence_score, o.verification_status)
+            else "unverified",
         )
         db.add(eq)
         await db.flush()
@@ -368,18 +395,29 @@ async def _pending_rows(db: AsyncSession, vessel_id: uuid.UUID) -> list[VesselEq
 
 def _request_response(r: EquipmentVerificationRequest, rows: list[VesselEquipment]) -> VerificationRequestResponse:
     return VerificationRequestResponse(
-        id=r.id, vessel_id=r.vessel_id, user_id=r.user_id, status=r.status, submitted_note=r.submitted_note,
-        evidence_url=r.evidence_url, reviewed_at=r.reviewed_at, review_note=r.review_note,
-        created_at=r.created_at, equipment_ids=[e.id for e in rows],
+        id=r.id,
+        vessel_id=r.vessel_id,
+        user_id=r.user_id,
+        status=r.status,
+        submitted_note=r.submitted_note,
+        evidence_url=r.evidence_url,
+        reviewed_at=r.reviewed_at,
+        review_note=r.review_note,
+        created_at=r.created_at,
+        equipment_ids=[e.id for e in rows],
     )
 
 
 @router.post(
-    "/vessels/{vessel_id}/equipment/verification-requests", response_model=VerificationRequestResponse,
-    status_code=status.HTTP_201_CREATED, dependencies=[Depends(mutation_limit())],
+    "/vessels/{vessel_id}/equipment/verification-requests",
+    response_model=VerificationRequestResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(mutation_limit())],
 )
 async def submit_verification_request(
-    vessel_id: uuid.UUID, body: VerificationRequestCreate, user_id: CurrentUserId,
+    vessel_id: uuid.UUID,
+    body: VerificationRequestCreate,
+    user_id: CurrentUserId,
     db: AsyncSession = Depends(get_db, scope="function"),
 ) -> VerificationRequestResponse:
     """Submit the vessel's equipment profile for staff verification (Boat DB spec §4.2)."""
@@ -408,7 +446,10 @@ async def submit_verification_request(
     for row in rows:
         row.verification_status = "pending_review"
     req = EquipmentVerificationRequest(
-        vessel_id=vessel.id, user_id=user_id, status="pending", submitted_note=body.note,
+        vessel_id=vessel.id,
+        user_id=user_id,
+        status="pending",
+        submitted_note=body.note,
         evidence_url=body.evidence_url,
     )
     db.add(req)
@@ -417,9 +458,7 @@ async def submit_verification_request(
     return _request_response(req, rows)
 
 
-@router.get(
-    "/vessels/{vessel_id}/equipment/verification-requests", response_model=list[VerificationRequestResponse]
-)
+@router.get("/vessels/{vessel_id}/equipment/verification-requests", response_model=list[VerificationRequestResponse])
 async def list_verification_requests(
     vessel_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
 ) -> list[VerificationRequestResponse]:
@@ -451,9 +490,21 @@ async def admin_verification_queue(
         rows = await _pending_rows(db, r.vessel_id) if r.status == "pending" else []
         out.append(
             AdminVerificationItem(
-                **{k: getattr(r, k) for k in (
-                    "id", "vessel_id", "user_id", "status", "submitted_note", "evidence_url", "reviewed_by",
-                    "reviewed_at", "review_note", "created_at")},
+                **{
+                    k: getattr(r, k)
+                    for k in (
+                        "id",
+                        "vessel_id",
+                        "user_id",
+                        "status",
+                        "submitted_note",
+                        "evidence_url",
+                        "reviewed_by",
+                        "reviewed_at",
+                        "review_note",
+                        "created_at",
+                    )
+                },
                 vessel_label=f"{vessel.nickname} ({vessel.year} {vessel.make} {vessel.model})",
                 equipment=[_installed_item(e).model_dump(mode="json") for e in rows],
             )
@@ -476,7 +527,9 @@ async def _pending_request(db: AsyncSession, request_id: uuid.UUID) -> Equipment
 
 @boat_router.post("/verification-requests/{request_id}/approve", response_model=VerificationRequestResponse)
 async def approve_verification(
-    request_id: uuid.UUID, admin: AdminUser, body: VerificationReview | None = None,
+    request_id: uuid.UUID,
+    admin: AdminUser,
+    body: VerificationReview | None = None,
     db: AsyncSession = Depends(get_db, scope="function"),
 ) -> VerificationRequestResponse:
     """Approve: reviewed rows become staff-verified; the owner's bonus is awarded once."""
@@ -490,8 +543,14 @@ async def approve_verification(
     req.reviewed_by = admin.id
     req.reviewed_at = utcnow()
     req.review_note = body.review_note if body else None
-    await audit.record(db, admin.id, "equipment_verification.approve", "equipment_verification_request", req.id,
-                       {"vessel_id": str(req.vessel_id), "equipment_ids": [str(r.id) for r in rows]})
+    await audit.record(
+        db,
+        admin.id,
+        "equipment_verification.approve",
+        "equipment_verification_request",
+        req.id,
+        {"vessel_id": str(req.vessel_id), "equipment_ids": [str(r.id) for r in rows]},
+    )
     await db.flush()
     await loyalty.award_profile_verification_bonus(db, req.user_id, req.id)
     return _request_response(req, rows)
@@ -499,7 +558,9 @@ async def approve_verification(
 
 @boat_router.post("/verification-requests/{request_id}/reject", response_model=VerificationRequestResponse)
 async def reject_verification(
-    request_id: uuid.UUID, admin: AdminUser, body: VerificationReview | None = None,
+    request_id: uuid.UUID,
+    admin: AdminUser,
+    body: VerificationReview | None = None,
     db: AsyncSession = Depends(get_db, scope="function"),
 ) -> VerificationRequestResponse:
     """Reject: rows return to unverified owner declarations (still the owner's facts)."""
@@ -511,8 +572,14 @@ async def reject_verification(
     req.reviewed_by = admin.id
     req.reviewed_at = utcnow()
     req.review_note = body.review_note if body else None
-    await audit.record(db, admin.id, "equipment_verification.reject", "equipment_verification_request", req.id,
-                       {"vessel_id": str(req.vessel_id), "equipment_ids": [str(r.id) for r in rows]})
+    await audit.record(
+        db,
+        admin.id,
+        "equipment_verification.reject",
+        "equipment_verification_request",
+        req.id,
+        {"vessel_id": str(req.vessel_id), "equipment_ids": [str(r.id) for r in rows]},
+    )
     await db.flush()
     return _request_response(req, rows)
 
@@ -532,7 +599,9 @@ async def _check_equipment_ref(db: AsyncSession, vessel: Vessel, equipment_id: u
 
 async def _owned_record(db: AsyncSession, vessel: Vessel, record_id: uuid.UUID) -> ServiceRecord:
     rec = (
-        await db.execute(select(ServiceRecord).where(ServiceRecord.id == record_id, ServiceRecord.vessel_id == vessel.id))
+        await db.execute(
+            select(ServiceRecord).where(ServiceRecord.id == record_id, ServiceRecord.vessel_id == vessel.id)
+        )
     ).scalar_one_or_none()
     if rec is None:
         raise not_found("Service record")
@@ -556,11 +625,16 @@ async def list_service_records(
 
 
 @router.post(
-    "/vessels/{vessel_id}/service-records", response_model=ServiceRecordResponse,
-    status_code=status.HTTP_201_CREATED, dependencies=[Depends(mutation_limit())],
+    "/vessels/{vessel_id}/service-records",
+    response_model=ServiceRecordResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(mutation_limit())],
 )
 async def create_service_record(
-    vessel_id: uuid.UUID, body: ServiceRecordCreate, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
+    vessel_id: uuid.UUID,
+    body: ServiceRecordCreate,
+    user_id: CurrentUserId,
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> ServiceRecord:
     vessel = await get_owned_vessel(db, vessel_id, user_id)
     await _check_equipment_ref(db, vessel, body.equipment_id)
@@ -572,11 +646,15 @@ async def create_service_record(
 
 
 @router.patch(
-    "/vessels/{vessel_id}/service-records/{record_id}", response_model=ServiceRecordResponse,
+    "/vessels/{vessel_id}/service-records/{record_id}",
+    response_model=ServiceRecordResponse,
     dependencies=[Depends(mutation_limit())],
 )
 async def update_service_record(
-    vessel_id: uuid.UUID, record_id: uuid.UUID, body: ServiceRecordUpdate, user_id: CurrentUserId,
+    vessel_id: uuid.UUID,
+    record_id: uuid.UUID,
+    body: ServiceRecordUpdate,
+    user_id: CurrentUserId,
     db: AsyncSession = Depends(get_db, scope="function"),
 ) -> ServiceRecord:
     vessel = await get_owned_vessel(db, vessel_id, user_id)
@@ -595,11 +673,15 @@ async def update_service_record(
 
 
 @router.delete(
-    "/vessels/{vessel_id}/service-records/{record_id}", status_code=status.HTTP_204_NO_CONTENT,
+    "/vessels/{vessel_id}/service-records/{record_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(mutation_limit())],
 )
 async def delete_service_record(
-    vessel_id: uuid.UUID, record_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
+    vessel_id: uuid.UUID,
+    record_id: uuid.UUID,
+    user_id: CurrentUserId,
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> None:
     vessel = await get_owned_vessel(db, vessel_id, user_id)
     await db.delete(await _owned_record(db, vessel, record_id))
@@ -616,13 +698,30 @@ def _add_months(d: date, months: int) -> date:
 def _reminder_response(r: ServiceReminder, vessel: Vessel) -> ReminderResponse:
     is_due = r.status == "active" and (
         (r.due_on is not None and r.due_on <= date.today())
-        or (r.due_engine_hours is not None and vessel.engine_hours is not None
-            and vessel.engine_hours >= r.due_engine_hours)
+        or (
+            r.due_engine_hours is not None
+            and vessel.engine_hours is not None
+            and vessel.engine_hours >= r.due_engine_hours
+        )
     )
     return ReminderResponse(
-        **{k: getattr(r, k) for k in (
-            "id", "vessel_id", "equipment_id", "title", "due_on", "due_engine_hours", "interval_months",
-            "interval_hours", "status", "source", "created_at", "updated_at")},
+        **{
+            k: getattr(r, k)
+            for k in (
+                "id",
+                "vessel_id",
+                "equipment_id",
+                "title",
+                "due_on",
+                "due_engine_hours",
+                "interval_months",
+                "interval_hours",
+                "status",
+                "source",
+                "created_at",
+                "updated_at",
+            )
+        },
         is_due=is_due,
     )
 
@@ -640,7 +739,8 @@ async def _owned_reminder(db: AsyncSession, vessel: Vessel, reminder_id: uuid.UU
 
 @router.get("/vessels/{vessel_id}/service-reminders", response_model=list[ReminderResponse])
 async def list_reminders(
-    vessel_id: uuid.UUID, user_id: CurrentUserId,
+    vessel_id: uuid.UUID,
+    user_id: CurrentUserId,
     status_filter: str = Query("active", alias="status", pattern="^(active|completed|dismissed|all)$"),
     db: AsyncSession = Depends(get_db, scope="function"),
 ) -> list[ReminderResponse]:
@@ -648,17 +748,25 @@ async def list_reminders(
     q = select(ServiceReminder).where(ServiceReminder.vessel_id == vessel.id)
     if status_filter != "all":
         q = q.where(ServiceReminder.status == status_filter)
-    q = q.order_by(ServiceReminder.due_on.asc().nulls_last(), ServiceReminder.due_engine_hours.asc().nulls_last(),
-                   ServiceReminder.created_at)
+    q = q.order_by(
+        ServiceReminder.due_on.asc().nulls_last(),
+        ServiceReminder.due_engine_hours.asc().nulls_last(),
+        ServiceReminder.created_at,
+    )
     return [_reminder_response(r, vessel) for r in (await db.execute(q)).scalars()]
 
 
 @router.post(
-    "/vessels/{vessel_id}/service-reminders", response_model=ReminderResponse,
-    status_code=status.HTTP_201_CREATED, dependencies=[Depends(mutation_limit())],
+    "/vessels/{vessel_id}/service-reminders",
+    response_model=ReminderResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(mutation_limit())],
 )
 async def create_reminder(
-    vessel_id: uuid.UUID, body: ReminderCreate, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
+    vessel_id: uuid.UUID,
+    body: ReminderCreate,
+    user_id: CurrentUserId,
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> ReminderResponse:
     """Owner-defined reminder. Intervals are the owner's; none are invented from manufacturer data."""
     vessel = await get_owned_vessel(db, vessel_id, user_id)
@@ -671,11 +779,15 @@ async def create_reminder(
 
 
 @router.patch(
-    "/vessels/{vessel_id}/service-reminders/{reminder_id}", response_model=ReminderResponse,
+    "/vessels/{vessel_id}/service-reminders/{reminder_id}",
+    response_model=ReminderResponse,
     dependencies=[Depends(mutation_limit())],
 )
 async def update_reminder(
-    vessel_id: uuid.UUID, reminder_id: uuid.UUID, body: ReminderUpdate, user_id: CurrentUserId,
+    vessel_id: uuid.UUID,
+    reminder_id: uuid.UUID,
+    body: ReminderUpdate,
+    user_id: CurrentUserId,
     db: AsyncSession = Depends(get_db, scope="function"),
 ) -> ReminderResponse:
     vessel = await get_owned_vessel(db, vessel_id, user_id)
@@ -699,11 +811,15 @@ async def update_reminder(
 
 
 @router.delete(
-    "/vessels/{vessel_id}/service-reminders/{reminder_id}", status_code=status.HTTP_204_NO_CONTENT,
+    "/vessels/{vessel_id}/service-reminders/{reminder_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(mutation_limit())],
 )
 async def delete_reminder(
-    vessel_id: uuid.UUID, reminder_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
+    vessel_id: uuid.UUID,
+    reminder_id: uuid.UUID,
+    user_id: CurrentUserId,
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> None:
     vessel = await get_owned_vessel(db, vessel_id, user_id)
     await db.delete(await _owned_reminder(db, vessel, reminder_id))
@@ -711,11 +827,15 @@ async def delete_reminder(
 
 
 @router.post(
-    "/vessels/{vessel_id}/service-reminders/{reminder_id}/complete", response_model=ReminderCompleteResponse,
+    "/vessels/{vessel_id}/service-reminders/{reminder_id}/complete",
+    response_model=ReminderCompleteResponse,
     dependencies=[Depends(mutation_limit())],
 )
 async def complete_reminder(
-    vessel_id: uuid.UUID, reminder_id: uuid.UUID, user_id: CurrentUserId, body: ReminderComplete | None = None,
+    vessel_id: uuid.UUID,
+    reminder_id: uuid.UUID,
+    user_id: CurrentUserId,
+    body: ReminderComplete | None = None,
     db: AsyncSession = Depends(get_db, scope="function"),
 ) -> ReminderCompleteResponse:
     """Complete a reminder; when it has an interval the next reminder is created from it."""
@@ -738,8 +858,12 @@ async def complete_reminder(
     record = None
     if body.record_service:
         record = ServiceRecord(
-            vessel_id=vessel.id, equipment_id=rem.equipment_id, service_type=rem.title, performed_on=done_on,
-            engine_hours=hours, notes=body.notes,
+            vessel_id=vessel.id,
+            equipment_id=rem.equipment_id,
+            service_type=rem.title,
+            performed_on=done_on,
+            engine_hours=hours,
+            notes=body.notes,
         )
         db.add(record)
     nxt = None
@@ -749,10 +873,16 @@ async def complete_reminder(
             base = hours if hours is not None else rem.due_engine_hours
             next_hours = base + rem.interval_hours if base is not None else None
         nxt = ServiceReminder(
-            vessel_id=vessel.id, equipment_id=rem.equipment_id, title=rem.title,
+            vessel_id=vessel.id,
+            equipment_id=rem.equipment_id,
+            title=rem.title,
             due_on=_add_months(done_on, rem.interval_months) if rem.interval_months else None,
-            due_engine_hours=next_hours, interval_months=rem.interval_months, interval_hours=rem.interval_hours,
-            status="active", source=rem.source, knowledge_source_id=rem.knowledge_source_id,
+            due_engine_hours=next_hours,
+            interval_months=rem.interval_months,
+            interval_hours=rem.interval_hours,
+            status="active",
+            source=rem.source,
+            knowledge_source_id=rem.knowledge_source_id,
         )
         if nxt.due_on is None and nxt.due_engine_hours is None:
             nxt = None  # interval hours with no known engine hours: owner must set the next due point
@@ -774,9 +904,16 @@ async def complete_reminder(
 # =========================================================================== boat DB (public)
 def _oem_response(o: OEMEquipment, synthetic_parent: bool = False) -> OEMEquipmentResponse:
     return OEMEquipmentResponse(
-        id=o.id, model_year_id=o.model_year_id, category=_cat(o.category), equipment_make=o.equipment_make,
-        equipment_model=o.equipment_model, part_sku=o.part_sku, is_standard=o.is_standard,
-        data_source=o.data_source, source_url=o.source_url, confidence_score=float(o.confidence_score),
+        id=o.id,
+        model_year_id=o.model_year_id,
+        category=_cat(o.category),
+        equipment_make=o.equipment_make,
+        equipment_model=o.equipment_model,
+        part_sku=o.part_sku,
+        is_standard=o.is_standard,
+        data_source=o.data_source,
+        source_url=o.source_url,
+        confidence_score=float(o.confidence_score),
         verification_status=o.verification_status,
         is_synthetic=synthetic_parent or o.data_source == "synthetic_fixture",
         reliable=boat_db.is_reliable(o.confidence_score, o.verification_status),
@@ -785,16 +922,29 @@ def _oem_response(o: OEMEquipment, synthetic_parent: bool = False) -> OEMEquipme
 
 def _model_response(m: BoatModel, years: list[int] | None = None) -> BoatModelResponse:
     return BoatModelResponse(
-        id=m.id, manufacturer_id=m.manufacturer_id, name=m.name, hull_type=m.hull_type,
-        propulsion_type=m.propulsion_type, length_ft=float(m.length_ft) if m.length_ft is not None else None,
-        beam_in=m.beam_in, is_synthetic=m.is_synthetic, source_url=m.source_url, years=sorted(years or []),
+        id=m.id,
+        manufacturer_id=m.manufacturer_id,
+        name=m.name,
+        hull_type=m.hull_type,
+        propulsion_type=m.propulsion_type,
+        length_ft=float(m.length_ft) if m.length_ft is not None else None,
+        beam_in=m.beam_in,
+        is_synthetic=m.is_synthetic,
+        source_url=m.source_url,
+        years=sorted(years or []),
     )
 
 
 def _maker_response(m: Manufacturer, model_count: int = 0) -> ManufacturerResponse:
     return ManufacturerResponse(
-        id=m.id, name=m.name, country=m.country, website=m.website, mic_codes=list(m.mic_codes or []),
-        is_synthetic=m.is_synthetic, source=m.source, model_count=model_count,
+        id=m.id,
+        name=m.name,
+        country=m.country,
+        website=m.website,
+        mic_codes=list(m.mic_codes or []),
+        is_synthetic=m.is_synthetic,
+        source=m.source,
+        model_count=model_count,
     )
 
 
@@ -820,8 +970,11 @@ async def create_equipment_category(
     return cat
 
 
-@boat_router.post("/hin/decode", response_model=HinDecodeResponse,
-                  dependencies=[Depends(rate_limit("hin_decode", lambda: get_settings().rate_limit_hin_per_minute))])
+@boat_router.post(
+    "/hin/decode",
+    response_model=HinDecodeResponse,
+    dependencies=[Depends(rate_limit("hin_decode", lambda: get_settings().rate_limit_hin_per_minute))],
+)
 async def decode_hin(body: HinDecodeRequest, db: AsyncSession = Depends(get_db, scope="function")) -> HinDecodeResponse:
     """Decode a HIN/CIN. Manufacturer only when its MIC is recorded; nothing is guessed."""
     return HinDecodeResponse.model_validate((await hin.decode(db, body.hin)).as_dict())
@@ -829,7 +982,9 @@ async def decode_hin(body: HinDecodeRequest, db: AsyncSession = Depends(get_db, 
 
 @boat_router.get("/manufacturers", response_model=list[ManufacturerResponse])
 async def list_manufacturers(
-    q: str | None = Query(None, max_length=100), include_synthetic: bool = True, db: AsyncSession = Depends(get_db, scope="function")
+    q: str | None = Query(None, max_length=100),
+    include_synthetic: bool = True,
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> list[ManufacturerResponse]:
     counts = dict(
         (await db.execute(select(BoatModel.manufacturer_id, func.count()).group_by(BoatModel.manufacturer_id))).all()
@@ -861,22 +1016,28 @@ async def _model_or_404(db: AsyncSession, model_id: uuid.UUID) -> BoatModel:
 async def _models_for(db: AsyncSession, manufacturer_id: uuid.UUID) -> list[BoatModelResponse]:
     models = (
         await db.execute(
-            select(BoatModel).where(BoatModel.manufacturer_id == manufacturer_id)
-            .options(selectinload(BoatModel.years)).order_by(BoatModel.name)
+            select(BoatModel)
+            .where(BoatModel.manufacturer_id == manufacturer_id)
+            .options(selectinload(BoatModel.years))
+            .order_by(BoatModel.name)
         )
     ).scalars()
     return [_model_response(m, [y.year for y in m.years]) for m in models]
 
 
 @boat_router.get("/manufacturers/{manufacturer_id}", response_model=ManufacturerDetail)
-async def get_manufacturer(manufacturer_id: uuid.UUID, db: AsyncSession = Depends(get_db, scope="function")) -> ManufacturerDetail:
+async def get_manufacturer(
+    manufacturer_id: uuid.UUID, db: AsyncSession = Depends(get_db, scope="function")
+) -> ManufacturerDetail:
     m = await _maker_or_404(db, manufacturer_id)
     models = await _models_for(db, m.id)
     return ManufacturerDetail(**_maker_response(m, len(models)).model_dump(), models=models)
 
 
 @boat_router.get("/manufacturers/{manufacturer_id}/models", response_model=list[BoatModelResponse])
-async def list_models(manufacturer_id: uuid.UUID, db: AsyncSession = Depends(get_db, scope="function")) -> list[BoatModelResponse]:
+async def list_models(
+    manufacturer_id: uuid.UUID, db: AsyncSession = Depends(get_db, scope="function")
+) -> list[BoatModelResponse]:
     await _maker_or_404(db, manufacturer_id)
     return await _models_for(db, manufacturer_id)
 
@@ -894,7 +1055,8 @@ async def _year_counts(db: AsyncSession, year_ids: list[uuid.UUID]) -> dict[uuid
         (
             await db.execute(
                 select(OEMEquipment.model_year_id, func.count())
-                .where(OEMEquipment.model_year_id.in_(year_ids)).group_by(OEMEquipment.model_year_id)
+                .where(OEMEquipment.model_year_id.in_(year_ids))
+                .group_by(OEMEquipment.model_year_id)
             )
         ).all()
     )
@@ -902,13 +1064,19 @@ async def _year_counts(db: AsyncSession, year_ids: list[uuid.UUID]) -> dict[uuid
 
 def _year_response(y: ModelYear, count: int = 0) -> ModelYearResponse:
     return ModelYearResponse(
-        id=y.id, boat_model_id=y.boat_model_id, year=y.year, brochure_url=y.brochure_url,
-        hin_prefix=y.hin_prefix, equipment_count=count,
+        id=y.id,
+        boat_model_id=y.boat_model_id,
+        year=y.year,
+        brochure_url=y.brochure_url,
+        hin_prefix=y.hin_prefix,
+        equipment_count=count,
     )
 
 
 @boat_router.get("/models/{model_id}/years", response_model=list[ModelYearResponse])
-async def list_model_years(model_id: uuid.UUID, db: AsyncSession = Depends(get_db, scope="function")) -> list[ModelYearResponse]:
+async def list_model_years(
+    model_id: uuid.UUID, db: AsyncSession = Depends(get_db, scope="function")
+) -> list[ModelYearResponse]:
     m = await _model_or_404(db, model_id)
     years = sorted(m.years, key=lambda y: y.year)
     counts = await _year_counts(db, [y.id for y in years])
@@ -931,7 +1099,9 @@ async def _year_detail(db: AsyncSession, model_year_id: uuid.UUID) -> ModelYearD
 
 
 @boat_router.get("/model-years/{model_year_id}", response_model=ModelYearDetail)
-async def get_model_year(model_year_id: uuid.UUID, db: AsyncSession = Depends(get_db, scope="function")) -> ModelYearDetail:
+async def get_model_year(
+    model_year_id: uuid.UUID, db: AsyncSession = Depends(get_db, scope="function")
+) -> ModelYearDetail:
     """Model year with its OEM equipment (data source, confidence, verification, synthetic flag)."""
     return await _year_detail(db, model_year_id)
 
@@ -945,7 +1115,9 @@ async def get_model_year_equipment(
 
 @boat_router.get("/lookup", response_model=ModelYearDetail)
 async def lookup_model_year(
-    make: str = Query(min_length=1), model: str = Query(min_length=1), year: int = Query(ge=1900, le=2100),
+    make: str = Query(min_length=1),
+    model: str = Query(min_length=1),
+    year: int = Query(ge=1900, le=2100),
     db: AsyncSession = Depends(get_db, scope="function"),
 ) -> ModelYearDetail:
     """Exact (normalised) make/model/year lookup — the same match the vessel hook uses."""
@@ -971,12 +1143,21 @@ async def create_manufacturer(
 
 @boat_router.patch("/manufacturers/{manufacturer_id}", response_model=ManufacturerResponse)
 async def update_manufacturer(
-    manufacturer_id: uuid.UUID, body: ManufacturerUpdate, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
+    manufacturer_id: uuid.UUID,
+    body: ManufacturerUpdate,
+    admin: AdminUser,
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> ManufacturerResponse:
     m = await _maker_or_404(db, manufacturer_id)
-    data = {k: v for k, v in body.model_dump(exclude_unset=True).items() if not (k in ("name", "is_synthetic", "mic_codes") and v is None)}
+    data = {
+        k: v
+        for k, v in body.model_dump(exclude_unset=True).items()
+        if not (k in ("name", "is_synthetic", "mic_codes") and v is None)
+    }
     if "name" in data and data["name"].lower() != m.name.lower():
-        if (await db.execute(select(Manufacturer.id).where(func.lower(Manufacturer.name) == data["name"].lower()))).first():
+        if (
+            await db.execute(select(Manufacturer.id).where(func.lower(Manufacturer.name) == data["name"].lower()))
+        ).first():
             raise AppError(409, "duplicate", "A manufacturer with this name exists")
     for k, v in data.items():
         setattr(m, k, v)
@@ -986,7 +1167,9 @@ async def update_manufacturer(
 
 
 @boat_router.delete("/manufacturers/{manufacturer_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_manufacturer(manufacturer_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")) -> None:
+async def delete_manufacturer(
+    manufacturer_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
+) -> None:
     m = await _maker_or_404(db, manufacturer_id)
     await audit.record(db, admin.id, "boat_db.manufacturer_delete", "manufacturer", m.id, {"name": m.name})
     await db.execute(sa_delete(Manufacturer).where(Manufacturer.id == m.id))  # DB cascades models/years/OEM
@@ -996,13 +1179,17 @@ async def delete_manufacturer(manufacturer_id: uuid.UUID, admin: AdminUser, db: 
     "/manufacturers/{manufacturer_id}/models", response_model=BoatModelResponse, status_code=status.HTTP_201_CREATED
 )
 async def create_model(
-    manufacturer_id: uuid.UUID, body: BoatModelCreate, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
+    manufacturer_id: uuid.UUID,
+    body: BoatModelCreate,
+    admin: AdminUser,
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> BoatModelResponse:
     await _maker_or_404(db, manufacturer_id)
     exists = (
         await db.execute(
-            select(BoatModel.id).where(BoatModel.manufacturer_id == manufacturer_id,
-                                       func.lower(BoatModel.name) == body.name.lower())
+            select(BoatModel.id).where(
+                BoatModel.manufacturer_id == manufacturer_id, func.lower(BoatModel.name) == body.name.lower()
+            )
         )
     ).first()
     if exists:
@@ -1019,7 +1206,11 @@ async def update_model(
     model_id: uuid.UUID, body: BoatModelUpdate, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
 ) -> BoatModelResponse:
     m = await _model_or_404(db, model_id)
-    data = {k: v for k, v in body.model_dump(exclude_unset=True).items() if not (k in ("name", "is_synthetic") and v is None)}
+    data = {
+        k: v
+        for k, v in body.model_dump(exclude_unset=True).items()
+        if not (k in ("name", "is_synthetic") and v is None)
+    }
     for k, v in data.items():
         setattr(m, k, v)
     await db.flush()
@@ -1028,7 +1219,9 @@ async def update_model(
 
 
 @boat_router.delete("/models/{model_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_model(model_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")) -> None:
+async def delete_model(
+    model_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
+) -> None:
     m = await _model_or_404(db, model_id)
     await audit.record(db, admin.id, "boat_db.model_delete", "boat_model", m.id, {"name": m.name})
     await db.execute(sa_delete(BoatModel).where(BoatModel.id == m.id))
@@ -1050,7 +1243,10 @@ async def create_model_year(
 
 @boat_router.patch("/model-years/{model_year_id}", response_model=ModelYearResponse)
 async def update_model_year(
-    model_year_id: uuid.UUID, body: ModelYearUpdate, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
+    model_year_id: uuid.UUID,
+    body: ModelYearUpdate,
+    admin: AdminUser,
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> ModelYearResponse:
     y = await db.get(ModelYear, model_year_id)
     if y is None:
@@ -1064,7 +1260,9 @@ async def update_model_year(
 
 
 @boat_router.delete("/model-years/{model_year_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_model_year(model_year_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")) -> None:
+async def delete_model_year(
+    model_year_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
+) -> None:
     y = await db.get(ModelYear, model_year_id)
     if y is None:
         raise not_found("Model year")
@@ -1075,28 +1273,36 @@ async def delete_model_year(model_year_id: uuid.UUID, admin: AdminUser, db: Asyn
 def _check_verifiable(confidence: Decimal, verification_status: str) -> None:
     if verification_status == "verified" and confidence < _threshold():
         raise AppError(
-            422, "confidence_too_low",
+            422,
+            "confidence_too_low",
             f"OEM data can only be verified with confidence ≥ {get_settings().fitment_min_confidence}",
         )
 
 
 @boat_router.post(
-    "/model-years/{model_year_id}/equipment", response_model=OEMEquipmentResponse,
+    "/model-years/{model_year_id}/equipment",
+    response_model=OEMEquipmentResponse,
     status_code=status.HTTP_201_CREATED,
 )
 async def create_oem_equipment(
-    model_year_id: uuid.UUID, body: OEMEquipmentCreate, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
+    model_year_id: uuid.UUID,
+    body: OEMEquipmentCreate,
+    admin: AdminUser,
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> OEMEquipmentResponse:
     if await db.get(ModelYear, model_year_id) is None:
         raise not_found("Model year")
     cat = await _category_or_422(db, body.category)
     confidence = (
-        Decimal(str(body.confidence_score)) if body.confidence_score is not None
+        Decimal(str(body.confidence_score))
+        if body.confidence_score is not None
         else boat_db.default_confidence(body.data_source)
     )
     _check_verifiable(confidence, body.verification_status)
     o = OEMEquipment(
-        model_year_id=model_year_id, category_id=cat.id, confidence_score=confidence,
+        model_year_id=model_year_id,
+        category_id=cat.id,
+        confidence_score=confidence,
         **body.model_dump(exclude={"category", "confidence_score"}),
     )
     db.add(o)
@@ -1111,13 +1317,20 @@ async def update_oem_equipment(
     oem_id: uuid.UUID, body: OEMEquipmentUpdate, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
 ) -> OEMEquipmentResponse:
     o = (
-        await db.execute(select(OEMEquipment).where(OEMEquipment.id == oem_id).options(selectinload(OEMEquipment.category)))
+        await db.execute(
+            select(OEMEquipment).where(OEMEquipment.id == oem_id).options(selectinload(OEMEquipment.category))
+        )
     ).scalar_one_or_none()
     if o is None:
         raise not_found("OEM equipment")
-    data = {k: v for k, v in body.model_dump(exclude_unset=True).items()
-            if not (k in ("equipment_make", "is_standard", "data_source", "verification_status", "category",
-                          "confidence_score") and v is None)}
+    data = {
+        k: v
+        for k, v in body.model_dump(exclude_unset=True).items()
+        if not (
+            k in ("equipment_make", "is_standard", "data_source", "verification_status", "category", "confidence_score")
+            and v is None
+        )
+    }
     if "category" in data:
         o.category_id = (await _category_or_422(db, data.pop("category"))).id
     if "confidence_score" in data:
@@ -1127,18 +1340,32 @@ async def update_oem_equipment(
     _check_verifiable(Decimal(str(o.confidence_score)), o.verification_status)
     await db.flush()
     await db.refresh(o, ["category"])
-    await audit.record(db, admin.id, "boat_db.oem_update", "oem_equipment", o.id,
-                       {k: (str(v) if isinstance(v, Decimal) else v) for k, v in data.items()})
+    await audit.record(
+        db,
+        admin.id,
+        "boat_db.oem_update",
+        "oem_equipment",
+        o.id,
+        {k: (str(v) if isinstance(v, Decimal) else v) for k, v in data.items()},
+    )
     return _oem_response(o)
 
 
 @boat_router.delete("/oem-equipment/{oem_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_oem_equipment(oem_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")) -> None:
+async def delete_oem_equipment(
+    oem_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
+) -> None:
     o = await db.get(OEMEquipment, oem_id)
     if o is None:
         raise not_found("OEM equipment")
-    await audit.record(db, admin.id, "boat_db.oem_delete", "oem_equipment", o.id,
-                       {"make": o.equipment_make, "model": o.equipment_model})
+    await audit.record(
+        db,
+        admin.id,
+        "boat_db.oem_delete",
+        "oem_equipment",
+        o.id,
+        {"make": o.equipment_make, "model": o.equipment_model},
+    )
     await db.delete(o)
     await db.flush()
 

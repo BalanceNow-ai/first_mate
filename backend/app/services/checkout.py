@@ -135,13 +135,9 @@ async def _bound_quote(
     if quote.used_by_order_id is not None:
         raise AppError(409, "quote_used", "This delivery quote has already been used")
     if quote.expires_at <= utcnow():
-        raise AppError(
-            409, "quote_expired", "This delivery quote has expired. Please get a new quote."
-        )
+        raise AppError(409, "quote_expired", "This delivery quote has expired. Please get a new quote.")
     if quote.cart_fingerprint != shipping_quotes.fingerprint_of(lines):
-        raise AppError(
-            409, "quote_cart_changed", "Your cart changed after this quote. Please get a new quote."
-        )
+        raise AppError(409, "quote_cart_changed", "Your cart changed after this quote. Please get a new quote.")
     if not quote.destination:
         raise AppError(422, "invalid_destination", "This quote has no destination")
     return quote
@@ -159,13 +155,9 @@ async def price_checkout(db: AsyncSession, user_id: uuid.UUID, req: CheckoutRequ
     quote: DeliveryQuote | None = None
     if req.delivery_type == "click_and_collect":
         if not settings.click_and_collect_enabled:
-            raise AppError(
-                422, "delivery_unavailable", "Click and collect is not available right now"
-            )
+            raise AppError(422, "delivery_unavailable", "Click and collect is not available right now")
         if req.quote_id is not None:
-            raise AppError(
-                422, "quote_not_applicable", "Click and collect does not use a delivery quote"
-            )
+            raise AppError(422, "quote_not_applicable", "Click and collect does not use a delivery quote")
     elif req.delivery_type == "courier":
         if req.shipping_address is None:
             raise AppError(
@@ -181,9 +173,7 @@ async def price_checkout(db: AsyncSession, user_id: uuid.UUID, req: CheckoutRequ
                 "The shipping address postcode does not match the quoted destination",
             )
         if not shipping_quotes.courier_configured(settings):
-            raise AppError(
-                503, "courier_unavailable", "Courier delivery is not available right now"
-            )
+            raise AppError(503, "courier_unavailable", "Courier delivery is not available right now")
     elif req.delivery_type == "helm_dash":
         if req.helm_dash_contact is None:
             raise AppError(
@@ -192,11 +182,7 @@ async def price_checkout(db: AsyncSession, user_id: uuid.UUID, req: CheckoutRequ
                 "Vessel contact details are required for Helm Dash",
             )
         quote = await _bound_quote(db, user_id, req, lines)
-        area = (
-            await db.get(OperatingArea, quote.operating_area_id)
-            if quote.operating_area_id
-            else None
-        )
+        area = await db.get(OperatingArea, quote.operating_area_id) if quote.operating_area_id else None
         if not settings.helm_dash_enabled or area is None or not area.enabled:
             raise AppError(503, "helm_dash_unavailable", "Helm Dash is not operating right now")
     else:  # pragma: no cover - schema restricts values
@@ -205,19 +191,14 @@ async def price_checkout(db: AsyncSession, user_id: uuid.UUID, req: CheckoutRequ
     ent = None
     discount = 0
     if req.discount_entitlement_id is not None:
-        ent = await entitlements.lock_for_checkout(
-            db, user_id, req.discount_entitlement_id, subtotal
-        )
+        ent = await entitlements.lock_for_checkout(db, user_id, req.discount_entitlement_id, subtotal)
         discount = ent.amount_cents
 
     shipping = 0
     free = False
     if quote is not None:
         shipping = quote.price_cents
-        if (
-            req.delivery_type == "courier"
-            and subtotal - discount >= settings.free_shipping_threshold_cents
-        ):
+        if req.delivery_type == "courier" and subtotal - discount >= settings.free_shipping_threshold_cents:
             shipping, free = 0, True
     total = subtotal - discount + shipping
     if total < settings.min_charge_cents:
@@ -232,9 +213,7 @@ async def price_checkout(db: AsyncSession, user_id: uuid.UUID, req: CheckoutRequ
 
 async def _lock_user(db: AsyncSession, user_id: uuid.UUID) -> None:
     """Serialise checkouts of one user (double taps with or without the same key)."""
-    await db.execute(
-        text("SELECT pg_advisory_xact_lock(hashtextextended(:k, 0))"), {"k": f"checkout:{user_id}"}
-    )
+    await db.execute(text("SELECT pg_advisory_xact_lock(hashtextextended(:k, 0))"), {"k": f"checkout:{user_id}"})
 
 
 async def checkout(

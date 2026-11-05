@@ -158,7 +158,7 @@ class TypesenseClient:
         if not ids:
             return
         for start in range(0, len(ids), 100):
-            chunk = ids[start:start + 100]
+            chunk = ids[start : start + 100]
             await self._request(
                 "DELETE",
                 f"/collections/{self.collection}/documents",
@@ -260,7 +260,9 @@ async def full_sync(db: AsyncSession, client: TypesenseClient | None = None) -> 
                 break
             upserted += await client.upsert(await build_documents(db, chunk))
             last_id = chunk[-1].id
-        inactive = [str(i) for i in (await db.execute(select(Product.id).where(Product.is_active.is_(False)))).scalars()]
+        inactive = [
+            str(i) for i in (await db.execute(select(Product.id).where(Product.is_active.is_(False)))).scalars()
+        ]
         await client.delete(inactive)
         result = {"status": "ok", "created_collection": created, "upserted": upserted, "deleted": len(inactive)}
         logger.info("Typesense full sync: %s", result)

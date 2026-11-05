@@ -9,8 +9,12 @@ from pydantic import Field, field_validator
 from app.schemas.common import APIModel, StrictInput
 
 DataSource = Literal[
-    "manufacturer", "dealer", "internal_curation", "crowdsourced_verified",
-    "crowdsourced_unverified", "synthetic_fixture",
+    "manufacturer",
+    "dealer",
+    "internal_curation",
+    "crowdsourced_verified",
+    "crowdsourced_unverified",
+    "synthetic_fixture",
 ]
 
 

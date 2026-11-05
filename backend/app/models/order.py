@@ -62,20 +62,14 @@ class Order(Base):
             "AND total_cents >= 0 AND refunded_cents >= 0 AND refunded_cents <= total_cents",
             name="amounts_valid",
         ),
-        CheckConstraint(
-            "total_cents = subtotal_cents - discount_cents + shipping_cents", name="total_consistent"
-        ),
+        CheckConstraint("total_cents = subtotal_cents - discount_cents + shipping_cents", name="total_consistent"),
     )
 
     id: Mapped[uuid.UUID] = uuid_pk()
     order_number: Mapped[str] = mapped_column(String, unique=True, nullable=False)
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
-    )
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
     status: Mapped[str] = mapped_column(String, nullable=False, default="pending_payment")
-    payment_status: Mapped[str] = mapped_column(
-        String, nullable=False, default="unpaid", server_default="unpaid"
-    )
+    payment_status: Mapped[str] = mapped_column(String, nullable=False, default="unpaid", server_default="unpaid")
     currency: Mapped[str] = mapped_column(String(3), nullable=False, default="NZD", server_default="NZD")
     subtotal_cents: Mapped[int] = mapped_column(Integer, nullable=False)
     discount_cents: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
@@ -108,13 +102,11 @@ class Order(Base):
     created_at: Mapped[datetime] = created_at_col()
     updated_at: Mapped[datetime] = updated_at_col()
 
-    user: Mapped["User"] = relationship("User", back_populates="orders")  # noqa: F821
-    items: Mapped[list["OrderItem"]] = relationship(
+    user: Mapped[User] = relationship("User", back_populates="orders")  # noqa: F821
+    items: Mapped[list[OrderItem]] = relationship(
         "OrderItem", back_populates="order", cascade="all, delete-orphan", order_by="OrderItem.product_name"
     )
-    reservations: Mapped[list["StockReservation"]] = relationship(
-        back_populates="order", cascade="all, delete-orphan"
-    )
+    reservations: Mapped[list[StockReservation]] = relationship(back_populates="order", cascade="all, delete-orphan")
 
 
 class OrderItem(Base):
@@ -128,9 +120,7 @@ class OrderItem(Base):
     order_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("orders.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    product_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("products.id"), nullable=False
-    )
+    product_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("products.id"), nullable=False)
     product_name: Mapped[str] = mapped_column(String, nullable=False)
     sku: Mapped[str] = mapped_column(String, nullable=False)
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -139,7 +129,7 @@ class OrderItem(Base):
     line_total_cents: Mapped[int] = mapped_column(Integer, nullable=False)
 
     order: Mapped[Order] = relationship("Order", back_populates="items")
-    product: Mapped["Product"] = relationship("Product")  # noqa: F821
+    product: Mapped[Product] = relationship("Product")  # noqa: F821
 
 
 class StockReservation(Base):
@@ -149,18 +139,14 @@ class StockReservation(Base):
     __table_args__ = (
         UniqueConstraint("order_id", "product_id"),
         CheckConstraint("quantity > 0", name="quantity_positive"),
-        CheckConstraint(
-            "status IN ('reserved','consumed','released','restocked')", name="valid_status"
-        ),
+        CheckConstraint("status IN ('reserved','consumed','released','restocked')", name="valid_status"),
     )
 
     id: Mapped[uuid.UUID] = uuid_pk()
     order_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("orders.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    product_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("products.id"), nullable=False
-    )
+    product_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("products.id"), nullable=False)
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
     status: Mapped[str] = mapped_column(String, nullable=False, default="reserved")
     created_at: Mapped[datetime] = created_at_col()

@@ -141,11 +141,7 @@ async def test_acceptance_journey(client, customer, admin):
     assert "[1]" not in limited["message"]["content"]
 
     # The conversation stored every turn with its structured references.
-    detail = (
-        await client.get(
-            f"/api/v1/ai/conversations/{body['conversation_id']}", headers=customer.headers
-        )
-    ).json()
+    detail = (await client.get(f"/api/v1/ai/conversations/{body['conversation_id']}", headers=customer.headers)).json()
     assert detail["message_count"] == 6
     assert [m["role"] for m in detail["messages"]] == ["user", "assistant"] * 3
     first = detail["messages"][1]
@@ -177,9 +173,7 @@ async def test_no_vessel_and_general_question(client, customer):
     body = r.json()
     assert body["vessel"] is None
     assert body["grounding"]["status"] == "grounded"
-    assert any(
-        c["title"] == "Synthetic general outboard troubleshooting" for c in body["citations"]
-    )
+    assert any(c["title"] == "Synthetic general outboard troubleshooting" for c in body["citations"])
     # Without a vessel, engine-specific facts cannot be confirmed; fit is never claimed.
     for p in body["products"]:
         assert p["fitment"]["status"] in ("unknown", "universal")
@@ -218,9 +212,7 @@ async def test_prompt_injection_in_document_is_ignored(client, customer, admin):
     )
     assert r.status_code == 201, r.text
     sid = r.json()["source"]["id"]
-    assert (
-        await client.post(f"/api/v1/knowledge/sources/{sid}/admit", headers=admin.headers)
-    ).status_code == 200
+    assert (await client.post(f"/api/v1/knowledge/sources/{sid}/admit", headers=admin.headers)).status_code == 200
 
     body = (await ask(client, customer, "How should I care for my spark plugs?")).json()
     content = body["message"]["content"].lower()
@@ -242,22 +234,14 @@ async def test_cross_owner_vessel_and_conversation_are_404(client, customer, oth
     cid = their_turn["conversation_id"]
     assert their_turn["vessel"]["id"] == str(theirs.id)
     assert (await ask(client, customer, conversation_id=cid)).status_code == 404
-    assert (
-        await client.get(f"/api/v1/ai/conversations/{cid}", headers=customer.headers)
-    ).status_code == 404
-    assert (
-        await client.delete(f"/api/v1/ai/conversations/{cid}", headers=customer.headers)
-    ).status_code == 404
+    assert (await client.get(f"/api/v1/ai/conversations/{cid}", headers=customer.headers)).status_code == 404
+    assert (await client.delete(f"/api/v1/ai/conversations/{cid}", headers=customer.headers)).status_code == 404
     assert (await client.get("/api/v1/ai/conversations", headers=customer.headers)).json() == []
     # Owner can list and delete their own.
     mine = (await client.get("/api/v1/ai/conversations", headers=other_customer.headers)).json()
     assert [c["id"] for c in mine] == [cid] and mine[0]["message_count"] == 2
-    assert (
-        await client.delete(f"/api/v1/ai/conversations/{cid}", headers=other_customer.headers)
-    ).status_code == 204
-    assert (
-        await client.get(f"/api/v1/ai/conversations/{cid}", headers=other_customer.headers)
-    ).status_code == 404
+    assert (await client.delete(f"/api/v1/ai/conversations/{cid}", headers=other_customer.headers)).status_code == 204
+    assert (await client.get(f"/api/v1/ai/conversations/{cid}", headers=other_customer.headers)).status_code == 404
 
 
 async def test_explicit_vessel_and_deleted_vessel(client, customer):
@@ -272,9 +256,7 @@ async def test_explicit_vessel_and_deleted_vessel(client, customer):
     # Follow-up uses the conversation's vessel (re-checked) rather than the primary.
     follow = (await ask(client, customer, conversation_id=cid)).json()
     assert follow["vessel"]["id"] == str(second.id)
-    assert (
-        await client.delete(f"/api/v1/vessels/{second.id}", headers=customer.headers)
-    ).status_code == 204
+    assert (await client.delete(f"/api/v1/vessels/{second.id}", headers=customer.headers)).status_code == 204
     after = (await ask(client, customer, conversation_id=cid)).json()
     assert after["vessel"] is None
 
@@ -286,9 +268,7 @@ async def test_message_and_conversation_bounds(client, customer, monkeypatch):
     r = await ask(client, customer, too_long)
     assert r.status_code == 422 and r.json()["code"] == "message_too_long"
     assert (await ask(client, customer, "   ")).status_code == 422
-    r = await client.post(
-        CHAT, json={"message": "hi", "user_id": str(customer.id)}, headers=customer.headers
-    )
+    r = await client.post(CHAT, json={"message": "hi", "user_id": str(customer.id)}, headers=customer.headers)
     assert r.status_code == 422  # unknown fields are rejected
 
     monkeypatch.setattr(settings, "ai_max_conversation_messages", 4)
@@ -353,9 +333,7 @@ async def test_specialists_list_is_public(client):
 async def test_safety_question_routes_to_safety(client, customer):
     await create_vessel(customer.id)
     await seed_corpus()
-    body = (
-        await ask(client, customer, "Lifejackets and flares: what should I check before departure?")
-    ).json()
+    body = (await ask(client, customer, "Lifejackets and flares: what should I check before departure?")).json()
     assert body["grounding"]["specialists_consulted"][0] == "safety"
     assert body["grounding"]["status"] == "grounded"
     assert all(c["title"] == "Synthetic pre-departure safety checklist" for c in body["citations"])
@@ -370,9 +348,7 @@ async def test_revocation_takes_effect_without_reingest(client, customer, admin)
     async with async_session() as db:
         f150 = (
             await db.execute(
-                select(KnowledgeSource).where(
-                    KnowledgeSource.title == "Synthetic service notes — Yamaha F150 outboard"
-                )
+                select(KnowledgeSource).where(KnowledgeSource.title == "Synthetic service notes — Yamaha F150 outboard")
             )
         ).scalar_one()
     await client.post(f"/api/v1/knowledge/sources/{f150.id}/revoke", headers=admin.headers)

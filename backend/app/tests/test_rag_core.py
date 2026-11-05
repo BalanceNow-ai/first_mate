@@ -44,9 +44,7 @@ async def test_local_hash_is_deterministic_normalised_and_discriminative():
     assert len(a1) == 1536
     assert math.isclose(sum(v * v for v in a1), 1.0, rel_tol=1e-9)
     cos = sum(x * y for x, y in zip(a1, b, strict=True))
-    near = sum(
-        x * y for x, y in zip(a1, e.embed_one("When should I replace spark plugs?"), strict=True)
-    )
+    near = sum(x * y for x, y in zip(a1, e.embed_one("When should I replace spark plugs?"), strict=True))
     assert near > 0.3 and abs(cos) < 0.1
     assert e.model_id == "local_hash-v1"
     assert e.embed_one("the and of") == [0.0] * 1536  # stopwords only
@@ -60,18 +58,13 @@ async def test_openai_embedder_batches_with_fake_client(monkeypatch):
     class FakeEmbeddings:
         async def create(self, **kwargs):
             calls.append(kwargs)
-            data = [
-                SimpleNamespace(index=i, embedding=[float(i + 1)] * 1536)
-                for i in range(len(kwargs["input"]))
-            ]
+            data = [SimpleNamespace(index=i, embedding=[float(i + 1)] * 1536) for i in range(len(kwargs["input"]))]
             return SimpleNamespace(data=list(reversed(data)))
 
     e = embeddings.OpenAIEmbedder(settings, client=SimpleNamespace(embeddings=FakeEmbeddings()))
     vectors = await e.embed(["a", "b", "c"])
     assert [len(c["input"]) for c in calls] == [2, 1]
-    assert all(
-        c["model"] == settings.openai_embedding_model and c["dimensions"] == 1536 for c in calls
-    )
+    assert all(c["model"] == settings.openai_embedding_model and c["dimensions"] == 1536 for c in calls)
     assert all(c["timeout"] == settings.ai_request_timeout_seconds for c in calls)
     assert [v[0] for v in vectors] == [1.0, 2.0, 1.0]  # re-ordered by index
     assert e.model_id == "text-embedding-3-small"
@@ -124,9 +117,7 @@ def test_front_matter_parsing():
 
 
 def test_heading_aware_chunking_with_overlap():
-    long_para = " ".join(
-        f"Sentence number {i} explains a maintenance step in detail." for i in range(40)
-    )
+    long_para = " ".join(f"Sentence number {i} explains a maintenance step in detail." for i in range(40))
     body = f"Intro line.\n\n# Engine\n\n## Spark plugs\n\nShort plug text SYN-X-1.\n\n## Impeller\n\n{long_para}\n"
     chunks = chunk_document(body, size=300, overlap=80)
     assert chunks[0].heading is None and chunks[0].content == "Intro line."
@@ -138,9 +129,7 @@ def test_heading_aware_chunking_with_overlap():
     tail_words = impeller[0].content.split()[-3:]
     assert " ".join(tail_words) in impeller[1].content
     assert [c.index for c in chunks] == list(range(len(chunks)))
-    attach_facts(
-        chunks, [{"key": "plug", "value": "SYN-X-1"}, {"key": "whole", "value": "nowhere"}]
-    )
+    attach_facts(chunks, [{"key": "plug", "value": "SYN-X-1"}, {"key": "whole", "value": "nowhere"}])
     assert {"key": "plug", "value": "SYN-X-1"} in chunks[1].facts
     assert all({"key": "plug", "value": "SYN-X-1"} not in c.facts for c in impeller)
     assert all({"key": "whole", "value": "nowhere"} in c.facts for c in chunks)
@@ -151,25 +140,16 @@ def test_seed_fixtures_are_all_synthetic():
     assert len(paths) >= 6
     for path in paths:
         first_line = path.read_text(encoding="utf-8").splitlines()[0]
-        assert (
-            "SYNTHETIC" in first_line
-            and "not real maintenance, safety or regulatory guidance" in first_line
-        )
+        assert "SYNTHETIC" in first_line and "not real maintenance, safety or regulatory guidance" in first_line
         meta, body = load_fixture(path)
-        assert (
-            meta.is_synthetic
-            and meta.publisher == SYNTHETIC_PUBLISHER
-            and meta.licence == SYNTHETIC_LICENCE
-        )
+        assert meta.is_synthetic and meta.publisher == SYNTHETIC_PUBLISHER and meta.licence == SYNTHETIC_LICENCE
         body_first = body.strip().splitlines()[0]
         assert "synthetic" in body_first.lower() and "not real maintenance" in body_first
 
 
 # ---------------------------------------------------------------- ingestion
 def _meta(**kw) -> SourceMetadata:
-    base = dict(
-        title="Doc", publisher="Pub", licence="Licensed", licence_verified=True, domain="engine"
-    )
+    base = dict(title="Doc", publisher="Pub", licence="Licensed", licence_verified=True, domain="engine")
     base.update(kw)
     return SourceMetadata(**base)
 
@@ -188,13 +168,7 @@ async def test_ingest_is_idempotent_and_versions_revoke_old():
         await db.refresh(first.source)
         assert first.source.admission_status == "revoked"
         chunks = (
-            (
-                await db.execute(
-                    select(RAGDocument).where(RAGDocument.source_id == changed.source.id)
-                )
-            )
-            .scalars()
-            .all()
+            (await db.execute(select(RAGDocument).where(RAGDocument.source_id == changed.source.id))).scalars().all()
         )
         assert all(c.embedding_model == "local_hash-v1" and c.embedding is not None for c in chunks)
         assert first.source.checksum != changed.source.checksum
@@ -218,24 +192,18 @@ async def test_ingest_validation():
 
 async def test_admission_requires_verified_licence(monkeypatch):
     async with async_session() as db:
-        real = await ingest(
-            db, _meta(title="Real", licence_verified=False), "# A\n\nText about plugs."
-        )
+        real = await ingest(db, _meta(title="Real", licence_verified=False), "# A\n\nText about plugs.")
         with pytest.raises(AppError) as exc:
             await admit(db, real.source.id, None)
         assert exc.value.code == "licence_not_verified"
-        synthetic = await ingest(
-            db, _meta(title="Synth", licence_verified=False, is_synthetic=True), "# A\n\nPlugs."
-        )
+        synthetic = await ingest(db, _meta(title="Synth", licence_verified=False, is_synthetic=True), "# A\n\nPlugs.")
         assert (await admit(db, synthetic.source.id, None)).admission_status == "admitted"
         await revoke(db, synthetic.source.id, None)
         monkeypatch.setattr(get_settings(), "app_env", "production")
         with pytest.raises(AppError):
             await admit(db, synthetic.source.id, None)  # synthetic exemption is local-only
         monkeypatch.setattr(get_settings(), "app_env", "test")
-        assert (
-            await admit(db, real.source.id, None, licence_verified=True)
-        ).admission_status == "admitted"
+        assert (await admit(db, real.source.id, None, licence_verified=True)).admission_status == "admitted"
         await db.commit()
 
 
@@ -248,9 +216,7 @@ async def test_retrieval_filters_admission_applicability_and_model(customer):
     vessel = await create_vessel(customer.id)
     async with async_session() as db:
         await ingest_synthetic_corpus(db, admit_sources=True)
-        pending = await ingest(
-            db, _meta(title="Pending plugs"), "# Spark plugs\n\nSpark plugs spark plugs change."
-        )
+        pending = await ingest(db, _meta(title="Pending plugs"), "# Spark plugs\n\nSpark plugs spark plugs change.")
         legacy_vector = embeddings.LocalHashEmbedder().embed_one("spark plugs change")
         db.add(
             RAGDocument(
@@ -284,9 +250,7 @@ async def test_retrieval_filters_admission_applicability_and_model(customer):
     # Engine change flips applicability.
     async with async_session() as db:
         await db.execute(
-            update(Vessel)
-            .where(Vessel.id == vessel.id)
-            .values(engine_make="Suzuki", engine_model="DF140")
+            update(Vessel).where(Vessel.id == vessel.id).values(engine_make="Suzuki", engine_model="DF140")
         )
         await db.commit()
     async with async_session() as db:
@@ -308,9 +272,7 @@ async def test_revocation_and_deletion_remove_from_retrieval(customer):
         await db.commit()
     q = "When should I change the spark plugs?"
     async with async_session() as db:
-        f150 = (
-            await db.execute(select(KnowledgeSource).where(KnowledgeSource.title == F150))
-        ).scalar_one()
+        f150 = (await db.execute(select(KnowledgeSource).where(KnowledgeSource.title == F150))).scalar_one()
         assert F150 in [c.title for c in await retrieve(db, q, await _profile(db, vessel.id))]
         await revoke(db, f150.id, None)
         assert F150 not in [c.title for c in await retrieve(db, q, await _profile(db, vessel.id))]
@@ -334,8 +296,5 @@ def test_applicability_rules():
     assert applicability(yam, prof()) == "unconfirmed"
     assert applicability(yam, None) == "unconfirmed"
     assert applicability({"vessel_make": "Rayglass"}, prof("Yamaha", "F150")) is None
-    assert (
-        applicability({"vessel_make": "Stabicraft", "vessel_model": ["2050", "1850"]}, prof())
-        == "matches"
-    )
+    assert applicability({"vessel_make": "Stabicraft", "vessel_model": ["2050", "1850"]}, prof()) == "matches"
     assert applicability({"engine_model": ["F150", "F175"]}, prof("Yamaha", "F175")) == "matches"

@@ -23,9 +23,7 @@ async def order_paid(db: AsyncSession, order: Order) -> None:
 
 async def order_refunded(db: AsyncSession, order: Order, newly_refunded_cents: int) -> None:
     """Additional refund amount recorded on a paid order (partial or full)."""
-    from app.services import loyalty, notifications
-
-    from app.services import delivery
+    from app.services import delivery, loyalty, notifications
 
     await loyalty.reverse_for_refund(db, order, newly_refunded_cents)
     await delivery.cancel_for_refunded_order(db, order)

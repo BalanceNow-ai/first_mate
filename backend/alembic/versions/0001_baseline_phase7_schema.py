@@ -35,8 +35,20 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     for table in (
-        "checklist_items", "helm_dash_deliveries", "voyage_checklists", "ai_conversations",
-        "crew_team_members", "order_items", "crew_teams", "crew_points", "cart_items",
-        "orders", "product_compatibility", "vessels", "rag_documents", "products", "users",
+        "checklist_items",
+        "helm_dash_deliveries",
+        "voyage_checklists",
+        "ai_conversations",
+        "crew_team_members",
+        "order_items",
+        "crew_teams",
+        "crew_points",
+        "cart_items",
+        "orders",
+        "product_compatibility",
+        "vessels",
+        "rag_documents",
+        "products",
+        "users",
     ):
         op.execute(f"DROP TABLE IF EXISTS {table} CASCADE")

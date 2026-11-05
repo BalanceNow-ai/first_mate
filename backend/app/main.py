@@ -84,8 +84,25 @@ def create_app() -> FastAPI:
     )
     prefix = settings.api_v1_prefix
     for module in (
-        auth, users, vessels, equipment, products, search, cart, orders, payments, shipping,
-        ai, knowledge, checklists, loyalty, helm_dash, dispatch, content, notifications, admin,
+        auth,
+        users,
+        vessels,
+        equipment,
+        products,
+        search,
+        cart,
+        orders,
+        payments,
+        shipping,
+        ai,
+        knowledge,
+        checklists,
+        loyalty,
+        helm_dash,
+        dispatch,
+        content,
+        notifications,
+        admin,
     ):
         app.include_router(module.router, prefix=prefix)
     app.include_router(system.router)

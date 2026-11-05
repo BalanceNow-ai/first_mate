@@ -45,10 +45,15 @@ asyncio_default_fixture_loop_scope = "function"
 
 [tool.ruff]
 target-version = "py311"
-line-length = 100
+line-length = 120
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+# Long SQL literals in migrations and the legacy-data migration test.
+"alembic/versions/*.py" = ["E501"]
+"app/tests/test_migrations.py" = ["E501"]
 
 [tool.setuptools.packages.find]
 include = ["app*"]

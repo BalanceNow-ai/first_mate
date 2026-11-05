@@ -250,9 +250,9 @@ async def on_succeeded(db: AsyncSession, obj: dict) -> Outcome:
         await reservations.load_items(db, order)
         sp = await db.begin_nested()
         try:
-            ok = await reservations.rereserve_released(
+            ok = await reservations.rereserve_released(db, order) and await entitlements.reclaim_for_paid_order(
                 db, order
-            ) and await entitlements.reclaim_for_paid_order(db, order)
+            )
         except Exception:
             await sp.rollback()
             raise
@@ -322,9 +322,7 @@ async def on_charge_refunded(db: AsyncSession, obj: dict) -> Outcome:
     if order.payment_status not in PAID_PAYMENT_STATUSES:
         # The success event has not been processed yet. Refuse *without* recording the
         # event (the transaction rolls back) so the provider redelivers it later.
-        raise AppError(
-            409, "event_deferred", "Payment not yet recorded for this refund; retry later"
-        )
+        raise AppError(409, "event_deferred", "Payment not yet recorded for this refund; retry later")
     cumulative = obj.get("amount_refunded")
     if not isinstance(cumulative, int) or cumulative < 0 or cumulative > order.total_cents:
         return Outcome("mismatch", "invalid amount_refunded", order)

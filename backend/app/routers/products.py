@@ -73,8 +73,15 @@ def filters_dependency(
     q: str | None = Query(None, max_length=200),
 ) -> ProductFilters:
     return ProductFilters(
-        category=category, sub_category=sub_category, brand=brand, min_price_cents=min_price_cents,
-        max_price_cents=max_price_cents, in_stock=in_stock, on_sale=on_sale, part_role=part_role, q=q,
+        category=category,
+        sub_category=sub_category,
+        brand=brand,
+        min_price_cents=min_price_cents,
+        max_price_cents=max_price_cents,
+        in_stock=in_stock,
+        on_sale=on_sale,
+        part_role=part_role,
+        q=q,
     )
 
 
@@ -101,7 +108,10 @@ async def list_catalogue(
     )
     return ProductListResponse(
         items=[product_response(p, page.fitment.get(p.id)) for p in page.items],
-        total=page.total, offset=offset, limit=limit, vessel=vessel_ref,
+        total=page.total,
+        offset=offset,
+        limit=limit,
+        vessel=vessel_ref,
     )
 
 
@@ -174,7 +184,9 @@ async def admin_list_products(
 
 
 @router.post("/", response_model=ProductAdminResponse, status_code=status.HTTP_201_CREATED)
-async def create_product(body: ProductCreate, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")) -> ProductAdminResponse:
+async def create_product(
+    body: ProductCreate, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
+) -> ProductAdminResponse:
     if (await db.execute(select(Product.id).where(func.lower(Product.sku) == body.sku.lower()))).first():
         raise AppError(409, "duplicate_sku", "A product with this SKU exists")
     data = body.model_dump()
@@ -195,8 +207,16 @@ async def update_product(
 ) -> ProductAdminResponse:
     product = await _admin_product(db, product_id, lock=True)
     data = body.model_dump(exclude_unset=True)
-    for required in ("name", "category", "price_cents", "stock_quantity", "fitment_scope", "dangerous_goods",
-                     "is_active", "oem_part_numbers"):
+    for required in (
+        "name",
+        "category",
+        "price_cents",
+        "stock_quantity",
+        "fitment_scope",
+        "dangerous_goods",
+        "is_active",
+        "oem_part_numbers",
+    ):
         if required in data and data[required] is None:
             raise AppError(422, "invalid_value", f"{required} cannot be null")
     price = data.get("price_cents", product.price_cents)
@@ -207,8 +227,14 @@ async def update_product(
     for k, v in data.items():
         setattr(product, k, v)
     await db.flush()
-    await audit.record(db, admin.id, "product.update", "product", product.id,
-                       {"changes": {k: {"from": before[k], "to": v} for k, v in data.items() if before[k] != v}})
+    await audit.record(
+        db,
+        admin.id,
+        "product.update",
+        "product",
+        product.id,
+        {"changes": {k: {"from": before[k], "to": v} for k, v in data.items() if before[k] != v}},
+    )
     await db.refresh(product)
     response = product_admin_response(product)
     await _commit_and_sync(db, [product.id])
@@ -232,9 +258,14 @@ async def adjust_stock(
     ).first()
     if row is None:
         raise AppError(409, "insufficient_stock", "Stock cannot go below zero")
-    await audit.record(db, admin.id, "product.stock_adjust", "product", product_id,
-                       {"delta": body.delta, "reason": body.reason, "stock_after": row[0],
-                        "stock_before": row[0] - body.delta})
+    await audit.record(
+        db,
+        admin.id,
+        "product.stock_adjust",
+        "product",
+        product_id,
+        {"delta": body.delta, "reason": body.reason, "stock_after": row[0], "stock_before": row[0] - body.delta},
+    )
     product = await _admin_product(db, product_id)
     await db.refresh(product)
     response = product_admin_response(product)
@@ -243,7 +274,9 @@ async def adjust_stock(
 
 
 @router.delete("/{product_id}", response_model=ProductAdminResponse)
-async def deactivate_product(product_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")) -> ProductAdminResponse:
+async def deactivate_product(
+    product_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
+) -> ProductAdminResponse:
     """Deactivate (soft delete): hidden publicly, kept for order history."""
     product = await _admin_product(db, product_id, lock=True)
     if product.is_active:
@@ -263,11 +296,32 @@ async def _slug_map(db: AsyncSession) -> dict[uuid.UUID, str]:
 
 def _rule_response(r: ProductCompatibility, slugs: dict[uuid.UUID, str]) -> FitmentRuleAdminResponse:
     return FitmentRuleAdminResponse(
-        **{k: getattr(r, k) for k in (
-            "id", "product_id", "vessel_make", "vessel_model", "year_from", "year_to", "engine_make", "engine_model",
-            "engine_year_from", "engine_year_to", "equipment_category_id", "equipment_make", "equipment_model",
-            "fitment_type", "verification_status", "data_source", "source_url", "notes", "verified_at",
-            "verified_by", "created_at")},
+        **{
+            k: getattr(r, k)
+            for k in (
+                "id",
+                "product_id",
+                "vessel_make",
+                "vessel_model",
+                "year_from",
+                "year_to",
+                "engine_make",
+                "engine_model",
+                "engine_year_from",
+                "engine_year_to",
+                "equipment_category_id",
+                "equipment_make",
+                "equipment_model",
+                "fitment_type",
+                "verification_status",
+                "data_source",
+                "source_url",
+                "notes",
+                "verified_at",
+                "verified_by",
+                "created_at",
+            )
+        },
         confidence_score=float(r.confidence_score),
         equipment_category=slugs.get(r.equipment_category_id) if r.equipment_category_id else None,
     )
@@ -284,10 +338,14 @@ async def _rule(db: AsyncSession, rule_id: uuid.UUID) -> ProductCompatibility:
 
 def _rule_snapshot(r: ProductCompatibility) -> dict:
     return {
-        "product_id": str(r.product_id), "vessel_make": r.vessel_make, "vessel_model": r.vessel_model,
-        "engine_make": r.engine_make, "engine_model": r.engine_model,
+        "product_id": str(r.product_id),
+        "vessel_make": r.vessel_make,
+        "vessel_model": r.vessel_model,
+        "engine_make": r.engine_make,
+        "engine_model": r.engine_model,
         "equipment_category_id": str(r.equipment_category_id) if r.equipment_category_id else None,
-        "verification_status": r.verification_status, "confidence_score": str(r.confidence_score),
+        "verification_status": r.verification_status,
+        "confidence_score": str(r.confidence_score),
     }
 
 
@@ -309,12 +367,19 @@ async def list_fitment_rules(
 
 @router.post("/fitment-rules/{rule_id}/verify", response_model=FitmentRuleAdminResponse)
 async def verify_fitment_rule(
-    rule_id: uuid.UUID, admin: AdminUser, body: FitmentRuleVerify | None = None, db: AsyncSession = Depends(get_db, scope="function")
+    rule_id: uuid.UUID,
+    admin: AdminUser,
+    body: FitmentRuleVerify | None = None,
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> FitmentRuleAdminResponse:
     """Verify a rule (needs confidence ≥ FITMENT_MIN_CONFIDENCE). Only verified rules can produce a fit."""
     rule = await _rule(db, rule_id)
     body = body or FitmentRuleVerify()
-    confidence = Decimal(str(body.confidence_score)) if body.confidence_score is not None else Decimal(str(rule.confidence_score))
+    confidence = (
+        Decimal(str(body.confidence_score))
+        if body.confidence_score is not None
+        else Decimal(str(rule.confidence_score))
+    )
     minimum = get_settings().fitment_min_confidence
     if confidence < Decimal(str(minimum)):
         raise AppError(422, "confidence_too_low", f"A rule needs confidence ≥ {minimum} to be verified")
@@ -335,7 +400,10 @@ async def verify_fitment_rule(
 
 @router.post("/fitment-rules/{rule_id}/reject", response_model=FitmentRuleAdminResponse)
 async def reject_fitment_rule(
-    rule_id: uuid.UUID, admin: AdminUser, body: FitmentRuleReject | None = None, db: AsyncSession = Depends(get_db, scope="function")
+    rule_id: uuid.UUID,
+    admin: AdminUser,
+    body: FitmentRuleReject | None = None,
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> FitmentRuleAdminResponse:
     rule = await _rule(db, rule_id)
     rule.verification_status = "rejected"
@@ -351,7 +419,9 @@ async def reject_fitment_rule(
 
 
 @router.delete("/fitment-rules/{rule_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_fitment_rule(rule_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")) -> None:
+async def delete_fitment_rule(
+    rule_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
+) -> None:
     rule = await _rule(db, rule_id)
     product_id = rule.product_id
     await audit.record(db, admin.id, "fitment_rule.delete", "product_compatibility", rule.id, _rule_snapshot(rule))
@@ -368,16 +438,22 @@ async def product_fitment_rules(
     slugs = await _slug_map(db)
     rules = (
         await db.execute(
-            select(ProductCompatibility).where(ProductCompatibility.product_id == product_id)
+            select(ProductCompatibility)
+            .where(ProductCompatibility.product_id == product_id)
             .order_by(ProductCompatibility.created_at, ProductCompatibility.id)
         )
     ).scalars()
     return [_rule_response(r, slugs) for r in rules]
 
 
-@router.post("/{product_id}/fitment-rules", response_model=FitmentRuleAdminResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{product_id}/fitment-rules", response_model=FitmentRuleAdminResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_fitment_rule(
-    product_id: uuid.UUID, body: FitmentRuleCreate, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
+    product_id: uuid.UUID,
+    body: FitmentRuleCreate,
+    admin: AdminUser,
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> FitmentRuleAdminResponse:
     """New rules are always ``unverified`` (no fit until an admin verifies them)."""
     await _admin_product(db, product_id)
@@ -408,7 +484,9 @@ async def create_fitment_rule(
 # =========================================================================== public detail
 @router.get("/{product_id}", response_model=ProductResponse)
 async def get_product(
-    product_id: uuid.UUID, principal: OptionalPrincipal, vessel_id: uuid.UUID | None = None,
+    product_id: uuid.UUID,
+    principal: OptionalPrincipal,
+    vessel_id: uuid.UUID | None = None,
     db: AsyncSession = Depends(get_db, scope="function"),
 ) -> ProductResponse:
     product = await get_active_product(db, product_id)
@@ -428,7 +506,9 @@ async def _fitment_for(
 
 @router.get("/{product_id}/fitment", response_model=FitmentResult)
 async def product_fitment(
-    product_id: uuid.UUID, principal: OptionalPrincipal, vessel_id: uuid.UUID = Query(...),
+    product_id: uuid.UUID,
+    principal: OptionalPrincipal,
+    vessel_id: uuid.UUID = Query(...),
     db: AsyncSession = Depends(get_db, scope="function"),
 ) -> FitmentResult:
     """Compatibility check for one of the caller's vessels (auth + ownership required)."""
@@ -436,7 +516,9 @@ async def product_fitment(
 
 
 @router.get("/{product_id}/compatibility", response_model=CompatibilityResponse)
-async def product_compatibility(product_id: uuid.UUID, db: AsyncSession = Depends(get_db, scope="function")) -> CompatibilityResponse:
+async def product_compatibility(
+    product_id: uuid.UUID, db: AsyncSession = Depends(get_db, scope="function")
+) -> CompatibilityResponse:
     """Public "known to fit" list — verified rules at or above the confidence threshold only."""
     product = await get_active_product(db, product_id)
     threshold = Decimal(str(get_settings().fitment_min_confidence))
@@ -449,24 +531,41 @@ async def product_compatibility(product_id: uuid.UUID, db: AsyncSession = Depend
                 ProductCompatibility.verification_status == "verified",
                 ProductCompatibility.confidence_score >= threshold,
             )
-            .order_by(ProductCompatibility.vessel_make, ProductCompatibility.engine_make,
-                      ProductCompatibility.engine_model, ProductCompatibility.id)
+            .order_by(
+                ProductCompatibility.vessel_make,
+                ProductCompatibility.engine_make,
+                ProductCompatibility.engine_model,
+                ProductCompatibility.id,
+            )
         )
     ).scalars()
     known = [
         KnownFit(
-            rule_id=r.id, vessel_make=r.vessel_make, vessel_model=r.vessel_model, year_from=r.year_from,
-            year_to=r.year_to, engine_make=r.engine_make, engine_model=r.engine_model,
-            engine_year_from=r.engine_year_from, engine_year_to=r.engine_year_to,
+            rule_id=r.id,
+            vessel_make=r.vessel_make,
+            vessel_model=r.vessel_model,
+            year_from=r.year_from,
+            year_to=r.year_to,
+            engine_make=r.engine_make,
+            engine_model=r.engine_model,
+            engine_year_from=r.engine_year_from,
+            engine_year_to=r.engine_year_to,
             equipment_category=slugs.get(r.equipment_category_id) if r.equipment_category_id else None,
-            equipment_make=r.equipment_make, equipment_model=r.equipment_model, fitment_type=r.fitment_type,
-            confidence_score=float(r.confidence_score), data_source=r.data_source,
-            is_synthetic=r.data_source == "synthetic_fixture", notes=r.notes,
+            equipment_make=r.equipment_make,
+            equipment_model=r.equipment_model,
+            fitment_type=r.fitment_type,
+            confidence_score=float(r.confidence_score),
+            data_source=r.data_source,
+            is_synthetic=r.data_source == "synthetic_fixture",
+            notes=r.notes,
         )
         for r in rules
     ]
     return CompatibilityResponse(
-        product_id=product.id, sku=product.sku, fitment_scope=product.fitment_scope,
-        universal=product.fitment_scope == "universal", oem_part_numbers=list(product.oem_part_numbers or []),
+        product_id=product.id,
+        sku=product.sku,
+        fitment_scope=product.fitment_scope,
+        universal=product.fitment_scope == "universal",
+        oem_part_numbers=list(product.oem_part_numbers or []),
         known_to_fit=known,
     )

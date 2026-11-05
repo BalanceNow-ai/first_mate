@@ -182,9 +182,7 @@ async def list_products(
     return ProductPage(items=items, total=total, fitment=results)
 
 
-async def resolve_vessel(
-    db: AsyncSession, principal: Principal | None, vessel_id: uuid.UUID | None
-) -> Vessel | None:
+async def resolve_vessel(db: AsyncSession, principal: Principal | None, vessel_id: uuid.UUID | None) -> Vessel | None:
     """Owner-scoped vessel for personalised catalogue calls.
 
     No token → 401; a vessel that is not the caller's → 404 (no existence leak).
@@ -193,7 +191,9 @@ async def resolve_vessel(
         return None
     if principal is None:
         raise AppError(
-            401, "invalid_token", "Sign in to check fitment for a vessel",
+            401,
+            "invalid_token",
+            "Sign in to check fitment for a vessel",
             headers={"WWW-Authenticate": "Bearer"},
         )
     vessel = (

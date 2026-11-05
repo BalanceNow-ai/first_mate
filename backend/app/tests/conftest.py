@@ -16,9 +16,7 @@ import uuid
 from collections.abc import AsyncGenerator
 from dataclasses import dataclass, field
 
-TEST_DATABASE_URL = os.environ.get(
-    "TEST_DATABASE_URL", "postgresql+asyncpg://helm:helm@localhost:5432/helm_test"
-)
+TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL", "postgresql+asyncpg://helm:helm@localhost:5432/helm_test")
 TEST_JWT_SECRET = "test-only-supabase-jwt-secret-0123456789abcdef"
 TEST_ISSUER = "http://supabase.test/auth/v1"
 
@@ -48,12 +46,12 @@ os.environ.update(
 import jwt  # noqa: E402
 import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
-from alembic import command  # noqa: E402
 from alembic.config import Config  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 from sqlalchemy import text  # noqa: E402
 from sqlalchemy.ext.asyncio import AsyncSession  # noqa: E402
 
+from alembic import command  # noqa: E402
 from app.config import get_settings  # noqa: E402
 
 get_settings.cache_clear()
@@ -138,10 +136,7 @@ async def clean_database() -> AsyncGenerator[None, None]:
     async with engine.begin() as conn:
         if not _TABLES:
             rows = await conn.execute(
-                text(
-                    "SELECT tablename FROM pg_tables WHERE schemaname='public' "
-                    "AND tablename <> 'alembic_version'"
-                )
+                text("SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename <> 'alembic_version'")
             )
             _TABLES.extend(r[0] for r in rows)
         await conn.execute(text(f"TRUNCATE {', '.join(_TABLES)} RESTART IDENTITY CASCADE"))

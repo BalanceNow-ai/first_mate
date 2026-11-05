@@ -46,7 +46,7 @@ class CrewPoints(Base):
     tier: Mapped[str] = mapped_column(String, nullable=False, default="deckhand", server_default="deckhand")
     updated_at: Mapped[datetime] = updated_at_col()
 
-    user: Mapped["User"] = relationship("User", back_populates="crew_points")  # noqa: F821
+    user: Mapped[User] = relationship("User", back_populates="crew_points")  # noqa: F821
 
 
 class PointsTransaction(Base):
@@ -95,12 +95,10 @@ class CrewTeam(Base):
 
     id: Mapped[uuid.UUID] = uuid_pk()
     name: Mapped[str] = mapped_column(String, nullable=False)
-    created_by: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False
-    )
+    created_by: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     created_at: Mapped[datetime] = created_at_col()
 
-    members: Mapped[list["CrewTeamMember"]] = relationship(
+    members: Mapped[list[CrewTeamMember]] = relationship(
         "CrewTeamMember", back_populates="team", cascade="all, delete-orphan"
     )
 
@@ -125,9 +123,7 @@ class CrewTeamMember(Base):
 class CrewInvite(Base):
     __tablename__ = "crew_invites"
     __table_args__ = (
-        CheckConstraint(
-            "status IN ('pending','accepted','declined','revoked','expired')", name="valid_status"
-        ),
+        CheckConstraint("status IN ('pending','accepted','declined','revoked','expired')", name="valid_status"),
     )
 
     id: Mapped[uuid.UUID] = uuid_pk()
@@ -173,9 +169,7 @@ class ExperienceRedemption(Base):
 
     __tablename__ = "experience_redemptions"
     __table_args__ = (
-        CheckConstraint(
-            "status IN ('requested','confirmed','fulfilled','cancelled')", name="valid_status"
-        ),
+        CheckConstraint("status IN ('requested','confirmed','fulfilled','cancelled')", name="valid_status"),
     )
 
     id: Mapped[uuid.UUID] = uuid_pk()

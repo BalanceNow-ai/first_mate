@@ -15,8 +15,8 @@ from app.core.rate_limit import auth_limit
 from app.database import get_db, utcnow
 from app.middleware.auth import CurrentPrincipal, CurrentUser
 from app.models.user import User
-from app.services import identity
 from app.schemas.user import ProvisionRequest, ProvisionResponse, UserResponse
+from app.services import identity
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -43,13 +43,9 @@ async def _provision(
     if admin_view is not None:
         admin_email, confirmed_at = admin_view
         if confirmed_at is None or admin_email != principal.email:
-            raise AppError(
-                403, "email_not_confirmed", "Confirm your email address before completing sign-up"
-            )
+            raise AppError(403, "email_not_confirmed", "Confirm your email address before completing sign-up")
         verified_at = confirmed_at
-    clash = (
-        await db.execute(select(User).where(func.lower(User.email) == principal.email))
-    ).scalar_one_or_none()
+    clash = (await db.execute(select(User).where(func.lower(User.email) == principal.email))).scalar_one_or_none()
     if clash is not None:
         # The email belongs to a different identity (e.g. a deleted and re-created auth
         # account). Never re-bind another account's data to this subject.

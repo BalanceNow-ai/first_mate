@@ -7,8 +7,7 @@ from datetime import UTC, datetime
 from sqlalchemy import select
 
 from app.database import async_session
-from app.models.loyalty import DiscountEntitlement, PointsTransaction
-from app.models.loyalty import CrewPoints
+from app.models.loyalty import CrewPoints, DiscountEntitlement, PointsTransaction
 from app.models.ops import AuditLog
 from app.models.order import Order
 from app.services import loyalty

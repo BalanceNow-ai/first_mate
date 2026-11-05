@@ -128,9 +128,9 @@ async def invite(db: AsyncSession, captain: User, email: str) -> CrewInvite:
         raise AppError(409, "invite_pending", "That email already has a pending invite")
     sent_today = (
         await db.execute(
-            select(func.count()).select_from(CrewInvite).where(
-                CrewInvite.team_id == team.id, CrewInvite.created_at >= utcnow() - timedelta(days=1)
-            )
+            select(func.count())
+            .select_from(CrewInvite)
+            .where(CrewInvite.team_id == team.id, CrewInvite.created_at >= utcnow() - timedelta(days=1))
         )
     ).scalar_one()
     if sent_today >= settings.crew_invites_per_day:

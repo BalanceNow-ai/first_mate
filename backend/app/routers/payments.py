@@ -28,11 +28,7 @@ MAX_WEBHOOK_BYTES = 512 * 1024
     "/orders/{order_id}/intent",
     response_model=PaymentIntentResponse,
     dependencies=[
-        Depends(
-            user_rate_limit(
-                "payment_intent", lambda: get_settings().rate_limit_payment_intent_per_minute
-            )
-        )
+        Depends(user_rate_limit("payment_intent", lambda: get_settings().rate_limit_payment_intent_per_minute))
     ],
 )
 async def create_payment_intent(
@@ -52,9 +48,7 @@ async def create_payment_intent(
 @router.post(
     "/webhook",
     response_model=WebhookResponse,
-    dependencies=[
-        Depends(rate_limit("payment_webhook", lambda: get_settings().rate_limit_webhook_per_minute))
-    ],
+    dependencies=[Depends(rate_limit("payment_webhook", lambda: get_settings().rate_limit_webhook_per_minute))],
 )
 async def payment_webhook(
     request: Request,
@@ -75,11 +69,7 @@ async def payment_webhook(
     "/local/{payment_intent_id}/confirm",
     response_model=LocalConfirmResponse,
     dependencies=[
-        Depends(
-            user_rate_limit(
-                "payment_intent", lambda: get_settings().rate_limit_payment_intent_per_minute
-            )
-        )
+        Depends(user_rate_limit("payment_intent", lambda: get_settings().rate_limit_payment_intent_per_minute))
     ],
 )
 async def local_confirm(

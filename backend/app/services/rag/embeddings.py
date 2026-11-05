@@ -151,9 +151,7 @@ class OpenAIEmbedder:
             vectors = [d.embedding for d in sorted(response.data, key=lambda d: d.index)]
             if len(vectors) != len(batch) or any(len(v) != self.dimensions for v in vectors):
                 logger.error("Embedding provider returned an unexpected shape")
-                raise AppError(
-                    503, "knowledge_unavailable", "The knowledge service is temporarily unavailable"
-                )
+                raise AppError(503, "knowledge_unavailable", "The knowledge service is temporarily unavailable")
             out.extend(list(v) for v in vectors)
         return out
 
@@ -183,8 +181,4 @@ def active_model_id(settings: Settings | None = None) -> str | None:
     settings = settings or get_settings()
     if not embeddings_available(settings):
         return None
-    return (
-        settings.openai_embedding_model
-        if settings.embedding_provider == "openai"
-        else LOCAL_HASH_MODEL_ID
-    )
+    return settings.openai_embedding_model if settings.embedding_provider == "openai" else LOCAL_HASH_MODEL_ID

@@ -53,9 +53,7 @@ async def add(client, actor, product, qty: int = 1) -> dict:
 
 async def quote(client, actor, delivery_type: str = "courier", destination: dict | None = None):
     if destination is None:
-        destination = (
-            {"postcode": "1010", "city": "Auckland"} if delivery_type == "courier" else WAIHEKE
-        )
+        destination = {"postcode": "1010", "city": "Auckland"} if delivery_type == "courier" else WAIHEKE
     return await client.post(
         f"{API}/shipping/quotes",
         json={"delivery_type": delivery_type, "destination": destination},
@@ -82,15 +80,11 @@ async def courier_checkout(client, actor, **extra):
 
 
 async def intent(client, actor, order_id: str):
-    return await client.post(
-        f"{API}/payments/orders/{order_id}/intent", json={}, headers=actor.headers
-    )
+    return await client.post(f"{API}/payments/orders/{order_id}/intent", json={}, headers=actor.headers)
 
 
 async def confirm(client, actor, pi: str, outcome: str):
-    return await client.post(
-        f"{API}/payments/local/{pi}/confirm", json={"outcome": outcome}, headers=actor.headers
-    )
+    return await client.post(f"{API}/payments/local/{pi}/confirm", json={"outcome": outcome}, headers=actor.headers)
 
 
 async def pay(client, actor, order_id: str, outcome: str = "succeed") -> dict:
@@ -116,9 +110,7 @@ async def paid_order(client, actor, product, qty: int = 1) -> dict:
 
 
 # --------------------------------------------------------------------------- events
-def pi_event(
-    order: dict, event_type: str = "payment_intent.succeeded", *, event_id: str | None = None, **obj
-):
+def pi_event(order: dict, event_type: str = "payment_intent.succeeded", *, event_id: str | None = None, **obj):
     status = {
         "payment_intent.succeeded": "succeeded",
         "payment_intent.payment_failed": "requires_payment_method",
@@ -178,33 +170,25 @@ async def post_event(client, event: dict, secret: str | None = None, signature: 
 # --------------------------------------------------------------------------- database
 async def stock(product_id) -> int:
     async with async_session() as s:
-        return (
-            await s.execute(select(Product.stock_quantity).where(Product.id == product_id))
-        ).scalar_one()
+        return (await s.execute(select(Product.stock_quantity).where(Product.id == product_id))).scalar_one()
 
 
 async def db_order(order_id) -> Order:
     async with async_session() as s:
-        return (
-            await s.execute(select(Order).where(Order.id == uuid.UUID(str(order_id))))
-        ).scalar_one()
+        return (await s.execute(select(Order).where(Order.id == uuid.UUID(str(order_id))))).scalar_one()
 
 
 async def reservation_statuses(order_id) -> list[str]:
     async with async_session() as s:
         rows = await s.execute(
-            select(StockReservation.status).where(
-                StockReservation.order_id == uuid.UUID(str(order_id))
-            )
+            select(StockReservation.status).where(StockReservation.order_id == uuid.UUID(str(order_id)))
         )
         return sorted(r[0] for r in rows)
 
 
 async def cart_quantities(user_id) -> dict:
     async with async_session() as s:
-        rows = await s.execute(
-            select(CartItem.product_id, CartItem.quantity).where(CartItem.user_id == user_id)
-        )
+        rows = await s.execute(select(CartItem.product_id, CartItem.quantity).where(CartItem.user_id == user_id))
         return {r[0]: r[1] for r in rows}
 
 
@@ -216,9 +200,7 @@ async def payment_events(order_id=None) -> list[PaymentEvent]:
         return list((await s.execute(q)).scalars())
 
 
-async def seed_entitlement(
-    user_id, amount_cents: int = 1000, status: str = "issued"
-) -> DiscountEntitlement:
+async def seed_entitlement(user_id, amount_cents: int = 1000, status: str = "issued") -> DiscountEntitlement:
     async with async_session() as s:
         ent = DiscountEntitlement(
             user_id=user_id,
@@ -235,9 +217,7 @@ async def seed_entitlement(
 
 async def entitlement(ent_id) -> DiscountEntitlement:
     async with async_session() as s:
-        return (
-            await s.execute(select(DiscountEntitlement).where(DiscountEntitlement.id == ent_id))
-        ).scalar_one()
+        return (await s.execute(select(DiscountEntitlement).where(DiscountEntitlement.id == ent_id))).scalar_one()
 
 
 async def seed_area(area_id: str = "hauraki-gulf", **overrides) -> OperatingArea:

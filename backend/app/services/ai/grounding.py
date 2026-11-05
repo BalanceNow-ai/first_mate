@@ -106,11 +106,7 @@ def detect_conflicts(
     for key, entries in by_key.items():
         for i, (nv_a, va, ra, ca) in enumerate(entries):
             for nv_b, vb, rb, cb in entries[i + 1 :]:
-                if (
-                    nv_a != nv_b
-                    and ca.source_id != cb.source_id
-                    and _overlap(ca.applies_to, cb.applies_to)
-                ):
+                if nv_a != nv_b and ca.source_id != cb.source_id and _overlap(ca.applies_to, cb.applies_to):
                     values = conflicts.setdefault(key, [])
                     for v in (va, vb):
                         if v not in values:
@@ -197,9 +193,35 @@ def _citation(ref: int, chunk: RetrievedChunk) -> dict:
 
 _CLAUSE = re.compile(r"[,;:]|\s(?:although|though|but|while|whereas|however|and|or)\s", re.IGNORECASE)
 _GENERIC_TOKENS = {
-    "synthetic", "marine", "engine", "outboard", "spare", "kit", "pump", "plug", "plugs", "spark",
-    "filter", "filters", "fuel", "oil", "water", "with", "for", "the", "and", "pack", "set", "litre",
-    "bilge", "impeller", "assembly", "replacement", "part", "parts", "boat",
+    "synthetic",
+    "marine",
+    "engine",
+    "outboard",
+    "spare",
+    "kit",
+    "pump",
+    "plug",
+    "plugs",
+    "spark",
+    "filter",
+    "filters",
+    "fuel",
+    "oil",
+    "water",
+    "with",
+    "for",
+    "the",
+    "and",
+    "pack",
+    "set",
+    "litre",
+    "bilge",
+    "impeller",
+    "assembly",
+    "replacement",
+    "part",
+    "parts",
+    "boat",
 }
 
 
@@ -232,9 +254,7 @@ def _fix_fit_claims(sentence: str, refs: list[ProductRef]) -> str | None:
     plain = CITATION.sub("", sentence)
     if not FIT_CLAIM.search(plain):
         return sentence
-    affirmative = [
-        c for c in _CLAUSE.split(plain) if FIT_CLAIM.search(c) and not _FIT_NEGATION.search(c)
-    ]
+    affirmative = [c for c in _CLAUSE.split(plain) if FIT_CLAIM.search(c) and not _FIT_NEGATION.search(c)]
     if not affirmative:
         return sentence
     # Products are matched against the whole sentence ("…the X, which fits").
@@ -283,17 +303,11 @@ def apply_guard(
     status = (
         "conflicting"
         if conflicts
-        else (
-            "grounded"
-            if any(int(n) in retrieved for n in CITATION.findall(text))
-            else "insufficient_evidence"
-        )
+        else ("grounded" if any(int(n) in retrieved for n in CITATION.findall(text)) else "insufficient_evidence")
     )
 
     if status == "grounded":
-        product_names = [
-            n for r in product_refs for n in (r.product.name.lower(), r.product.sku.lower())
-        ]
+        product_names = [n for r in product_refs for n in (r.product.name.lower(), r.product.sku.lower())]
 
         def keep(s: str) -> bool:
             if SAFETY_CLAIM.search(s) and not cited(s):

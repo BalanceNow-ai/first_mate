@@ -306,9 +306,7 @@ def _keyword_pattern(keyword: str) -> re.Pattern[str]:
     return re.compile(r"(?<![a-z0-9])" + re.escape(keyword) + r"(?![a-z0-9])")
 
 
-_PATTERNS = {
-    key: [(kw, _keyword_pattern(kw)) for kw in spec.keywords] for key, spec in SPECIALISTS.items()
-}
+_PATTERNS = {key: [(kw, _keyword_pattern(kw)) for kw in spec.keywords] for key, spec in SPECIALISTS.items()}
 
 
 def route(message: str, limit: int = 2) -> list[str]:
@@ -327,6 +325,4 @@ def route(message: str, limit: int = 2) -> list[str]:
 
 
 def public_list() -> list[dict]:
-    return [
-        {"key": s.key, "name": s.name, "description": s.description} for s in SPECIALISTS.values()
-    ]
+    return [{"key": s.key, "name": s.name, "description": s.description} for s in SPECIALISTS.values()]

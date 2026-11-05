@@ -22,7 +22,9 @@ async def test_verified_engine_rule_fits_and_engine_change_flips(customer):
     r = await _eval(p, vessel)
     assert r.status == "verified_fit" and "Fits My Stabi" in r.message
     async with async_session() as db:
-        await db.execute(update(Vessel).where(Vessel.id == vessel.id).values(engine_make="Suzuki", engine_model="DF140"))
+        await db.execute(
+            update(Vessel).where(Vessel.id == vessel.id).values(engine_make="Suzuki", engine_model="DF140")
+        )
         await db.commit()
     assert (await _eval(p, vessel)).status == "verified_mismatch"
     async with async_session() as db:
@@ -55,8 +57,15 @@ async def test_missing_vessel_fact_is_unknown_not_fit(customer):
 async def test_vessel_rule_year_range_and_universal(customer):
     vessel = await create_vessel(customer.id, make="Stabicraft", model="2050 Supercab", year=2022)
     p = await create_product(fitment_scope="specific")
-    await add_fitment_rule(p.id, engine_make=None, engine_model=None, vessel_make="Stabicraft",
-                           vessel_model="2050 Supercab", year_from=2015, year_to=2020)
+    await add_fitment_rule(
+        p.id,
+        engine_make=None,
+        engine_model=None,
+        vessel_make="Stabicraft",
+        vessel_model="2050 Supercab",
+        year_from=2015,
+        year_to=2020,
+    )
     assert (await _eval(p, vessel)).status == "verified_mismatch"
     u = await create_product(fitment_scope="universal")
     assert (await _eval(u, vessel)).status == "universal"

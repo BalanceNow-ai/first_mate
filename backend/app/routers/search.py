@@ -39,7 +39,10 @@ async def _postgres_facets(db: AsyncSession, filters: ProductFilters) -> dict[st
     for name, col in (("category", Product.category), ("brand", Product.brand), ("part_role", Product.part_role)):
         rows = (
             await db.execute(
-                select(col, func.count()).where(*clauses, col.isnot(None)).group_by(col).order_by(func.count().desc(), col)
+                select(col, func.count())
+                .where(*clauses, col.isnot(None))
+                .group_by(col)
+                .order_by(func.count().desc(), col)
             )
         ).all()
         out[name] = [FacetValue(value=v, count=c) for v, c in rows]
@@ -87,10 +90,16 @@ async def _typesense_search(db, filters, sort, offset, limit, profile, compatibl
         found = int(raw.get("found", 0))
     except (KeyError, TypeError, ValueError) as exc:
         raise search_index.TypesenseError("Malformed Typesense hits") from exc
-    rows = {
-        p.id: p
-        for p in (await db.execute(select(Product).where(Product.id.in_(hit_ids), Product.is_active.is_(True)))).scalars()
-    } if hit_ids else {}
+    rows = (
+        {
+            p.id: p
+            for p in (
+                await db.execute(select(Product).where(Product.id.in_(hit_ids), Product.is_active.is_(True)))
+            ).scalars()
+        }
+        if hit_ids
+        else {}
+    )
     products = [rows[i] for i in hit_ids if i in rows]  # index order; stale/inactive hits dropped
     facets = {
         k: [FacetValue(value=v["value"], count=v["count"]) for v in vals]
@@ -104,11 +113,12 @@ async def _typesense_search(db, filters, sort, offset, limit, profile, compatibl
     exact = [p for p in products if results[p.id].status in fitment.POSITIVE_STATUSES]
     if found > len(hit_ids):
         notice = f"Compatible results limited to the top {len(hit_ids)} search matches"
-    return exact[offset:offset + limit], len(exact), results, facets, notice
+    return exact[offset : offset + limit], len(exact), results, facets, notice
 
 
 @router.get(
-    "/products", response_model=SearchResponse,
+    "/products",
+    response_model=SearchResponse,
     dependencies=[Depends(rate_limit("search", lambda: get_settings().rate_limit_search_per_minute))],
 )
 async def search_products(
@@ -134,8 +144,14 @@ async def search_products(
                 db, filters, sort, offset, limit, profile, compatible_only
             )
             return SearchResponse(
-                items=[product_response(p, results.get(p.id)) for p in products], total=total, offset=offset,
-                limit=limit, engine="typesense", notice=notice, facets=facets, vessel=vessel_ref,
+                items=[product_response(p, results.get(p.id)) for p in products],
+                total=total,
+                offset=offset,
+                limit=limit,
+                engine="typesense",
+                notice=notice,
+                facets=facets,
+                vessel=vessel_ref,
             )
         except search_index.TypesenseError as exc:
             logger.warning("Typesense search failed (%s); falling back to PostgreSQL", exc)
@@ -145,6 +161,12 @@ async def search_products(
         db, filters, sort, offset, limit, profile, compatible_only
     )
     return SearchResponse(
-        items=[product_response(p, results.get(p.id)) for p in products], total=total, offset=offset, limit=limit,
-        engine=engine, notice=notice, facets=facets, vessel=vessel_ref,
+        items=[product_response(p, results.get(p.id)) for p in products],
+        total=total,
+        offset=offset,
+        limit=limit,
+        engine=engine,
+        notice=notice,
+        facets=facets,
+        vessel=vessel_ref,
     )

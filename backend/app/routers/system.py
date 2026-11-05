@@ -21,8 +21,7 @@ AFTERPAY_REASON = (
     "redirect-based confirmation flow that has not been implemented or validated."
 )
 LAYBUY_REASON = (
-    "Laybuy is not offered: no merchant account or current API documentation has been "
-    "validated for this integration."
+    "Laybuy is not offered: no merchant account or current API documentation has been validated for this integration."
 )
 
 
@@ -78,7 +77,11 @@ async def public_config(db: AsyncSession = Depends(get_db, scope="function")) ->
     courier_enabled = s.courier_rate_mode == "rate_card" and bool(s.courier_rate_table())
     helm_dash_enabled = s.helm_dash_enabled and enabled_areas > 0
     payment_methods = [
-        {"id": "card", "enabled": s.payments_available, "reason": None if s.payments_available else "Payments are not configured"},
+        {
+            "id": "card",
+            "enabled": s.payments_available,
+            "reason": None if s.payments_available else "Payments are not configured",
+        },
         {"id": "afterpay", "enabled": False, "reason": AFTERPAY_REASON},
         {"id": "laybuy", "enabled": False, "reason": LAYBUY_REASON},
     ]

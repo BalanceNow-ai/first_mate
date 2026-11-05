@@ -7,7 +7,7 @@ from app.database import async_session
 
 
 async def _seed(args) -> int:
-    from app.seed.catalogue import SeedRefused, seed_reference, seed_synthetic
+    from app.seed.catalogue import SeedRefusedError, seed_reference, seed_synthetic
 
     if args.synthetic and not get_settings().is_local:
         print("Refusing: synthetic catalogue data may only be seeded when APP_ENV is development or test.")
@@ -15,7 +15,7 @@ async def _seed(args) -> int:
     async with async_session() as db:
         try:
             counts = await (seed_synthetic(db) if args.synthetic else seed_reference(db))
-        except SeedRefused as exc:
+        except SeedRefusedError as exc:
             print(f"Refusing: {exc}")
             return 2
         await db.commit()

@@ -163,9 +163,7 @@ def decode_structure(raw: str, today: date | None = None) -> HinDecode:
                 return result
 
     result.status = "unrecognised"
-    result.warnings.append(
-        "The date characters do not match a recognised HIN format; enter the boat details manually"
-    )
+    result.warnings.append("The date characters do not match a recognised HIN format; enter the boat details manually")
     return result
 
 

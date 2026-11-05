@@ -5,7 +5,6 @@ seen by the ASGI server (run uvicorn/gunicorn with ``--forwarded-allow-ips`` set
 reverse proxy only, so ``X-Forwarded-For`` cannot be spoofed by clients).
 """
 
-
 import asyncio
 import logging
 import time
@@ -66,11 +65,7 @@ def _get_backend() -> _MemoryBackend | _RedisBackend | None:
     if settings.rate_limit_backend == "disabled":
         return None
     if _backend is None:
-        _backend = (
-            _RedisBackend(settings.redis_url)
-            if settings.rate_limit_backend == "redis"
-            else _MemoryBackend()
-        )
+        _backend = _RedisBackend(settings.redis_url) if settings.rate_limit_backend == "redis" else _MemoryBackend()
     return _backend
 
 
@@ -108,6 +103,7 @@ async def _enforce(scope: str, key_suffix: str, limit: Callable[[], int] | int, 
             "Too many requests. Please wait and try again.",
             headers={"Retry-After": str(window_seconds)},
         )
+
 
 def rate_limit(scope: str, limit: Callable[[], int] | int, window_seconds: int = 60):
     """Dependency factory: limit by client address (for unauthenticated endpoints)."""

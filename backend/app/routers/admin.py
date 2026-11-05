@@ -71,8 +71,13 @@ async def audit_trail(
     rows = (await db.execute(q)).scalars()
     return [
         {
-            "id": r.id, "actor_id": r.actor_id, "action": r.action, "entity_type": r.entity_type,
-            "entity_id": r.entity_id, "detail": r.detail, "created_at": r.created_at,
+            "id": r.id,
+            "actor_id": r.actor_id,
+            "action": r.action,
+            "entity_type": r.entity_type,
+            "entity_id": r.entity_id,
+            "detail": r.detail,
+            "created_at": r.created_at,
         }
         for r in rows
     ]

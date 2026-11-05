@@ -119,9 +119,7 @@ async def test_stripe_intent_amount_currency_idempotency_and_reuse(client, custo
     assert body["client_secret"].startswith(body["payment_intent_id"])
     name, kw = fake_stripe.calls[0]
     assert name == "create"
-    assert (
-        kw["amount"] == 11000 and kw["currency"] == "nzd" and kw["payment_method_types"] == ["card"]
-    )
+    assert kw["amount"] == 11000 and kw["currency"] == "nzd" and kw["payment_method_types"] == ["card"]
     assert kw["idempotency_key"] == f"order:{order['id']}:pi" and kw["api_key"] == "sk_test_fake"
     assert kw["metadata"] == {
         "order_id": order["id"],
@@ -134,9 +132,7 @@ async def test_stripe_intent_amount_currency_idempotency_and_reuse(client, custo
     assert fake_stripe.names() == ["create", "retrieve"]
 
 
-async def test_stripe_webhook_marks_paid_and_rejects_other_secrets(
-    client, customer, fake_stripe, monkeypatch
-):
+async def test_stripe_webhook_marks_paid_and_rejects_other_secrets(client, customer, fake_stripe, monkeypatch):
     spy = EventSpy(monkeypatch)
     p = await create_product(stock_quantity=2)
     order = await _order_with_intent(client, customer, p)
@@ -195,9 +191,7 @@ async def test_stripe_expiry_cancels_and_survives_provider_errors(client, custom
     b = {**b_order, **(await intent(client, customer, b_order["id"])).json(), "id": b_order["id"]}
     await expire_order(a["id"], minutes=2)
     await expire_order(b["id"], minutes=1)
-    fake_stripe.fail_next = stripe.APIConnectionError(
-        "network down"
-    )  # first cancel (order a) fails
+    fake_stripe.fail_next = stripe.APIConnectionError("network down")  # first cancel (order a) fails
     async with async_session() as s:
         assert await release_expired(s) == 1
         await s.commit()
@@ -223,11 +217,7 @@ async def test_stripe_refund_waits_for_webhook(client, customer, admin, fake_str
     assert r.status_code == 202, r.text
     assert r.json()["status"] == "pending" and r.json()["refunded_cents"] == 0
     name, kw = fake_stripe.calls[-1]
-    assert (
-        name == "refund"
-        and kw["payment_intent"] == order["payment_intent_id"]
-        and kw["amount"] == 2000
-    )
+    assert name == "refund" and kw["payment_intent"] == order["payment_intent_id"] and kw["amount"] == 2000
     assert kw["idempotency_key"] == f"order:{order['id']}:refund:{refund_key}"
     calls = len(fake_stripe.calls)
     # Repeating the same request never refunds twice ...

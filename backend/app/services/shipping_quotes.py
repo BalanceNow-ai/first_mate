@@ -169,11 +169,7 @@ class HelmDashPrice:
 async def enabled_areas(db: AsyncSession) -> list[OperatingArea]:
     return list(
         (
-            await db.execute(
-                select(OperatingArea)
-                .where(OperatingArea.enabled.is_(True))
-                .order_by(OperatingArea.id)
-            )
+            await db.execute(select(OperatingArea).where(OperatingArea.enabled.is_(True)).order_by(OperatingArea.id))
         ).scalars()
     )
 
@@ -199,12 +195,8 @@ async def helm_dash_price(db: AsyncSession, lat: float, lng: float) -> HelmDashP
             "outside_operating_area",
             "This location is outside the Helm Dash operating areas.",
         )
-    nm = round_half_up(
-        Decimal(str(haversine_nm(settings.warehouse_lat, settings.warehouse_lng, lat, lng))), "0.01"
-    )
-    fee = settings.helm_dash_base_fee_cents + int(
-        round_half_up(Decimal(settings.helm_dash_per_nm_fee_cents) * nm)
-    )
+    nm = round_half_up(Decimal(str(haversine_nm(settings.warehouse_lat, settings.warehouse_lng, lat, lng))), "0.01")
+    fee = settings.helm_dash_base_fee_cents + int(round_half_up(Decimal(settings.helm_dash_per_nm_fee_cents) * nm))
     speed = Decimal(str(settings.helm_dash_speed_knots))
     eta = int(round_half_up(nm / speed * 60)) + 15
     return HelmDashPrice(area=area, nautical_miles=nm, price_cents=fee, estimated_minutes=eta)
@@ -245,9 +237,7 @@ def quote_payload(view: QuoteView) -> dict:
     }
 
 
-async def create_quote(
-    db: AsyncSession, user_id: uuid.UUID, delivery_type: str, destination: dict
-) -> QuoteView:
+async def create_quote(db: AsyncSession, user_id: uuid.UUID, delivery_type: str, destination: dict) -> QuoteView:
     """Price the user's current cart and persist a single-use, expiring quote."""
     settings = get_settings()
     lines = await cart_service.load_cart(db, user_id)
@@ -279,9 +269,7 @@ async def create_quote(
         )
     else:
         if "lat" not in destination or "lng" not in destination:
-            raise AppError(
-                422, "invalid_destination", "Helm Dash quotes need a position (lat, lng)"
-            )
+            raise AppError(422, "invalid_destination", "Helm Dash quotes need a position (lat, lng)")
         hd = await helm_dash_price(db, destination["lat"], destination["lng"])
         area_name = hd.area.name
         quote = DeliveryQuote(
@@ -350,8 +338,7 @@ async def delivery_options(db: AsyncSession, user_id: uuid.UUID) -> dict:
         "available": True,
         "service_name": settings.courier_service_name,
         "estimated_days": settings.courier_estimated_days,
-        "development_rate_card": courier_configured(settings)
-        and is_development_rate_card(settings),
+        "development_rate_card": courier_configured(settings) and is_development_rate_card(settings),
     }
     if not lines:
         courier.update(available=False, reason_code="cart_empty", reason="Your cart is empty")
@@ -424,16 +411,12 @@ async def estimate(
     products = {
         p.id: p
         for p in (
-            await db.execute(
-                select(Product).where(Product.id.in_(merged), Product.is_active.is_(True))
-            )
+            await db.execute(select(Product).where(Product.id.in_(merged), Product.is_active.is_(True)))
         ).scalars()
     }
     result: dict = {"delivery_type": delivery_type, "available": False, "bindable": False}
     if len(products) != len(merged):
-        result.update(
-            reason_code="product_unavailable", reason="One or more products are not available"
-        )
+        result.update(reason_code="product_unavailable", reason="One or more products are not available")
         return result
     lines = [SimpleLine(products[pid], qty) for pid, qty in merged.items()]
     try:

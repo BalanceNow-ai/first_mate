@@ -81,9 +81,7 @@ def validate_metadata(meta: SourceMetadata) -> None:
             raise AppError(422, "invalid_metadata", f"Unsupported applies_to key {key!r}")
         values = value if isinstance(value, list) else [value]
         if not values or not all(isinstance(v, str) and v.strip() for v in values):
-            raise AppError(
-                422, "invalid_metadata", f"applies_to.{key} must be a string or list of strings"
-            )
+            raise AppError(422, "invalid_metadata", f"applies_to.{key} must be a string or list of strings")
     if not isinstance(meta.facts, list):
         raise AppError(422, "invalid_metadata", "facts must be a list")
     for fact in meta.facts:
@@ -129,8 +127,7 @@ async def _embed_chunks(
 def _identity(meta: SourceMetadata):
     return (
         func.lower(KnowledgeSource.title) == meta.title.strip().lower(),
-        func.coalesce(func.lower(KnowledgeSource.publisher), "")
-        == (meta.publisher or "").strip().lower(),
+        func.coalesce(func.lower(KnowledgeSource.publisher), "") == (meta.publisher or "").strip().lower(),
     )
 
 
@@ -154,21 +151,15 @@ async def ingest(
 
     previous = list(
         (
-            await db.execute(
-                select(KnowledgeSource).where(*_identity(meta)).order_by(KnowledgeSource.created_at)
-            )
+            await db.execute(select(KnowledgeSource).where(*_identity(meta)).order_by(KnowledgeSource.created_at))
         ).scalars()
     )
     for existing in previous:
         if existing.checksum == digest:
-            count = await db.scalar(
-                select(func.count()).where(RAGDocument.source_id == existing.id)
-            )
+            count = await db.scalar(select(func.count()).where(RAGDocument.source_id == existing.id))
             return IngestResult("unchanged", existing, int(count or 0))
 
-    chunks: list[Chunk] = chunk_document(
-        body, settings.knowledge_chunk_chars, settings.knowledge_chunk_overlap_chars
-    )
+    chunks: list[Chunk] = chunk_document(body, settings.knowledge_chunk_chars, settings.knowledge_chunk_overlap_chars)
     if not chunks:
         raise AppError(422, "empty_document", "The document has no content")
     if len(chunks) > settings.knowledge_max_chunks_per_source:
@@ -270,17 +261,13 @@ async def admit(
     return source
 
 
-async def revoke(
-    db: AsyncSession, source_id: uuid.UUID, actor_id: uuid.UUID | None
-) -> KnowledgeSource:
+async def revoke(db: AsyncSession, source_id: uuid.UUID, actor_id: uuid.UUID | None) -> KnowledgeSource:
     source = await get_source(db, source_id)
     source.admission_status = "revoked"
     await db.flush()
     from app.services import audit
 
-    await audit.record(
-        db, actor_id, "knowledge_revoke", "knowledge_source", source.id, {"title": source.title}
-    )
+    await audit.record(db, actor_id, "knowledge_revoke", "knowledge_source", source.id, {"title": source.title})
     return source
 
 
@@ -291,9 +278,7 @@ async def delete_source(db: AsyncSession, source_id: uuid.UUID, actor_id: uuid.U
     await db.execute(delete(KnowledgeSource).where(KnowledgeSource.id == source_id))
     from app.services import audit
 
-    await audit.record(
-        db, actor_id, "knowledge_delete", "knowledge_source", source_id, {"title": title}
-    )
+    await audit.record(db, actor_id, "knowledge_delete", "knowledge_source", source_id, {"title": title})
 
 
 async def reembed(
@@ -308,9 +293,7 @@ async def reembed(
     chunks = list(
         (
             await db.execute(
-                select(RAGDocument)
-                .where(RAGDocument.source_id == source_id)
-                .order_by(RAGDocument.chunk_index)
+                select(RAGDocument).where(RAGDocument.source_id == source_id).order_by(RAGDocument.chunk_index)
             )
         ).scalars()
     )
@@ -332,9 +315,7 @@ async def reembed(
     return source, len(chunks)
 
 
-async def chunk_stats(
-    db: AsyncSession, source_ids: list[uuid.UUID]
-) -> dict[uuid.UUID, tuple[int, list[str]]]:
+async def chunk_stats(db: AsyncSession, source_ids: list[uuid.UUID]) -> dict[uuid.UUID, tuple[int, list[str]]]:
     if not source_ids:
         return {}
     rows = await db.execute(

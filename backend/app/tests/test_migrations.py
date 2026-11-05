@@ -5,7 +5,6 @@ import os
 import uuid
 
 import pytest
-from alembic import command
 from alembic.autogenerate import compare_metadata
 from alembic.config import Config
 from alembic.runtime.migration import MigrationContext
@@ -13,6 +12,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.pool import NullPool
 
+from alembic import command
 from app.database import Base
 from app.tests.conftest import BACKEND_DIR, TEST_DATABASE_URL
 
@@ -119,7 +119,12 @@ def q(sql: str, **params):
 
 
 def test_products_converted_to_cents(upgraded):
-    rows = {r["sku"]: r for r in q("SELECT sku, price_cents, sale_price_cents, cost_price_cents, stock_quantity, fitment_scope FROM products")}
+    rows = {
+        r["sku"]: r
+        for r in q(
+            "SELECT sku, price_cents, sale_price_cents, cost_price_cents, stock_quantity, fitment_scope FROM products"
+        )
+    }
     assert rows["OIL-1"]["price_cents"] == 6290 and rows["OIL-1"]["sale_price_cents"] == 4995
     assert rows["OIL-1"]["cost_price_cents"] == 3800 and rows["OIL-1"]["fitment_scope"] == "specific"
     assert rows["PLUG-1"]["price_cents"] == 1235  # half-up
@@ -127,9 +132,13 @@ def test_products_converted_to_cents(upgraded):
     assert rows["PLUG-1"]["stock_quantity"] == 0  # clamped
     audit = q("SELECT action FROM audit_log")
     actions = {a["action"] for a in audit}
-    assert {"migration_clamp_negative_stock", "migration_remove_unscoped_fitment_rule",
-            "migration_remove_extra_crew_membership", "migration_drop_crew_wallet_balance",
-            "migration_remove_duplicate_checklist"} <= actions
+    assert {
+        "migration_clamp_negative_stock",
+        "migration_remove_unscoped_fitment_rule",
+        "migration_remove_extra_crew_membership",
+        "migration_drop_crew_wallet_balance",
+        "migration_remove_duplicate_checklist",
+    } <= actions
 
 
 def test_fitment_rules_become_unverified(upgraded):

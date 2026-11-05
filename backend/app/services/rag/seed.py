@@ -25,11 +25,7 @@ SYNTHETIC_LICENCE = "Synthetic test fixture (no third-party content)"
 def load_fixture(path: Path) -> tuple[SourceMetadata, str]:
     meta, body = parse_front_matter(path.read_text(encoding="utf-8"))
     source = SourceMetadata.from_mapping(meta)
-    if not (
-        source.is_synthetic
-        and source.publisher == SYNTHETIC_PUBLISHER
-        and source.licence == SYNTHETIC_LICENCE
-    ):
+    if not (source.is_synthetic and source.publisher == SYNTHETIC_PUBLISHER and source.licence == SYNTHETIC_LICENCE):
         raise AppError(422, "not_synthetic", f"{path.name} is not a synthetic fixture")
     return source, body
 
@@ -47,9 +43,7 @@ async def ingest_synthetic_corpus(
 ) -> list[IngestResult]:
     """Ingest (and optionally admit) the synthetic fixtures. Refused outside dev/test."""
     if not get_settings().is_local:
-        raise AppError(
-            409, "local_only", "Synthetic fixtures may only be ingested in development/test"
-        )
+        raise AppError(409, "local_only", "Synthetic fixtures may only be ingested in development/test")
     results: list[IngestResult] = []
     for path in paths or fixture_paths():
         meta, body = load_fixture(path)

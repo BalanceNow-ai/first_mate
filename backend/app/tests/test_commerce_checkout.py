@@ -34,9 +34,7 @@ from app.tests.test_commerce_support import (
 
 
 async def test_charged_total_is_sale_price_plus_server_shipping_minus_discount(client, customer):
-    p = await create_product(
-        price_cents=10000, sale_price_cents=7999, weight_grams=2000, stock_quantity=5
-    )
+    p = await create_product(price_cents=10000, sale_price_cents=7999, weight_grams=2000, stock_quantity=5)
     cart = await add(client, customer, p)
     assert cart["subtotal_cents"] == 7999
     ent = await seed_entitlement(customer.id, 1000)
@@ -48,9 +46,7 @@ async def test_charged_total_is_sale_price_plus_server_shipping_minus_discount(c
         "shipping_address": ADDRESS,
         "discount_entitlement_id": str(ent.id),
     }
-    preview = await client.post(
-        f"{API}/orders/checkout/preview", json=body, headers=customer.headers
-    )
+    preview = await client.post(f"{API}/orders/checkout/preview", json=body, headers=customer.headers)
     assert preview.status_code == 200, preview.text
     assert preview.json()["total_cents"] == 7999 - 1000 + 1290
 
@@ -64,11 +60,7 @@ async def test_charged_total_is_sale_price_plus_server_shipping_minus_discount(c
     )
     assert order["total_cents"] == 8289 == preview.json()["total_cents"]
     assert order["status"] == "pending_payment" and order["payment_status"] == "unpaid"
-    assert (
-        order["order_number"].startswith("HM-")
-        and order["can_cancel"]
-        and order["can_retry_payment"]
-    )
+    assert order["order_number"].startswith("HM-") and order["can_cancel"] and order["can_retry_payment"]
     item = order["items"][0]
     assert (item["list_price_cents"], item["unit_price_cents"], item["line_total_cents"]) == (
         10000,
@@ -124,9 +116,7 @@ async def test_click_and_collect_is_free_and_needs_no_quote(client, customer):
     await add(client, customer, p)
     q = await quote(client, customer, "courier")
     assert q.status_code == 422 and q.json()["code"] == "weight_unknown"
-    r = await checkout(
-        client, customer, {"delivery_type": "click_and_collect", "quote_id": order["id"]}
-    )
+    r = await checkout(client, customer, {"delivery_type": "click_and_collect", "quote_id": order["id"]})
     assert r.status_code == 422 and r.json()["code"] == "quote_not_applicable"
 
 
@@ -145,17 +135,11 @@ async def test_helm_dash_checkout_uses_quote_and_contact(client, customer):
     assert order["shipping_cents"] == q.json()["price_cents"]
     assert order["total_cents"] == 5000 + q.json()["price_cents"]
     hd = order["delivery"]["helm_dash"]
-    assert (
-        hd["vessel_name"] == "Sea Biscuit"
-        and hd["lat"] == -36.79
-        and hd["operating_area_id"] == "hauraki-gulf"
-    )
+    assert hd["vessel_name"] == "Sea Biscuit" and hd["lat"] == -36.79 and hd["operating_area_id"] == "hauraki-gulf"
     assert order["delivery"]["estimated_minutes"] == q.json()["estimated_minutes"]
 
 
-async def test_quote_must_be_owned_unexpired_unused_and_match_the_cart(
-    client, customer, other_customer
-):
+async def test_quote_must_be_owned_unexpired_unused_and_match_the_cart(client, customer, other_customer):
     p = await create_product(stock_quantity=20)
     p2 = await create_product(stock_quantity=20)
     await add(client, customer, p)
@@ -187,9 +171,7 @@ async def test_quote_must_be_owned_unexpired_unused_and_match_the_cart(
     r = await checkout(client, customer, body(hd["id"]))
     assert r.status_code == 422 and r.json()["code"] == "quote_type_mismatch"
     q = (await quote(client, customer)).json()
-    r = await checkout(
-        client, customer, body(q["id"], shipping_address={**ADDRESS, "postcode": "9016"})
-    )
+    r = await checkout(client, customer, body(q["id"], shipping_address={**ADDRESS, "postcode": "9016"}))
     assert r.status_code == 422 and r.json()["code"] == "quote_destination_mismatch"
     r = await checkout(client, customer, {"delivery_type": "courier", "quote_id": q["id"]})
     assert r.status_code == 422 and r.json()["code"] == "shipping_address_required"
@@ -204,18 +186,12 @@ async def test_quote_must_be_owned_unexpired_unused_and_match_the_cart(
     r = await checkout(client, customer, body(q["id"]))
     assert r.status_code == 409 and r.json()["code"] == "quote_used"
     async with async_session() as s:
-        used = (
-            await s.execute(
-                select(DeliveryQuote.used_by_order_id).where(DeliveryQuote.id == q["id"])
-            )
-        ).scalar_one()
+        used = (await s.execute(select(DeliveryQuote.used_by_order_id).where(DeliveryQuote.id == q["id"]))).scalar_one()
     assert used is not None
 
 
 async def test_dangerous_goods_restricted_to_configured_delivery_types(client, customer):
-    fuel = await create_product(
-        name="Outboard Fuel Additive 1L", dangerous_goods=True, weight_grams=1100
-    )
+    fuel = await create_product(name="Outboard Fuel Additive 1L", dangerous_goods=True, weight_grams=1100)
     rope = await create_product(name="Mooring Line", weight_grams=900)
     await add(client, customer, rope)
     q = (await quote(client, customer)).json()  # quoted before the DG item was added
@@ -248,18 +224,12 @@ async def test_idempotent_checkout_and_double_tap(client, customer):
     await add(client, customer, p, 1)
     key = idem()
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c2:
-        r1, r2 = await asyncio.gather(
-            checkout(client, customer, key=key), checkout(c2, customer, key=key)
-        )
+        r1, r2 = await asyncio.gather(checkout(client, customer, key=key), checkout(c2, customer, key=key))
     assert sorted([r1.status_code, r2.status_code]) == [200, 201]
     assert r1.json()["id"] == r2.json()["id"]
     assert await stock(p.id) == 2
     async with async_session() as s:
-        n = (
-            await s.execute(
-                select(func.count()).select_from(Order).where(Order.user_id == customer.id)
-            )
-        ).scalar_one()
+        n = (await s.execute(select(func.count()).select_from(Order).where(Order.user_id == customer.id))).scalar_one()
     assert n == 2
 
 
@@ -276,9 +246,7 @@ async def test_concurrent_last_item_exactly_one_wins(client):
     codes = sorted(r.status_code for r in results)
     assert codes == [201, 409], [r.text for r in results]
     loser = next(r for r in results if r.status_code == 409)
-    assert loser.json()["code"] == "insufficient_stock" and loser.json()["product_ids"] == [
-        str(p.id)
-    ]
+    assert loser.json()["code"] == "insufficient_stock" and loser.json()["product_ids"] == [str(p.id)]
     assert await stock(p.id) == 0
     async with async_session() as s:
         assert (await s.execute(select(func.count()).select_from(Order))).scalar_one() == 1
@@ -342,9 +310,7 @@ async def test_failed_checkout_rolls_back_everything(client, customer):
     assert await cart_quantities(customer.id) == {a.id: 2, b.id: 1}
     async with async_session() as s:
         assert (
-            await s.execute(
-                select(DeliveryQuote.used_by_order_id).where(DeliveryQuote.id == q["id"])
-            )
+            await s.execute(select(DeliveryQuote.used_by_order_id).where(DeliveryQuote.id == q["id"]))
         ).scalar_one() is None
         assert (await s.execute(select(func.count()).select_from(Order))).scalar_one() == 0
 
@@ -361,14 +327,10 @@ async def test_checkout_input_validation(client, customer, other_customer):
         headers = dict(customer.headers)
         if bad_key is not None:
             headers["Idempotency-Key"] = bad_key
-        r = await client.post(
-            f"{API}/orders/checkout", json={"delivery_type": "click_and_collect"}, headers=headers
-        )
+        r = await client.post(f"{API}/orders/checkout", json={"delivery_type": "click_and_collect"}, headers=headers)
         assert r.status_code == 400 and r.json()["code"] == "idempotency_key_required"
 
-    r = await checkout(
-        client, customer, {"delivery_type": "click_and_collect", "payment_method": "afterpay"}
-    )
+    r = await checkout(client, customer, {"delivery_type": "click_and_collect", "payment_method": "afterpay"})
     assert r.status_code == 422 and r.json()["code"] == "payment_method_unavailable"
     assert "Afterpay" in r.json()["detail"]
     r = await checkout(client, customer, {"delivery_type": "click_and_collect", "total_cents": 1})

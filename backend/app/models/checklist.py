@@ -18,9 +18,7 @@ class VoyageChecklist(Base):
     __tablename__ = "voyage_checklists"
     __table_args__ = (
         UniqueConstraint("vessel_id", "tier"),
-        CheckConstraint(
-            "tier IN ('grab_and_go','coastal_cruising','offshore_passage')", name="valid_tier"
-        ),
+        CheckConstraint("tier IN ('grab_and_go','coastal_cruising','offshore_passage')", name="valid_tier"),
     )
 
     id: Mapped[uuid.UUID] = uuid_pk()
@@ -32,8 +30,10 @@ class VoyageChecklist(Base):
     template_version: Mapped[str | None] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = created_at_col()
 
-    items: Mapped[list["ChecklistItem"]] = relationship(
-        "ChecklistItem", back_populates="checklist", cascade="all, delete-orphan",
+    items: Mapped[list[ChecklistItem]] = relationship(
+        "ChecklistItem",
+        back_populates="checklist",
+        cascade="all, delete-orphan",
         order_by="ChecklistItem.position",
     )
 
