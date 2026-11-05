@@ -19,7 +19,7 @@ void main() {
       final backend = fixtureBackend();
       final vessel = fixtureMap('vessel_create');
       backend.json('GET /vessels/${vessel['id']}', 200, vessel);
-      final app = await signedInApp(tester, backend: backend);
+      final app = await signedInApp(tester, backend: backend, size: const Size(600, 2000));
 
       app.go('/vessels');
       await app.settle();
@@ -117,7 +117,7 @@ void main() {
       expect(find.text(r'$74.90'), findsOneWidget);
       expect(find.text(r'$89.90'), findsOneWidget); // struck-through regular price
       expect(find.text('Out of stock'), findsOneWidget);
-      expect(find.text('1–4 of 4'), findsOneWidget);
+      expect(find.text('Showing 4 of 4'), findsOneWidget);
     });
 
     testWidgets('detail shows fitment reasons and adds to cart with server pricing', (tester) async {

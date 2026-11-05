@@ -1,0 +1,15 @@
+[
+  {
+    "id": "0362ed4e-bef3-4b55-b45e-b49dedd48a2f",
+    "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+    "equipment_id": null,
+    "service_type": "100-hour service",
+    "performed_on": "2026-09-14",
+    "engine_hours": 100,
+    "provider_name": "Gulf Marine",
+    "cost_cents": 46500,
+    "currency": "NZD",
+    "notes": "Plugs and impeller",
+    "created_at": "2026-11-05T07:43:05.281706Z"
+  }
+]

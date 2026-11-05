@@ -1,0 +1,3429 @@
+{
+  "vessel": {
+    "id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+    "label": "Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)"
+  },
+  "generated": true,
+  "template_version": "2026.11-1",
+  "disclaimer": "This is a practical spares list to help you prepare. It is NOT a certified safety-equipment list or a regulatory-compliance assessment. Check the safety equipment legally required for your vessel and trip with Maritime NZ and your local regional council.",
+  "tiers": [
+    {
+      "tier": "grab_and_go",
+      "name": "Grab & Go Kit (day trips)",
+      "checklist_id": "5411f7ce-25d4-4898-a42b-5425feead70a",
+      "items": [
+        {
+          "id": "fc18e526-72a5-48f7-8a2d-8aa8f1b5f0c3",
+          "template_key": "g_propeller",
+          "introduced_in": "grab_and_go",
+          "position": 0,
+          "system": "Engine",
+          "item_name": "Spare propeller with prop nut and split pin",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "propeller",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "unlinked",
+          "product": null,
+          "fitment": null,
+          "alternatives": [],
+          "search_hint": {
+            "q": "Spare propeller with prop nut and split pin",
+            "part_role": "propeller",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "path": "/api/v1/search/products?vessel_id=39aad79c-e1ce-4353-acba-6ed76c623647&part_role=propeller"
+          },
+          "warning": null
+        },
+        {
+          "id": "6bba0e15-00dd-47f6-ac2b-011dad35435a",
+          "template_key": "g_fuel_filter",
+          "introduced_in": "grab_and_go",
+          "position": 1,
+          "system": "Engine",
+          "item_name": "Spare engine fuel filter (primary)",
+          "description": "2 each",
+          "quantity": 2,
+          "part_role": "fuel_filter",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "verified_fit",
+          "product": {
+            "id": "678aefb3-1dee-4ec1-b1d8-2452afb937e7",
+            "sku": "SYN-FF-150",
+            "name": "Primary fuel filter — Yamaha F150 (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Primary fuel filter — Yamaha F150 (synthetic)",
+            "brand": "FixtureParts",
+            "category": "Engine Parts",
+            "sub_category": "Fuel System",
+            "currency": "NZD",
+            "price_cents": 3990,
+            "sale_price_cents": null,
+            "effective_price_cents": 3990,
+            "on_sale": false,
+            "stock_quantity": 38,
+            "in_stock": true,
+            "weight_grams": 180,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-FF-150"
+            ],
+            "part_role": "fuel_filter",
+            "fitment_scope": "specific",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.293204Z",
+            "updated_at": "2026-11-05T07:12:52.060699Z",
+            "fitment": {
+              "status": "verified_fit",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "engine matches verified fitment"
+              ],
+              "matched_rule_ids": [
+                "5452e88c-9076-485d-b385-d16517fa005e"
+              ]
+            }
+          },
+          "fitment": {
+            "status": "verified_fit",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "engine matches verified fitment"
+            ],
+            "matched_rule_ids": [
+              "5452e88c-9076-485d-b385-d16517fa005e"
+            ]
+          },
+          "alternatives": [
+            {
+              "id": "02e268f5-fe29-4168-bf70-75941ab6518d",
+              "sku": "SYN-FF-150-PREM",
+              "name": "Premium fuel filter — Yamaha F150 (synthetic)",
+              "description": "Synthetic test product — not a real catalogue item. Premium fuel filter — Yamaha F150 (synthetic)",
+              "brand": "FixtureMarine",
+              "category": "Engine Parts",
+              "sub_category": "Fuel System",
+              "currency": "NZD",
+              "price_cents": 5490,
+              "sale_price_cents": null,
+              "effective_price_cents": 5490,
+              "on_sale": false,
+              "stock_quantity": 6,
+              "in_stock": true,
+              "weight_grams": 200,
+              "images": [],
+              "specifications": {
+                "synthetic": true
+              },
+              "oem_part_numbers": [
+                "SYN-FF-150-PREM"
+              ],
+              "part_role": "fuel_filter",
+              "fitment_scope": "specific",
+              "dangerous_goods": false,
+              "is_active": true,
+              "created_at": "2026-11-05T07:10:53.296328Z",
+              "updated_at": "2026-11-05T07:10:53.296330Z",
+              "fitment": {
+                "status": "verified_fit",
+                "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+                "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+                "reasons": [
+                  "engine matches verified fitment"
+                ],
+                "matched_rule_ids": [
+                  "f3e6b6fc-7964-499f-9bf9-aec3d714bb18"
+                ]
+              }
+            }
+          ],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "d0230f03-b90c-4c22-818b-a3eef8c6fa24",
+          "template_key": "g_spark_plugs",
+          "introduced_in": "grab_and_go",
+          "position": 2,
+          "system": "Engine",
+          "item_name": "Spare spark plugs",
+          "description": "1 set",
+          "quantity": 1,
+          "part_role": "spark_plug",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "verified_fit",
+          "product": {
+            "id": "c91856bb-23c1-4d39-a471-e6a52808e1f9",
+            "sku": "SYN-PLUG-150",
+            "name": "Spark plug set — Yamaha F150 (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Spark plug set — Yamaha F150 (synthetic)",
+            "brand": "FixtureParts",
+            "category": "Engine Parts",
+            "sub_category": "Ignition",
+            "currency": "NZD",
+            "price_cents": 8990,
+            "sale_price_cents": null,
+            "effective_price_cents": 8990,
+            "on_sale": false,
+            "stock_quantity": 24,
+            "in_stock": true,
+            "weight_grams": 240,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-PLUG-150"
+            ],
+            "part_role": "spark_plug",
+            "fitment_scope": "specific",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.280244Z",
+            "updated_at": "2026-11-05T07:12:52.063165Z",
+            "fitment": {
+              "status": "verified_fit",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "engine matches verified fitment"
+              ],
+              "matched_rule_ids": [
+                "15f7c347-07c9-4583-b5dc-545eb5f84275"
+              ]
+            }
+          },
+          "fitment": {
+            "status": "verified_fit",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "engine matches verified fitment"
+            ],
+            "matched_rule_ids": [
+              "15f7c347-07c9-4583-b5dc-545eb5f84275"
+            ]
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "a9f8abc5-c508-4eb8-98bf-ef7b266a6dc4",
+          "template_key": "g_kill_switch",
+          "introduced_in": "grab_and_go",
+          "position": 3,
+          "system": "Engine",
+          "item_name": "Spare kill switch lanyard",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "kill_switch_lanyard",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "unlinked",
+          "product": null,
+          "fitment": null,
+          "alternatives": [],
+          "search_hint": {
+            "q": "Spare kill switch lanyard",
+            "part_role": "kill_switch_lanyard",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "path": "/api/v1/search/products?vessel_id=39aad79c-e1ce-4353-acba-6ed76c623647&part_role=kill_switch_lanyard"
+          },
+          "warning": null
+        },
+        {
+          "id": "466342cb-987d-41ec-9908-53d94afec165",
+          "template_key": "g_nav_bulbs",
+          "introduced_in": "grab_and_go",
+          "position": 4,
+          "system": "Electrical",
+          "item_name": "Spare navigation light bulbs (if not LED)",
+          "description": "1 set",
+          "quantity": 1,
+          "part_role": "nav_light_bulb",
+          "applicability": "if_fitted",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "unlinked",
+          "product": null,
+          "fitment": null,
+          "alternatives": [],
+          "search_hint": {
+            "q": "Spare navigation light bulbs (if not LED)",
+            "part_role": "nav_light_bulb",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "path": "/api/v1/search/products?vessel_id=39aad79c-e1ce-4353-acba-6ed76c623647&part_role=nav_light_bulb"
+          },
+          "warning": null
+        },
+        {
+          "id": "6648397a-d2e8-4952-a487-e0482cd7e803",
+          "template_key": "g_fuses",
+          "introduced_in": "grab_and_go",
+          "position": 5,
+          "system": "Electrical",
+          "item_name": "Assorted fuses (5A, 10A, 15A)",
+          "description": "1 pack",
+          "quantity": 1,
+          "part_role": "fuse_assortment",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "aacae832-25d4-42a2-94c4-df3335ce4190",
+            "sku": "SYN-FUSE-ASST",
+            "name": "Blade fuse assortment 5/10/15 A (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Blade fuse assortment 5/10/15 A (synthetic)",
+            "brand": "FixtureElec",
+            "category": "Electrical",
+            "sub_category": "Fuses",
+            "currency": "NZD",
+            "price_cents": 1290,
+            "sale_price_cents": null,
+            "effective_price_cents": 1290,
+            "on_sale": false,
+            "stock_quantity": 49,
+            "in_stock": true,
+            "weight_grams": 90,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-FUSE-ASST"
+            ],
+            "part_role": "fuse_assortment",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.334130Z",
+            "updated_at": "2026-11-05T07:12:52.062419Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "2645dc0b-fd8c-43f8-a7ea-79e0ce234cb3",
+          "template_key": "g_duct_tape",
+          "introduced_in": "grab_and_go",
+          "position": 6,
+          "system": "General",
+          "item_name": "Duct tape",
+          "description": "1 roll",
+          "quantity": 1,
+          "part_role": "duct_tape",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "739f5df1-c546-4d3a-a8ad-4e90fc4d467d",
+            "sku": "SYN-DUCT-TAPE",
+            "name": "Marine duct tape 25 m (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Marine duct tape 25 m (synthetic)",
+            "brand": "FixtureGeneral",
+            "category": "General",
+            "sub_category": "Repair",
+            "currency": "NZD",
+            "price_cents": 1490,
+            "sale_price_cents": 1190,
+            "effective_price_cents": 1190,
+            "on_sale": true,
+            "stock_quantity": 77,
+            "in_stock": true,
+            "weight_grams": 350,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-DUCT-TAPE"
+            ],
+            "part_role": "duct_tape",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.335712Z",
+            "updated_at": "2026-11-05T07:27:27.487586Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "d9d11a16-e475-4edf-a5d5-b1f6e8092695",
+          "template_key": "g_zip_ties",
+          "introduced_in": "grab_and_go",
+          "position": 7,
+          "system": "General",
+          "item_name": "Zip ties (assorted sizes)",
+          "description": "1 pack",
+          "quantity": 1,
+          "part_role": "zip_ties",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "480aabd1-b340-4025-95f7-b5d8bdc6ff71",
+            "sku": "SYN-ZIP-TIES",
+            "name": "UV-stable zip ties, assorted 200 pack (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. UV-stable zip ties, assorted 200 pack (synthetic)",
+            "brand": "FixtureGeneral",
+            "category": "General",
+            "sub_category": "Repair",
+            "currency": "NZD",
+            "price_cents": 990,
+            "sale_price_cents": null,
+            "effective_price_cents": 990,
+            "on_sale": false,
+            "stock_quantity": 89,
+            "in_stock": true,
+            "weight_grams": 300,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-ZIP-TIES"
+            ],
+            "part_role": "zip_ties",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.337120Z",
+            "updated_at": "2026-11-05T07:26:27.016671Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "4e6fb0a9-e259-473e-887c-492b863b4d67",
+          "template_key": "g_hose_clamps",
+          "introduced_in": "grab_and_go",
+          "position": 8,
+          "system": "General",
+          "item_name": "Stainless steel hose clamps (assorted sizes)",
+          "description": "1 pack",
+          "quantity": 1,
+          "part_role": "hose_clamp_assortment",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "56419b8e-0126-4b73-8a9a-3134820c8739",
+            "sku": "SYN-HOSE-CLAMP",
+            "name": "316 stainless hose clamp assortment (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. 316 stainless hose clamp assortment (synthetic)",
+            "brand": "FixtureGeneral",
+            "category": "General",
+            "sub_category": "Hardware",
+            "currency": "NZD",
+            "price_cents": 2490,
+            "sale_price_cents": null,
+            "effective_price_cents": 2490,
+            "on_sale": false,
+            "stock_quantity": 34,
+            "in_stock": true,
+            "weight_grams": 400,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-HOSE-CLAMP"
+            ],
+            "part_role": "hose_clamp_assortment",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.338362Z",
+            "updated_at": "2026-11-05T07:12:52.059928Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "6854d43d-08b7-4eb5-b977-8232bfcd84f0",
+          "template_key": "g_bungs",
+          "introduced_in": "grab_and_go",
+          "position": 9,
+          "system": "General",
+          "item_name": "Emergency wooden bungs (tapered)",
+          "description": "1 set",
+          "quantity": 1,
+          "part_role": "wooden_bungs",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "0199c619-4fdf-410c-8cc8-557ad5d6cef0",
+            "sku": "SYN-BUNGS",
+            "name": "Tapered softwood emergency bung set (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Tapered softwood emergency bung set (synthetic)",
+            "brand": "FixtureGeneral",
+            "category": "Safety",
+            "sub_category": "Damage Control",
+            "currency": "NZD",
+            "price_cents": 1990,
+            "sale_price_cents": null,
+            "effective_price_cents": 1990,
+            "on_sale": false,
+            "stock_quantity": 24,
+            "in_stock": true,
+            "weight_grams": 450,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-BUNGS"
+            ],
+            "part_role": "wooden_bungs",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.340335Z",
+            "updated_at": "2026-11-05T07:12:52.056572Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "8b2be77e-cd1f-4057-90c6-a123e8019803",
+          "template_key": "g_tools",
+          "introduced_in": "grab_and_go",
+          "position": 10,
+          "system": "Tools",
+          "item_name": "Shifting spanner, pliers, screwdriver set, prop spanner, spark plug spanner",
+          "description": "1 kit",
+          "quantity": 1,
+          "part_role": "basic_toolkit",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "19aeef46-4547-4c19-826f-556124ce5095",
+            "sku": "SYN-TOOLKIT-BASIC",
+            "name": "Grab-bag basic tool kit (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Grab-bag basic tool kit (synthetic)",
+            "brand": "FixtureTools",
+            "category": "Tools",
+            "sub_category": "Kits",
+            "currency": "NZD",
+            "price_cents": 8990,
+            "sale_price_cents": null,
+            "effective_price_cents": 8990,
+            "on_sale": false,
+            "stock_quantity": 9,
+            "in_stock": true,
+            "weight_grams": 2100,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-TOOLKIT-BASIC"
+            ],
+            "part_role": "basic_toolkit",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.342408Z",
+            "updated_at": "2026-11-05T07:12:52.058210Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        }
+      ],
+      "total": 11,
+      "checked": 0,
+      "unchecked_linked": 8
+    },
+    {
+      "tier": "coastal_cruising",
+      "name": "Coastal Cruising Kit (weekend & multi-day trips)",
+      "checklist_id": "2ed6019c-9207-4523-9663-58935eabf204",
+      "items": [
+        {
+          "id": "fc18e526-72a5-48f7-8a2d-8aa8f1b5f0c3",
+          "template_key": "g_propeller",
+          "introduced_in": "grab_and_go",
+          "position": 0,
+          "system": "Engine",
+          "item_name": "Spare propeller with prop nut and split pin",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "propeller",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "unlinked",
+          "product": null,
+          "fitment": null,
+          "alternatives": [],
+          "search_hint": {
+            "q": "Spare propeller with prop nut and split pin",
+            "part_role": "propeller",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "path": "/api/v1/search/products?vessel_id=39aad79c-e1ce-4353-acba-6ed76c623647&part_role=propeller"
+          },
+          "warning": null
+        },
+        {
+          "id": "6bba0e15-00dd-47f6-ac2b-011dad35435a",
+          "template_key": "g_fuel_filter",
+          "introduced_in": "grab_and_go",
+          "position": 1,
+          "system": "Engine",
+          "item_name": "Spare engine fuel filter (primary)",
+          "description": "2 each",
+          "quantity": 2,
+          "part_role": "fuel_filter",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "verified_fit",
+          "product": {
+            "id": "678aefb3-1dee-4ec1-b1d8-2452afb937e7",
+            "sku": "SYN-FF-150",
+            "name": "Primary fuel filter — Yamaha F150 (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Primary fuel filter — Yamaha F150 (synthetic)",
+            "brand": "FixtureParts",
+            "category": "Engine Parts",
+            "sub_category": "Fuel System",
+            "currency": "NZD",
+            "price_cents": 3990,
+            "sale_price_cents": null,
+            "effective_price_cents": 3990,
+            "on_sale": false,
+            "stock_quantity": 38,
+            "in_stock": true,
+            "weight_grams": 180,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-FF-150"
+            ],
+            "part_role": "fuel_filter",
+            "fitment_scope": "specific",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.293204Z",
+            "updated_at": "2026-11-05T07:12:52.060699Z",
+            "fitment": {
+              "status": "verified_fit",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "engine matches verified fitment"
+              ],
+              "matched_rule_ids": [
+                "5452e88c-9076-485d-b385-d16517fa005e"
+              ]
+            }
+          },
+          "fitment": {
+            "status": "verified_fit",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "engine matches verified fitment"
+            ],
+            "matched_rule_ids": [
+              "5452e88c-9076-485d-b385-d16517fa005e"
+            ]
+          },
+          "alternatives": [
+            {
+              "id": "02e268f5-fe29-4168-bf70-75941ab6518d",
+              "sku": "SYN-FF-150-PREM",
+              "name": "Premium fuel filter — Yamaha F150 (synthetic)",
+              "description": "Synthetic test product — not a real catalogue item. Premium fuel filter — Yamaha F150 (synthetic)",
+              "brand": "FixtureMarine",
+              "category": "Engine Parts",
+              "sub_category": "Fuel System",
+              "currency": "NZD",
+              "price_cents": 5490,
+              "sale_price_cents": null,
+              "effective_price_cents": 5490,
+              "on_sale": false,
+              "stock_quantity": 6,
+              "in_stock": true,
+              "weight_grams": 200,
+              "images": [],
+              "specifications": {
+                "synthetic": true
+              },
+              "oem_part_numbers": [
+                "SYN-FF-150-PREM"
+              ],
+              "part_role": "fuel_filter",
+              "fitment_scope": "specific",
+              "dangerous_goods": false,
+              "is_active": true,
+              "created_at": "2026-11-05T07:10:53.296328Z",
+              "updated_at": "2026-11-05T07:10:53.296330Z",
+              "fitment": {
+                "status": "verified_fit",
+                "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+                "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+                "reasons": [
+                  "engine matches verified fitment"
+                ],
+                "matched_rule_ids": [
+                  "f3e6b6fc-7964-499f-9bf9-aec3d714bb18"
+                ]
+              }
+            }
+          ],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "d0230f03-b90c-4c22-818b-a3eef8c6fa24",
+          "template_key": "g_spark_plugs",
+          "introduced_in": "grab_and_go",
+          "position": 2,
+          "system": "Engine",
+          "item_name": "Spare spark plugs",
+          "description": "1 set",
+          "quantity": 1,
+          "part_role": "spark_plug",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "verified_fit",
+          "product": {
+            "id": "c91856bb-23c1-4d39-a471-e6a52808e1f9",
+            "sku": "SYN-PLUG-150",
+            "name": "Spark plug set — Yamaha F150 (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Spark plug set — Yamaha F150 (synthetic)",
+            "brand": "FixtureParts",
+            "category": "Engine Parts",
+            "sub_category": "Ignition",
+            "currency": "NZD",
+            "price_cents": 8990,
+            "sale_price_cents": null,
+            "effective_price_cents": 8990,
+            "on_sale": false,
+            "stock_quantity": 24,
+            "in_stock": true,
+            "weight_grams": 240,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-PLUG-150"
+            ],
+            "part_role": "spark_plug",
+            "fitment_scope": "specific",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.280244Z",
+            "updated_at": "2026-11-05T07:12:52.063165Z",
+            "fitment": {
+              "status": "verified_fit",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "engine matches verified fitment"
+              ],
+              "matched_rule_ids": [
+                "15f7c347-07c9-4583-b5dc-545eb5f84275"
+              ]
+            }
+          },
+          "fitment": {
+            "status": "verified_fit",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "engine matches verified fitment"
+            ],
+            "matched_rule_ids": [
+              "15f7c347-07c9-4583-b5dc-545eb5f84275"
+            ]
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "a9f8abc5-c508-4eb8-98bf-ef7b266a6dc4",
+          "template_key": "g_kill_switch",
+          "introduced_in": "grab_and_go",
+          "position": 3,
+          "system": "Engine",
+          "item_name": "Spare kill switch lanyard",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "kill_switch_lanyard",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "unlinked",
+          "product": null,
+          "fitment": null,
+          "alternatives": [],
+          "search_hint": {
+            "q": "Spare kill switch lanyard",
+            "part_role": "kill_switch_lanyard",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "path": "/api/v1/search/products?vessel_id=39aad79c-e1ce-4353-acba-6ed76c623647&part_role=kill_switch_lanyard"
+          },
+          "warning": null
+        },
+        {
+          "id": "466342cb-987d-41ec-9908-53d94afec165",
+          "template_key": "g_nav_bulbs",
+          "introduced_in": "grab_and_go",
+          "position": 4,
+          "system": "Electrical",
+          "item_name": "Spare navigation light bulbs (if not LED)",
+          "description": "1 set",
+          "quantity": 1,
+          "part_role": "nav_light_bulb",
+          "applicability": "if_fitted",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "unlinked",
+          "product": null,
+          "fitment": null,
+          "alternatives": [],
+          "search_hint": {
+            "q": "Spare navigation light bulbs (if not LED)",
+            "part_role": "nav_light_bulb",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "path": "/api/v1/search/products?vessel_id=39aad79c-e1ce-4353-acba-6ed76c623647&part_role=nav_light_bulb"
+          },
+          "warning": null
+        },
+        {
+          "id": "6648397a-d2e8-4952-a487-e0482cd7e803",
+          "template_key": "g_fuses",
+          "introduced_in": "grab_and_go",
+          "position": 5,
+          "system": "Electrical",
+          "item_name": "Assorted fuses (5A, 10A, 15A)",
+          "description": "1 pack",
+          "quantity": 1,
+          "part_role": "fuse_assortment",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "aacae832-25d4-42a2-94c4-df3335ce4190",
+            "sku": "SYN-FUSE-ASST",
+            "name": "Blade fuse assortment 5/10/15 A (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Blade fuse assortment 5/10/15 A (synthetic)",
+            "brand": "FixtureElec",
+            "category": "Electrical",
+            "sub_category": "Fuses",
+            "currency": "NZD",
+            "price_cents": 1290,
+            "sale_price_cents": null,
+            "effective_price_cents": 1290,
+            "on_sale": false,
+            "stock_quantity": 49,
+            "in_stock": true,
+            "weight_grams": 90,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-FUSE-ASST"
+            ],
+            "part_role": "fuse_assortment",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.334130Z",
+            "updated_at": "2026-11-05T07:12:52.062419Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "2645dc0b-fd8c-43f8-a7ea-79e0ce234cb3",
+          "template_key": "g_duct_tape",
+          "introduced_in": "grab_and_go",
+          "position": 6,
+          "system": "General",
+          "item_name": "Duct tape",
+          "description": "1 roll",
+          "quantity": 1,
+          "part_role": "duct_tape",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "739f5df1-c546-4d3a-a8ad-4e90fc4d467d",
+            "sku": "SYN-DUCT-TAPE",
+            "name": "Marine duct tape 25 m (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Marine duct tape 25 m (synthetic)",
+            "brand": "FixtureGeneral",
+            "category": "General",
+            "sub_category": "Repair",
+            "currency": "NZD",
+            "price_cents": 1490,
+            "sale_price_cents": 1190,
+            "effective_price_cents": 1190,
+            "on_sale": true,
+            "stock_quantity": 77,
+            "in_stock": true,
+            "weight_grams": 350,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-DUCT-TAPE"
+            ],
+            "part_role": "duct_tape",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.335712Z",
+            "updated_at": "2026-11-05T07:27:27.487586Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "d9d11a16-e475-4edf-a5d5-b1f6e8092695",
+          "template_key": "g_zip_ties",
+          "introduced_in": "grab_and_go",
+          "position": 7,
+          "system": "General",
+          "item_name": "Zip ties (assorted sizes)",
+          "description": "1 pack",
+          "quantity": 1,
+          "part_role": "zip_ties",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "480aabd1-b340-4025-95f7-b5d8bdc6ff71",
+            "sku": "SYN-ZIP-TIES",
+            "name": "UV-stable zip ties, assorted 200 pack (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. UV-stable zip ties, assorted 200 pack (synthetic)",
+            "brand": "FixtureGeneral",
+            "category": "General",
+            "sub_category": "Repair",
+            "currency": "NZD",
+            "price_cents": 990,
+            "sale_price_cents": null,
+            "effective_price_cents": 990,
+            "on_sale": false,
+            "stock_quantity": 89,
+            "in_stock": true,
+            "weight_grams": 300,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-ZIP-TIES"
+            ],
+            "part_role": "zip_ties",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.337120Z",
+            "updated_at": "2026-11-05T07:26:27.016671Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "4e6fb0a9-e259-473e-887c-492b863b4d67",
+          "template_key": "g_hose_clamps",
+          "introduced_in": "grab_and_go",
+          "position": 8,
+          "system": "General",
+          "item_name": "Stainless steel hose clamps (assorted sizes)",
+          "description": "1 pack",
+          "quantity": 1,
+          "part_role": "hose_clamp_assortment",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "56419b8e-0126-4b73-8a9a-3134820c8739",
+            "sku": "SYN-HOSE-CLAMP",
+            "name": "316 stainless hose clamp assortment (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. 316 stainless hose clamp assortment (synthetic)",
+            "brand": "FixtureGeneral",
+            "category": "General",
+            "sub_category": "Hardware",
+            "currency": "NZD",
+            "price_cents": 2490,
+            "sale_price_cents": null,
+            "effective_price_cents": 2490,
+            "on_sale": false,
+            "stock_quantity": 34,
+            "in_stock": true,
+            "weight_grams": 400,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-HOSE-CLAMP"
+            ],
+            "part_role": "hose_clamp_assortment",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.338362Z",
+            "updated_at": "2026-11-05T07:12:52.059928Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "6854d43d-08b7-4eb5-b977-8232bfcd84f0",
+          "template_key": "g_bungs",
+          "introduced_in": "grab_and_go",
+          "position": 9,
+          "system": "General",
+          "item_name": "Emergency wooden bungs (tapered)",
+          "description": "1 set",
+          "quantity": 1,
+          "part_role": "wooden_bungs",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "0199c619-4fdf-410c-8cc8-557ad5d6cef0",
+            "sku": "SYN-BUNGS",
+            "name": "Tapered softwood emergency bung set (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Tapered softwood emergency bung set (synthetic)",
+            "brand": "FixtureGeneral",
+            "category": "Safety",
+            "sub_category": "Damage Control",
+            "currency": "NZD",
+            "price_cents": 1990,
+            "sale_price_cents": null,
+            "effective_price_cents": 1990,
+            "on_sale": false,
+            "stock_quantity": 24,
+            "in_stock": true,
+            "weight_grams": 450,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-BUNGS"
+            ],
+            "part_role": "wooden_bungs",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.340335Z",
+            "updated_at": "2026-11-05T07:12:52.056572Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "8b2be77e-cd1f-4057-90c6-a123e8019803",
+          "template_key": "g_tools",
+          "introduced_in": "grab_and_go",
+          "position": 10,
+          "system": "Tools",
+          "item_name": "Shifting spanner, pliers, screwdriver set, prop spanner, spark plug spanner",
+          "description": "1 kit",
+          "quantity": 1,
+          "part_role": "basic_toolkit",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "19aeef46-4547-4c19-826f-556124ce5095",
+            "sku": "SYN-TOOLKIT-BASIC",
+            "name": "Grab-bag basic tool kit (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Grab-bag basic tool kit (synthetic)",
+            "brand": "FixtureTools",
+            "category": "Tools",
+            "sub_category": "Kits",
+            "currency": "NZD",
+            "price_cents": 8990,
+            "sale_price_cents": null,
+            "effective_price_cents": 8990,
+            "on_sale": false,
+            "stock_quantity": 9,
+            "in_stock": true,
+            "weight_grams": 2100,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-TOOLKIT-BASIC"
+            ],
+            "part_role": "basic_toolkit",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.342408Z",
+            "updated_at": "2026-11-05T07:12:52.058210Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "40bd8629-747b-4b64-9aa0-fc4611d8daf2",
+          "template_key": "c_impeller",
+          "introduced_in": "coastal_cruising",
+          "position": 0,
+          "system": "Engine",
+          "item_name": "Spare water pump impeller & gasket",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "impeller",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "verified_fit",
+          "product": {
+            "id": "a5cfd876-4685-4316-9db1-bad1688d7df8",
+            "sku": "SYN-IMP-150",
+            "name": "Water pump impeller kit — Yamaha F150 (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Water pump impeller kit — Yamaha F150 (synthetic)",
+            "brand": "FixtureParts",
+            "category": "Engine Parts",
+            "sub_category": "Cooling",
+            "currency": "NZD",
+            "price_cents": 6490,
+            "sale_price_cents": 5490,
+            "effective_price_cents": 5490,
+            "on_sale": true,
+            "stock_quantity": 12,
+            "in_stock": true,
+            "weight_grams": 150,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-IMP-150"
+            ],
+            "part_role": "impeller",
+            "fitment_scope": "specific",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.302795Z",
+            "updated_at": "2026-11-05T07:10:53.302797Z",
+            "fitment": {
+              "status": "verified_fit",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "engine matches verified fitment"
+              ],
+              "matched_rule_ids": [
+                "537efa5b-9cb3-404a-aef1-5b647c6614c6"
+              ]
+            }
+          },
+          "fitment": {
+            "status": "verified_fit",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "engine matches verified fitment"
+            ],
+            "matched_rule_ids": [
+              "537efa5b-9cb3-404a-aef1-5b647c6614c6"
+            ]
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "9f4a330e-8232-4578-9b2c-ff02a1b04bb7",
+          "template_key": "c_thermostat",
+          "introduced_in": "coastal_cruising",
+          "position": 1,
+          "system": "Engine",
+          "item_name": "Spare thermostat & gasket",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "thermostat",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "verified_fit",
+          "product": {
+            "id": "b46bb996-1a3f-4448-bce2-00d9249684a5",
+            "sku": "SYN-THERM-150",
+            "name": "Thermostat & gasket — Yamaha F150 (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Thermostat & gasket — Yamaha F150 (synthetic)",
+            "brand": "FixtureParts",
+            "category": "Engine Parts",
+            "sub_category": "Cooling",
+            "currency": "NZD",
+            "price_cents": 7990,
+            "sale_price_cents": null,
+            "effective_price_cents": 7990,
+            "on_sale": false,
+            "stock_quantity": 4,
+            "in_stock": true,
+            "weight_grams": 120,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-THERM-150"
+            ],
+            "part_role": "thermostat",
+            "fitment_scope": "specific",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.314612Z",
+            "updated_at": "2026-11-05T07:10:53.314615Z",
+            "fitment": {
+              "status": "verified_fit",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "engine matches verified fitment"
+              ],
+              "matched_rule_ids": [
+                "8b7a4ce7-781d-48e9-b66f-927459f08863"
+              ]
+            }
+          },
+          "fitment": {
+            "status": "verified_fit",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "engine matches verified fitment"
+            ],
+            "matched_rule_ids": [
+              "8b7a4ce7-781d-48e9-b66f-927459f08863"
+            ]
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "3d62a102-c45c-464d-aa8e-7852a52d4f9c",
+          "template_key": "c_belt",
+          "introduced_in": "coastal_cruising",
+          "position": 2,
+          "system": "Engine",
+          "item_name": "Spare alternator / serpentine belt",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "drive_belt",
+          "applicability": "if_fitted",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "unlinked",
+          "product": null,
+          "fitment": null,
+          "alternatives": [],
+          "search_hint": {
+            "q": "Spare alternator / serpentine belt",
+            "part_role": "drive_belt",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "path": "/api/v1/search/products?vessel_id=39aad79c-e1ce-4353-acba-6ed76c623647&part_role=drive_belt"
+          },
+          "warning": null
+        },
+        {
+          "id": "4de743c7-f58e-4f8d-a6f3-8d5636270ff9",
+          "template_key": "c_engine_oil",
+          "introduced_in": "coastal_cruising",
+          "position": 3,
+          "system": "Engine",
+          "item_name": "Engine oil (1 L top-up)",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "engine_oil",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "verified_fit",
+          "product": {
+            "id": "9653e8ef-7cef-40cf-9b5d-bce0dff70dbc",
+            "sku": "SYN-OIL-150",
+            "name": "4-stroke outboard oil 1 L — for Yamaha F150 (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. 4-stroke outboard oil 1 L — for Yamaha F150 (synthetic)",
+            "brand": "FixtureLube",
+            "category": "Engine Parts",
+            "sub_category": "Oil & Lubricants",
+            "currency": "NZD",
+            "price_cents": 2490,
+            "sale_price_cents": null,
+            "effective_price_cents": 2490,
+            "on_sale": false,
+            "stock_quantity": 60,
+            "in_stock": true,
+            "weight_grams": 950,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-OIL-150"
+            ],
+            "part_role": "engine_oil",
+            "fitment_scope": "specific",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.308969Z",
+            "updated_at": "2026-11-05T07:26:17.990750Z",
+            "fitment": {
+              "status": "verified_fit",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "engine matches verified fitment"
+              ],
+              "matched_rule_ids": [
+                "2b041064-d8ba-4645-ad29-7d27576dedbd"
+              ]
+            }
+          },
+          "fitment": {
+            "status": "verified_fit",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "engine matches verified fitment"
+            ],
+            "matched_rule_ids": [
+              "2b041064-d8ba-4645-ad29-7d27576dedbd"
+            ]
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "8a9992c0-5b02-4c42-94e8-93fc4fdfb4ff",
+          "template_key": "c_bilge_pump",
+          "introduced_in": "coastal_cruising",
+          "position": 4,
+          "system": "Plumbing",
+          "item_name": "Spare bilge pump (cartridge or complete)",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "bilge_pump",
+          "applicability": "if_fitted",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "unlinked",
+          "product": null,
+          "fitment": null,
+          "alternatives": [],
+          "search_hint": {
+            "q": "Spare bilge pump (cartridge or complete)",
+            "part_role": "bilge_pump",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "path": "/api/v1/search/products?vessel_id=39aad79c-e1ce-4353-acba-6ed76c623647&part_role=bilge_pump"
+          },
+          "warning": null
+        },
+        {
+          "id": "5d52fddf-753b-44ce-8a21-7b455a94031d",
+          "template_key": "c_battery_terminals",
+          "introduced_in": "coastal_cruising",
+          "position": 5,
+          "system": "Electrical",
+          "item_name": "Spare battery terminals",
+          "description": "1 set",
+          "quantity": 1,
+          "part_role": "battery_terminal",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "5fad4047-ce18-4f53-9187-3cd9011e697b",
+            "sku": "SYN-BATT-TERM",
+            "name": "Marine battery terminal pair (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Marine battery terminal pair (synthetic)",
+            "brand": "FixtureElec",
+            "category": "Electrical",
+            "sub_category": "Batteries",
+            "currency": "NZD",
+            "price_cents": 1890,
+            "sale_price_cents": null,
+            "effective_price_cents": 1890,
+            "on_sale": false,
+            "stock_quantity": 40,
+            "in_stock": true,
+            "weight_grams": 200,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-BATT-TERM"
+            ],
+            "part_role": "battery_terminal",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.343736Z",
+            "updated_at": "2026-11-05T07:10:53.343738Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "f935e384-b0be-4ad0-a064-d45868b70091",
+          "template_key": "c_wire",
+          "introduced_in": "coastal_cruising",
+          "position": 6,
+          "system": "Electrical",
+          "item_name": "Small spool of marine-grade electrical wire",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "marine_wire",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "e01d2efc-7f7a-40c6-8b55-e1cf39fc7dd7",
+            "sku": "SYN-WIRE-TINNED",
+            "name": "Tinned marine wire 2.5 mm², 10 m (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Tinned marine wire 2.5 mm², 10 m (synthetic)",
+            "brand": "FixtureElec",
+            "category": "Electrical",
+            "sub_category": "Wire",
+            "currency": "NZD",
+            "price_cents": 2990,
+            "sale_price_cents": null,
+            "effective_price_cents": 2990,
+            "on_sale": false,
+            "stock_quantity": 22,
+            "in_stock": true,
+            "weight_grams": 600,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-WIRE-TINNED"
+            ],
+            "part_role": "marine_wire",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.345986Z",
+            "updated_at": "2026-11-05T07:10:53.345988Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "dd9743be-8d5d-4446-84d6-4754ffd2b89e",
+          "template_key": "c_crimp_kit",
+          "introduced_in": "coastal_cruising",
+          "position": 7,
+          "system": "Electrical",
+          "item_name": "Butt connectors & crimper",
+          "description": "1 kit",
+          "quantity": 1,
+          "part_role": "crimp_kit",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "2654d93c-8fb5-4e63-9a1b-f3afeb2232ab",
+            "sku": "SYN-CRIMP-KIT",
+            "name": "Heat-shrink butt connector & crimper kit (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Heat-shrink butt connector & crimper kit (synthetic)",
+            "brand": "FixtureTools",
+            "category": "Tools",
+            "sub_category": "Electrical",
+            "currency": "NZD",
+            "price_cents": 4990,
+            "sale_price_cents": null,
+            "effective_price_cents": 4990,
+            "on_sale": false,
+            "stock_quantity": 0,
+            "in_stock": false,
+            "weight_grams": 700,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-CRIMP-KIT"
+            ],
+            "part_role": "crimp_kit",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.347454Z",
+            "updated_at": "2026-11-05T07:10:53.347456Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "4b3aaf8b-787e-43de-aa57-e6d26dc8c5f4",
+          "template_key": "c_tools",
+          "introduced_in": "coastal_cruising",
+          "position": 8,
+          "system": "Tools",
+          "item_name": "Full socket set, multimeter, strap wrench (for filters)",
+          "description": "1 kit",
+          "quantity": 1,
+          "part_role": "coastal_toolkit",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "7ceb9949-42cb-4ea9-85f6-c1388ff47fcf",
+            "sku": "SYN-TOOLKIT-COASTAL",
+            "name": "Coastal tool kit: sockets, multimeter, strap wrench (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Coastal tool kit: sockets, multimeter, strap wrench (synthetic)",
+            "brand": "FixtureTools",
+            "category": "Tools",
+            "sub_category": "Kits",
+            "currency": "NZD",
+            "price_cents": 18990,
+            "sale_price_cents": 15990,
+            "effective_price_cents": 15990,
+            "on_sale": true,
+            "stock_quantity": 5,
+            "in_stock": true,
+            "weight_grams": 4800,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-TOOLKIT-COASTAL"
+            ],
+            "part_role": "coastal_toolkit",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.348932Z",
+            "updated_at": "2026-11-05T07:10:53.348935Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        }
+      ],
+      "total": 20,
+      "checked": 0,
+      "unchecked_linked": 15
+    },
+    {
+      "tier": "offshore_passage",
+      "name": "Offshore Passage Kit (blue water & extended voyages)",
+      "checklist_id": "488358fb-4603-4a04-9cbe-6171d5b0fd29",
+      "items": [
+        {
+          "id": "fc18e526-72a5-48f7-8a2d-8aa8f1b5f0c3",
+          "template_key": "g_propeller",
+          "introduced_in": "grab_and_go",
+          "position": 0,
+          "system": "Engine",
+          "item_name": "Spare propeller with prop nut and split pin",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "propeller",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "unlinked",
+          "product": null,
+          "fitment": null,
+          "alternatives": [],
+          "search_hint": {
+            "q": "Spare propeller with prop nut and split pin",
+            "part_role": "propeller",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "path": "/api/v1/search/products?vessel_id=39aad79c-e1ce-4353-acba-6ed76c623647&part_role=propeller"
+          },
+          "warning": null
+        },
+        {
+          "id": "6bba0e15-00dd-47f6-ac2b-011dad35435a",
+          "template_key": "g_fuel_filter",
+          "introduced_in": "grab_and_go",
+          "position": 1,
+          "system": "Engine",
+          "item_name": "Spare engine fuel filter (primary)",
+          "description": "2 each",
+          "quantity": 2,
+          "part_role": "fuel_filter",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "verified_fit",
+          "product": {
+            "id": "678aefb3-1dee-4ec1-b1d8-2452afb937e7",
+            "sku": "SYN-FF-150",
+            "name": "Primary fuel filter — Yamaha F150 (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Primary fuel filter — Yamaha F150 (synthetic)",
+            "brand": "FixtureParts",
+            "category": "Engine Parts",
+            "sub_category": "Fuel System",
+            "currency": "NZD",
+            "price_cents": 3990,
+            "sale_price_cents": null,
+            "effective_price_cents": 3990,
+            "on_sale": false,
+            "stock_quantity": 38,
+            "in_stock": true,
+            "weight_grams": 180,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-FF-150"
+            ],
+            "part_role": "fuel_filter",
+            "fitment_scope": "specific",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.293204Z",
+            "updated_at": "2026-11-05T07:12:52.060699Z",
+            "fitment": {
+              "status": "verified_fit",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "engine matches verified fitment"
+              ],
+              "matched_rule_ids": [
+                "5452e88c-9076-485d-b385-d16517fa005e"
+              ]
+            }
+          },
+          "fitment": {
+            "status": "verified_fit",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "engine matches verified fitment"
+            ],
+            "matched_rule_ids": [
+              "5452e88c-9076-485d-b385-d16517fa005e"
+            ]
+          },
+          "alternatives": [
+            {
+              "id": "02e268f5-fe29-4168-bf70-75941ab6518d",
+              "sku": "SYN-FF-150-PREM",
+              "name": "Premium fuel filter — Yamaha F150 (synthetic)",
+              "description": "Synthetic test product — not a real catalogue item. Premium fuel filter — Yamaha F150 (synthetic)",
+              "brand": "FixtureMarine",
+              "category": "Engine Parts",
+              "sub_category": "Fuel System",
+              "currency": "NZD",
+              "price_cents": 5490,
+              "sale_price_cents": null,
+              "effective_price_cents": 5490,
+              "on_sale": false,
+              "stock_quantity": 6,
+              "in_stock": true,
+              "weight_grams": 200,
+              "images": [],
+              "specifications": {
+                "synthetic": true
+              },
+              "oem_part_numbers": [
+                "SYN-FF-150-PREM"
+              ],
+              "part_role": "fuel_filter",
+              "fitment_scope": "specific",
+              "dangerous_goods": false,
+              "is_active": true,
+              "created_at": "2026-11-05T07:10:53.296328Z",
+              "updated_at": "2026-11-05T07:10:53.296330Z",
+              "fitment": {
+                "status": "verified_fit",
+                "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+                "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+                "reasons": [
+                  "engine matches verified fitment"
+                ],
+                "matched_rule_ids": [
+                  "f3e6b6fc-7964-499f-9bf9-aec3d714bb18"
+                ]
+              }
+            }
+          ],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "d0230f03-b90c-4c22-818b-a3eef8c6fa24",
+          "template_key": "g_spark_plugs",
+          "introduced_in": "grab_and_go",
+          "position": 2,
+          "system": "Engine",
+          "item_name": "Spare spark plugs",
+          "description": "1 set",
+          "quantity": 1,
+          "part_role": "spark_plug",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "verified_fit",
+          "product": {
+            "id": "c91856bb-23c1-4d39-a471-e6a52808e1f9",
+            "sku": "SYN-PLUG-150",
+            "name": "Spark plug set — Yamaha F150 (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Spark plug set — Yamaha F150 (synthetic)",
+            "brand": "FixtureParts",
+            "category": "Engine Parts",
+            "sub_category": "Ignition",
+            "currency": "NZD",
+            "price_cents": 8990,
+            "sale_price_cents": null,
+            "effective_price_cents": 8990,
+            "on_sale": false,
+            "stock_quantity": 24,
+            "in_stock": true,
+            "weight_grams": 240,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-PLUG-150"
+            ],
+            "part_role": "spark_plug",
+            "fitment_scope": "specific",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.280244Z",
+            "updated_at": "2026-11-05T07:12:52.063165Z",
+            "fitment": {
+              "status": "verified_fit",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "engine matches verified fitment"
+              ],
+              "matched_rule_ids": [
+                "15f7c347-07c9-4583-b5dc-545eb5f84275"
+              ]
+            }
+          },
+          "fitment": {
+            "status": "verified_fit",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "engine matches verified fitment"
+            ],
+            "matched_rule_ids": [
+              "15f7c347-07c9-4583-b5dc-545eb5f84275"
+            ]
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "a9f8abc5-c508-4eb8-98bf-ef7b266a6dc4",
+          "template_key": "g_kill_switch",
+          "introduced_in": "grab_and_go",
+          "position": 3,
+          "system": "Engine",
+          "item_name": "Spare kill switch lanyard",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "kill_switch_lanyard",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "unlinked",
+          "product": null,
+          "fitment": null,
+          "alternatives": [],
+          "search_hint": {
+            "q": "Spare kill switch lanyard",
+            "part_role": "kill_switch_lanyard",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "path": "/api/v1/search/products?vessel_id=39aad79c-e1ce-4353-acba-6ed76c623647&part_role=kill_switch_lanyard"
+          },
+          "warning": null
+        },
+        {
+          "id": "466342cb-987d-41ec-9908-53d94afec165",
+          "template_key": "g_nav_bulbs",
+          "introduced_in": "grab_and_go",
+          "position": 4,
+          "system": "Electrical",
+          "item_name": "Spare navigation light bulbs (if not LED)",
+          "description": "1 set",
+          "quantity": 1,
+          "part_role": "nav_light_bulb",
+          "applicability": "if_fitted",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "unlinked",
+          "product": null,
+          "fitment": null,
+          "alternatives": [],
+          "search_hint": {
+            "q": "Spare navigation light bulbs (if not LED)",
+            "part_role": "nav_light_bulb",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "path": "/api/v1/search/products?vessel_id=39aad79c-e1ce-4353-acba-6ed76c623647&part_role=nav_light_bulb"
+          },
+          "warning": null
+        },
+        {
+          "id": "6648397a-d2e8-4952-a487-e0482cd7e803",
+          "template_key": "g_fuses",
+          "introduced_in": "grab_and_go",
+          "position": 5,
+          "system": "Electrical",
+          "item_name": "Assorted fuses (5A, 10A, 15A)",
+          "description": "1 pack",
+          "quantity": 1,
+          "part_role": "fuse_assortment",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "aacae832-25d4-42a2-94c4-df3335ce4190",
+            "sku": "SYN-FUSE-ASST",
+            "name": "Blade fuse assortment 5/10/15 A (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Blade fuse assortment 5/10/15 A (synthetic)",
+            "brand": "FixtureElec",
+            "category": "Electrical",
+            "sub_category": "Fuses",
+            "currency": "NZD",
+            "price_cents": 1290,
+            "sale_price_cents": null,
+            "effective_price_cents": 1290,
+            "on_sale": false,
+            "stock_quantity": 49,
+            "in_stock": true,
+            "weight_grams": 90,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-FUSE-ASST"
+            ],
+            "part_role": "fuse_assortment",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.334130Z",
+            "updated_at": "2026-11-05T07:12:52.062419Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "2645dc0b-fd8c-43f8-a7ea-79e0ce234cb3",
+          "template_key": "g_duct_tape",
+          "introduced_in": "grab_and_go",
+          "position": 6,
+          "system": "General",
+          "item_name": "Duct tape",
+          "description": "1 roll",
+          "quantity": 1,
+          "part_role": "duct_tape",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "739f5df1-c546-4d3a-a8ad-4e90fc4d467d",
+            "sku": "SYN-DUCT-TAPE",
+            "name": "Marine duct tape 25 m (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Marine duct tape 25 m (synthetic)",
+            "brand": "FixtureGeneral",
+            "category": "General",
+            "sub_category": "Repair",
+            "currency": "NZD",
+            "price_cents": 1490,
+            "sale_price_cents": 1190,
+            "effective_price_cents": 1190,
+            "on_sale": true,
+            "stock_quantity": 77,
+            "in_stock": true,
+            "weight_grams": 350,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-DUCT-TAPE"
+            ],
+            "part_role": "duct_tape",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.335712Z",
+            "updated_at": "2026-11-05T07:27:27.487586Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "d9d11a16-e475-4edf-a5d5-b1f6e8092695",
+          "template_key": "g_zip_ties",
+          "introduced_in": "grab_and_go",
+          "position": 7,
+          "system": "General",
+          "item_name": "Zip ties (assorted sizes)",
+          "description": "1 pack",
+          "quantity": 1,
+          "part_role": "zip_ties",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "480aabd1-b340-4025-95f7-b5d8bdc6ff71",
+            "sku": "SYN-ZIP-TIES",
+            "name": "UV-stable zip ties, assorted 200 pack (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. UV-stable zip ties, assorted 200 pack (synthetic)",
+            "brand": "FixtureGeneral",
+            "category": "General",
+            "sub_category": "Repair",
+            "currency": "NZD",
+            "price_cents": 990,
+            "sale_price_cents": null,
+            "effective_price_cents": 990,
+            "on_sale": false,
+            "stock_quantity": 89,
+            "in_stock": true,
+            "weight_grams": 300,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-ZIP-TIES"
+            ],
+            "part_role": "zip_ties",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.337120Z",
+            "updated_at": "2026-11-05T07:26:27.016671Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "4e6fb0a9-e259-473e-887c-492b863b4d67",
+          "template_key": "g_hose_clamps",
+          "introduced_in": "grab_and_go",
+          "position": 8,
+          "system": "General",
+          "item_name": "Stainless steel hose clamps (assorted sizes)",
+          "description": "1 pack",
+          "quantity": 1,
+          "part_role": "hose_clamp_assortment",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "56419b8e-0126-4b73-8a9a-3134820c8739",
+            "sku": "SYN-HOSE-CLAMP",
+            "name": "316 stainless hose clamp assortment (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. 316 stainless hose clamp assortment (synthetic)",
+            "brand": "FixtureGeneral",
+            "category": "General",
+            "sub_category": "Hardware",
+            "currency": "NZD",
+            "price_cents": 2490,
+            "sale_price_cents": null,
+            "effective_price_cents": 2490,
+            "on_sale": false,
+            "stock_quantity": 34,
+            "in_stock": true,
+            "weight_grams": 400,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-HOSE-CLAMP"
+            ],
+            "part_role": "hose_clamp_assortment",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.338362Z",
+            "updated_at": "2026-11-05T07:12:52.059928Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "6854d43d-08b7-4eb5-b977-8232bfcd84f0",
+          "template_key": "g_bungs",
+          "introduced_in": "grab_and_go",
+          "position": 9,
+          "system": "General",
+          "item_name": "Emergency wooden bungs (tapered)",
+          "description": "1 set",
+          "quantity": 1,
+          "part_role": "wooden_bungs",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "0199c619-4fdf-410c-8cc8-557ad5d6cef0",
+            "sku": "SYN-BUNGS",
+            "name": "Tapered softwood emergency bung set (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Tapered softwood emergency bung set (synthetic)",
+            "brand": "FixtureGeneral",
+            "category": "Safety",
+            "sub_category": "Damage Control",
+            "currency": "NZD",
+            "price_cents": 1990,
+            "sale_price_cents": null,
+            "effective_price_cents": 1990,
+            "on_sale": false,
+            "stock_quantity": 24,
+            "in_stock": true,
+            "weight_grams": 450,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-BUNGS"
+            ],
+            "part_role": "wooden_bungs",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.340335Z",
+            "updated_at": "2026-11-05T07:12:52.056572Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "8b2be77e-cd1f-4057-90c6-a123e8019803",
+          "template_key": "g_tools",
+          "introduced_in": "grab_and_go",
+          "position": 10,
+          "system": "Tools",
+          "item_name": "Shifting spanner, pliers, screwdriver set, prop spanner, spark plug spanner",
+          "description": "1 kit",
+          "quantity": 1,
+          "part_role": "basic_toolkit",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "19aeef46-4547-4c19-826f-556124ce5095",
+            "sku": "SYN-TOOLKIT-BASIC",
+            "name": "Grab-bag basic tool kit (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Grab-bag basic tool kit (synthetic)",
+            "brand": "FixtureTools",
+            "category": "Tools",
+            "sub_category": "Kits",
+            "currency": "NZD",
+            "price_cents": 8990,
+            "sale_price_cents": null,
+            "effective_price_cents": 8990,
+            "on_sale": false,
+            "stock_quantity": 9,
+            "in_stock": true,
+            "weight_grams": 2100,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-TOOLKIT-BASIC"
+            ],
+            "part_role": "basic_toolkit",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.342408Z",
+            "updated_at": "2026-11-05T07:12:52.058210Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "40bd8629-747b-4b64-9aa0-fc4611d8daf2",
+          "template_key": "c_impeller",
+          "introduced_in": "coastal_cruising",
+          "position": 0,
+          "system": "Engine",
+          "item_name": "Spare water pump impeller & gasket",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "impeller",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "verified_fit",
+          "product": {
+            "id": "a5cfd876-4685-4316-9db1-bad1688d7df8",
+            "sku": "SYN-IMP-150",
+            "name": "Water pump impeller kit — Yamaha F150 (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Water pump impeller kit — Yamaha F150 (synthetic)",
+            "brand": "FixtureParts",
+            "category": "Engine Parts",
+            "sub_category": "Cooling",
+            "currency": "NZD",
+            "price_cents": 6490,
+            "sale_price_cents": 5490,
+            "effective_price_cents": 5490,
+            "on_sale": true,
+            "stock_quantity": 12,
+            "in_stock": true,
+            "weight_grams": 150,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-IMP-150"
+            ],
+            "part_role": "impeller",
+            "fitment_scope": "specific",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.302795Z",
+            "updated_at": "2026-11-05T07:10:53.302797Z",
+            "fitment": {
+              "status": "verified_fit",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "engine matches verified fitment"
+              ],
+              "matched_rule_ids": [
+                "537efa5b-9cb3-404a-aef1-5b647c6614c6"
+              ]
+            }
+          },
+          "fitment": {
+            "status": "verified_fit",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "engine matches verified fitment"
+            ],
+            "matched_rule_ids": [
+              "537efa5b-9cb3-404a-aef1-5b647c6614c6"
+            ]
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "9f4a330e-8232-4578-9b2c-ff02a1b04bb7",
+          "template_key": "c_thermostat",
+          "introduced_in": "coastal_cruising",
+          "position": 1,
+          "system": "Engine",
+          "item_name": "Spare thermostat & gasket",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "thermostat",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "verified_fit",
+          "product": {
+            "id": "b46bb996-1a3f-4448-bce2-00d9249684a5",
+            "sku": "SYN-THERM-150",
+            "name": "Thermostat & gasket — Yamaha F150 (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Thermostat & gasket — Yamaha F150 (synthetic)",
+            "brand": "FixtureParts",
+            "category": "Engine Parts",
+            "sub_category": "Cooling",
+            "currency": "NZD",
+            "price_cents": 7990,
+            "sale_price_cents": null,
+            "effective_price_cents": 7990,
+            "on_sale": false,
+            "stock_quantity": 4,
+            "in_stock": true,
+            "weight_grams": 120,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-THERM-150"
+            ],
+            "part_role": "thermostat",
+            "fitment_scope": "specific",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.314612Z",
+            "updated_at": "2026-11-05T07:10:53.314615Z",
+            "fitment": {
+              "status": "verified_fit",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "engine matches verified fitment"
+              ],
+              "matched_rule_ids": [
+                "8b7a4ce7-781d-48e9-b66f-927459f08863"
+              ]
+            }
+          },
+          "fitment": {
+            "status": "verified_fit",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "engine matches verified fitment"
+            ],
+            "matched_rule_ids": [
+              "8b7a4ce7-781d-48e9-b66f-927459f08863"
+            ]
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "3d62a102-c45c-464d-aa8e-7852a52d4f9c",
+          "template_key": "c_belt",
+          "introduced_in": "coastal_cruising",
+          "position": 2,
+          "system": "Engine",
+          "item_name": "Spare alternator / serpentine belt",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "drive_belt",
+          "applicability": "if_fitted",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "unlinked",
+          "product": null,
+          "fitment": null,
+          "alternatives": [],
+          "search_hint": {
+            "q": "Spare alternator / serpentine belt",
+            "part_role": "drive_belt",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "path": "/api/v1/search/products?vessel_id=39aad79c-e1ce-4353-acba-6ed76c623647&part_role=drive_belt"
+          },
+          "warning": null
+        },
+        {
+          "id": "4de743c7-f58e-4f8d-a6f3-8d5636270ff9",
+          "template_key": "c_engine_oil",
+          "introduced_in": "coastal_cruising",
+          "position": 3,
+          "system": "Engine",
+          "item_name": "Engine oil (1 L top-up)",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "engine_oil",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "verified_fit",
+          "product": {
+            "id": "9653e8ef-7cef-40cf-9b5d-bce0dff70dbc",
+            "sku": "SYN-OIL-150",
+            "name": "4-stroke outboard oil 1 L — for Yamaha F150 (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. 4-stroke outboard oil 1 L — for Yamaha F150 (synthetic)",
+            "brand": "FixtureLube",
+            "category": "Engine Parts",
+            "sub_category": "Oil & Lubricants",
+            "currency": "NZD",
+            "price_cents": 2490,
+            "sale_price_cents": null,
+            "effective_price_cents": 2490,
+            "on_sale": false,
+            "stock_quantity": 60,
+            "in_stock": true,
+            "weight_grams": 950,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-OIL-150"
+            ],
+            "part_role": "engine_oil",
+            "fitment_scope": "specific",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.308969Z",
+            "updated_at": "2026-11-05T07:26:17.990750Z",
+            "fitment": {
+              "status": "verified_fit",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "engine matches verified fitment"
+              ],
+              "matched_rule_ids": [
+                "2b041064-d8ba-4645-ad29-7d27576dedbd"
+              ]
+            }
+          },
+          "fitment": {
+            "status": "verified_fit",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "engine matches verified fitment"
+            ],
+            "matched_rule_ids": [
+              "2b041064-d8ba-4645-ad29-7d27576dedbd"
+            ]
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "8a9992c0-5b02-4c42-94e8-93fc4fdfb4ff",
+          "template_key": "c_bilge_pump",
+          "introduced_in": "coastal_cruising",
+          "position": 4,
+          "system": "Plumbing",
+          "item_name": "Spare bilge pump (cartridge or complete)",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "bilge_pump",
+          "applicability": "if_fitted",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "unlinked",
+          "product": null,
+          "fitment": null,
+          "alternatives": [],
+          "search_hint": {
+            "q": "Spare bilge pump (cartridge or complete)",
+            "part_role": "bilge_pump",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "path": "/api/v1/search/products?vessel_id=39aad79c-e1ce-4353-acba-6ed76c623647&part_role=bilge_pump"
+          },
+          "warning": null
+        },
+        {
+          "id": "5d52fddf-753b-44ce-8a21-7b455a94031d",
+          "template_key": "c_battery_terminals",
+          "introduced_in": "coastal_cruising",
+          "position": 5,
+          "system": "Electrical",
+          "item_name": "Spare battery terminals",
+          "description": "1 set",
+          "quantity": 1,
+          "part_role": "battery_terminal",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "5fad4047-ce18-4f53-9187-3cd9011e697b",
+            "sku": "SYN-BATT-TERM",
+            "name": "Marine battery terminal pair (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Marine battery terminal pair (synthetic)",
+            "brand": "FixtureElec",
+            "category": "Electrical",
+            "sub_category": "Batteries",
+            "currency": "NZD",
+            "price_cents": 1890,
+            "sale_price_cents": null,
+            "effective_price_cents": 1890,
+            "on_sale": false,
+            "stock_quantity": 40,
+            "in_stock": true,
+            "weight_grams": 200,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-BATT-TERM"
+            ],
+            "part_role": "battery_terminal",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.343736Z",
+            "updated_at": "2026-11-05T07:10:53.343738Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "f935e384-b0be-4ad0-a064-d45868b70091",
+          "template_key": "c_wire",
+          "introduced_in": "coastal_cruising",
+          "position": 6,
+          "system": "Electrical",
+          "item_name": "Small spool of marine-grade electrical wire",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "marine_wire",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "e01d2efc-7f7a-40c6-8b55-e1cf39fc7dd7",
+            "sku": "SYN-WIRE-TINNED",
+            "name": "Tinned marine wire 2.5 mm², 10 m (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Tinned marine wire 2.5 mm², 10 m (synthetic)",
+            "brand": "FixtureElec",
+            "category": "Electrical",
+            "sub_category": "Wire",
+            "currency": "NZD",
+            "price_cents": 2990,
+            "sale_price_cents": null,
+            "effective_price_cents": 2990,
+            "on_sale": false,
+            "stock_quantity": 22,
+            "in_stock": true,
+            "weight_grams": 600,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-WIRE-TINNED"
+            ],
+            "part_role": "marine_wire",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.345986Z",
+            "updated_at": "2026-11-05T07:10:53.345988Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "dd9743be-8d5d-4446-84d6-4754ffd2b89e",
+          "template_key": "c_crimp_kit",
+          "introduced_in": "coastal_cruising",
+          "position": 7,
+          "system": "Electrical",
+          "item_name": "Butt connectors & crimper",
+          "description": "1 kit",
+          "quantity": 1,
+          "part_role": "crimp_kit",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "2654d93c-8fb5-4e63-9a1b-f3afeb2232ab",
+            "sku": "SYN-CRIMP-KIT",
+            "name": "Heat-shrink butt connector & crimper kit (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Heat-shrink butt connector & crimper kit (synthetic)",
+            "brand": "FixtureTools",
+            "category": "Tools",
+            "sub_category": "Electrical",
+            "currency": "NZD",
+            "price_cents": 4990,
+            "sale_price_cents": null,
+            "effective_price_cents": 4990,
+            "on_sale": false,
+            "stock_quantity": 0,
+            "in_stock": false,
+            "weight_grams": 700,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-CRIMP-KIT"
+            ],
+            "part_role": "crimp_kit",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.347454Z",
+            "updated_at": "2026-11-05T07:10:53.347456Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "4b3aaf8b-787e-43de-aa57-e6d26dc8c5f4",
+          "template_key": "c_tools",
+          "introduced_in": "coastal_cruising",
+          "position": 8,
+          "system": "Tools",
+          "item_name": "Full socket set, multimeter, strap wrench (for filters)",
+          "description": "1 kit",
+          "quantity": 1,
+          "part_role": "coastal_toolkit",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "7ceb9949-42cb-4ea9-85f6-c1388ff47fcf",
+            "sku": "SYN-TOOLKIT-COASTAL",
+            "name": "Coastal tool kit: sockets, multimeter, strap wrench (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Coastal tool kit: sockets, multimeter, strap wrench (synthetic)",
+            "brand": "FixtureTools",
+            "category": "Tools",
+            "sub_category": "Kits",
+            "currency": "NZD",
+            "price_cents": 18990,
+            "sale_price_cents": 15990,
+            "effective_price_cents": 15990,
+            "on_sale": true,
+            "stock_quantity": 5,
+            "in_stock": true,
+            "weight_grams": 4800,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-TOOLKIT-COASTAL"
+            ],
+            "part_role": "coastal_toolkit",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.348932Z",
+            "updated_at": "2026-11-05T07:10:53.348935Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "5063969c-1845-4e90-864e-9c03014d0e95",
+          "template_key": "o_fuel_pump",
+          "introduced_in": "offshore_passage",
+          "position": 0,
+          "system": "Engine",
+          "item_name": "Spare fuel pump (lift or high-pressure)",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "fuel_pump",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "unlinked",
+          "product": null,
+          "fitment": null,
+          "alternatives": [],
+          "search_hint": {
+            "q": "Spare fuel pump (lift or high-pressure)",
+            "part_role": "fuel_pump",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "path": "/api/v1/search/products?vessel_id=39aad79c-e1ce-4353-acba-6ed76c623647&part_role=fuel_pump"
+          },
+          "warning": null
+        },
+        {
+          "id": "c4441d5e-371b-4721-9e68-c73ccb40c7de",
+          "template_key": "o_ignition_coil",
+          "introduced_in": "offshore_passage",
+          "position": 1,
+          "system": "Engine",
+          "item_name": "Spare ignition coil",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "ignition_coil",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "unlinked",
+          "product": null,
+          "fitment": null,
+          "alternatives": [],
+          "search_hint": {
+            "q": "Spare ignition coil",
+            "part_role": "ignition_coil",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "path": "/api/v1/search/products?vessel_id=39aad79c-e1ce-4353-acba-6ed76c623647&part_role=ignition_coil"
+          },
+          "warning": null
+        },
+        {
+          "id": "1341e8d4-bffd-44b4-acef-f5c5f897ce0f",
+          "template_key": "o_gasket_set",
+          "introduced_in": "offshore_passage",
+          "position": 2,
+          "system": "Engine",
+          "item_name": "Full gasket set",
+          "description": "1 set",
+          "quantity": 1,
+          "part_role": "gasket_set",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "unlinked",
+          "product": null,
+          "fitment": null,
+          "alternatives": [],
+          "search_hint": {
+            "q": "Full gasket set",
+            "part_role": "gasket_set",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "path": "/api/v1/search/products?vessel_id=39aad79c-e1ce-4353-acba-6ed76c623647&part_role=gasket_set"
+          },
+          "warning": null
+        },
+        {
+          "id": "e1bef500-f27e-4b1e-9d6c-5fa24045fcef",
+          "template_key": "o_oil_change",
+          "introduced_in": "offshore_passage",
+          "position": 3,
+          "system": "Engine",
+          "item_name": "Engine oil for a full change",
+          "description": "1 set",
+          "quantity": 1,
+          "part_role": "engine_oil",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "verified_fit",
+          "product": {
+            "id": "9653e8ef-7cef-40cf-9b5d-bce0dff70dbc",
+            "sku": "SYN-OIL-150",
+            "name": "4-stroke outboard oil 1 L — for Yamaha F150 (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. 4-stroke outboard oil 1 L — for Yamaha F150 (synthetic)",
+            "brand": "FixtureLube",
+            "category": "Engine Parts",
+            "sub_category": "Oil & Lubricants",
+            "currency": "NZD",
+            "price_cents": 2490,
+            "sale_price_cents": null,
+            "effective_price_cents": 2490,
+            "on_sale": false,
+            "stock_quantity": 60,
+            "in_stock": true,
+            "weight_grams": 950,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-OIL-150"
+            ],
+            "part_role": "engine_oil",
+            "fitment_scope": "specific",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.308969Z",
+            "updated_at": "2026-11-05T07:26:17.990750Z",
+            "fitment": {
+              "status": "verified_fit",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "engine matches verified fitment"
+              ],
+              "matched_rule_ids": [
+                "2b041064-d8ba-4645-ad29-7d27576dedbd"
+              ]
+            }
+          },
+          "fitment": {
+            "status": "verified_fit",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "engine matches verified fitment"
+            ],
+            "matched_rule_ids": [
+              "2b041064-d8ba-4645-ad29-7d27576dedbd"
+            ]
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "970af99a-2e7c-4049-af5a-f694be9709ee",
+          "template_key": "o_oil_filter",
+          "introduced_in": "offshore_passage",
+          "position": 4,
+          "system": "Engine",
+          "item_name": "Oil filter for a full change",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "oil_filter",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "verified_fit",
+          "product": {
+            "id": "4e5d0f2a-c94e-45b2-98be-ca2ac5867f68",
+            "sku": "SYN-OILF-150",
+            "name": "Oil filter — Yamaha F150 (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Oil filter — Yamaha F150 (synthetic)",
+            "brand": "FixtureParts",
+            "category": "Engine Parts",
+            "sub_category": "Oil & Lubricants",
+            "currency": "NZD",
+            "price_cents": 2890,
+            "sale_price_cents": null,
+            "effective_price_cents": 2890,
+            "on_sale": false,
+            "stock_quantity": 15,
+            "in_stock": true,
+            "weight_grams": 300,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-OILF-150"
+            ],
+            "part_role": "oil_filter",
+            "fitment_scope": "specific",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.317425Z",
+            "updated_at": "2026-11-05T07:10:53.317428Z",
+            "fitment": {
+              "status": "verified_fit",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "engine matches verified fitment"
+              ],
+              "matched_rule_ids": [
+                "0ef08618-a0b2-488a-be55-8dc7809bebd1"
+              ]
+            }
+          },
+          "fitment": {
+            "status": "verified_fit",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "engine matches verified fitment"
+            ],
+            "matched_rule_ids": [
+              "0ef08618-a0b2-488a-be55-8dc7809bebd1"
+            ]
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "5c61a6cf-8fa0-4232-abd6-44a3e7d1cc62",
+          "template_key": "o_freshwater_pump",
+          "introduced_in": "offshore_passage",
+          "position": 5,
+          "system": "Plumbing",
+          "item_name": "Complete spare freshwater pump",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "freshwater_pump",
+          "applicability": "if_fitted",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "unlinked",
+          "product": null,
+          "fitment": null,
+          "alternatives": [],
+          "search_hint": {
+            "q": "Complete spare freshwater pump",
+            "part_role": "freshwater_pump",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "path": "/api/v1/search/products?vessel_id=39aad79c-e1ce-4353-acba-6ed76c623647&part_role=freshwater_pump"
+          },
+          "warning": null
+        },
+        {
+          "id": "ff56ce21-1a0e-4e11-b0b6-1a502be23ec0",
+          "template_key": "o_bilge_rebuild",
+          "introduced_in": "offshore_passage",
+          "position": 6,
+          "system": "Plumbing",
+          "item_name": "Major bilge pump rebuild kit",
+          "description": "1 kit",
+          "quantity": 1,
+          "part_role": "bilge_pump_rebuild_kit",
+          "applicability": "if_fitted",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "unlinked",
+          "product": null,
+          "fitment": null,
+          "alternatives": [],
+          "search_hint": {
+            "q": "Major bilge pump rebuild kit",
+            "part_role": "bilge_pump_rebuild_kit",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "path": "/api/v1/search/products?vessel_id=39aad79c-e1ce-4353-acba-6ed76c623647&part_role=bilge_pump_rebuild_kit"
+          },
+          "warning": null
+        },
+        {
+          "id": "143dfa5b-42a7-4b74-9c0d-ee575d6a8f01",
+          "template_key": "o_hose_fittings",
+          "introduced_in": "offshore_passage",
+          "position": 7,
+          "system": "Plumbing",
+          "item_name": "Assorted hose & fittings",
+          "description": "1 kit",
+          "quantity": 1,
+          "part_role": "hose_fittings_kit",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "universal",
+          "product": {
+            "id": "0ce2127c-0faf-4060-a3cb-c572e768a47a",
+            "sku": "SYN-HOSE-FIT",
+            "name": "Assorted hose & fittings kit (synthetic)",
+            "description": "Synthetic test product — not a real catalogue item. Assorted hose & fittings kit (synthetic)",
+            "brand": "FixtureGeneral",
+            "category": "Plumbing",
+            "sub_category": "Hose",
+            "currency": "NZD",
+            "price_cents": 5490,
+            "sale_price_cents": null,
+            "effective_price_cents": 5490,
+            "on_sale": false,
+            "stock_quantity": 6,
+            "in_stock": true,
+            "weight_grams": 1500,
+            "images": [],
+            "specifications": {
+              "synthetic": true
+            },
+            "oem_part_numbers": [
+              "SYN-HOSE-FIT"
+            ],
+            "part_role": "hose_fittings_kit",
+            "fitment_scope": "universal",
+            "dangerous_goods": false,
+            "is_active": true,
+            "created_at": "2026-11-05T07:10:53.350583Z",
+            "updated_at": "2026-11-05T07:10:53.350586Z",
+            "fitment": {
+              "status": "universal",
+              "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+              "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+              "reasons": [
+                "product is verified as universal"
+              ],
+              "matched_rule_ids": []
+            }
+          },
+          "fitment": {
+            "status": "universal",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "message": "Suitable for any vessel, including Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+            "reasons": [
+              "product is verified as universal"
+            ],
+            "matched_rule_ids": []
+          },
+          "alternatives": [],
+          "search_hint": null,
+          "warning": null
+        },
+        {
+          "id": "5f3daab4-da76-470b-a429-c15b7690e0b8",
+          "template_key": "o_vhf_antenna",
+          "introduced_in": "offshore_passage",
+          "position": 8,
+          "system": "Electrical",
+          "item_name": "Spare VHF antenna",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "vhf_antenna",
+          "applicability": "if_fitted",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "unlinked",
+          "product": null,
+          "fitment": null,
+          "alternatives": [],
+          "search_hint": {
+            "q": "Spare VHF antenna",
+            "part_role": "vhf_antenna",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "path": "/api/v1/search/products?vessel_id=39aad79c-e1ce-4353-acba-6ed76c623647&part_role=vhf_antenna"
+          },
+          "warning": null
+        },
+        {
+          "id": "2f835c36-46be-411f-8a92-5043cc0487d2",
+          "template_key": "o_gps_antenna",
+          "introduced_in": "offshore_passage",
+          "position": 9,
+          "system": "Electrical",
+          "item_name": "Spare GPS antenna",
+          "description": "1 each",
+          "quantity": 1,
+          "part_role": "gps_antenna",
+          "applicability": "applies",
+          "is_checked": false,
+          "checked_at": null,
+          "link_status": "unlinked",
+          "product": null,
+          "fitment": null,
+          "alternatives": [],
+          "search_hint": {
+            "q": "Spare GPS antenna",
+            "part_role": "gps_antenna",
+            "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+            "path": "/api/v1/search/products?vessel_id=39aad79c-e1ce-4353-acba-6ed76c623647&part_role=gps_antenna"
+          },
+          "warning": null
+        }
+      ],
+      "total": 30,
+      "checked": 0,
+      "unchecked_linked": 18
+    }
+  ]
+}

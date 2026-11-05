@@ -1,0 +1,4 @@
+{
+  "detail": "Checklists already exist for this vessel; use regenerate=true",
+  "code": "checklists_exist"
+}

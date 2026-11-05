@@ -1,0 +1,47 @@
+[
+  {
+    "id": "a95a12ae-eab5-4ba0-a114-f057392d707b",
+    "manufacturer_id": "cf05ecfc-b08e-434e-a4fe-4064598a6ff5",
+    "name": "Fixture 32 Sloop",
+    "hull_type": "fibreglass",
+    "propulsion_type": "sail",
+    "length_ft": 32.0,
+    "beam_in": null,
+    "is_synthetic": true,
+    "source_url": null,
+    "years": [
+      2020
+    ]
+  },
+  {
+    "id": "e9b8a632-721b-4c2f-9ed2-58b88ac81679",
+    "manufacturer_id": "cf05ecfc-b08e-434e-a4fe-4064598a6ff5",
+    "name": "Fixture 580 Cuddy",
+    "hull_type": "fibreglass",
+    "propulsion_type": "outboard",
+    "length_ft": 19.0,
+    "beam_in": null,
+    "is_synthetic": true,
+    "source_url": null,
+    "years": [
+      2022,
+      2023
+    ]
+  },
+  {
+    "id": "3020f1f1-d128-4b1e-bd55-9570cd6cdd44",
+    "manufacturer_id": "cf05ecfc-b08e-434e-a4fe-4064598a6ff5",
+    "name": "Fixture 600 Runabout",
+    "hull_type": "aluminium",
+    "propulsion_type": "outboard",
+    "length_ft": 19.7,
+    "beam_in": null,
+    "is_synthetic": true,
+    "source_url": null,
+    "years": [
+      2021,
+      2022,
+      2023
+    ]
+  }
+]

@@ -16,8 +16,6 @@ class UserProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
-  bool _pushNotifications = true;
-
   @override
   Widget build(BuildContext context) {
     final authState = AsyncValue<User?>.data(ref.watch(currentUserProvider));
@@ -191,13 +189,12 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
           ),
           const SizedBox(height: 12),
           Card(
-            child: SwitchListTile(
-              title: const Text('Push Notifications'),
-              subtitle: const Text('Receive order updates and promotions'),
-              value: _pushNotifications,
-              onChanged: (v) => setState(() => _pushNotifications = v),
-              activeThumbColor: HelmTheme.primary,
-              secondary: const Icon(Icons.notifications_outlined),
+            child: ListTile(
+              title: const Text('Notification preferences'),
+              subtitle: const Text('Email, push, order, delivery and service updates'),
+              leading: const Icon(Icons.notifications_outlined),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.go('/profile/notifications'),
             ),
           ),
         ],

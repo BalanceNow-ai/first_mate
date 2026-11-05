@@ -1,0 +1,112 @@
+{
+  "id": "6935fbee-b444-4aa0-b336-ebdb9325af85",
+  "template_key": "g_fuel_filter",
+  "introduced_in": "grab_and_go",
+  "position": 1,
+  "system": "Engine",
+  "item_name": "Spare engine fuel filter (primary)",
+  "description": "2 each",
+  "quantity": 2,
+  "part_role": "fuel_filter",
+  "applicability": "applies",
+  "is_checked": false,
+  "checked_at": null,
+  "link_status": "verified_fit",
+  "product": {
+    "id": "678aefb3-1dee-4ec1-b1d8-2452afb937e7",
+    "sku": "SYN-FF-150",
+    "name": "Primary fuel filter — Yamaha F150 (synthetic)",
+    "description": "Synthetic test product — not a real catalogue item. Primary fuel filter — Yamaha F150 (synthetic)",
+    "brand": "FixtureParts",
+    "category": "Engine Parts",
+    "sub_category": "Fuel System",
+    "currency": "NZD",
+    "price_cents": 3990,
+    "sale_price_cents": null,
+    "effective_price_cents": 3990,
+    "on_sale": false,
+    "stock_quantity": 38,
+    "in_stock": true,
+    "weight_grams": 180,
+    "images": [],
+    "specifications": {
+      "synthetic": true
+    },
+    "oem_part_numbers": [
+      "SYN-FF-150"
+    ],
+    "part_role": "fuel_filter",
+    "fitment_scope": "specific",
+    "dangerous_goods": false,
+    "is_active": true,
+    "created_at": "2026-11-05T07:10:53.293204Z",
+    "updated_at": "2026-11-05T07:12:52.060699Z",
+    "fitment": {
+      "status": "verified_fit",
+      "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+      "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+      "reasons": [
+        "engine matches verified fitment"
+      ],
+      "matched_rule_ids": [
+        "5452e88c-9076-485d-b385-d16517fa005e"
+      ]
+    }
+  },
+  "fitment": {
+    "status": "verified_fit",
+    "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+    "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+    "reasons": [
+      "engine matches verified fitment"
+    ],
+    "matched_rule_ids": [
+      "5452e88c-9076-485d-b385-d16517fa005e"
+    ]
+  },
+  "alternatives": [
+    {
+      "id": "02e268f5-fe29-4168-bf70-75941ab6518d",
+      "sku": "SYN-FF-150-PREM",
+      "name": "Premium fuel filter — Yamaha F150 (synthetic)",
+      "description": "Synthetic test product — not a real catalogue item. Premium fuel filter — Yamaha F150 (synthetic)",
+      "brand": "FixtureMarine",
+      "category": "Engine Parts",
+      "sub_category": "Fuel System",
+      "currency": "NZD",
+      "price_cents": 5490,
+      "sale_price_cents": null,
+      "effective_price_cents": 5490,
+      "on_sale": false,
+      "stock_quantity": 6,
+      "in_stock": true,
+      "weight_grams": 200,
+      "images": [],
+      "specifications": {
+        "synthetic": true
+      },
+      "oem_part_numbers": [
+        "SYN-FF-150-PREM"
+      ],
+      "part_role": "fuel_filter",
+      "fitment_scope": "specific",
+      "dangerous_goods": false,
+      "is_active": true,
+      "created_at": "2026-11-05T07:10:53.296328Z",
+      "updated_at": "2026-11-05T07:10:53.296330Z",
+      "fitment": {
+        "status": "verified_fit",
+        "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+        "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+        "reasons": [
+          "engine matches verified fitment"
+        ],
+        "matched_rule_ids": [
+          "f3e6b6fc-7964-499f-9bf9-aec3d714bb18"
+        ]
+      }
+    }
+  ],
+  "search_hint": null,
+  "warning": null
+}

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:helm_marine/core/api/api_error.dart';
-import 'package:helm_marine/core/api/api_service.dart';
 import 'package:helm_marine/core/models/admin.dart';
 import 'package:helm_marine/core/models/loyalty.dart';
 import 'package:helm_marine/core/models/user.dart';
@@ -13,6 +12,7 @@ import 'package:helm_marine/core/widgets/state_views.dart';
 import 'package:helm_marine/features/admin/data/admin_api.dart';
 import 'package:helm_marine/features/admin/providers/admin_providers.dart';
 import 'package:helm_marine/features/content/widgets/synthetic_badge.dart';
+import 'package:helm_marine/features/products/data/catalogue_api.dart';
 import 'package:helm_marine/features/loyalty/screens/crew_dashboard_screen.dart' show RedemptionTile;
 import 'package:intl/intl.dart';
 
@@ -186,7 +186,7 @@ Widget _listOrState<T>(
 
 // ------------------------------------------------------------------ fitment rules
 final _productNameProvider = FutureProvider.autoDispose.family<String, String>((ref, id) async {
-  final product = await ref.watch(apiServiceProvider).getProduct(id);
+  final product = await ref.watch(catalogueApiProvider).getProduct(id);
   return '${product.name} (${product.sku})';
 });
 

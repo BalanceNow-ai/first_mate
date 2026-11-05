@@ -1,0 +1,13 @@
+{
+  "detail": "Does not fit Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+  "code": "fitment_mismatch",
+  "fitment": {
+    "status": "verified_mismatch",
+    "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+    "message": "Does not fit Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+    "reasons": [
+      "verified for Suzuki DF140 engines"
+    ],
+    "matched_rule_ids": []
+  }
+}
