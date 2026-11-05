@@ -160,15 +160,22 @@ async function visible(locator, timeout = 30_000) {
   return true;
 }
 
+// Flutter web moves its single DOM editing element to the focused field; a fill that
+// lands before focus settles is lost, so retry until the value sticks.
 async function fill(page, label, value) {
   const f = field(page, label);
   await f.waitFor({ state: 'visible', timeout: 20_000 });
-  await f.click();
-  await f.fill(value);
-  if ((await f.inputValue()) !== value) {
-    await page.keyboard.press('ControlOrMeta+A');
-    await page.keyboard.type(value);
+  for (let i = 0; i < 5; i++) {
+    await f.click();
+    await page.waitForTimeout(100);
+    await f.fill(value);
+    await page.waitForTimeout(150);
+    if ((await f.inputValue().catch(() => '')) === value) break;
+    if (i === 4) throw new Error(`could not fill "${label}"`);
   }
+  // The vessel Make/Model fields are typeaheads: close their suggestion overlay so it
+  // cannot cover the next field (Escape is consumed by the autocomplete there).
+  if (/^(Make|Model) \*$/.test(label)) await page.keyboard.press('Escape');
 }
 
 async function tap(page, locator) {

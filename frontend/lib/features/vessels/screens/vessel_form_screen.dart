@@ -33,8 +33,12 @@ class VesselFormScreen extends ConsumerWidget {
     final vessel = ref.watch(vesselDetailProvider(vesselId!));
     return Scaffold(
       appBar: AppBar(title: title),
+      // A background reload must never replace the form (and discard the user's
+      // edits) with a loading view or freshly-populated fields.
       body: vessel.when(
-        data: (v) => VesselForm(initial: v),
+        skipLoadingOnReload: true,
+        skipLoadingOnRefresh: true,
+        data: (v) => VesselForm(key: ValueKey('vessel-form-${v.id}'), initial: v),
         loading: () => const LoadingView(message: 'Loading vessel'),
         error: (e, _) => ErrorView(
           error: e,
