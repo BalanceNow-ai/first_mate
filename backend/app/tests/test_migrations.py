@@ -16,8 +16,10 @@ from sqlalchemy.pool import NullPool
 from app.database import Base
 from app.tests.conftest import BACKEND_DIR, TEST_DATABASE_URL
 
-MIGRATION_DB = TEST_DATABASE_URL.rsplit("/", 1)[0] + "/helm_migration_test"
-ADMIN_DB = TEST_DATABASE_URL.rsplit("/", 1)[0] + "/postgres"
+_BASE, _TEST_DB = TEST_DATABASE_URL.rsplit("/", 1)
+MIGRATION_DB_NAME = f"{_TEST_DB}_migration"
+MIGRATION_DB = f"{_BASE}/{MIGRATION_DB_NAME}"
+ADMIN_DB = f"{_BASE}/postgres"
 
 
 def _alembic(target: str) -> None:
@@ -30,8 +32,8 @@ def _alembic(target: str) -> None:
 async def _recreate_db() -> None:
     admin = create_async_engine(ADMIN_DB, poolclass=NullPool, isolation_level="AUTOCOMMIT")
     async with admin.connect() as conn:
-        await conn.execute(text("DROP DATABASE IF EXISTS helm_migration_test WITH (FORCE)"))
-        await conn.execute(text("CREATE DATABASE helm_migration_test"))
+        await conn.execute(text(f"DROP DATABASE IF EXISTS {MIGRATION_DB_NAME} WITH (FORCE)"))
+        await conn.execute(text(f"CREATE DATABASE {MIGRATION_DB_NAME}"))
     await admin.dispose()
 
 
