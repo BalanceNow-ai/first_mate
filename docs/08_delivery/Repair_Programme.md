@@ -176,12 +176,24 @@ containerised stack (§5), `M:` migration test.
 | ID | Finding (reproduced by the reviewer's probes) | Fix | Proof (each fails on `f4f3a97`, passes now) | Status |
 |---|---|---|---|---|
 | FM-01 | Answer guard certified contradicted/unsupported sentences as `grounded` because a valid citation index existed; unsupported instructions survived an insufficient-evidence reply | D21 claim/evidence contract; controlled non-grounded reply; claim evidence in the response; answer-time revalidation of sources, applicability, fitment, proposals; system prompt requires per-sentence citations | B:test_grounding_support (31 cases incl. G1–G4, both providers via the API), test_ai_* | RV |
-| FM-02 | Rule `{engine F150, vessel_model 2250, year_to 2000}` accepted and evaluated `verified_fit` for a 2022 Rayglass 2500 | Rule-scope contract in schema, verification, DB (0004) and evaluator (fail closed); audit CLI | B:test_fitment_scope_contract (20 cases) | RV |
+| FM-02 | Rule `{engine F150, vessel_model 2250, year_to 2000}` accepted and evaluated `verified_fit` for a 2022 Rayglass 2500 | Rule-scope contract in schema, verification, DB and evaluator (fail closed); 0004 moves violating rows to `fitment_rule_quarantine` (with reasons) and adds validated constraints identical to the Python contract (blanks absent, years 1900–2100, ordered); audit CLI lists quarantined rules | B:test_fitment_scope_contract (20 cases), M:test_0004_quarantines_malformed_fitment_rules | RV |
 | FM-03 | Full refund skipped returning discount points when no earned point remained to reverse (zero-earn order; earlier partial refund) | Independent, idempotent compensation steps; also found and fixed: crew-bonus clawback skipped for a refund crossing a tier without a further whole point | B:test_refund_compensation (6 cases via signed `charge.refunded`) | RV |
 | FM-04 | Partial FCM success marked the notification sent and lost the transiently failing device | Per-device outcomes persisted; retry only pending devices; lease renewal + fencing token | B:test_push_delivery_outcomes (7 cases) | RV |
 | FM-05 | Opposing lock orders: payment success vs voiding its discount; refund vs operator action | D22 single lock order; also found and fixed: two refunds in one crew locking members' accounts in opposite orders | B:test_lock_order (3 two-connection barrier races; all three raise `DeadlockDetectedError` on `f4f3a97`) | RV |
 
-Additional concerns raised by the review:
+**Second independent review (of the fixes, `f4f3a97..a95be4a`).** Confirmed: one-word
+reversals ("with" for "without", "disable" for "check", "after" for "before") and
+cross-sentence recombination still certified; a generic fit claim riding on a verified
+product; the lease fence reading the reclaiming worker's token after the first lost
+lease; legacy malformed rules not rejectable (500) and blank-string disagreement between
+the audit and the constraint. Traced: bonus-run vs refund lock order, deactivated
+products and deleted vessels not revalidated, reached devices lost on a lost lease.
+All fixed in `42f5b75`;
+each confirmed case is a regression test (B:test_grounding_support,
+test_push_delivery_outcomes::test_lost_lease_fences_every_later_row_of_the_batch — fails
+on the previous code — M:test_0004_quarantines_malformed_fitment_rules).
+
+Additional concerns raised by the first review:
 
 | Concern | Disposition |
 |---|---|
@@ -235,8 +247,8 @@ identity probes unchanged).
 | D18 | Customer search goes through the API (`/search/products`), not Typesense directly, so fitment stays centralised; Typesense is a prefilter and Postgres is the fallback. |
 | D19 | Admin refunds need a per-request `Idempotency-Key`; crew invites are capped at 20 per crew per rolling day. |
 | D20 | Points tier (deckhand…captain) is display-only and creates no cashback entitlement. |
-| D21 | **Grounding is a per-claim evidence contract** (`services/ai/support.py`). Each clause of a draft is framing, a catalogue/fitment statement about a tool-returned product, or a claim. A claim survives only when a passage cited *by its own sentence* has all its numbers, number+unit pairs and identifiers, the same polarity (negation scopes split at "but/however/;"), and its content words (all of them for quantitative claims, ≥ 75 % otherwise). Unsupported sentences are removed (counted in `removed_statements`), never certified; `grounded` needs ≥ 1 supported claim; otherwise the reply is a controlled limitation + question. Each claim is returned with its supporting passage and the passage's applicability. **Limits:** the check is lexical — it cannot tell which noun a number belongs to *inside one passage sentence*, cannot judge whether a passage is true or applies more finely than make/model, and does not replace live evaluation of model quality on licensed content. |
-| D22 | **Lock order**: `Order → DiscountEntitlement → HelmDashDelivery → CrewPoints` (several accounts in ascending `str(user_id)`, taken together up front via `loyalty.lock_accounts`). Locking delivery lookups lock the order first; voiding locks the entitlement before the account; a refund cancels the delivery before touching points. |
+| D21 | **Grounding is a per-claim evidence contract** (`services/ai/support.py`). Each clause of a draft is framing, a catalogue/fitment statement about a tool-returned product *named in that clause*, or part of a claim. A claim sentence survives only when ONE sentence (or structured fact) of a passage cited *by that sentence* contains all of its content words (no paraphrase allowance; relation words such as with/without, before/after, on/off and quantifiers count), all its numbers, number+unit pairs and identifiers (normalised: 100-hour = 100 h = 100 hours; 10W-30 = 10W30), and agrees clause by clause in polarity with the passage clause it overlaps most. Unsupported sentences are removed (counted in `removed_statements`), never certified; `grounded` needs ≥ 1 supported claim; otherwise the reply is a controlled limitation + question. Each claim is returned with its supporting passage and the passage's applicability. **Limits:** the check is lexical — inside ONE passage sentence that lists several values it cannot tell which noun each belongs to; it cannot judge whether a passage is true or applies more finely than make/model; faithful paraphrases are removed (fail closed); it does not replace live evaluation of model quality on licensed content. |
+| D22 | **Lock order**: `Order → DiscountEntitlement → HelmDashDelivery → crew-period advisory lock (crew, period) → CrewPoints`; several crew-period locks or accounts are taken together, up front, in ascending order (`loyalty.lock_crew_periods`, `loyalty.lock_accounts`). Locking delivery lookups lock the order first; voiding locks the entitlement before the account; a refund cancels the delivery before touching points and takes the crew-period lock before reading bonus recipients; the monthly bonus run takes all its crew-period locks, then all accounts, then re-reads spend. |
 | D23 | **Authorization model**: identity, role and ownership are checked at the start of each request, and the request's effects commit in that request's transaction. A role or ownership change takes effect for subsequent requests; there is no continuous re-authorization during a request already in progress. |
 
 ## 5. Validation log
