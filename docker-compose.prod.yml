@@ -84,11 +84,13 @@ services:
       - sh
       - -c
       - umask 077; printf 'requirepass %s\nappendonly yes\nsave 300 10\n' "$$REDIS_PASSWORD" > /tmp/redis.conf; exec redis-server /tmp/redis.conf
+    # Runs directly as the image's redis user (owner of /data); no capabilities needed.
+    user: redis
     volumes: ["redis_data:/data"]
     tmpfs: ["/tmp:size=8m,mode=1777"]
+    read_only: true
     security_opt: ["no-new-privileges:true"]
     cap_drop: ["ALL"]
-    cap_add: [SETGID, SETUID, CHOWN]
     healthcheck:
       test: ["CMD-SHELL", "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"]
       interval: 10s
