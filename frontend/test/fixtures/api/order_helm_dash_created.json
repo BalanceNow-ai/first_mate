@@ -1,0 +1,63 @@
+{
+  "id": "927f4f55-fba3-4ead-9017-b1774e4506d3",
+  "order_number": "HM-261105-C8MWG2",
+  "status": "pending_payment",
+  "payment_status": "unpaid",
+  "currency": "NZD",
+  "subtotal_cents": 1190,
+  "discount_cents": 0,
+  "shipping_cents": 6708,
+  "total_cents": 7898,
+  "refunded_cents": 0,
+  "discount_entitlement_id": null,
+  "payment_provider": "local",
+  "payment_intent_id": null,
+  "delivery": {
+    "delivery_type": "helm_dash",
+    "shipping_address": null,
+    "helm_dash": {
+      "lat": -36.8,
+      "lng": 174.85,
+      "note": "Port side, white hull",
+      "phone": "021 555 0102",
+      "vessel_name": "Sea Biscuit",
+      "location_name": "Motuihe Channel anchorage",
+      "nautical_miles": 5.26,
+      "estimated_minutes": 28,
+      "operating_area_id": "hauraki-gulf"
+    },
+    "pickup_location": null,
+    "quote_id": "9f988acd-13f4-444b-ac38-251416162e0c",
+    "service_name": "Helm Dash",
+    "estimated_days": null,
+    "estimated_minutes": 28,
+    "free_shipping_applied": false
+  },
+  "items": [
+    {
+      "id": "d1854681-0706-4957-a38d-d33c317e854c",
+      "product_id": "739f5df1-c546-4d3a-a8ad-4e90fc4d467d",
+      "product_name": "Marine duct tape 25 m (synthetic)",
+      "sku": "SYN-DUCT-TAPE",
+      "quantity": 1,
+      "list_price_cents": 1490,
+      "unit_price_cents": 1190,
+      "line_total_cents": 1190
+    }
+  ],
+  "expires_at": "2026-11-05T07:57:27.488160Z",
+  "paid_at": null,
+  "cancelled_at": null,
+  "cancel_reason": null,
+  "notes": null,
+  "can_cancel": true,
+  "can_retry_payment": true,
+  "tracking": {
+    "tracking_number": null,
+    "courier": null,
+    "shipment_status": null,
+    "is_test": false
+  },
+  "created_at": "2026-11-05T07:27:27.491225Z",
+  "updated_at": "2026-11-05T07:27:27.491229Z"
+}

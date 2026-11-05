@@ -1,0 +1,4 @@
+{
+  "detail": "recorded_at is too old to be a live position",
+  "code": "location_stale"
+}

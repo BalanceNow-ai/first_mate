@@ -14,7 +14,7 @@ import 'package:helm_marine/features/auth/screens/signup_screen.dart';
 import 'package:helm_marine/features/cart/screens/cart_screen.dart';
 import 'package:helm_marine/features/checklists/screens/vessel_checklists_screen.dart';
 import 'package:helm_marine/features/checkout/screens/checkout_screen.dart';
-import 'package:helm_marine/features/checkout/screens/order_detail_screen.dart';
+import 'package:helm_marine/features/orders/screens/orders_screens.dart';
 import 'package:helm_marine/features/helm_dash/screens/delivery_tracking_screen.dart';
 import 'package:helm_marine/features/home/screens/home_screen.dart';
 import 'package:helm_marine/features/loyalty/screens/crew_dashboard_screen.dart';

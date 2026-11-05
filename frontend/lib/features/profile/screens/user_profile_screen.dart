@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:helm_marine/core/auth/auth_controller.dart';
 import 'package:helm_marine/core/models/user.dart';
-import 'package:helm_marine/core/money/money.dart';
 import 'package:helm_marine/core/session/session.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
-import 'package:helm_marine/features/profile/providers/profile_provider.dart';
+import 'package:helm_marine/features/orders/screens/orders_screens.dart';
+import 'package:helm_marine/features/staff_orders/screens/staff_hub_screen.dart';
 
 class UserProfileScreen extends ConsumerStatefulWidget {
   const UserProfileScreen({super.key});
@@ -19,7 +19,6 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = AsyncValue<User?>.data(ref.watch(currentUserProvider));
-    final ordersState = ref.watch(orderHistoryProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Profile')),
@@ -108,75 +107,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                 ?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          ordersState.when(
-            data: (orders) {
-              if (orders.isEmpty) {
-                return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      children: [
-                        Icon(Icons.receipt_long,
-                            size: 48,
-                            color: Colors.grey[300]),
-                        const SizedBox(height: 8),
-                        Text(
-                          'No orders yet',
-                          style: TextStyle(color: Colors.grey[500]),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }
-              return Column(
-                children: orders.map((order) {
-                  final orderId = order['id']?.toString() ?? '';
-                  final status = order['status'] as String? ?? '';
-                  final total = order['total_cents'] as int? ?? 0;
-                  final createdAt = order['created_at'] as String? ?? '';
-
-                  String dateStr = '';
-                  if (createdAt.isNotEmpty) {
-                    try {
-                      final dt = DateTime.parse(createdAt);
-                      dateStr = '${dt.day}/${dt.month}/${dt.year}';
-                    } catch (_) {}
-                  }
-
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: ListTile(
-                      onTap: () => context.go('/orders/$orderId'),
-                      leading: _statusIcon(status),
-                      title: Text(
-                        'Order #${orderId.length >= 8 ? orderId.substring(0, 8).toUpperCase() : orderId}',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      subtitle: Text(dateStr.isNotEmpty
-                          ? '$dateStr — ${status.toUpperCase()}'
-                          : status.toUpperCase()),
-                      trailing: Text(
-                        formatCents(total),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: HelmTheme.primary,
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              );
-            },
-            loading: () =>
-                const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text('Failed to load orders: $e'),
-              ),
-            ),
-          ),
+          const RecentOrdersSection(),
+          const StaffToolsEntry(),
           const SizedBox(height: 24),
 
           // --- Settings ---
@@ -200,28 +132,5 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
         ],
       ),
     );
-  }
-
-  Widget _statusIcon(String status) {
-    IconData icon;
-    Color color;
-    switch (status) {
-      case 'paid':
-        icon = Icons.check_circle;
-        color = HelmTheme.success;
-      case 'shipped':
-        icon = Icons.local_shipping;
-        color = HelmTheme.accent;
-      case 'delivered':
-        icon = Icons.done_all;
-        color = HelmTheme.success;
-      case 'cancelled':
-        icon = Icons.cancel;
-        color = HelmTheme.error;
-      default:
-        icon = Icons.pending;
-        color = Colors.grey;
-    }
-    return Icon(icon, color: color);
   }
 }

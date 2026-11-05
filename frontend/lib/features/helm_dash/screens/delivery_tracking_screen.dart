@@ -1,599 +1,263 @@
-// TODO(client pass 2): bind to the Helm Dash delivery contract (reported
-// operator positions and status events, not interpolated positions).
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:helm_marine/core/api/api_error.dart';
+import 'package:helm_marine/core/models/helm_dash.dart';
 import 'package:helm_marine/core/money/money.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
-import 'package:helm_marine/core/widgets/helm_map.dart';
+import 'package:helm_marine/core/widgets/state_views.dart';
 import 'package:helm_marine/features/helm_dash/providers/delivery_provider.dart';
+import 'package:helm_marine/features/helm_dash/widgets/sea_map.dart';
+import 'package:helm_marine/features/orders/widgets/order_widgets.dart';
 import 'package:latlong2/latlong.dart';
 
-// Westhaven Marina, Auckland
-const _warehouseLatLng = LatLng(-36.8406, 174.7530);
-
+/// Customer Helm Dash tracking: status timeline, skipper, and the latest
+/// *reported* position only (no interpolation, no animation between reports).
 class DeliveryTrackingScreen extends ConsumerWidget {
-  final String deliveryId;
-
   const DeliveryTrackingScreen({super.key, required this.deliveryId});
+
+  final String deliveryId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final deliveryState = ref.watch(deliveryDetailProvider(deliveryId));
-    final liveLocationState =
-        ref.watch(deliveryLiveLocationProvider(deliveryId));
-
+    final async = ref.watch(deliveryTrackingProvider(deliveryId));
     return Scaffold(
-      appBar: AppBar(title: const Text('Delivery Tracking')),
-      body: deliveryState.when(
-        data: (delivery) {
-          final status = delivery['status'] as String? ?? 'pending';
-          final nm =
-              (delivery['nautical_miles'] as num?)?.toDouble();
-          final feeCents = delivery['delivery_fee_cents'] as int? ?? 0;
-          final etaMinutes =
-              delivery['estimated_delivery_minutes'] as int?;
-          final operatorName = delivery['operator_name'] as String?;
-          final locationName =
-              delivery['delivery_location_name'] as String?;
-          final coords =
-              delivery['delivery_coordinates'] as Map<String, dynamic>?;
-
-          final destLatLng = coords != null
-              ? LatLng(
-                  (coords['lat'] as num?)?.toDouble() ?? _warehouseLatLng.latitude,
-                  (coords['lng'] as num?)?.toDouble() ?? _warehouseLatLng.longitude,
-                )
-              : null;
-
-          final vesselLocation = liveLocationState.value;
-
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              // Mapbox Map
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: SizedBox(
-                  height: 280,
-                  child: ref.watch(mapTilesProvider) != null
-                      ? _MapView(
-                          tiles: ref.watch(mapTilesProvider)!,
-                          warehouseLatLng: _warehouseLatLng,
-                          destLatLng: destLatLng,
-                          vesselLocation: vesselLocation,
-                          status: status,
-                        )
-                      : _FallbackMapView(
-                          status: status,
-                          coords: coords,
-                          vesselLocation: vesselLocation,
-                        ),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Status
-              _StatusBanner(status: status),
-              const SizedBox(height: 16),
-
-              // Delivery details
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Delivery Details',
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleSmall
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      const Divider(),
-                      if (locationName != null)
-                        _DetailRow(
-                          icon: Icons.location_on,
-                          label: 'Destination',
-                          value: locationName,
-                        ),
-                      if (nm != null)
-                        _DetailRow(
-                          icon: Icons.straighten,
-                          label: 'Distance',
-                          value: '${nm.toStringAsFixed(1)} NM',
-                        ),
-                      _DetailRow(
-                        icon: Icons.attach_money,
-                        label: 'Delivery Fee',
-                        value: formatCents(feeCents, showCode: true),
-                      ),
-                      if (etaMinutes != null)
-                        _DetailRow(
-                          icon: Icons.timer,
-                          label: 'Estimated Time',
-                          value: etaMinutes >= 60
-                              ? '${etaMinutes ~/ 60}h ${etaMinutes % 60}m'
-                              : '$etaMinutes min',
-                        ),
-                      if (operatorName != null)
-                        _DetailRow(
-                          icon: Icons.person,
-                          label: 'Operator',
-                          value: operatorName,
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Status timeline
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Status Timeline',
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleSmall
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 12),
-                      _TimelineStep(
-                        label: 'Order Placed',
-                        isComplete: true,
-                        isActive: status == 'pending',
-                      ),
-                      _TimelineStep(
-                        label: 'Assigned to Operator',
-                        isComplete: _statusIndex(status) >= 1,
-                        isActive: status == 'assigned',
-                      ),
-                      _TimelineStep(
-                        label: 'Picking Up',
-                        isComplete: _statusIndex(status) >= 2,
-                        isActive: status == 'pickup',
-                      ),
-                      _TimelineStep(
-                        label: 'En Route',
-                        isComplete: _statusIndex(status) >= 3,
-                        isActive: status == 'en_route',
-                      ),
-                      _TimelineStep(
-                        label: 'Delivered',
-                        isComplete: _statusIndex(status) >= 4,
-                        isActive: status == 'delivered',
-                        isLast: true,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 48, color: HelmTheme.error),
-              const SizedBox(height: 16),
-              Text('Failed to load delivery\n$error',
-                  textAlign: TextAlign.center),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () =>
-                    ref.invalidate(deliveryDetailProvider(deliveryId)),
-                child: const Text('Retry'),
-              ),
-            ],
+      appBar: AppBar(
+        title: const Text('Helm Dash tracking'),
+        actions: [
+          IconButton(
+            tooltip: 'Refresh',
+            icon: const Icon(Icons.refresh),
+            onPressed: () => ref.read(deliveryTrackingProvider(deliveryId).notifier).refresh(),
           ),
+        ],
+      ),
+      body: async.when(
+        loading: () => const LoadingView(message: 'Loading delivery…'),
+        error: (e, _) => ErrorView(
+          error: e,
+          title: 'Could not load this delivery',
+          onRetry: () => ref.invalidate(deliveryTrackingProvider(deliveryId)),
         ),
+        data: (view) => _TrackingBody(view: view),
       ),
     );
   }
-
-  int _statusIndex(String status) {
-    const statuses = ['pending', 'assigned', 'pickup', 'en_route', 'delivered'];
-    return statuses.indexOf(status);
-  }
 }
 
-/// Tile map with markers for warehouse, destination and vessel.
-class _MapView extends StatelessWidget {
-  final MapTiles tiles;
-  final LatLng warehouseLatLng;
-  final LatLng? destLatLng;
-  final DeliveryLocation? vesselLocation;
-  final String status;
+class _TrackingBody extends StatelessWidget {
+  const _TrackingBody({required this.view});
 
-  const _MapView({
-    required this.tiles,
-    required this.warehouseLatLng,
-    this.destLatLng,
-    this.vesselLocation,
-    required this.status,
-  });
-
-  LatLng get _center {
-    if (vesselLocation != null) {
-      return LatLng(vesselLocation!.lat, vesselLocation!.lng);
-    }
-    if (destLatLng != null) {
-      return LatLng(
-        (warehouseLatLng.latitude + destLatLng!.latitude) / 2,
-        (warehouseLatLng.longitude + destLatLng!.longitude) / 2,
-      );
-    }
-    return warehouseLatLng;
-  }
+  final TrackingView view;
 
   @override
   Widget build(BuildContext context) {
-    return HelmMap(
-      tiles: tiles,
-      center: _center,
-      markers: [
-        MapMarker(
-          point: warehouseLatLng,
-          label: 'Warehouse',
+    final t = view.tracking;
+    final theme = Theme.of(context);
+    final loc = t.latestLocation;
+    final destination = LatLng(t.deliveryPoint.lat, t.deliveryPoint.lng);
+    final markers = <SeaMarker>[
+      SeaMarker(
+        point: destination,
+        label: 'Delivery point${t.deliveryLocationName == null ? '' : ': ${t.deliveryLocationName}'}',
+        icon: Icons.location_pin,
+        color: HelmTheme.coral,
+      ),
+      if (t.pickupLocation != null)
+        SeaMarker(
+          point: LatLng(t.pickupLocation!.lat, t.pickupLocation!.lng),
+          label: t.pickupLocation!.name ?? 'Pickup',
           icon: Icons.warehouse,
           color: HelmTheme.navy,
         ),
-        if (destLatLng != null)
-          MapMarker(
-            point: destLatLng!,
-            label: 'Delivery point',
-            icon: Icons.location_on,
-            color: HelmTheme.error,
-          ),
-        if (vesselLocation != null)
-          MapMarker(
-            point: LatLng(vesselLocation!.lat, vesselLocation!.lng),
-            label: vesselLocation!.label,
-            icon: Icons.directions_boat,
-            color: HelmTheme.ocean,
-          ),
-      ],
-    );
-  }
-}
-
-/// Fallback view when no map tiles are configured.
-class _FallbackMapView extends StatelessWidget {
-  final String status;
-  final Map<String, dynamic>? coords;
-  final DeliveryLocation? vesselLocation;
-
-  const _FallbackMapView({
-    required this.status,
-    this.coords,
-    this.vesselLocation,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: HelmTheme.primary.withValues(alpha: 0.08),
-        border: Border.all(color: HelmTheme.primary.withValues(alpha: 0.2)),
-      ),
-      child: Stack(
+      if (loc != null)
+        SeaMarker(
+          point: LatLng(loc.lat, loc.lng),
+          label: loc.isSimulated ? 'Last reported position (simulated, local test)' : 'Last reported position',
+          icon: Icons.directions_boat,
+          color: loc.isSimulated ? HelmTheme.warning : HelmTheme.ocean,
+        ),
+    ];
+    return ContentWidth(
+      maxWidth: 960,
+      child: ListView(
+        padding: const EdgeInsets.all(16),
         children: [
-          const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.map, size: 48, color: HelmTheme.primary),
-                SizedBox(height: 8),
-                Text(
-                  'Map view',
-                  style: TextStyle(color: HelmTheme.primary),
-                ),
-                Text(
-                  'Set MAPBOX_ACCESS_TOKEN to enable live map',
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                ),
-              ],
+          Semantics(
+            header: true,
+            child: Text('Order ${t.orderNumber}', style: theme.textTheme.titleLarge),
+          ),
+          const SizedBox(height: 8),
+          Semantics(
+            liveRegion: true,
+            child: LabelChip(
+              label: t.statusLabel,
+              color: t.status == 'delivered'
+                  ? HelmTheme.success
+                  : (t.status == 'failed' || t.status == 'cancelled')
+                      ? HelmTheme.error
+                      : HelmTheme.ocean,
+              icon: Icons.sailing,
+              semanticPrefix: 'Delivery status',
             ),
           ),
-          const Positioned(
-            left: 30,
-            top: 40,
-            child: _MapPin(
-              icon: Icons.warehouse,
-              color: HelmTheme.primary,
-              label: 'Warehouse',
+          const SizedBox(height: 8),
+          if (t.operatorDisplayName != null)
+            Text('Skipper: ${t.operatorDisplayName}${t.operatorVesselName == null ? '' : ' · ${t.operatorVesselName}'}')
+          else
+            const Text('No skipper assigned yet.'),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 320,
+            child: SeaMap(
+              center: loc != null ? LatLng(loc.lat, loc.lng) : destination,
+              zoom: 11,
+              markers: markers,
             ),
           ),
-          if (coords != null)
-            const Positioned(
-              right: 40,
-              bottom: 50,
-              child: _MapPin(
-                icon: Icons.location_on,
-                color: HelmTheme.error,
-                label: 'Delivery',
+          const SizedBox(height: 12),
+          _PositionPanel(view: view),
+          const SizedBox(height: 12),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Semantics(header: true, child: Text('Delivery', style: theme.textTheme.titleMedium)),
+                  const SizedBox(height: 6),
+                  if (t.deliveryLocationName != null) Text(t.deliveryLocationName!),
+                  Text('${t.deliveryPoint.lat.toStringAsFixed(5)}, ${t.deliveryPoint.lng.toStringAsFixed(5)}'),
+                  if (t.nauticalMiles != null) Text('${t.nauticalMiles!.toStringAsFixed(2)} nm from the warehouse'),
+                  if (t.estimatedDeliveryMinutes != null)
+                    Text('Estimated ${t.estimatedDeliveryMinutes} min once the skipper departs'),
+                  Text('Helm Dash fee ${formatCents(t.deliveryFeeCents)}'),
+                ],
               ),
             ),
-          if (vesselLocation != null)
-            Positioned(
-              left: _simulateX(status),
-              top: _simulateY(status),
-              child: _MapPin(
-                icon: Icons.directions_boat,
-                color: HelmTheme.accent,
-                label: vesselLocation!.label,
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Semantics(header: true, child: Text('Timeline', style: theme.textTheme.titleMedium)),
+                  const SizedBox(height: 6),
+                  for (final e in t.timeline)
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      leading: Icon(
+                        e.status == t.status ? Icons.radio_button_checked : Icons.check_circle_outline,
+                        color: e.status == t.status ? HelmTheme.primary : HelmTheme.success,
+                      ),
+                      title: Text(e.label),
+                      subtitle: Text(formatLocalDateTime(e.at)),
+                    ),
+                ],
               ),
             ),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: () => context.go('/orders/${t.orderId}'),
+            icon: const Icon(Icons.receipt_long),
+            label: const Text('View order'),
+          ),
         ],
       ),
     );
   }
-
-  double _simulateX(String status) {
-    switch (status) {
-      case 'pending':
-      case 'assigned':
-        return 30;
-      case 'pickup':
-        return 80;
-      case 'en_route':
-        return 180;
-      case 'delivered':
-        return 260;
-      default:
-        return 30;
-    }
-  }
-
-  double _simulateY(String status) {
-    switch (status) {
-      case 'pending':
-      case 'assigned':
-        return 40;
-      case 'pickup':
-        return 70;
-      case 'en_route':
-        return 120;
-      case 'delivered':
-        return 170;
-      default:
-        return 40;
-    }
-  }
 }
 
-class _MapPin extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final String label;
+/// The latest reported position, its source and age — or why there is none.
+class _PositionPanel extends StatefulWidget {
+  const _PositionPanel({required this.view});
 
-  const _MapPin({
-    required this.icon,
-    required this.color,
-    required this.label,
-  });
+  final TrackingView view;
+
+  @override
+  State<_PositionPanel> createState() => _PositionPanelState();
+}
+
+class _PositionPanelState extends State<_PositionPanel> {
+  Timer? _tick;
+
+  @override
+  void initState() {
+    super.initState();
+    _tick = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _tick?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: color.withValues(alpha: 0.3),
-                blurRadius: 8,
-                spreadRadius: 2,
-              ),
-            ],
-          ),
-          child: Icon(icon, color: Colors.white, size: 16),
-        ),
-        const SizedBox(height: 2),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(4),
-          ),
+    final t = widget.view.tracking;
+    final loc = t.latestLocation;
+    final theme = Theme.of(context);
+    final children = <Widget>[];
+    if (loc == null) {
+      children.add(Row(children: [
+        const Icon(Icons.gps_not_fixed, color: HelmTheme.mutedText),
+        const SizedBox(width: 8),
+        Expanded(
           child: Text(
-            label,
-            style: TextStyle(fontSize: 8, color: color),
+            t.locationMessage ?? (t.isActive ? 'Awaiting first position report' : 'No position was reported.'),
+            style: theme.textTheme.titleSmall,
           ),
         ),
-      ],
-    );
-  }
-}
-
-class _StatusBanner extends StatelessWidget {
-  final String status;
-
-  const _StatusBanner({required this.status});
-
-  Color get _color {
-    switch (status) {
-      case 'delivered':
-        return HelmTheme.success;
-      case 'en_route':
-      case 'pickup':
-        return HelmTheme.accent;
-      case 'cancelled':
-        return HelmTheme.error;
-      default:
-        return HelmTheme.primary;
-    }
-  }
-
-  IconData get _icon {
-    switch (status) {
-      case 'delivered':
-        return Icons.check_circle;
-      case 'en_route':
-        return Icons.directions_boat;
-      case 'pickup':
-        return Icons.inventory;
-      case 'assigned':
-        return Icons.person_pin;
-      case 'cancelled':
-        return Icons.cancel;
-      default:
-        return Icons.schedule;
-    }
-  }
-
-  String get _label {
-    switch (status) {
-      case 'pending':
-        return 'Pending';
-      case 'assigned':
-        return 'Assigned to Operator';
-      case 'pickup':
-        return 'Picking Up Order';
-      case 'en_route':
-        return 'En Route';
-      case 'delivered':
-        return 'Delivered';
-      case 'cancelled':
-        return 'Cancelled';
-      default:
-        return status;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: _color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _color.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        children: [
-          Icon(_icon, color: _color, size: 28),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _label,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: _color,
-                ),
-              ),
-              Text(
-                'Helm Dash Maritime Delivery',
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-
-  const _DetailRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: Colors.grey[600]),
+      ]));
+    } else {
+      // Server age at the time of the answer plus the time since then.
+      final age = Duration(seconds: loc.ageSeconds) + DateTime.now().difference(widget.view.receivedAt);
+      children.addAll([
+        Row(children: [
+          Icon(Icons.gps_fixed, color: loc.isSimulated ? HelmTheme.warning : HelmTheme.ocean),
           const SizedBox(width: 8),
-          Text(label, style: TextStyle(color: Colors.grey[600])),
-          const Spacer(),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
-        ],
+          Expanded(child: Text('Last reported ${describeAge(age)}', style: theme.textTheme.titleSmall)),
+        ]),
+        const SizedBox(height: 4),
+        if (loc.isSimulated)
+          const LabelChip(label: 'Simulated (local test)', color: HelmTheme.warning, icon: Icons.science),
+        Text(loc.sourceLabel),
+        Text('Position ${loc.lat.toStringAsFixed(5)}, ${loc.lng.toStringAsFixed(5)}'
+            '${loc.accuracyM != null ? ' (±${loc.accuracyM!.round()} m)' : ''}'),
+        Text('Recorded ${formatLocalDateTime(loc.recordedAt)}', style: theme.textTheme.bodySmall),
+        Text('Shown as reported — positions are not estimated between reports.', style: theme.textTheme.bodySmall),
+      ]);
+    }
+    if (t.isActive) {
+      children.add(Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: Text('Updates automatically every 10 seconds.', style: theme.textTheme.bodySmall),
+      ));
+    }
+    if (widget.view.pollError != null) {
+      children.add(Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: Text('Could not refresh: ${describeError(widget.view.pollError!)}',
+            style: const TextStyle(color: HelmTheme.error)),
+      ));
+    }
+    return Semantics(
+      container: true,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children),
+        ),
       ),
-    );
-  }
-}
-
-class _TimelineStep extends StatelessWidget {
-  final String label;
-  final bool isComplete;
-  final bool isActive;
-  final bool isLast;
-
-  const _TimelineStep({
-    required this.label,
-    required this.isComplete,
-    this.isActive = false,
-    this.isLast = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isComplete
-        ? HelmTheme.success
-        : isActive
-            ? HelmTheme.accent
-            : Colors.grey[300]!;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Column(
-          children: [
-            Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isComplete ? color : Colors.white,
-                border: Border.all(color: color, width: 2),
-              ),
-              child: isComplete
-                  ? const Icon(Icons.check, size: 12, color: Colors.white)
-                  : null,
-            ),
-            if (!isLast)
-              Container(
-                width: 2,
-                height: 24,
-                color: isComplete ? HelmTheme.success : Colors.grey[300],
-              ),
-          ],
-        ),
-        const SizedBox(width: 12),
-        Padding(
-          padding: const EdgeInsets.only(top: 2),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-              color: isActive ? HelmTheme.accent : null,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

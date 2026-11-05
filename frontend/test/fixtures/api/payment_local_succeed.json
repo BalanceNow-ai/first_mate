@@ -1,0 +1,10 @@
+{
+  "test_mode": true,
+  "outcome": "succeed",
+  "event_id": "evt_local_67eff53939e641439c6842ebefbf5e7e",
+  "event_type": "payment_intent.succeeded",
+  "event_outcome": "applied",
+  "order_id": "927f4f55-fba3-4ead-9017-b1774e4506d3",
+  "order_status": "paid",
+  "payment_status": "succeeded"
+}

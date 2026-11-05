@@ -1,0 +1,24 @@
+{
+  "id": "f4777d8b-3d9c-4262-9b41-cf4806670343",
+  "delivery_type": "helm_dash",
+  "provider": "helm_dash",
+  "service_name": "Helm Dash",
+  "price_cents": 6708,
+  "currency": "NZD",
+  "destination": {
+    "lat": -36.8,
+    "lng": 174.85,
+    "location_name": "Motuihe Channel anchorage"
+  },
+  "parcel_weight_grams": 3350,
+  "merchandise_subtotal_cents": 11090,
+  "free_shipping_threshold_cents": null,
+  "operating_area_id": "hauraki-gulf",
+  "operating_area_name": "Hauraki Gulf (local demo area)",
+  "nautical_miles": 5.26,
+  "estimated_minutes": 28,
+  "estimated_days": null,
+  "development_rate_card": false,
+  "expires_at": "2026-11-05T07:46:26.748339Z",
+  "created_at": "2026-11-05T07:26:26.748339Z"
+}

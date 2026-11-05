@@ -1,0 +1,13 @@
+{
+  "currency": "NZD",
+  "delivery_type": "helm_dash",
+  "quote_id": "9f988acd-13f4-444b-ac38-251416162e0c",
+  "subtotal_cents": 1190,
+  "discount_cents": 0,
+  "shipping_cents": 6708,
+  "total_cents": 7898,
+  "free_shipping_applied": false,
+  "free_shipping_threshold_cents": 15000,
+  "min_charge_cents": 50,
+  "pickup_location": null
+}

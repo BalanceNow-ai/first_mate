@@ -1,0 +1,63 @@
+{
+  "environment": "development",
+  "currency": "NZD",
+  "payments": {
+    "provider": "local",
+    "stripe_publishable_key": null,
+    "local_test_mode": true,
+    "methods": [
+      {
+        "id": "card",
+        "enabled": true,
+        "reason": null
+      },
+      {
+        "id": "afterpay",
+        "enabled": false,
+        "reason": "Afterpay is not offered: it requires an Afterpay-enabled Stripe account and a redirect-based confirmation flow that has not been implemented or validated."
+      },
+      {
+        "id": "laybuy",
+        "enabled": false,
+        "reason": "Laybuy is not offered: no merchant account or current API documentation has been validated for this integration."
+      }
+    ]
+  },
+  "delivery": {
+    "courier": {
+      "enabled": true,
+      "service_name": "Standard courier",
+      "reason": null,
+      "development_rate_card": true
+    },
+    "helm_dash": {
+      "enabled": true,
+      "reason": null
+    },
+    "click_and_collect": {
+      "enabled": true,
+      "location": "Helm Marine, Westhaven Marina, Auckland"
+    },
+    "free_shipping_threshold_cents": 15000,
+    "dangerous_goods_delivery_types": [
+      "click_and_collect"
+    ]
+  },
+  "ai": {
+    "enabled": true,
+    "mode": "local_extractive",
+    "local_substitute": true
+  },
+  "content": {
+    "provider": "local_fixture",
+    "local_fixture": true
+  },
+  "search": {
+    "backend": "typesense"
+  },
+  "mapbox_public_token": null,
+  "warehouse": {
+    "lat": -36.8406,
+    "lng": 174.753
+  }
+}

@@ -102,51 +102,8 @@ class ApiService {
 
   Future<void> clearCart() => _call(() => _dio.delete('/cart/'), (_) {});
 
-  // --- Pass-2 screens: untyped until their contracts are merged -------------
-  // TODO(client pass 2): replace these Map-based calls with typed models.
-  // First Mate (`/ai/*`) and Crew Rewards (`/loyalty/*`) are typed in
-  // features/ai_chat/data/first_mate_api.dart and features/loyalty/data/loyalty_api.dart.
-
-  Future<List<Map<String, dynamic>>> getVesselChecklists(String vesselId) =>
-      _call(() => _dio.get('/checklists/vessel/$vesselId'), _list);
-
-  Future<Map<String, dynamic>> generateChecklists(String vesselId) =>
-      _call(() => _dio.post('/checklists/vessel/$vesselId/generate'), _map);
-
-  Future<Map<String, dynamic>> toggleChecklistItem(String itemId) =>
-      _call(() => _dio.patch('/checklists/items/$itemId/toggle'), _map);
-
-  Future<Map<String, dynamic>> linkProductToItem(String itemId, String productId) => _call(
-        () => _dio.patch('/checklists/items/$itemId/link-product',
-            data: {'product_id': productId}),
-        _map,
-      );
-
-  Future<Map<String, dynamic>> addUncheckedToCart(String vesselId) =>
-      _call(() => _dio.post('/checklists/vessel/$vesselId/add-unchecked-to-cart'), _map);
-
-  Future<List<Map<String, dynamic>>> getOrders() => _call(() => _dio.get('/orders/'), _list);
-
-  Future<Map<String, dynamic>> createOrder(Map<String, dynamic> data) =>
-      _call(() => _dio.post('/orders/', data: data), _map);
-
-  Future<Map<String, dynamic>> getOrder(String orderId) =>
-      _call(() => _dio.get('/orders/$orderId'), _map);
-
-  Future<Map<String, dynamic>> createPaymentIntent(String orderId) =>
-      _call(() => _dio.post('/payments/$orderId/create-intent'), _map);
-
-  Future<Map<String, dynamic>> getShippingRates(Map<String, dynamic> data) =>
-      _call(() => _dio.post('/shipping/rates', data: data), _map);
-
-  Future<Map<String, dynamic>> getHelmDashQuote(double lat, double lng) => _call(
-        () => _dio.post('/helm-dash/quote', data: {'delivery_lat': lat, 'delivery_lng': lng}),
-        _map,
-      );
-
-  Future<List<Map<String, dynamic>>> getHelmDashDeliveries() =>
-      _call(() => _dio.get('/helm-dash/deliveries'), _list);
-
-  Future<Map<String, dynamic>> getHelmDashDelivery(String id) =>
-      _call(() => _dio.get('/helm-dash/deliveries/$id'), _map);
+  // Feature contracts live in typed feature clients: catalogue (features/products/data),
+  // garage (features/vessels/data), checklists (features/checklists/data), First Mate
+  // (features/ai_chat/data), Crew Rewards (features/loyalty/data), commerce
+  // (features/orders/data) and dispatch/staff (features/dispatch/data).
 }

@@ -1,0 +1,10 @@
+{
+  "test_mode": true,
+  "outcome": "decline",
+  "event_id": "evt_local_828e6a31a49a457bb292c786f3e76f3b",
+  "event_type": "payment_intent.payment_failed",
+  "event_outcome": "applied",
+  "order_id": "313dec26-cc8b-4e84-a618-e9df023eb676",
+  "order_status": "pending_payment",
+  "payment_status": "failed"
+}

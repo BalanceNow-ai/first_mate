@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,11 +16,13 @@ const _configHint = 'Build with --dart-define=API_BASE_URL=https://<api-host>/ap
     '--dart-define=SUPABASE_URL=https://<project>.supabase.co '
     '--dart-define=SUPABASE_ANON_KEY=<public anon key>.';
 
+/// Keeps the web semantics tree enabled (screen readers and browser automation
+/// see real labelled elements instead of a bare canvas).
+SemanticsHandle? _webSemantics;
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Build the semantics tree on the web from the start so assistive technology
-  // (and browser automation) sees labelled controls without an opt-in gesture.
-  if (kIsWeb) SemanticsBinding.instance.ensureSemantics();
+  if (kIsWeb) _webSemantics ??= SemanticsBinding.instance.ensureSemantics();
 
   final config = AppConfig.fromEnvironment();
   final problems = config.problems();

@@ -1,0 +1,52 @@
+{
+  "items": [
+    {
+      "id": "927f4f55-fba3-4ead-9017-b1774e4506d3",
+      "order_number": "HM-261105-C8MWG2",
+      "status": "delivered",
+      "payment_status": "succeeded",
+      "currency": "NZD",
+      "total_cents": 7898,
+      "refunded_cents": 0,
+      "delivery_type": "helm_dash",
+      "item_count": 1,
+      "expires_at": "2026-11-05T07:57:27.488160Z",
+      "created_at": "2026-11-05T07:27:27.491225Z",
+      "user_id": "0271fba4-92e7-4101-b899-2cd0ba0efae7",
+      "review_reason": null
+    },
+    {
+      "id": "269e4190-3b6d-4e93-87af-626aef9b81eb",
+      "order_number": "HM-261105-M93GA5",
+      "status": "cancelled",
+      "payment_status": "unpaid",
+      "currency": "NZD",
+      "total_cents": 1190,
+      "refunded_cents": 0,
+      "delivery_type": "click_and_collect",
+      "item_count": 1,
+      "expires_at": "2026-11-05T07:57:27.393254Z",
+      "created_at": "2026-11-05T07:27:27.394253Z",
+      "user_id": "0271fba4-92e7-4101-b899-2cd0ba0efae7",
+      "review_reason": null
+    },
+    {
+      "id": "313dec26-cc8b-4e84-a618-e9df023eb676",
+      "order_number": "HM-261105-QZQG4Q",
+      "status": "paid",
+      "payment_status": "succeeded",
+      "currency": "NZD",
+      "total_cents": 12380,
+      "refunded_cents": 0,
+      "delivery_type": "courier",
+      "item_count": 11,
+      "expires_at": "2026-11-05T07:56:27.018747Z",
+      "created_at": "2026-11-05T07:26:27.020308Z",
+      "user_id": "0271fba4-92e7-4101-b899-2cd0ba0efae7",
+      "review_reason": null
+    }
+  ],
+  "total": 3,
+  "page": 1,
+  "page_size": 50
+}
