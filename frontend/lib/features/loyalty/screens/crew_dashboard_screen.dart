@@ -848,7 +848,7 @@ class _DiscountFormState extends ConsumerState<_DiscountForm> {
     if (!_form.currentState!.validate()) return;
     final points = int.parse(_amount.text.trim());
     // One key per intended redemption: a double tap returns the same code.
-    _key ??= 'redeem-${DateTime.now().microsecondsSinceEpoch}-${Random().nextInt(1 << 32)}';
+    _key ??= 'redeem-${DateTime.now().microsecondsSinceEpoch}-${Random().nextInt(0x3fffffff)}';
     setState(() => _busy = true);
     try {
       final e = await ref.read(loyaltyApiProvider).redeemDiscount(points, idempotencyKey: _key!);

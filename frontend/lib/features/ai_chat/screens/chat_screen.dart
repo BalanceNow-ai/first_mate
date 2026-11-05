@@ -178,17 +178,13 @@ class _VesselContextBar extends ConsumerWidget {
             Expanded(
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Semantics(
-                  button: true,
-                  label: '$label. Change vessel',
-                  excludeSemantics: true,
-                  child: ActionChip(
-                    avatar: const Icon(Icons.directions_boat, size: 18),
-                    label: Text(label, overflow: TextOverflow.ellipsis),
-                    onPressed: list.isEmpty
-                        ? () => context.go('/vessels/new')
-                        : () => _pickVessel(context, ref, list, chosen?.id ?? answeredFor?.id ?? primary?.id),
-                  ),
+                child: ActionChip(
+                  avatar: const Icon(Icons.directions_boat, size: 18),
+                  tooltip: list.isEmpty ? 'Add a vessel' : 'Change vessel',
+                  label: Text(label, overflow: TextOverflow.ellipsis),
+                  onPressed: list.isEmpty
+                      ? () => context.go('/vessels/new')
+                      : () => _pickVessel(context, ref, list, chosen?.id ?? answeredFor?.id ?? primary?.id),
                 ),
               ),
             ),

@@ -324,6 +324,7 @@ class _CartActionButtonState extends ConsumerState<CartActionButton> {
       setState(() => _added = true);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: const Text('Added to cart'),
+        persist: false,
         action: SnackBarAction(label: 'View cart', onPressed: () => context.go('/cart')),
       ));
     } catch (e) {
@@ -344,16 +345,15 @@ class _CartActionButtonState extends ConsumerState<CartActionButton> {
         children: [
           Text(widget.action.label, style: Theme.of(context).textTheme.bodySmall),
           const SizedBox(height: 4),
-          Semantics(
-            button: true,
-            label: _added ? 'Added to cart' : 'Add to cart: ${widget.action.label}',
-            excludeSemantics: true,
-            child: FilledButton.icon(
-              onPressed: _busy || _added ? null : _add,
-              icon: _busy
-                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                  : Icon(_added ? Icons.check : Icons.add_shopping_cart),
-              label: Text(_added ? 'Added to cart' : 'Add to cart'),
+          FilledButton.icon(
+            onPressed: _busy || _added ? null : _add,
+            icon: _busy
+                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                : Icon(_added ? Icons.check : Icons.add_shopping_cart),
+            // The spoken name says which product the action adds.
+            label: Text(
+              _added ? 'Added to cart' : 'Add to cart',
+              semanticsLabel: _added ? 'Added to cart' : 'Add to cart: ${widget.action.label}',
             ),
           ),
           if (_error != null)
