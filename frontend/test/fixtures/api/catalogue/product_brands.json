@@ -1,0 +1,58 @@
+[
+  {
+    "brand": "FixtureCom",
+    "count": 1
+  },
+  {
+    "brand": "FixtureElec",
+    "count": 3
+  },
+  {
+    "brand": "FixtureGeneral",
+    "count": 5
+  },
+  {
+    "brand": "FixtureHead",
+    "count": 1
+  },
+  {
+    "brand": "FixtureLight",
+    "count": 1
+  },
+  {
+    "brand": "FixtureLube",
+    "count": 2
+  },
+  {
+    "brand": "FixtureMarine",
+    "count": 1
+  },
+  {
+    "brand": "FixtureParts",
+    "count": 10
+  },
+  {
+    "brand": "FixtureProp",
+    "count": 1
+  },
+  {
+    "brand": "FixturePump",
+    "count": 1
+  },
+  {
+    "brand": "FixtureRig",
+    "count": 1
+  },
+  {
+    "brand": "FixtureSafety",
+    "count": 1
+  },
+  {
+    "brand": "FixtureSteer",
+    "count": 1
+  },
+  {
+    "brand": "FixtureTools",
+    "count": 3
+  }
+]

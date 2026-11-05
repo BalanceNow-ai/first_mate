@@ -1,0 +1,41 @@
+{
+  "id": "c91856bb-23c1-4d39-a471-e6a52808e1f9",
+  "sku": "SYN-PLUG-150",
+  "name": "Spark plug set — Yamaha F150 (synthetic)",
+  "description": "Synthetic test product — not a real catalogue item. Spark plug set — Yamaha F150 (synthetic)",
+  "brand": "FixtureParts",
+  "category": "Engine Parts",
+  "sub_category": "Ignition",
+  "currency": "NZD",
+  "price_cents": 8990,
+  "sale_price_cents": null,
+  "effective_price_cents": 8990,
+  "on_sale": false,
+  "stock_quantity": 24,
+  "in_stock": true,
+  "weight_grams": 240,
+  "images": [],
+  "specifications": {
+    "synthetic": true
+  },
+  "oem_part_numbers": [
+    "SYN-PLUG-150"
+  ],
+  "part_role": "spark_plug",
+  "fitment_scope": "specific",
+  "dangerous_goods": false,
+  "is_active": true,
+  "created_at": "2026-11-05T07:10:53.280244Z",
+  "updated_at": "2026-11-05T07:12:52.063165Z",
+  "fitment": {
+    "status": "verified_fit",
+    "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+    "message": "Fits Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout)",
+    "reasons": [
+      "engine matches verified fitment"
+    ],
+    "matched_rule_ids": [
+      "15f7c347-07c9-4583-b5dc-545eb5f84275"
+    ]
+  }
+}

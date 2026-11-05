@@ -1,0 +1,23 @@
+# Helm voyage spares checklist,Kahawai (2021 Synthetic Test Marine (fixture) Fixture 600 Runabout),Coastal Cruising Kit (weekend & multi-day trips)
+# This is a practical spares list to help you prepare. It is NOT a certified safety-equipment list or a regulatory-compliance assessment. Check the safety equipment legally required for your vessel and trip with Maritime NZ and your local regional council.
+tier_introduced,system,item,quantity,unit,applicability,checked,product_sku,product_name,link_status
+grab_and_go,Engine,Spare propeller with prop nut and split pin,1,1 each,applies,no,,,unlinked
+grab_and_go,Engine,Spare engine fuel filter (primary),2,2 each,applies,no,SYN-FF-150,Primary fuel filter — Yamaha F150 (synthetic),verified_fit
+grab_and_go,Engine,Spare spark plugs,1,1 set,applies,no,SYN-PLUG-150,Spark plug set — Yamaha F150 (synthetic),verified_fit
+grab_and_go,Engine,Spare kill switch lanyard,1,1 each,applies,no,,,unlinked
+grab_and_go,Electrical,Spare navigation light bulbs (if not LED),1,1 set,if_fitted,no,,,unlinked
+grab_and_go,Electrical,"Assorted fuses (5A, 10A, 15A)",1,1 pack,applies,no,SYN-FUSE-ASST,Blade fuse assortment 5/10/15 A (synthetic),universal
+grab_and_go,General,Duct tape,1,1 roll,applies,no,SYN-DUCT-TAPE,Marine duct tape 25 m (synthetic),universal
+grab_and_go,General,Zip ties (assorted sizes),1,1 pack,applies,no,SYN-ZIP-TIES,"UV-stable zip ties, assorted 200 pack (synthetic)",universal
+grab_and_go,General,Stainless steel hose clamps (assorted sizes),1,1 pack,applies,no,SYN-HOSE-CLAMP,316 stainless hose clamp assortment (synthetic),universal
+grab_and_go,General,Emergency wooden bungs (tapered),1,1 set,applies,no,SYN-BUNGS,Tapered softwood emergency bung set (synthetic),universal
+grab_and_go,Tools,"Shifting spanner, pliers, screwdriver set, prop spanner, spark plug spanner",1,1 kit,applies,no,SYN-TOOLKIT-BASIC,Grab-bag basic tool kit (synthetic),universal
+coastal_cruising,Engine,Spare water pump impeller & gasket,1,1 each,applies,no,SYN-IMP-150,Water pump impeller kit — Yamaha F150 (synthetic),verified_fit
+coastal_cruising,Engine,Spare thermostat & gasket,1,1 each,applies,no,SYN-THERM-150,Thermostat & gasket — Yamaha F150 (synthetic),verified_fit
+coastal_cruising,Engine,Spare alternator / serpentine belt,1,1 each,if_fitted,no,,,unlinked
+coastal_cruising,Engine,Engine oil (1 L top-up),1,1 each,applies,no,SYN-OIL-150,4-stroke outboard oil 1 L — for Yamaha F150 (synthetic),verified_fit
+coastal_cruising,Plumbing,Spare bilge pump (cartridge or complete),1,1 each,if_fitted,no,,,unlinked
+coastal_cruising,Electrical,Spare battery terminals,1,1 set,applies,no,SYN-BATT-TERM,Marine battery terminal pair (synthetic),universal
+coastal_cruising,Electrical,Small spool of marine-grade electrical wire,1,1 each,applies,no,SYN-WIRE-TINNED,"Tinned marine wire 2.5 mm², 10 m (synthetic)",universal
+coastal_cruising,Electrical,Butt connectors & crimper,1,1 kit,applies,no,SYN-CRIMP-KIT,Heat-shrink butt connector & crimper kit (synthetic),universal
+coastal_cruising,Tools,"Full socket set, multimeter, strap wrench (for filters)",1,1 kit,applies,no,SYN-TOOLKIT-COASTAL,"Coastal tool kit: sockets, multimeter, strap wrench (synthetic)",universal

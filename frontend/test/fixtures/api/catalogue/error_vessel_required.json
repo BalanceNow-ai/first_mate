@@ -1,0 +1,4 @@
+{
+  "detail": "compatible_only requires vessel_id",
+  "code": "vessel_required"
+}

@@ -1,0 +1,15 @@
+{
+  "id": "06057391-87f1-46c5-a9d7-aedad2128efb",
+  "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+  "equipment_id": null,
+  "title": "Replace impeller",
+  "due_on": "2026-10-01",
+  "due_engine_hours": 200,
+  "interval_months": 12,
+  "interval_hours": 100,
+  "status": "active",
+  "source": "owner",
+  "is_due": true,
+  "created_at": "2026-11-05T07:43:05.334409Z",
+  "updated_at": "2026-11-05T07:43:05.334418Z"
+}

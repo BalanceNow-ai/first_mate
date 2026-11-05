@@ -1,0 +1,30 @@
+{
+  "id": "cdff2d29-1be7-46fb-8bbf-8eec71092076",
+  "source": "installed",
+  "vessel_id": "39aad79c-e1ce-4353-acba-6ed76c623647",
+  "category": {
+    "id": "22172071-dcbe-4be8-8848-5437e7231a7c",
+    "slug": "chartplotter",
+    "name": "Chartplotter / GPS",
+    "parent_id": "ea976441-1a55-4a76-96b7-066b6fa8fae1"
+  },
+  "make": "Garmin",
+  "model": "echoMAP UHD 93sv",
+  "serial_number": "GAR-001",
+  "year": 2022,
+  "origin": "user_added",
+  "provenance": "owner_declared",
+  "data_source": null,
+  "confidence_score": 1.0,
+  "verification_status": "unverified",
+  "reliability": "owner_declared",
+  "is_standard": null,
+  "is_synthetic": false,
+  "oem_equipment_id": null,
+  "installed_on": "2022-10-01",
+  "removed_at": null,
+  "notes": "Fitted by owner",
+  "display_note": null,
+  "created_at": "2026-11-05T07:43:05.076006Z",
+  "updated_at": "2026-11-05T07:43:05.076010Z"
+}

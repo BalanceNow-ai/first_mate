@@ -1,0 +1,18 @@
+{
+  "input": "not-a-hin",
+  "normalized": null,
+  "valid": false,
+  "status": "invalid",
+  "format": null,
+  "country_code": null,
+  "mic": null,
+  "serial": null,
+  "production_month": null,
+  "production_year": null,
+  "model_year": null,
+  "manufacturer": null,
+  "confidence": 0.0,
+  "warnings": [
+    "A HIN has 12 characters (optionally preceded by a 2-letter country code)"
+  ]
+}

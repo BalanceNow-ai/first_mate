@@ -115,7 +115,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/products',
-            builder: (context, state) => const ProductListScreen(),
+            builder: (context, state) =>
+                ProductListScreen(initialParams: state.uri.queryParameters),
             routes: [
               GoRoute(
                 path: ':productId',

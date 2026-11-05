@@ -4,7 +4,6 @@ import 'package:helm_marine/core/api/api_client.dart';
 import 'package:helm_marine/core/api/api_error.dart';
 import 'package:helm_marine/core/config/public_config.dart';
 import 'package:helm_marine/core/models/cart.dart';
-import 'package:helm_marine/core/models/product.dart';
 import 'package:helm_marine/core/models/user.dart';
 import 'package:helm_marine/core/models/vessel.dart';
 
@@ -82,42 +81,7 @@ class ApiService {
 
   Future<void> deleteVessel(String id) => _call(() => _dio.delete('/vessels/$id'), (_) {});
 
-  // --- Products (catalogue workstream contract) ---
-
-  Future<ProductPage> getProducts({
-    String? category,
-    String? brand,
-    String? vesselId,
-    String? search,
-    bool onSale = false,
-    bool inStockOnly = false,
-    int offset = 0,
-    int limit = 20,
-  }) =>
-      _call(
-        () => _dio.get('/products/', queryParameters: {
-          'offset': offset,
-          'limit': limit,
-          'category': ?category,
-          'brand': ?brand,
-          'vessel_id': ?vesselId,
-          if (search != null && search.isNotEmpty) 'search': search,
-          if (onSale) 'on_sale': true,
-          if (inStockOnly) 'in_stock': true,
-        }),
-        (d) => ProductPage.fromJson(_map(d)),
-      );
-
-  Future<Product> getProduct(String id, {String? vesselId}) => _call(
-        () => _dio.get('/products/$id',
-            queryParameters: {'vessel_id': ?vesselId}),
-        (d) => Product.fromJson(_map(d)),
-      );
-
-  Future<List<String>> getProductCategories() => _call(
-        () => _dio.get('/products/categories'),
-        (d) => [for (final c in d as List) '$c'],
-      );
+  // --- Products: see features/products/data/catalogue_api.dart (CatalogueApi).
 
   // --- Cart ---
 

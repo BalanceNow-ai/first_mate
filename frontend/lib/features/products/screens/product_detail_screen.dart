@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:helm_marine/core/api/api_error.dart';
 import 'package:helm_marine/core/config/public_config_provider.dart';
+import 'package:helm_marine/core/models/catalogue.dart';
 import 'package:helm_marine/core/models/product.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
 import 'package:helm_marine/core/widgets/fitment_badge.dart';
@@ -48,26 +50,7 @@ class _ProductDetails extends ConsumerWidget {
         ref.watch(publicConfigProvider).value?.delivery.dangerousGoodsDeliveryTypes ?? const [];
     final wide = MediaQuery.sizeOf(context).width >= 900;
 
-    final gallery = AspectRatio(
-      aspectRatio: 4 / 3,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: product.images.length <= 1
-            ? ProductImage(url: product.primaryImage, semanticLabel: product.name, fit: BoxFit.contain)
-            : PageView(
-                children: [
-                  for (final (i, url) in product.images.indexed)
-                    InteractiveViewer(
-                      child: ProductImage(
-                        url: url,
-                        semanticLabel: '${product.name}, image ${i + 1} of ${product.images.length}',
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                ],
-              ),
-      ),
-    );
+    final gallery = _Gallery(product: product);
 
     final info = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,7 +74,9 @@ class _ProductDetails extends ConsumerWidget {
         if (product.fitment != null)
           _FitmentPanel(fitment: product.fitment!, vesselName: vessel?.nickname)
         else if (vessel == null)
-          const Text('Add a vessel to check whether this part fits your boat.'),
+          const Text('Add a vessel to check whether this part fits your boat.')
+        else
+          const Text('Fit not checked — choose a vessel in the shop to check fitment.'),
         if (product.dangerousGoods) ...[
           const SizedBox(height: 12),
           _Notice(
@@ -146,6 +131,8 @@ class _ProductDetails extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
               ],
+              _CompatibilitySection(productId: product.id),
+              const SizedBox(height: 16),
               if (product.specifications != null && product.specifications!.isNotEmpty) ...[
                 Semantics(header: true, child: Text('Specifications', style: theme.textTheme.titleMedium)),
                 const SizedBox(height: 8),
@@ -275,6 +262,154 @@ class _AddToCartState extends ConsumerState<_AddToCart> {
           icon: const Icon(Icons.add_shopping_cart),
           label: Text(available ? 'Add to cart' : 'Out of stock'),
         ),
+      ],
+    );
+  }
+}
+
+/// Product images with previous/next controls and a position label.
+class _Gallery extends StatefulWidget {
+  const _Gallery({required this.product});
+
+  final Product product;
+
+  @override
+  State<_Gallery> createState() => _GalleryState();
+}
+
+class _GalleryState extends State<_Gallery> {
+  final _controller = PageController();
+  int _index = 0;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _go(int i) =>
+      _controller.animateToPage(i, duration: const Duration(milliseconds: 250), curve: Curves.easeOut);
+
+  @override
+  Widget build(BuildContext context) {
+    final p = widget.product;
+    final images = p.images;
+    if (images.length <= 1) {
+      return AspectRatio(
+        aspectRatio: 4 / 3,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: ProductImage(url: p.primaryImage, semanticLabel: p.name, fit: BoxFit.contain),
+        ),
+      );
+    }
+    return Column(
+      children: [
+        AspectRatio(
+          aspectRatio: 4 / 3,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: PageView(
+              controller: _controller,
+              onPageChanged: (i) => setState(() => _index = i),
+              children: [
+                for (final (i, url) in images.indexed)
+                  InteractiveViewer(
+                    child: ProductImage(
+                      url: url,
+                      semanticLabel: '${p.name}, image ${i + 1} of ${images.length}',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.chevron_left),
+              tooltip: 'Previous image',
+              onPressed: _index > 0 ? () => _go(_index - 1) : null,
+            ),
+            Text('${_index + 1} / ${images.length}'),
+            IconButton(
+              icon: const Icon(Icons.chevron_right),
+              tooltip: 'Next image',
+              onPressed: _index < images.length - 1 ? () => _go(_index + 1) : null,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// The public "known to fit" list (verified rules only).
+class _CompatibilitySection extends ConsumerWidget {
+  const _CompatibilitySection({required this.productId});
+
+  final String productId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final compat = ref.watch(productCompatibilityProvider(productId));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Semantics(header: true, child: Text('Known to fit', style: theme.textTheme.titleMedium)),
+        const SizedBox(height: 8),
+        compat.when(
+          loading: () => const Padding(
+            padding: EdgeInsets.all(8),
+            child: LinearProgressIndicator(semanticsLabel: 'Loading compatibility'),
+          ),
+          error: (e, _) => Row(
+            children: [
+              Expanded(child: Text('Could not load compatibility: ${describeError(e)}')),
+              TextButton(
+                onPressed: () => ref.invalidate(productCompatibilityProvider(productId)),
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+          data: (c) => _KnownToFitList(compatibility: c),
+        ),
+      ],
+    );
+  }
+}
+
+class _KnownToFitList extends StatelessWidget {
+  const _KnownToFitList({required this.compatibility});
+
+  final ProductCompatibility compatibility;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = compatibility;
+    if (c.universal) {
+      return const Text('Universal part — suitable for any vessel.');
+    }
+    if (c.knownToFit.isEmpty) {
+      return const Text('No verified fitment recorded yet. Check the OEM part number before buying.');
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final k in c.knownToFit)
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.verified, color: HelmTheme.success),
+            title: Text(k.description),
+            subtitle: Text([
+              k.fitmentType.replaceAll('_', ' '),
+              'confidence ${(k.confidenceScore * 100).round()}%',
+              if (k.isSynthetic) 'synthetic test data',
+            ].join(' · ')),
+          ),
       ],
     );
   }

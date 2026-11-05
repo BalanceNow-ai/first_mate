@@ -1,0 +1,42 @@
+{
+  "id": "900b6ab3-99a4-4b12-a181-95f294b67f52",
+  "user_id": "acd7dbd1-a42a-4719-bcb4-3cedcf829f34",
+  "nickname": "Dinghy",
+  "hin": "SYN12345F121",
+  "hin_status": "valid",
+  "hin_decoded": {
+    "mic": "SYN",
+    "note": "Suggestion decoded from the HIN; it does not change the details you entered.",
+    "input": "SYN12345F121",
+    "valid": true,
+    "format": "us_current",
+    "serial": "12345",
+    "status": "valid",
+    "warnings": [
+      "Manufacturer code SYN is not in the Helm boat database; manufacturer not identified"
+    ],
+    "confidence": 0.9,
+    "model_year": 2021,
+    "normalized": "SYN12345F121",
+    "country_code": null,
+    "manufacturer": null,
+    "production_year": 2021,
+    "production_month": 6
+  },
+  "make": "Homebuilt",
+  "model": "Pram",
+  "year": 1998,
+  "model_year_id": null,
+  "hull_type": null,
+  "length_ft": null,
+  "primary_use": null,
+  "propulsion_type": null,
+  "engine_make": null,
+  "engine_model": null,
+  "engine_year": null,
+  "engine_serial": null,
+  "engine_hours": null,
+  "is_primary": false,
+  "created_at": "2026-11-05T07:43:04.781104Z",
+  "updated_at": "2026-11-05T07:43:04.781112Z"
+}

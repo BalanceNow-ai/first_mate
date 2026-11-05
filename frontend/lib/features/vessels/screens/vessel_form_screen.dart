@@ -3,10 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:helm_marine/core/api/api_error.dart';
+import 'package:helm_marine/core/models/boat_db.dart';
 import 'package:helm_marine/core/models/vessel.dart';
 import 'package:helm_marine/core/monitoring/monitoring.dart';
 import 'package:helm_marine/core/widgets/state_views.dart';
+import 'package:helm_marine/features/vessels/data/garage_api.dart';
 import 'package:helm_marine/features/vessels/providers/vessel_provider.dart';
+import 'package:helm_marine/features/vessels/widgets/hin_suggestion.dart';
+import 'package:helm_marine/features/vessels/widgets/lookup_field.dart';
 
 /// Add / edit a vessel using the canonical server fields.
 class VesselFormScreen extends ConsumerWidget {
@@ -60,6 +64,15 @@ class _VesselFormState extends ConsumerState<VesselForm> {
   bool _isPrimary = false;
   bool _submitting = false;
   String? _formError;
+
+  /// The latest HIN decode (a suggestion; never applied automatically).
+  HinDecode? _hin;
+  bool _decoding = false;
+  String? _hinError;
+
+  /// Boat-database manufacturer chosen from the make suggestions (assist only).
+  BoatManufacturer? _maker;
+  List<BoatModel>? _makerModels;
   Map<String, String> _serverErrors = const {};
 
   static const _textFields = [
@@ -90,6 +103,63 @@ class _VesselFormState extends ConsumerState<VesselForm> {
     _hullType = hullTypes.contains(v?.hullType) ? v?.hullType : null;
     _propulsionType = propulsionTypes.contains(v?.propulsionType) ? v?.propulsionType : null;
     _isPrimary = v?.isPrimary ?? false;
+    final stored = v?.hinDecoded;
+    if (stored != null) {
+      try {
+        _hin = HinDecode.fromJson(stored);
+      } on FormatException {
+        _hin = null; // An older stored shape: just don't show a suggestion.
+      }
+    }
+  }
+
+  // --- HIN decode (suggestion only) ------------------------------------------
+
+  Future<void> _decodeHin() async {
+    final hin = _text('hin');
+    if (hin == null) {
+      setState(() => _hinError = 'Enter a HIN to decode');
+      return;
+    }
+    setState(() {
+      _decoding = true;
+      _hinError = null;
+    });
+    try {
+      final result = await ref.read(garageApiProvider).decodeHin(hin);
+      if (mounted) setState(() => _hin = result);
+    } catch (e) {
+      if (mounted) setState(() => _hinError = 'Could not decode the HIN: ${describeError(e)}');
+    } finally {
+      if (mounted) setState(() => _decoding = false);
+    }
+  }
+
+  void _useValue(String field, String value) {
+    setState(() => _c[field]!.text = value);
+  }
+
+  // --- boat database typeahead (assist only) ----------------------------------
+
+  Future<List<BoatManufacturer>> _searchMakers(String text) async {
+    if (text.length < 2) return const [];
+    return ref.read(garageApiProvider).manufacturers(q: text);
+  }
+
+  Future<List<BoatModel>> _searchModels(String text) async {
+    final maker = _maker;
+    if (maker == null || maker.name != _c['make']!.text.trim()) return const [];
+    final models = _makerModels ??= await ref.read(garageApiProvider).models(maker.id);
+    final needle = text.toLowerCase();
+    return [for (final m in models) if (m.name.toLowerCase().contains(needle)) m];
+  }
+
+  String? get _yearHint {
+    final model = _c['model']!.text.trim();
+    for (final m in _makerModels ?? const <BoatModel>[]) {
+      if (m.name == model && m.years.isNotEmpty) return 'Boat database years: ${m.years.join(', ')}';
+    }
+    return null;
   }
 
   @override
@@ -253,20 +323,99 @@ class _VesselFormState extends ConsumerState<VesselForm> {
                   caps: TextCapitalization.words,
                   validator: _required('nickname', 'Nickname')),
               const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 480),
+                    child: TextFormField(
+                      controller: _c['hin'],
+                      decoration: const InputDecoration(
+                        labelText: 'HIN (hull identification number)',
+                        helperText: 'Optional. Decode it to see what the number says.',
+                      ),
+                      textCapitalization: TextCapitalization.characters,
+                      textInputAction: TextInputAction.next,
+                      validator: _maxLen('hin', 20),
+                      onFieldSubmitted: (_) => _decodeHin(),
+                    ),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: _decoding ? null : _decodeHin,
+                    icon: _decoding
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2, semanticsLabel: 'Decoding'),
+                          )
+                        : const Icon(Icons.qr_code_scanner),
+                    label: const Text('Decode HIN'),
+                  ),
+                ],
+              ),
+              if (_hinError != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Semantics(
+                    liveRegion: true,
+                    child: Text(_hinError!, style: TextStyle(color: theme.colorScheme.error)),
+                  ),
+                ),
+              if (_hin != null) ...[
+                const SizedBox(height: 8),
+                HinSuggestionCard(
+                  decode: _hin!,
+                  currentYear: int.tryParse(_c['year']!.text.trim()),
+                  currentMake: _c['make']!.text.trim(),
+                  onUseYear: (y) => _useValue('year', '$y'),
+                  onUseMake: (m) => _useValue('make', m),
+                  onUseNormalized: (h) => _useValue('hin', h),
+                  onDismiss: () => setState(() => _hin = null),
+                ),
+              ],
+              const SizedBox(height: 12),
               _pair(
-                _field('make', 'Make *',
-                    hint: 'e.g. Haines Hunter',
-                    caps: TextCapitalization.words,
-                    validator: _required('make', 'Make')),
-                _field('model', 'Model *',
-                    hint: 'e.g. SF600', validator: _required('model', 'Model')),
+                LookupField<BoatManufacturer>(
+                  controller: _c['make']!,
+                  label: 'Make *',
+                  hint: 'e.g. Haines Hunter',
+                  textCapitalization: TextCapitalization.words,
+                  search: _searchMakers,
+                  display: (m) => m.name,
+                  subtitle: (m) => [
+                    if (m.country != null) m.country!,
+                    '${m.modelCount} models in the boat database',
+                    if (m.isSynthetic) 'synthetic test data',
+                  ].join(' · '),
+                  onSelected: (m) => setState(() {
+                    _maker = m;
+                    _makerModels = null;
+                  }),
+                  validator: _required('make', 'Make'),
+                ),
+                LookupField<BoatModel>(
+                  controller: _c['model']!,
+                  label: 'Model *',
+                  hint: 'e.g. SF600',
+                  search: _searchModels,
+                  display: (m) => m.name,
+                  subtitle: (m) => m.years.isEmpty ? null : 'Years: ${m.years.join(', ')}',
+                  onSelected: (_) => setState(() {}),
+                  validator: _required('model', 'Model'),
+                ),
               ),
               const SizedBox(height: 12),
               _pair(
-                _field('year', 'Year *',
-                    keyboard: TextInputType.number,
-                    formatters: digits,
-                    validator: _intRange('year', 'Year', 1900, 2100, required: true)),
+                TextFormField(
+                  controller: _c['year'],
+                  decoration: InputDecoration(labelText: 'Year *', helperText: _yearHint),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: digits,
+                  textInputAction: TextInputAction.next,
+                  validator: _intRange('year', 'Year', 1900, 2100, required: true),
+                ),
                 _field('length_ft', 'Length (ft)',
                     keyboard: const TextInputType.numberWithOptions(decimal: true),
                     formatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
@@ -297,12 +446,8 @@ class _VesselFormState extends ConsumerState<VesselForm> {
                 ),
               ),
               const SizedBox(height: 12),
-              _pair(
-                _field('primary_use', 'Primary use',
-                    hint: 'e.g. fishing', validator: _maxLen('primary_use', 60)),
-                _field('hin', 'HIN (hull identification number)',
-                    caps: TextCapitalization.characters, validator: _maxLen('hin', 20)),
-              ),
+              _field('primary_use', 'Primary use',
+                  hint: 'e.g. fishing', validator: _maxLen('primary_use', 60)),
               const SizedBox(height: 24),
               Semantics(header: true, child: Text('Engine', style: heading)),
               const SizedBox(height: 4),

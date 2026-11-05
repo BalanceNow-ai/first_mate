@@ -1,0 +1,18 @@
+{
+  "input": "SYN12345F121",
+  "normalized": "SYN12345F121",
+  "valid": true,
+  "status": "valid",
+  "format": "us_current",
+  "country_code": null,
+  "mic": "SYN",
+  "serial": "12345",
+  "production_month": 6,
+  "production_year": 2021,
+  "model_year": 2021,
+  "manufacturer": null,
+  "confidence": 0.9,
+  "warnings": [
+    "Manufacturer code SYN is not in the Helm boat database; manufacturer not identified"
+  ]
+}

@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:helm_marine/app.dart';
 import 'package:helm_marine/core/auth/auth_gateway.dart';
@@ -16,6 +18,9 @@ const _configHint = 'Build with --dart-define=API_BASE_URL=https://<api-host>/ap
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Build the semantics tree on the web so screen readers (and role/label
+  // based browser tests) can use the app without first enabling accessibility.
+  if (kIsWeb) SemanticsBinding.instance.ensureSemantics();
 
   final config = AppConfig.fromEnvironment();
   final problems = config.problems();

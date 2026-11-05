@@ -1,0 +1,22 @@
+{
+  "input": "nz-z9x12345c121",
+  "normalized": "NZ-Z9X12345C121",
+  "valid": true,
+  "status": "valid",
+  "format": "iso_10087",
+  "country_code": "NZ",
+  "mic": "Z9X",
+  "serial": "12345",
+  "production_month": 3,
+  "production_year": 2021,
+  "model_year": 2021,
+  "manufacturer": {
+    "id": "cf05ecfc-b08e-434e-a4fe-4064598a6ff5",
+    "name": "Synthetic Test Marine (fixture)",
+    "is_synthetic": true
+  },
+  "confidence": 0.9,
+  "warnings": [
+    "Manufacturer code belongs to a synthetic test fixture"
+  ]
+}

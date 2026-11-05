@@ -1,0 +1,14 @@
+[
+  {
+    "id": "cf05ecfc-b08e-434e-a4fe-4064598a6ff5",
+    "name": "Synthetic Test Marine (fixture)",
+    "country": "NZ",
+    "website": null,
+    "mic_codes": [
+      "Z9X"
+    ],
+    "is_synthetic": true,
+    "source": "Synthetic test fixture — not a real manufacturer",
+    "model_count": 3
+  }
+]
