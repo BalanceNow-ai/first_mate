@@ -46,8 +46,7 @@ class _ProductDetails extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final vessel = ref.watch(shoppingVesselProvider);
-    final dgTypes =
-        ref.watch(publicConfigProvider).value?.delivery.dangerousGoodsDeliveryTypes ?? const [];
+    final dgTypes = ref.watch(publicConfigProvider).value?.delivery.dangerousGoodsDeliveryTypes ?? const [];
     final wide = MediaQuery.sizeOf(context).width >= 900;
 
     final gallery = _Gallery(product: product);
@@ -56,8 +55,7 @@ class _ProductDetails extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (product.brand != null) Text(product.brand!, style: theme.textTheme.titleSmall),
-        Text(product.name,
-            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+        Text(product.name, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
         Text('SKU ${product.sku}', style: theme.textTheme.bodySmall),
         const SizedBox(height: 12),
@@ -69,22 +67,31 @@ class _ProductDetails extends ConsumerWidget {
           large: true,
         ),
         const SizedBox(height: 8),
-        StockLabel(inStock: product.inStock, quantity: product.stockQuantity),
+        Semantics(
+          container: true,
+          child: StockLabel(inStock: product.inStock, quantity: product.stockQuantity),
+        ),
         const SizedBox(height: 16),
         if (product.fitment != null)
-          _FitmentPanel(fitment: product.fitment!, vesselName: vessel?.nickname)
+          Semantics(
+            container: true,
+            child: _FitmentPanel(fitment: product.fitment!, vesselName: vessel?.nickname),
+          )
         else if (vessel == null)
           const Text('Add a vessel to check whether this part fits your boat.')
         else
           const Text('Fit not checked — choose a vessel in the shop to check fitment.'),
         if (product.dangerousGoods) ...[
           const SizedBox(height: 12),
-          _Notice(
-            icon: Icons.warning_amber,
-            text: dgTypes.isEmpty
-                ? 'Dangerous goods — delivery options are restricted.'
-                : 'Dangerous goods — available by '
-                    '${dgTypes.map((t) => t.replaceAll('_', ' ')).join(', ')} only.',
+          Semantics(
+            container: true,
+            child: _Notice(
+              icon: Icons.warning_amber,
+              text: dgTypes.isEmpty
+                  ? 'Dangerous goods — delivery options are restricted.'
+                  : 'Dangerous goods — available by '
+                        '${dgTypes.map((t) => t.replaceAll('_', ' ')).join(', ')} only.',
+            ),
           ),
         ],
         const SizedBox(height: 16),
@@ -121,13 +128,15 @@ class _ProductDetails extends ConsumerWidget {
                 const SizedBox(height: 16),
               ],
               if (product.oemPartNumbers.isNotEmpty) ...[
-                Semantics(
-                    header: true, child: Text('OEM part numbers', style: theme.textTheme.titleMedium)),
+                Semantics(header: true, child: Text('OEM part numbers', style: theme.textTheme.titleMedium)),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children: [for (final n in product.oemPartNumbers) Chip(label: SelectableText(n))],
+                  children: [
+                    for (final n in product.oemPartNumbers)
+                      Chip(label: Text(n, semanticsLabel: 'OEM part number $n')),
+                  ],
                 ),
                 const SizedBox(height: 16),
               ],
@@ -143,8 +152,10 @@ class _ProductDetails extends ConsumerWidget {
                       children: [
                         SizedBox(
                           width: 160,
-                          child: Text(e.key.replaceAll('_', ' '),
-                              style: const TextStyle(color: HelmTheme.mutedText)),
+                          child: Text(
+                            e.key.replaceAll('_', ' '),
+                            style: const TextStyle(color: HelmTheme.mutedText),
+                          ),
                         ),
                         Expanded(child: Text('${e.value}')),
                       ],
@@ -232,10 +243,12 @@ class _AddToCartState extends ConsumerState<_AddToCart> {
     try {
       await ref.read(cartProvider.notifier).add(widget.product.id, quantity: _quantity);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Added $_quantity × ${widget.product.name} to your cart'),
-        action: SnackBarAction(label: 'View cart', onPressed: () => context.go('/cart')),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Added $_quantity × ${widget.product.name} to your cart'),
+          action: SnackBarAction(label: 'View cart', onPressed: () => context.go('/cart')),
+        ),
+      );
     } catch (e) {
       if (mounted) showErrorSnackBar(context, e, prefix: 'Could not add to cart');
     } finally {
@@ -404,11 +417,13 @@ class _KnownToFitList extends StatelessWidget {
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.verified, color: HelmTheme.success),
             title: Text(k.description),
-            subtitle: Text([
-              k.fitmentType.replaceAll('_', ' '),
-              'confidence ${(k.confidenceScore * 100).round()}%',
-              if (k.isSynthetic) 'synthetic test data',
-            ].join(' · ')),
+            subtitle: Text(
+              [
+                k.fitmentType.replaceAll('_', ' '),
+                'confidence ${(k.confidenceScore * 100).round()}%',
+                if (k.isSynthetic) 'synthetic test data',
+              ].join(' · '),
+            ),
           ),
       ],
     );

@@ -118,6 +118,7 @@ class ProductImage extends StatelessWidget {
   Widget build(BuildContext context) {
     if (url == null || url!.isEmpty) {
       return Semantics(
+        container: true,
         label: semanticLabel == null ? 'No image' : '$semanticLabel, no image',
         image: true,
         excludeSemantics: true,
@@ -125,6 +126,7 @@ class ProductImage extends StatelessWidget {
       );
     }
     return Semantics(
+      container: true,
       image: true,
       label: semanticLabel,
       child: Image.network(
@@ -200,7 +202,8 @@ class ProductCard extends StatelessWidget {
           children: [
             SizedBox(
               height: 130,
-              child: ProductImage(url: product.primaryImage, semanticLabel: product.name),
+              // The card's own label already names the product.
+              child: ExcludeSemantics(child: ProductImage(url: product.primaryImage)),
             ),
             Expanded(
               child: Padding(
