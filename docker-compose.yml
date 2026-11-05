@@ -172,6 +172,8 @@ services:
       GOTRUE_JWT_SECRET: ${SUPABASE_JWT_SECRET:?set SUPABASE_JWT_SECRET in .env}
       GOTRUE_JWT_ISSUER: ${HELM_PUBLIC_URL:?set HELM_PUBLIC_URL in .env}/auth/v1
       GOTRUE_JWT_AUD: authenticated
+      # supabase-js / supabase_flutter send these on cross-origin requests.
+      GOTRUE_CORS_ALLOWED_HEADERS: "apikey,x-client-info,x-supabase-api-version"
       GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
       GOTRUE_JWT_ADMIN_ROLES: service_role
       GOTRUE_JWT_EXP: "3600"
