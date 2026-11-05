@@ -326,14 +326,28 @@ async def award_for_paid_order(db: AsyncSession, order: Order) -> None:
 
 
 async def reverse_for_refund(db: AsyncSession, order: Order, newly_refunded_cents: int) -> None:
-    """Reverse earned points in proportion to the cumulative refunded share.
+    """Refund compensation. Three independent obligations, each idempotent (FM-03):
 
-    Idempotent per cumulative refunded amount (``earn_reversal:{order}:{refunded}``)."""
+    1. reverse earned points in proportion to the cumulative refunded share
+       (``earn_reversal:{order}:{refunded}``);
+    2. recompute the crew bonus for the earn period from the crew's *net* spend, which
+       falls with every refund even when no further whole point is reversed;
+    3. on a full refund, return the points spent on the order's discount
+       (``refund_entitlement:{order}``, D14) — whether or not the order earned points
+       and whether or not an earlier partial refund already reversed them."""
     if newly_refunded_cents <= 0 and order.refunded_cents <= 0:
         return
     earn = await get_by_key(db, f"earn:{order.id}")
-    if earn is None:
-        return
+    if earn is not None:
+        await _reverse_earned_points(db, order, earn)
+        if earn.team_id and earn.period:
+            await clawback_period_bonus(db, earn.team_id, earn.period, trigger=f"{order.id}:{order.refunded_cents}")
+    if order.refunded_cents >= order.total_cents and order.discount_entitlement_id:
+        await _return_entitlement_points(db, order)
+    await refresh_tier(db, order.user_id)
+
+
+async def _reverse_earned_points(db: AsyncSession, order: Order, earn: PointsTransaction) -> None:
     key = f"earn_reversal:{order.id}:{order.refunded_cents}"
     if await get_by_key(db, key) is not None:
         return
@@ -364,11 +378,6 @@ async def reverse_for_refund(db: AsyncSession, order: Order, newly_refunded_cent
         period=earn.period,
         eligible_spend_cents=-spend_target,
     )
-    if earn.team_id and earn.period:
-        await clawback_period_bonus(db, earn.team_id, earn.period, trigger=f"{order.id}:{order.refunded_cents}")
-    if order.refunded_cents >= order.total_cents and order.discount_entitlement_id:
-        await _return_entitlement_points(db, order)
-    await refresh_tier(db, order.user_id)
 
 
 async def _return_entitlement_points(db: AsyncSession, order: Order) -> None:
