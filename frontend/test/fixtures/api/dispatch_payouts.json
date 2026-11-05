@@ -1,0 +1,16 @@
+[
+  {
+    "id": "2a28f2a5-cbee-4ecc-93e1-e3e9607dca7f",
+    "delivery_id": "35051be4-d63e-4f40-a4b9-c6d1a61c9b87",
+    "operator_id": "f83ee534-6d5f-401e-9999-72321aeef088",
+    "gross_fee_cents": 6708,
+    "share_bps": null,
+    "amount_cents": null,
+    "status": "rate_unconfigured",
+    "approved_by": null,
+    "approved_at": null,
+    "paid_at": null,
+    "created_at": "2026-11-05T07:27:31.483925Z",
+    "currency": "NZD"
+  }
+]

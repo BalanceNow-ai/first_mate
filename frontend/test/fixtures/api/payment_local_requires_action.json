@@ -1,0 +1,10 @@
+{
+  "test_mode": true,
+  "outcome": "requires_action",
+  "event_id": "evt_local_47c87ed8df754b1bbfcf3ed82ce366e9",
+  "event_type": "payment_intent.requires_action",
+  "event_outcome": "applied",
+  "order_id": "313dec26-cc8b-4e84-a618-e9df023eb676",
+  "order_status": "pending_payment",
+  "payment_status": "requires_action"
+}

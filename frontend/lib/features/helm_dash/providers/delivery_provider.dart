@@ -1,91 +1,70 @@
-// TODO(client pass 2): use operator-reported positions from the delivery
-// contract; the interpolated position below is a placeholder only.
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:helm_marine/core/session/session.dart';
+import 'package:helm_marine/core/models/helm_dash.dart';
+import 'package:helm_marine/features/orders/data/commerce_api.dart';
 
-/// Fetch a single delivery by ID.
-final deliveryDetailProvider = FutureProvider.autoDispose
-    .family<Map<String, dynamic>, String>((ref, id) async {
-  final apiService = ref.watch(userApiProvider);
-  return apiService.getHelmDashDelivery(id);
-});
+/// How often an active delivery is re-read.
+final trackingPollIntervalProvider = Provider<Duration>((ref) => const Duration(seconds: 10));
 
-/// Fetch all user deliveries.
-final deliveryListProvider =
-    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
-  final apiService = ref.watch(userApiProvider);
-  return apiService.getHelmDashDeliveries();
-});
+/// Customer tracking for one delivery (`GET /helm-dash/deliveries/{id}`),
+/// re-read every [trackingPollIntervalProvider] while the delivery is active.
+/// Shows exactly what the server reports: the latest reported position (or
+/// none), never an interpolated or invented one.
+final deliveryTrackingProvider =
+    AsyncNotifierProvider.autoDispose.family<DeliveryTrackingController, TrackingView, String>(
+  DeliveryTrackingController.new,
+);
 
-/// Simulated live location for the delivery vessel.
-/// In production, this would connect to a WebSocket or polling endpoint.
-class DeliveryLocation {
-  final double lat;
-  final double lng;
-  final String label;
+/// The last server answer, when it was received, and the last refresh error.
+class TrackingView {
+  const TrackingView({required this.tracking, required this.receivedAt, this.pollError});
 
-  const DeliveryLocation({
-    required this.lat,
-    required this.lng,
-    required this.label,
-  });
+  final DeliveryTracking tracking;
+  final DateTime receivedAt;
+  final Object? pollError;
 }
 
-/// Simulated live position provider. Moves towards destination.
-final deliveryLiveLocationProvider = FutureProvider.autoDispose
-    .family<DeliveryLocation, String>((ref, deliveryId) async {
-  final delivery = await ref.watch(deliveryDetailProvider(deliveryId).future);
-  final coords = delivery['delivery_coordinates'] as Map<String, dynamic>?;
-  final status = delivery['status'] as String? ?? 'pending';
+class DeliveryTrackingController extends AsyncNotifier<TrackingView> {
+  DeliveryTrackingController(this.deliveryId);
 
-  // Warehouse coordinates (Westhaven Marina)
-  const warehouseLat = -36.8406;
-  const warehouseLng = 174.7530;
+  final String deliveryId;
+  Timer? _timer;
 
-  if (coords == null) {
-    return const DeliveryLocation(
-      lat: warehouseLat,
-      lng: warehouseLng,
-      label: 'Westhaven Marina (Warehouse)',
-    );
+  @override
+  Future<TrackingView> build() async {
+    final api = ref.watch(commerceApiProvider);
+    ref.onDispose(() => _timer?.cancel());
+    final tracking = await api.delivery(deliveryId);
+    _schedule(tracking);
+    return TrackingView(tracking: tracking, receivedAt: DateTime.now());
   }
 
-  final destLat = (coords['lat'] as num?)?.toDouble() ?? warehouseLat;
-  final destLng = (coords['lng'] as num?)?.toDouble() ?? warehouseLng;
-
-  // Simulate position based on delivery status
-  switch (status) {
-    case 'pending':
-    case 'assigned':
-      return const DeliveryLocation(
-        lat: warehouseLat,
-        lng: warehouseLng,
-        label: 'At warehouse — preparing order',
-      );
-    case 'pickup':
-      return DeliveryLocation(
-        lat: warehouseLat + (destLat - warehouseLat) * 0.1,
-        lng: warehouseLng + (destLng - warehouseLng) * 0.1,
-        label: 'Departing warehouse',
-      );
-    case 'en_route':
-      // Simulate midway position
-      return DeliveryLocation(
-        lat: warehouseLat + (destLat - warehouseLat) * 0.6,
-        lng: warehouseLng + (destLng - warehouseLng) * 0.6,
-        label: 'En route to delivery point',
-      );
-    case 'delivered':
-      return DeliveryLocation(
-        lat: destLat,
-        lng: destLng,
-        label: 'Delivered',
-      );
-    default:
-      return const DeliveryLocation(
-        lat: warehouseLat,
-        lng: warehouseLng,
-        label: 'Status unknown',
-      );
+  void _schedule(DeliveryTracking tracking) {
+    _timer?.cancel();
+    if (!tracking.isActive) return;
+    _timer = Timer(ref.read(trackingPollIntervalProvider), _poll);
   }
-});
+
+  Future<void> _poll() async {
+    if (!ref.mounted) return;
+    try {
+      final tracking = await ref.read(commerceApiProvider).delivery(deliveryId);
+      if (!ref.mounted) return;
+      state = AsyncData(TrackingView(tracking: tracking, receivedAt: DateTime.now()));
+      _schedule(tracking);
+    } catch (e) {
+      if (!ref.mounted) return;
+      // Keep the last good answer visible; surface the error and keep polling.
+      final last = state.value;
+      if (last == null) return;
+      state = AsyncData(TrackingView(tracking: last.tracking, receivedAt: last.receivedAt, pollError: e));
+      _schedule(last.tracking);
+    }
+  }
+
+  Future<void> refresh() async {
+    _timer?.cancel();
+    await _poll();
+  }
+}

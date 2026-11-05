@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:helm_marine/app.dart';
 import 'package:helm_marine/core/auth/auth_gateway.dart';
@@ -14,8 +16,13 @@ const _configHint = 'Build with --dart-define=API_BASE_URL=https://<api-host>/ap
     '--dart-define=SUPABASE_URL=https://<project>.supabase.co '
     '--dart-define=SUPABASE_ANON_KEY=<public anon key>.';
 
+/// Keeps the web semantics tree enabled (screen readers and browser automation
+/// see real labelled elements instead of a bare canvas).
+SemanticsHandle? _webSemantics;
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (kIsWeb) _webSemantics ??= SemanticsBinding.instance.ensureSemantics();
 
   final config = AppConfig.fromEnvironment();
   final problems = config.problems();

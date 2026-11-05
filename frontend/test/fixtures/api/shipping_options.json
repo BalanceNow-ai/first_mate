@@ -1,0 +1,57 @@
+{
+  "currency": "NZD",
+  "merchandise_subtotal_cents": 11090,
+  "total_weight_grams": 3350,
+  "missing_weight_products": [],
+  "dangerous_goods_products": [],
+  "free_shipping_threshold_cents": 15000,
+  "options": [
+    {
+      "delivery_type": "click_and_collect",
+      "available": true,
+      "reason_code": null,
+      "reason": null,
+      "requires_quote": false,
+      "price_cents": 0,
+      "service_name": null,
+      "estimated_days": null,
+      "pickup_location": "Helm Marine, Westhaven Marina, Auckland",
+      "development_rate_card": false,
+      "operating_areas": []
+    },
+    {
+      "delivery_type": "courier",
+      "available": true,
+      "reason_code": null,
+      "reason": null,
+      "requires_quote": true,
+      "price_cents": 1290,
+      "service_name": "Standard courier",
+      "estimated_days": 3,
+      "pickup_location": null,
+      "development_rate_card": true,
+      "operating_areas": []
+    },
+    {
+      "delivery_type": "helm_dash",
+      "available": true,
+      "reason_code": null,
+      "reason": null,
+      "requires_quote": true,
+      "price_cents": null,
+      "service_name": "Helm Dash",
+      "estimated_days": null,
+      "pickup_location": null,
+      "development_rate_card": false,
+      "operating_areas": [
+        {
+          "id": "hauraki-gulf",
+          "name": "Hauraki Gulf (local demo area)",
+          "center_lat": -36.75,
+          "center_lng": 175.0,
+          "radius_nm": 25.0
+        }
+      ]
+    }
+  ]
+}

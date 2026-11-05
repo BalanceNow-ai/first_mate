@@ -1,0 +1,7 @@
+{
+  "detail": "Some products in your cart do not have enough stock",
+  "code": "insufficient_stock",
+  "product_ids": [
+    "68c24018-2b8c-4659-8ec8-44a795e95d92"
+  ]
+}

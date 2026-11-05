@@ -1,0 +1,10 @@
+{
+  "test_mode": true,
+  "outcome": "authenticate",
+  "event_id": "evt_local_20cd6da4a86f4590828e2129a7c8252f",
+  "event_type": "payment_intent.succeeded",
+  "event_outcome": "applied",
+  "order_id": "313dec26-cc8b-4e84-a618-e9df023eb676",
+  "order_status": "paid",
+  "payment_status": "succeeded"
+}

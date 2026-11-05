@@ -1,0 +1,72 @@
+{
+  "id": "313dec26-cc8b-4e84-a618-e9df023eb676",
+  "order_number": "HM-261105-QZQG4Q",
+  "status": "ready_for_dispatch",
+  "payment_status": "partially_refunded",
+  "currency": "NZD",
+  "subtotal_cents": 11090,
+  "discount_cents": 0,
+  "shipping_cents": 1290,
+  "total_cents": 12380,
+  "refunded_cents": 500,
+  "discount_entitlement_id": null,
+  "payment_provider": "local",
+  "payment_intent_id": "pi_local_739f77d583db4faeadf67dee43613e3c",
+  "delivery": {
+    "delivery_type": "courier",
+    "shipping_address": {
+      "city": "Auckland",
+      "name": "Fixture Shopper",
+      "line1": "1 Quay Street",
+      "line2": null,
+      "phone": "021 555 0101",
+      "suburb": "Auckland Central",
+      "country": "NZ",
+      "postcode": "1010"
+    },
+    "helm_dash": null,
+    "pickup_location": null,
+    "quote_id": "2ae5bb24-ecb4-41fa-871f-bfea4f664802",
+    "service_name": "Standard courier",
+    "estimated_days": 3,
+    "estimated_minutes": null,
+    "free_shipping_applied": false
+  },
+  "items": [
+    {
+      "id": "1513b32f-dd74-483e-a377-3a5d99e4afd7",
+      "product_id": "739f5df1-c546-4d3a-a8ad-4e90fc4d467d",
+      "product_name": "Marine duct tape 25 m (synthetic)",
+      "sku": "SYN-DUCT-TAPE",
+      "quantity": 1,
+      "list_price_cents": 1490,
+      "unit_price_cents": 1190,
+      "line_total_cents": 1190
+    },
+    {
+      "id": "1f5ad443-009a-4102-acfc-51dc13a8e833",
+      "product_id": "480aabd1-b340-4025-95f7-b5d8bdc6ff71",
+      "product_name": "UV-stable zip ties, assorted 200 pack (synthetic)",
+      "sku": "SYN-ZIP-TIES",
+      "quantity": 10,
+      "list_price_cents": 990,
+      "unit_price_cents": 990,
+      "line_total_cents": 9900
+    }
+  ],
+  "expires_at": "2026-11-05T07:56:27.018747Z",
+  "paid_at": "2026-11-05T07:26:27.221748Z",
+  "cancelled_at": null,
+  "cancel_reason": null,
+  "notes": "Leave with the marina office",
+  "can_cancel": false,
+  "can_retry_payment": false,
+  "tracking": {
+    "tracking_number": "TEST-0721EA66BB",
+    "courier": "local_contract",
+    "shipment_status": "label_created",
+    "is_test": true
+  },
+  "created_at": "2026-11-05T07:26:27.020308Z",
+  "updated_at": "2026-11-05T07:27:31.670279Z"
+}

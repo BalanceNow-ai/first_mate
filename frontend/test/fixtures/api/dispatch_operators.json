@@ -1,0 +1,13 @@
+[
+  {
+    "user_id": "f83ee534-6d5f-401e-9999-72321aeef088",
+    "display_name": "Skipper Fixture b7ab",
+    "vessel_name": "MV Fixture Runner",
+    "area_id": "hauraki-gulf",
+    "is_online": false,
+    "active": true,
+    "certification_reference": "Unverified test reference",
+    "certification_verified": false,
+    "created_at": "2026-11-05T07:27:27.653448Z"
+  }
+]

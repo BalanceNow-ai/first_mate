@@ -1,0 +1,5 @@
+{
+  "detail": "Afterpay is not offered: it requires an Afterpay-enabled Stripe account and a redirect-based confirmation flow that has not been implemented or validated.",
+  "code": "payment_method_unavailable",
+  "payment_method": "afterpay"
+}

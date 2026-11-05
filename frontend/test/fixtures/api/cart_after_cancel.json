@@ -1,0 +1,31 @@
+{
+  "currency": "NZD",
+  "items": [
+    {
+      "id": "da9e43d2-1589-431a-a409-bcd3b3ff37c3",
+      "product_id": "739f5df1-c546-4d3a-a8ad-4e90fc4d467d",
+      "quantity": 1,
+      "unit_price_cents": 1190,
+      "line_total_cents": 1190,
+      "product": {
+        "id": "739f5df1-c546-4d3a-a8ad-4e90fc4d467d",
+        "sku": "SYN-DUCT-TAPE",
+        "name": "Marine duct tape 25 m (synthetic)",
+        "brand": "FixtureGeneral",
+        "images": [],
+        "price_cents": 1490,
+        "sale_price_cents": 1190,
+        "effective_price_cents": 1190,
+        "stock_quantity": 78,
+        "is_active": true,
+        "dangerous_goods": false,
+        "weight_grams": 350
+      },
+      "issues": [],
+      "created_at": "2026-11-05T07:27:27.420619Z"
+    }
+  ],
+  "subtotal_cents": 1190,
+  "item_count": 1,
+  "has_issues": false
+}

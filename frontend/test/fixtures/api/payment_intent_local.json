@@ -1,0 +1,12 @@
+{
+  "order_id": "313dec26-cc8b-4e84-a618-e9df023eb676",
+  "provider": "local",
+  "payment_intent_id": "pi_local_739f77d583db4faeadf67dee43613e3c",
+  "client_secret": "pi_local_739f77d583db4faeadf67dee43613e3c_secret_c8a938c622871c018f59efc2",
+  "status": "requires_payment_method",
+  "amount_cents": 12380,
+  "currency": "NZD",
+  "publishable_key": null,
+  "test_mode": true,
+  "expires_at": "2026-11-05T07:56:27.018747Z"
+}

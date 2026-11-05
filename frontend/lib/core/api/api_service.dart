@@ -140,6 +140,8 @@ class ApiService {
 
   // --- Pass-2 screens: untyped until their contracts are merged -------------
   // TODO(client pass 2): replace these Map-based calls with typed models.
+  // Orders, payments, shipping and Helm Dash moved to the typed
+  // `features/orders/data/commerce_api.dart` and `features/dispatch/data/dispatch_api.dart`.
 
   Future<Map<String, dynamic>> sendChatMessage({
     required String message,
@@ -179,20 +181,6 @@ class ApiService {
   Future<Map<String, dynamic>> addUncheckedToCart(String vesselId) =>
       _call(() => _dio.post('/checklists/vessel/$vesselId/add-unchecked-to-cart'), _map);
 
-  Future<List<Map<String, dynamic>>> getOrders() => _call(() => _dio.get('/orders/'), _list);
-
-  Future<Map<String, dynamic>> createOrder(Map<String, dynamic> data) =>
-      _call(() => _dio.post('/orders/', data: data), _map);
-
-  Future<Map<String, dynamic>> getOrder(String orderId) =>
-      _call(() => _dio.get('/orders/$orderId'), _map);
-
-  Future<Map<String, dynamic>> createPaymentIntent(String orderId) =>
-      _call(() => _dio.post('/payments/$orderId/create-intent'), _map);
-
-  Future<Map<String, dynamic>> getShippingRates(Map<String, dynamic> data) =>
-      _call(() => _dio.post('/shipping/rates', data: data), _map);
-
   Future<List<Map<String, dynamic>>> getSignatureExperiences() =>
       _call(() => _dio.get('/loyalty/experiences'), _list);
 
@@ -206,15 +194,4 @@ class ApiService {
 
   Future<Map<String, dynamic>> redeemPoints(Map<String, dynamic> data) =>
       _call(() => _dio.post('/loyalty/points/redeem', data: data), _map);
-
-  Future<Map<String, dynamic>> getHelmDashQuote(double lat, double lng) => _call(
-        () => _dio.post('/helm-dash/quote', data: {'delivery_lat': lat, 'delivery_lng': lng}),
-        _map,
-      );
-
-  Future<List<Map<String, dynamic>>> getHelmDashDeliveries() =>
-      _call(() => _dio.get('/helm-dash/deliveries'), _list);
-
-  Future<Map<String, dynamic>> getHelmDashDelivery(String id) =>
-      _call(() => _dio.get('/helm-dash/deliveries/$id'), _map);
 }

@@ -1,0 +1,9 @@
+[
+  {
+    "id": "hauraki-gulf",
+    "name": "Hauraki Gulf (local demo area)",
+    "center_lat": -36.75,
+    "center_lng": 175.0,
+    "radius_nm": 25.0
+  }
+]
