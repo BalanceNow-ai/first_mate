@@ -75,5 +75,7 @@ frontend/android/app/release/
 
 # Secrets
 *.pem
+# Empty placeholder for the optional build CA secret (docker-compose*.yml default); not a secret.
+!deploy/no-build-ca.pem
 *.key
 credentials.json
