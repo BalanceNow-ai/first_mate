@@ -501,7 +501,7 @@ class _Notice extends StatelessWidget {
       liveRegion: liveRegion,
       container: true,
       child: Card(
-        color: color.withValues(alpha: 0.08),
+        color: tintedCardColor(color),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(

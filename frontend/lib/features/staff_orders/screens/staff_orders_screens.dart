@@ -365,7 +365,7 @@ class StaffOrderDetailScreen extends ConsumerWidget {
 String newRefundIdempotencyKey([Random? random]) {
   final r = random ?? Random.secure();
   return 'refund-${DateTime.now().toUtc().microsecondsSinceEpoch.toRadixString(36)}-'
-      '${r.nextInt(1 << 32).toRadixString(36)}${r.nextInt(1 << 32).toRadixString(36)}';
+      '${r.nextInt(0x7fffffff).toRadixString(36)}${r.nextInt(0x7fffffff).toRadixString(36)}';
 }
 
 /// What a refund response means for the admin.

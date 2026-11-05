@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:helm_marine/features/checkout/payment/payment_controller.dart';
 import 'package:helm_marine/features/checkout/providers/checkout_provider.dart';
@@ -123,6 +124,17 @@ void main() {
     await app.tap(find.text('Continue to review'));
     expect(find.text('Your cart changed'), findsOneWidget);
     expect(find.text('Get a new quote'), findsOneWidget);
+    await app.stop();
+  });
+
+  testWidgets('phone width with 2x text: delivery step renders without overflow', (tester) async {
+    final app = harness(tester, checkoutBackend(options: 'shipping_options_dangerous_goods'));
+    await app.start(size: const Size(380, 2400), textScale: 2.0);
+    app.go('/checkout');
+    await app.pump();
+    expect(tester.takeException(), isNull);
+    await tester.scrollUntilVisible(find.text('Continue to review'), 400, scrollable: find.byType(Scrollable).last);
+    expect(tester.takeException(), isNull);
     await app.stop();
   });
 }

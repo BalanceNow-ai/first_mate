@@ -43,8 +43,10 @@ const requoteCodes = {
 /// A fresh Idempotency-Key: 8-100 chars of `A-Z a-z 0-9 _ - : .`.
 String newIdempotencyKey([Random? random]) {
   final r = random ?? Random.secure();
-  final a = r.nextInt(1 << 32).toRadixString(36);
-  final b = r.nextInt(1 << 32).toRadixString(36);
+  // 31-bit bounds: on the web `1 << 32` is 0 (JS 32-bit shifts), which made
+  // nextInt throw and silently broke "Place order" in the browser.
+  final a = r.nextInt(0x7fffffff).toRadixString(36);
+  final b = r.nextInt(0x7fffffff).toRadixString(36);
   return 'checkout-${DateTime.now().toUtc().microsecondsSinceEpoch.toRadixString(36)}-$a$b';
 }
 

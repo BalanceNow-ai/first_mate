@@ -93,24 +93,21 @@ class DeliveryOptionTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: selected ? HelmTheme.primary : Colors.transparent, width: 2),
       ),
-      child: Semantics(
-        selected: selected,
+      // ListTile exposes one button node with enabled/selected state.
+      child: ListTile(
         enabled: option.available,
-        button: true,
-        child: ListTile(
-          enabled: option.available,
-          onTap: option.available ? onSelect : null,
-          leading: Icon(
-            selected ? Icons.radio_button_checked : (option.available ? Icons.radio_button_unchecked : Icons.block),
-            color: selected ? HelmTheme.primary : null,
-          ),
-          title: Row(children: [
-            Icon(_icon, size: 20),
-            const SizedBox(width: 8),
-            Expanded(child: Text(_title)),
-          ]),
-          subtitle: Text(_subtitle),
+        selected: selected,
+        onTap: option.available ? onSelect : null,
+        leading: Icon(
+          selected ? Icons.radio_button_checked : (option.available ? Icons.radio_button_unchecked : Icons.block),
+          color: selected ? HelmTheme.primary : null,
         ),
+        title: Row(children: [
+          Icon(_icon, size: 20),
+          const SizedBox(width: 8),
+          Expanded(child: Text(_title)),
+        ]),
+        subtitle: Text(_subtitle),
       ),
     );
   }
@@ -159,7 +156,7 @@ class _QuoteCardState extends State<QuoteCard> {
       if (q.operatingAreaName != null) q.operatingAreaName!,
     ];
     return Card(
-      color: (expired ? HelmTheme.warning : HelmTheme.success).withValues(alpha: 0.08),
+      color: tintedCardColor(expired ? HelmTheme.warning : HelmTheme.success),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Semantics(
@@ -296,7 +293,7 @@ class CheckoutErrorCard extends StatelessWidget {
       liveRegion: true,
       container: true,
       child: Card(
-        color: HelmTheme.error.withValues(alpha: 0.07),
+        color: tintedCardColor(HelmTheme.error, 0.07),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(

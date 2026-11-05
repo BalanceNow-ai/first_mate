@@ -263,7 +263,7 @@ class _AwaitingPayment extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: HelmTheme.warning.withValues(alpha: 0.08),
+      color: tintedCardColor(HelmTheme.warning),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

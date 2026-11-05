@@ -9,6 +9,11 @@ final _dateFormat = DateFormat('d MMM yyyy, h:mm a');
 
 String formatLocalDateTime(DateTime t) => _dateFormat.format(t.toLocal());
 
+/// An opaque tint for status cards (a translucent Card colour lets the
+/// elevation shadow show through and looks muddy).
+Color tintedCardColor(Color color, [double strength = 0.08]) =>
+    Color.alphaBlend(color.withValues(alpha: strength), Colors.white);
+
 Color orderStatusColor(String status) => switch (status) {
       'paid' || 'ready_for_dispatch' || 'dispatched' => HelmTheme.ocean,
       'delivered' || 'collected' => HelmTheme.success,

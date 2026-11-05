@@ -556,7 +556,7 @@ class _InfoBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: color.withValues(alpha: 0.08),
+      color: tintedCardColor(color),
       child: ListTile(leading: Icon(icon, color: color), title: Text(text)),
     );
   }
