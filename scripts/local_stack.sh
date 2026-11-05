@@ -66,8 +66,9 @@ anon_key() {
 }
 
 use_placeholder() {
-  rm -rf "$HELM_WEB_ROOT"
+  # Empty the directory in place: the running web container bind-mounts it.
   mkdir -p "$HELM_WEB_ROOT"
+  find "$HELM_WEB_ROOT" -mindepth 1 -delete
   cp "$ROOT/deploy/local/placeholder/index.html" "$HELM_WEB_ROOT/index.html"
   warn "serving the placeholder page at $HELM_PUBLIC_URL/ ($1)"
   printf 'placeholder: %s\n' "$1" > "$LOCAL_DIR/web-status"
@@ -99,9 +100,10 @@ build_web() {
       --dart-define=APP_ENV=development \
       --dart-define=SENTRY_DSN=
   ) > "$LOCAL_DIR/web-build.log" 2>&1; then
-    rm -rf "$HELM_WEB_ROOT"
-    mkdir -p "$(dirname "$HELM_WEB_ROOT")"
-    cp -r "$src/build/web" "$HELM_WEB_ROOT"
+    # Replace contents in place so a running web container (bind mount) sees them.
+    mkdir -p "$HELM_WEB_ROOT"
+    find "$HELM_WEB_ROOT" -mindepth 1 -delete
+    cp -r "$src/build/web/." "$HELM_WEB_ROOT/"
     printf 'flutter: built %s\n' "$(date -u +%FT%TZ)" > "$LOCAL_DIR/web-status"
     log "web bundle ready in $HELM_WEB_ROOT"
   else
