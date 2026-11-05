@@ -55,7 +55,6 @@ class Settings(BaseSettings):
     supabase_jwt_issuer: str = ""  # default: {supabase_url}/auth/v1
     supabase_jwt_audience: str = "authenticated"
     supabase_jwks_url: str = ""  # default: {supabase_url}/auth/v1/.well-known/jwks.json
-    supabase_require_email_confirmation: bool = True
     jwt_leeway_seconds: int = 30
 
     # --- Rate limiting -----------------------------------------------------------

@@ -22,7 +22,7 @@ COMPOSE=(docker compose -f "$ROOT/docker-compose.yml")
 
 # Seed commands looked for, in order (owned by other workstreams; missing ones are
 # reported, not fatal).
-SEED_COMMANDS=(seed-boats seed-catalogue seed-products seed-knowledge seed-checklists seed-operating-areas seed-rewards seed-demo)
+SEED_COMMANDS=(seed-demo)
 
 log() { printf '==> %s\n' "$*"; }
 warn() { printf 'WARNING: %s\n' "$*" >&2; }

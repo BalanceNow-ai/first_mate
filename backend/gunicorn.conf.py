@@ -29,7 +29,7 @@ def _int(name: str, default: int) -> int:
 
 bind = os.environ.get("GUNICORN_BIND", "0.0.0.0:8000")
 workers = _int("WEB_CONCURRENCY", 2)
-worker_class = "uvicorn.workers.UvicornWorker"
+worker_class = "uvicorn_worker.UvicornWorker"
 timeout = _int("GUNICORN_TIMEOUT", 60)
 graceful_timeout = _int("GUNICORN_GRACEFUL_TIMEOUT", 30)
 keepalive = _int("GUNICORN_KEEPALIVE", 5)

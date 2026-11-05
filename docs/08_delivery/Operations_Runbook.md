@@ -351,7 +351,6 @@ Compose/deploy-only variables (not read by the application): `HELM_PUBLIC_URL`,
 | `SUPABASE_JWT_ISSUER` | "" |  |
 | `SUPABASE_JWT_AUDIENCE` | `authenticated` |  |
 | `SUPABASE_JWKS_URL` | "" |  |
-| `SUPABASE_REQUIRE_EMAIL_CONFIRMATION` | `True` | declared but not read by the API yet |
 | `JWT_LEEWAY_SECONDS` | `30` |  |
 | `RATE_LIMIT_BACKEND` | `memory` | `redis` required outside dev/test (compose sets it) |
 | `RATE_LIMIT_AUTH_PER_MINUTE` | `20` |  |
