@@ -183,6 +183,12 @@ class _WebCardPaymentFormState extends State<WebCardPaymentForm> with AutomaticK
   }
 }
 
+/// Stripe's messages do not always end with a full stop.
+String _sentence(String text) {
+  final t = text.trim();
+  return RegExp(r'[.!?]$').hasMatch(t) ? t : '$t.';
+}
+
 class _Unavailable extends StatelessWidget {
   const _Unavailable({required this.reason, required this.onRetry});
 
@@ -211,7 +217,7 @@ class _Unavailable extends StatelessWidget {
                     Text('Card payments are unavailable right now',
                         style: theme.textTheme.titleSmall?.copyWith(color: HelmTheme.warning)),
                     const SizedBox(height: 4),
-                    Text('${reason ?? 'The secure card form could not be loaded.'} '
+                    Text('${_sentence(reason ?? 'The secure card form could not be loaded.')} '
                         'Nothing was charged and your order is still reserved.'),
                     const SizedBox(height: 8),
                     FilledButton.icon(
