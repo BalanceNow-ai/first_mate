@@ -1,0 +1,35 @@
+{
+  "items": [
+    {
+      "id": "5246d54f-729c-4d30-b061-373d855264a8",
+      "kind": "redeem_discount",
+      "points": -100,
+      "balance_after": 522,
+      "description": "Discount CREW-N7W5-G5X4-EX6F",
+      "order_id": null,
+      "entitlement_id": "8954fa0e-1bd6-45b4-963b-1b53bdf199a9",
+      "redemption_id": null,
+      "team_id": null,
+      "period": null,
+      "eligible_spend_cents": null,
+      "created_at": "2026-11-05T07:50:13.169308Z"
+    },
+    {
+      "id": "029a20fb-f511-49af-9a82-90e103cb698e",
+      "kind": "earn",
+      "points": 622,
+      "balance_after": 622,
+      "description": "Order HM-261105-95EAXU",
+      "order_id": "4cecbd3e-dc9c-4c93-9050-ce7259170742",
+      "entitlement_id": null,
+      "redemption_id": null,
+      "team_id": null,
+      "period": "2026-11",
+      "eligible_spend_cents": 62250,
+      "created_at": "2026-11-05T07:50:13.050646Z"
+    }
+  ],
+  "total": 5,
+  "limit": 3,
+  "offset": 3
+}

@@ -1,0 +1,13 @@
+{
+  "id": "8122a91f-e30e-418c-a3f2-cc452376eabc",
+  "experience_id": "synthetic-test-day-trip",
+  "experience_title": "[SYNTHETIC] Test Harbour Day Trip",
+  "points_cost": 500,
+  "cms_provider": "local_fixture",
+  "is_synthetic": true,
+  "status": "requested",
+  "customer_note": "Two people, any Saturday",
+  "fulfilled_at": null,
+  "created_at": "2026-11-05T07:50:13.247730Z",
+  "updated_at": "2026-11-05T07:50:13.247734Z"
+}

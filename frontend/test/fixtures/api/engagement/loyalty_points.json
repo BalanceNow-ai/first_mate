@@ -1,0 +1,13 @@
+{
+  "points_balance": 622,
+  "lifetime_earned": 622,
+  "points_value_cents": 622,
+  "currency": "NZD",
+  "tier": "mate",
+  "tier_is_display_only": true,
+  "trailing_12_month_spend_cents": 62250,
+  "next_tier": "skipper",
+  "next_tier_threshold_cents": 200000,
+  "crew_id": null,
+  "crew_wallet_points": null
+}

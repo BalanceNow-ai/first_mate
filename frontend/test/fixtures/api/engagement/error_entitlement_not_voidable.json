@@ -1,0 +1,4 @@
+{
+  "detail": "A voided entitlement cannot be voided",
+  "code": "entitlement_not_voidable"
+}

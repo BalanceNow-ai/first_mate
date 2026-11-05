@@ -1,0 +1,340 @@
+[
+  {
+    "id": "43412c0c-a216-4586-9d1e-01a541fa06c0",
+    "actor_id": "5ef312f4-4563-415a-9555-edfd2b120c34",
+    "action": "set_role",
+    "entity_type": "user",
+    "entity_id": "e943319f-7694-4c71-8aad-ecc267472b99",
+    "detail": {
+      "to": "customer",
+      "from": "operator"
+    },
+    "created_at": "2026-11-05T07:50:14.240563Z"
+  },
+  {
+    "id": "e7fe0a32-48ac-4266-aff7-c10349a4100e",
+    "actor_id": "5ef312f4-4563-415a-9555-edfd2b120c34",
+    "action": "set_role",
+    "entity_type": "user",
+    "entity_id": "e943319f-7694-4c71-8aad-ecc267472b99",
+    "detail": {
+      "to": "operator",
+      "from": "customer"
+    },
+    "created_at": "2026-11-05T07:50:14.215822Z"
+  },
+  {
+    "id": "bd602788-ef6e-481c-b110-8358ee3dfa2b",
+    "actor_id": "5ef312f4-4563-415a-9555-edfd2b120c34",
+    "action": "knowledge_delete",
+    "entity_type": "knowledge_source",
+    "entity_id": "7e7e004f-e181-4d50-8d15-365b95659925",
+    "detail": {
+      "title": "Fixture licensed note c08a6176"
+    },
+    "created_at": "2026-11-05T07:50:14.177432Z"
+  },
+  {
+    "id": "2b0df177-bdb0-4ac0-ac58-d6875f02602d",
+    "actor_id": "5ef312f4-4563-415a-9555-edfd2b120c34",
+    "action": "knowledge_delete",
+    "entity_type": "knowledge_source",
+    "entity_id": "a584b5b0-0bc6-41f2-9590-0028e935923d",
+    "detail": {
+      "title": "[SYNTHETIC] Fixture anchoring note c08a6176"
+    },
+    "created_at": "2026-11-05T07:50:14.161828Z"
+  },
+  {
+    "id": "27e59f6a-3914-475c-ab28-fce2c8c3327c",
+    "actor_id": "5ef312f4-4563-415a-9555-edfd2b120c34",
+    "action": "knowledge_revoke",
+    "entity_type": "knowledge_source",
+    "entity_id": "a584b5b0-0bc6-41f2-9590-0028e935923d",
+    "detail": {
+      "title": "[SYNTHETIC] Fixture anchoring note c08a6176"
+    },
+    "created_at": "2026-11-05T07:50:14.143880Z"
+  },
+  {
+    "id": "0020c0d5-f894-453f-bf1e-e8775e207e07",
+    "actor_id": "5ef312f4-4563-415a-9555-edfd2b120c34",
+    "action": "knowledge_reembed",
+    "entity_type": "knowledge_source",
+    "entity_id": "a584b5b0-0bc6-41f2-9590-0028e935923d",
+    "detail": {
+      "model": "local_hash-v1",
+      "chunks": 2
+    },
+    "created_at": "2026-11-05T07:50:14.120217Z"
+  },
+  {
+    "id": "b9f76da9-3233-4e6b-9777-296f8bc80b7e",
+    "actor_id": "5ef312f4-4563-415a-9555-edfd2b120c34",
+    "action": "knowledge_admit",
+    "entity_type": "knowledge_source",
+    "entity_id": "a584b5b0-0bc6-41f2-9590-0028e935923d",
+    "detail": {
+      "title": "[SYNTHETIC] Fixture anchoring note c08a6176",
+      "synthetic": true
+    },
+    "created_at": "2026-11-05T07:50:14.092221Z"
+  },
+  {
+    "id": "7b5ba2ae-0e18-4e3a-b00e-314eb077e90a",
+    "actor_id": "5ef312f4-4563-415a-9555-edfd2b120c34",
+    "action": "knowledge_ingest",
+    "entity_type": "knowledge_source",
+    "entity_id": "7e7e004f-e181-4d50-8d15-365b95659925",
+    "detail": {
+      "title": "Fixture licensed note c08a6176",
+      "version": "1",
+      "superseded": []
+    },
+    "created_at": "2026-11-05T07:50:14.058455Z"
+  },
+  {
+    "id": "9947c085-7d9b-405c-9fc0-46ae94b0e086",
+    "actor_id": "5ef312f4-4563-415a-9555-edfd2b120c34",
+    "action": "knowledge_ingest",
+    "entity_type": "knowledge_source",
+    "entity_id": "a584b5b0-0bc6-41f2-9590-0028e935923d",
+    "detail": {
+      "title": "[SYNTHETIC] Fixture anchoring note c08a6176",
+      "version": "1",
+      "superseded": []
+    },
+    "created_at": "2026-11-05T07:50:14.002043Z"
+  },
+  {
+    "id": "03793555-6f4d-4ccc-8ae9-c4cdba9954c3",
+    "actor_id": "5ef312f4-4563-415a-9555-edfd2b120c34",
+    "action": "fitment_rule.delete",
+    "entity_type": "product_compatibility",
+    "entity_id": "6d310052-710a-4ca0-9852-185b0dda217a",
+    "detail": {
+      "product_id": "af2b2166-1487-404e-acb4-931214894486",
+      "engine_make": "Fixturesynth",
+      "vessel_make": null,
+      "engine_model": "FY-c08a6176",
+      "vessel_model": null,
+      "confidence_score": "0.30",
+      "verification_status": "rejected",
+      "equipment_category_id": null
+    },
+    "created_at": "2026-11-05T07:50:13.967042Z"
+  },
+  {
+    "id": "2f3e071b-9a58-478c-a2df-f48af815193b",
+    "actor_id": "5ef312f4-4563-415a-9555-edfd2b120c34",
+    "action": "fitment_rule.delete",
+    "entity_type": "product_compatibility",
+    "entity_id": "09a00aa4-5b1d-488e-9c51-9ec9d12cb848",
+    "detail": {
+      "product_id": "af2b2166-1487-404e-acb4-931214894486",
+      "engine_make": "Fixturesynth",
+      "vessel_make": null,
+      "engine_model": "FX-c08a6176",
+      "vessel_model": null,
+      "confidence_score": "0.80",
+      "verification_status": "verified",
+      "equipment_category_id": null
+    },
+    "created_at": "2026-11-05T07:50:13.947595Z"
+  },
+  {
+    "id": "e1406a28-760a-498b-b242-8e8671b649d1",
+    "actor_id": "5ef312f4-4563-415a-9555-edfd2b120c34",
+    "action": "fitment_rule.reject",
+    "entity_type": "product_compatibility",
+    "entity_id": "6d310052-710a-4ca0-9852-185b0dda217a",
+    "detail": {
+      "product_id": "af2b2166-1487-404e-acb4-931214894486",
+      "engine_make": "Fixturesynth",
+      "vessel_make": null,
+      "engine_model": "FY-c08a6176",
+      "vessel_model": null,
+      "confidence_score": "0.30",
+      "verification_status": "rejected",
+      "equipment_category_id": null
+    },
+    "created_at": "2026-11-05T07:50:13.932629Z"
+  },
+  {
+    "id": "9dc41e61-fa33-4934-8083-b67aa93a8b04",
+    "actor_id": "5ef312f4-4563-415a-9555-edfd2b120c34",
+    "action": "fitment_rule.verify",
+    "entity_type": "product_compatibility",
+    "entity_id": "09a00aa4-5b1d-488e-9c51-9ec9d12cb848",
+    "detail": {
+      "product_id": "af2b2166-1487-404e-acb4-931214894486",
+      "engine_make": "Fixturesynth",
+      "vessel_make": null,
+      "engine_model": "FX-c08a6176",
+      "vessel_model": null,
+      "confidence_score": "0.8",
+      "verification_status": "verified",
+      "equipment_category_id": null
+    },
+    "created_at": "2026-11-05T07:50:13.914485Z"
+  },
+  {
+    "id": "d9c9c7d9-759e-4e66-8375-bb1104c515df",
+    "actor_id": "5ef312f4-4563-415a-9555-edfd2b120c34",
+    "action": "fitment_rule.create",
+    "entity_type": "product_compatibility",
+    "entity_id": "6d310052-710a-4ca0-9852-185b0dda217a",
+    "detail": {
+      "product_id": "af2b2166-1487-404e-acb4-931214894486",
+      "engine_make": "Fixturesynth",
+      "vessel_make": null,
+      "engine_model": "FY-c08a6176",
+      "vessel_model": null,
+      "confidence_score": "0.30",
+      "verification_status": "unverified",
+      "equipment_category_id": null
+    },
+    "created_at": "2026-11-05T07:50:13.876450Z"
+  },
+  {
+    "id": "db4aab8a-fa8d-474f-8d64-25693aea2c6d",
+    "actor_id": "5ef312f4-4563-415a-9555-edfd2b120c34",
+    "action": "fitment_rule.create",
+    "entity_type": "product_compatibility",
+    "entity_id": "09a00aa4-5b1d-488e-9c51-9ec9d12cb848",
+    "detail": {
+      "product_id": "af2b2166-1487-404e-acb4-931214894486",
+      "engine_make": "Fixturesynth",
+      "vessel_make": null,
+      "engine_model": "FX-c08a6176",
+      "vessel_model": null,
+      "confidence_score": "0.30",
+      "verification_status": "unverified",
+      "equipment_category_id": null
+    },
+    "created_at": "2026-11-05T07:50:13.848837Z"
+  },
+  {
+    "id": "887a6298-e92e-4069-a75d-44da520f2be2",
+    "actor_id": "3ec80ac5-9b3b-4760-bdf2-6f527c0feab7",
+    "action": "crew_leave",
+    "entity_type": "crew",
+    "entity_id": "7b344b98-a9e5-4e07-9f4d-d4ea59304e2e",
+    "detail": {
+      "disbanded": "True",
+      "left_crew_id": "7b344b98-a9e5-4e07-9f4d-d4ea59304e2e",
+      "new_captain_id": "None"
+    },
+    "created_at": "2026-11-05T07:50:13.815180Z"
+  },
+  {
+    "id": "513ef7cc-5492-4f6c-9cce-008b982f6682",
+    "actor_id": "6b2e90e3-a7e7-44e1-b5fd-ba0587f03aac",
+    "action": "crew_leave",
+    "entity_type": "crew",
+    "entity_id": "7b344b98-a9e5-4e07-9f4d-d4ea59304e2e",
+    "detail": {
+      "disbanded": "False",
+      "left_crew_id": "7b344b98-a9e5-4e07-9f4d-d4ea59304e2e",
+      "new_captain_id": "3ec80ac5-9b3b-4760-bdf2-6f527c0feab7"
+    },
+    "created_at": "2026-11-05T07:50:13.798417Z"
+  },
+  {
+    "id": "be7fad98-73b4-45ac-aa70-fc48b2699fa0",
+    "actor_id": "3ec80ac5-9b3b-4760-bdf2-6f527c0feab7",
+    "action": "crew_join",
+    "entity_type": "crew",
+    "entity_id": "7b344b98-a9e5-4e07-9f4d-d4ea59304e2e",
+    "detail": {
+      "invite_id": "a7c0af39-2e51-45d4-8483-f57b9945ab98"
+    },
+    "created_at": "2026-11-05T07:50:13.784002Z"
+  },
+  {
+    "id": "c9ed5ccf-786a-46fb-b9bc-3118210d3bf8",
+    "actor_id": "6b2e90e3-a7e7-44e1-b5fd-ba0587f03aac",
+    "action": "crew_invite",
+    "entity_type": "crew",
+    "entity_id": "7b344b98-a9e5-4e07-9f4d-d4ea59304e2e",
+    "detail": {
+      "invite_id": "a7c0af39-2e51-45d4-8483-f57b9945ab98"
+    },
+    "created_at": "2026-11-05T07:50:13.770003Z"
+  },
+  {
+    "id": "6c68f02b-3804-4d48-8b6b-c404801fefb7",
+    "actor_id": "6b2e90e3-a7e7-44e1-b5fd-ba0587f03aac",
+    "action": "crew_remove_member",
+    "entity_type": "crew",
+    "entity_id": "7b344b98-a9e5-4e07-9f4d-d4ea59304e2e",
+    "detail": {
+      "user_id": "3ec80ac5-9b3b-4760-bdf2-6f527c0feab7"
+    },
+    "created_at": "2026-11-05T07:50:13.757045Z"
+  },
+  {
+    "id": "61ba1c55-2fdd-4e7d-9940-967d72a56669",
+    "actor_id": "5ef312f4-4563-415a-9555-edfd2b120c34",
+    "action": "experience_cancel",
+    "entity_type": "experience_redemption",
+    "entity_id": "b5b69b66-337e-4f1c-b09d-22c7e8e10857",
+    "detail": {
+      "to": "cancelled",
+      "from": "requested"
+    },
+    "created_at": "2026-11-05T07:50:13.718228Z"
+  },
+  {
+    "id": "8f33d647-bb38-48e0-8eb4-0488c81481e3",
+    "actor_id": "5ef312f4-4563-415a-9555-edfd2b120c34",
+    "action": "experience_fulfil",
+    "entity_type": "experience_redemption",
+    "entity_id": "8122a91f-e30e-418c-a3f2-cc452376eabc",
+    "detail": {
+      "to": "fulfilled",
+      "from": "confirmed"
+    },
+    "created_at": "2026-11-05T07:50:13.696601Z"
+  },
+  {
+    "id": "d124f386-2d91-49a5-8694-bfc149947915",
+    "actor_id": "5ef312f4-4563-415a-9555-edfd2b120c34",
+    "action": "experience_confirm",
+    "entity_type": "experience_redemption",
+    "entity_id": "8122a91f-e30e-418c-a3f2-cc452376eabc",
+    "detail": {
+      "to": "confirmed",
+      "from": "requested"
+    },
+    "created_at": "2026-11-05T07:50:13.683179Z"
+  },
+  {
+    "id": "b19f7062-a97f-4cdc-87bb-ed106b591622",
+    "actor_id": "5ef312f4-4563-415a-9555-edfd2b120c34",
+    "action": "equipment_verification.approve",
+    "entity_type": "equipment_verification_request",
+    "entity_id": "af26b2d2-26cc-497a-938c-169ea6463d1e",
+    "detail": {
+      "vessel_id": "aa78a4db-12cd-4143-af10-f2e91deae47a",
+      "equipment_ids": [
+        "639e1717-8043-4c97-9fb4-e044dc2fd0a7"
+      ]
+    },
+    "created_at": "2026-11-05T07:50:13.625913Z"
+  },
+  {
+    "id": "2169e144-738f-40f0-88f1-c5d5fc81b21f",
+    "actor_id": "5ef312f4-4563-415a-9555-edfd2b120c34",
+    "action": "equipment_verification.reject",
+    "entity_type": "equipment_verification_request",
+    "entity_id": "96c1b89b-c739-4236-9f8b-f5fff10abb6f",
+    "detail": {
+      "vessel_id": "aa78a4db-12cd-4143-af10-f2e91deae47a",
+      "equipment_ids": [
+        "639e1717-8043-4c97-9fb4-e044dc2fd0a7"
+      ]
+    },
+    "created_at": "2026-11-05T07:50:13.584165Z"
+  }
+]

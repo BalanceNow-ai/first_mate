@@ -1,0 +1,49 @@
+{
+  "items": [
+    {
+      "id": "34b76e4b-2144-4d0c-a569-4bdf7dc6d7b1",
+      "kind": "redeem_experience",
+      "points": -500,
+      "balance_after": 22,
+      "description": "Experience: [SYNTHETIC] Test Harbour Day Trip",
+      "order_id": null,
+      "entitlement_id": null,
+      "redemption_id": "8122a91f-e30e-418c-a3f2-cc452376eabc",
+      "team_id": null,
+      "period": null,
+      "eligible_spend_cents": null,
+      "created_at": "2026-11-05T07:50:13.251219Z"
+    },
+    {
+      "id": "a034dd4c-4717-4c4c-a760-6bc7d832d2a9",
+      "kind": "redeem_discount",
+      "points": -100,
+      "balance_after": 522,
+      "description": "Discount CREW-6DE7-TFYG-JZ5L",
+      "order_id": null,
+      "entitlement_id": "6d954690-d26f-4a6c-8fc8-912ec0de755c",
+      "redemption_id": null,
+      "team_id": null,
+      "period": null,
+      "eligible_spend_cents": null,
+      "created_at": "2026-11-05T07:50:13.216416Z"
+    },
+    {
+      "id": "cb150947-e842-4691-964a-568ecdc64929",
+      "kind": "redemption_reversal",
+      "points": 100,
+      "balance_after": 622,
+      "description": "Discount CREW-N7W5-G5X4-EX6F voided",
+      "order_id": null,
+      "entitlement_id": "8954fa0e-1bd6-45b4-963b-1b53bdf199a9",
+      "redemption_id": null,
+      "team_id": null,
+      "period": null,
+      "eligible_spend_cents": null,
+      "created_at": "2026-11-05T07:50:13.187330Z"
+    }
+  ],
+  "total": 5,
+  "limit": 3,
+  "offset": 0
+}

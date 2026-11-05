@@ -1,0 +1,14 @@
+{
+  "detail": "Request validation failed",
+  "code": "validation_error",
+  "errors": [
+    {
+      "loc": [
+        "body",
+        "role"
+      ],
+      "msg": "String should match pattern '^(customer|operator|dispatcher|admin)$'",
+      "type": "string_pattern_mismatch"
+    }
+  ]
+}
