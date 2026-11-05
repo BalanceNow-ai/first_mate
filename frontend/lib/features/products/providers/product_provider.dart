@@ -1,101 +1,101 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:helm_marine/core/api/api_service.dart';
 import 'package:helm_marine/core/models/product.dart';
+import 'package:helm_marine/core/session/session.dart';
+import 'package:helm_marine/features/vessels/providers/vessel_provider.dart';
 
-/// Search / filter parameters for products.
+/// Catalogue search / filter parameters.
 class ProductFilter {
-  final String? category;
-  final String? brand;
-  final String? vesselId;
-  final String? search;
-  final bool onSale;
-  final bool vesselCompatible;
-  final int offset;
-  final int limit;
-
   const ProductFilter({
     this.category,
-    this.brand,
-    this.vesselId,
     this.search,
     this.onSale = false,
-    this.vesselCompatible = false,
+    this.inStockOnly = false,
     this.offset = 0,
     this.limit = 20,
   });
 
+  final String? category;
+  final String? search;
+  final bool onSale;
+  final bool inStockOnly;
+  final int offset;
+  final int limit;
+
   ProductFilter copyWith({
     String? category,
-    String? brand,
-    String? vesselId,
     String? search,
     bool? onSale,
-    bool? vesselCompatible,
+    bool? inStockOnly,
     int? offset,
-    int? limit,
     bool clearCategory = false,
-    bool clearBrand = false,
     bool clearSearch = false,
   }) {
     return ProductFilter(
       category: clearCategory ? null : (category ?? this.category),
-      brand: clearBrand ? null : (brand ?? this.brand),
-      vesselId: vesselId ?? this.vesselId,
       search: clearSearch ? null : (search ?? this.search),
       onSale: onSale ?? this.onSale,
-      vesselCompatible: vesselCompatible ?? this.vesselCompatible,
-      offset: offset ?? this.offset,
-      limit: limit ?? this.limit,
+      inStockOnly: inStockOnly ?? this.inStockOnly,
+      // Any filter change returns to the first page unless an offset is given.
+      offset: offset ?? 0,
+      limit: limit,
     );
   }
 }
 
-/// Current filter state.
-final productFilterProvider = StateProvider<ProductFilter>(
-  (ref) => const ProductFilter(),
-);
+final productFilterProvider =
+    NotifierProvider<ProductFilterNotifier, ProductFilter>(ProductFilterNotifier.new);
 
-/// Available categories from backend.
-final productCategoriesProvider =
-    FutureProvider.autoDispose<List<String>>((ref) async {
-  final apiService = ref.read(apiServiceProvider);
-  return apiService.getProductCategories();
+class ProductFilterNotifier extends Notifier<ProductFilter> {
+  @override
+  ProductFilter build() => const ProductFilter();
+
+  void update(ProductFilter Function(ProductFilter) change) => state = change(state);
+}
+
+/// Whether the shop evaluates fitment against the shopping vessel.
+final useVesselFitmentProvider =
+    NotifierProvider<_BoolNotifier, bool>(() => _BoolNotifier(initial: true));
+
+class _BoolNotifier extends Notifier<bool> {
+  _BoolNotifier({required this.initial});
+
+  final bool initial;
+
+  @override
+  bool build() => initial;
+
+  void set(bool value) => state = value;
+}
+
+/// The vessel id sent with catalogue requests (null = no fitment evaluation).
+final fitmentVesselIdProvider = Provider<String?>((ref) {
+  if (!ref.watch(useVesselFitmentProvider)) return null;
+  return ref.watch(shoppingVesselProvider)?.id;
 });
 
-/// Available brands from backend.
-final productBrandsProvider =
-    FutureProvider.autoDispose<List<String>>((ref) async {
-  final apiService = ref.read(apiServiceProvider);
-  return apiService.getProductBrands();
-});
-
-/// Product list based on current filter.
-final productListProvider =
-    FutureProvider.autoDispose<List<Product>>((ref) async {
+/// A page of products for the current filter, with server-evaluated fitment
+/// for the shopping vessel.
+final productListProvider = FutureProvider.autoDispose<ProductPage>((ref) {
+  final api = ref.watch(userApiProvider);
   final filter = ref.watch(productFilterProvider);
-  final apiService = ref.read(apiServiceProvider);
-  return apiService.getProducts(
+  return api.getProducts(
     category: filter.category,
-    brand: filter.brand,
-    vesselId: filter.vesselCompatible ? filter.vesselId : null,
     search: filter.search,
-    onSale: filter.onSale ? true : null,
+    vesselId: ref.watch(fitmentVesselIdProvider),
+    onSale: filter.onSale,
+    inStockOnly: filter.inStockOnly,
     offset: filter.offset,
     limit: filter.limit,
   );
 });
 
-/// Single product detail.
-final productDetailProvider =
-    FutureProvider.autoDispose.family<Product, String>((ref, id) async {
-  final apiService = ref.read(apiServiceProvider);
-  return apiService.getProduct(id);
+/// Product categories offered as filter chips.
+final productCategoriesProvider = FutureProvider.autoDispose<List<String>>((ref) {
+  return ref.watch(userApiProvider).getProductCategories();
 });
 
-/// Compatibility check result.
-final compatibilityProvider = FutureProvider.autoDispose
-    .family<Map<String, dynamic>, ({String productId, String vesselId})>(
-        (ref, params) async {
-  final apiService = ref.read(apiServiceProvider);
-  return apiService.checkCompatibility(params.productId, params.vesselId);
+/// One product, with fitment for the shopping vessel when there is one.
+final productDetailProvider = FutureProvider.autoDispose.family<Product, String>((ref, id) {
+  final api = ref.watch(userApiProvider);
+  return api.getProduct(id, vesselId: ref.watch(fitmentVesselIdProvider));
 });

@@ -1,3 +1,4 @@
+// TODO(client pass 2): rewards ledger contract (points, entitlements, cents).
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
@@ -94,7 +95,7 @@ class CrewDashboardScreen extends ConsumerWidget {
                             child: ListTile(
                               leading: CircleAvatar(
                                 backgroundColor:
-                                    HelmTheme.secondary.withOpacity(0.15),
+                                    HelmTheme.secondary.withValues(alpha: 0.15),
                                 child: const Icon(Icons.group,
                                     color: HelmTheme.secondary),
                               ),
@@ -205,7 +206,7 @@ class _PointsCard extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -275,7 +276,7 @@ class _MultiplierCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: HelmTheme.accent.withOpacity(0.15),
+                    color: HelmTheme.accent.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -345,7 +346,7 @@ class _ExperienceCard extends StatelessWidget {
     return Card(
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: HelmTheme.accent.withOpacity(0.15),
+          backgroundColor: HelmTheme.accent.withValues(alpha: 0.15),
           child: const Icon(Icons.star, color: HelmTheme.accent),
         ),
         title: Text(title),

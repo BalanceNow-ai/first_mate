@@ -1,17 +1,19 @@
+// TODO(client pass 2): use operator-reported positions from the delivery
+// contract; the interpolated position below is a placeholder only.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:helm_marine/core/api/api_service.dart';
+import 'package:helm_marine/core/session/session.dart';
 
 /// Fetch a single delivery by ID.
 final deliveryDetailProvider = FutureProvider.autoDispose
     .family<Map<String, dynamic>, String>((ref, id) async {
-  final apiService = ref.read(apiServiceProvider);
+  final apiService = ref.watch(userApiProvider);
   return apiService.getHelmDashDelivery(id);
 });
 
 /// Fetch all user deliveries.
 final deliveryListProvider =
     FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
-  final apiService = ref.read(apiServiceProvider);
+  final apiService = ref.watch(userApiProvider);
   return apiService.getHelmDashDeliveries();
 });
 

@@ -1,80 +1,117 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:helm_marine/core/api/api_error.dart';
+import 'package:helm_marine/core/auth/auth_controller.dart';
+import 'package:helm_marine/core/auth/auth_gateway.dart';
+import 'package:helm_marine/core/config/app_config.dart';
 
-const String _baseUrl = 'http://localhost:8000/api/v1';
+/// Called when the session cannot be refreshed; the app signs the user out.
+typedef SessionExpiredCallback = Future<void> Function();
 
-final dioProvider = Provider<Dio>((ref) {
+/// Builds the API [Dio] for [baseUrl] with the auth interceptor installed.
+Dio createApiDio({
+  required String baseUrl,
+  required AuthGateway gateway,
+  required SessionExpiredCallback onSessionExpired,
+  HttpClientAdapter? adapter,
+}) {
   final dio = Dio(BaseOptions(
-    baseUrl: _baseUrl,
-    connectTimeout: const Duration(seconds: 10),
-    receiveTimeout: const Duration(seconds: 10),
-    headers: {'Content-Type': 'application/json'},
+    baseUrl: baseUrl,
+    connectTimeout: const Duration(seconds: 15),
+    receiveTimeout: const Duration(seconds: 30),
+    headers: {'Accept': 'application/json'},
+    contentType: Headers.jsonContentType,
   ));
-
-  dio.interceptors.add(AuthInterceptor(ref));
-  dio.interceptors.add(LogInterceptor(
-    requestBody: true,
-    responseBody: true,
-    logPrint: (obj) {}, // Suppress in production
-  ));
-
+  if (adapter != null) dio.httpClientAdapter = adapter;
+  dio.interceptors.add(AuthInterceptor(dio, gateway, onSessionExpired));
   return dio;
+}
+
+/// Transport override for tests (null = platform default).
+final httpClientAdapterProvider = Provider<HttpClientAdapter?>((ref) => null);
+
+/// The configured API client (base URL from [AppConfig]). A refresh failure
+/// signs the user out through the auth controller.
+final dioProvider = Provider<Dio>((ref) {
+  final config = ref.watch(appConfigProvider);
+  final gateway = ref.watch(authGatewayProvider);
+  return createApiDio(
+    baseUrl: config.apiBaseUrl,
+    gateway: gateway,
+    adapter: ref.watch(httpClientAdapterProvider),
+    onSessionExpired: () => ref.read(authControllerProvider.notifier).sessionExpired(),
+  );
 });
 
+/// Attaches the *current* Supabase access token to each request; on a 401 it
+/// refreshes the session once (shared between concurrent requests) and retries
+/// the request through the same configured [Dio]. When refreshing fails the
+/// session is ended via [onSessionExpired].
 class AuthInterceptor extends Interceptor {
-  final Ref _ref;
-  static const _storage = FlutterSecureStorage();
+  AuthInterceptor(this._dio, this._gateway, this._onSessionExpired);
 
-  AuthInterceptor(this._ref);
+  static const retriedKey = 'helm_auth_retried';
+  static const skipAuthKey = 'helm_skip_auth';
+
+  final Dio _dio;
+  final AuthGateway _gateway;
+  final SessionExpiredCallback _onSessionExpired;
+  Future<String?>? _refreshing;
 
   @override
-  void onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
-  ) async {
-    final token = await _storage.read(key: 'access_token');
-    if (token != null) {
-      options.headers['Authorization'] = 'Bearer $token';
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    if (options.extra[skipAuthKey] != true) {
+      final token = _gateway.currentAccessToken;
+      if (token != null && token.isNotEmpty) {
+        options.headers['Authorization'] = 'Bearer $token';
+      } else {
+        options.headers.remove('Authorization');
+      }
     }
     handler.next(options);
   }
 
   @override
-  void onError(DioException err, ErrorInterceptorHandler handler) async {
-    if (err.response?.statusCode == 401) {
-      // Token expired — attempt refresh via Supabase
-      final refreshToken = await _storage.read(key: 'refresh_token');
-      if (refreshToken != null) {
-        try {
-          final supabase = Supabase.instance.client;
-          final response = await supabase.auth.refreshSession();
-          final session = response.session;
-
-          if (session != null) {
-            // Store the new tokens
-            await _storage.write(
-                key: 'access_token', value: session.accessToken);
-            if (session.refreshToken != null) {
-              await _storage.write(
-                  key: 'refresh_token', value: session.refreshToken!);
-            }
-
-            // Retry the original request with the new token
-            final options = err.requestOptions;
-            options.headers['Authorization'] =
-                'Bearer ${session.accessToken}';
-            final retryResponse = await Dio().fetch(options);
-            return handler.resolve(retryResponse);
-          }
-        } catch (_) {
-          // Refresh failed — clear tokens and let the 401 propagate
-          await _storage.delete(key: 'access_token');
-          await _storage.delete(key: 'refresh_token');
-        }
-      }
+  Future<void> onError(DioException err, ErrorInterceptorHandler handler) async {
+    final request = err.requestOptions;
+    final hadToken = request.headers['Authorization'] != null;
+    if (err.response?.statusCode != 401 ||
+        !hadToken ||
+        request.extra[retriedKey] == true ||
+        request.extra[skipAuthKey] == true) {
+      return handler.next(_withApiError(err));
     }
-    handler.next(err);
+
+    final token = await _refreshOnce();
+    if (token == null) {
+      await _onSessionExpired();
+      return handler.next(_withApiError(err));
+    }
+    try {
+      request.extra[retriedKey] = true;
+      final response = await _dio.fetch<dynamic>(request);
+      return handler.resolve(response);
+    } on DioException catch (retryError) {
+      if (retryError.response?.statusCode == 401) {
+        await _onSessionExpired();
+      }
+      return handler.next(_withApiError(retryError));
+    }
+  }
+
+  Future<String?> _refreshOnce() {
+    final inflight = _refreshing;
+    if (inflight != null) return inflight;
+    final future = _gateway.refreshSession().whenComplete(() => _refreshing = null);
+    _refreshing = future;
+    return future;
+  }
+
+  /// Carries the parsed `{detail, code}` error on the exception.
+  static DioException _withApiError(DioException err) {
+    if (err.error is ApiError) return err;
+    return err.copyWith(error: ApiError.fromDio(err));
   }
 }

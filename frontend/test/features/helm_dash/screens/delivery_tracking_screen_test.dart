@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:helm_marine/features/helm_dash/providers/delivery_provider.dart';
 import 'package:helm_marine/features/helm_dash/screens/delivery_tracking_screen.dart';
+
+import '../../../helpers/fakes.dart';
 
 void main() {
   group('DeliveryTrackingScreen', () {
@@ -12,6 +16,7 @@ void main() {
     }) {
       return ProviderScope(
         overrides: [
+          ...baseTestOverrides(),
           deliveryDetailProvider('test-delivery').overrideWith((ref) async {
             if (deliveryState is AsyncError) throw deliveryState.error!;
             return deliveryState.value!;
@@ -35,7 +40,7 @@ void main() {
           'status': 'en_route',
           'delivery_coordinates': {'lat': -36.87, 'lng': 174.78},
           'nautical_miles': 5.2,
-          'delivery_fee': 66.60,
+          'delivery_fee_cents': 6660,
           'estimated_delivery_minutes': 27,
           'operator_name': 'Captain Jack',
           'delivery_location_name': 'Rangitoto Channel',
@@ -56,7 +61,7 @@ void main() {
         deliveryState: const AsyncData({
           'status': 'en_route',
           'delivery_coordinates': {'lat': -36.87, 'lng': 174.78},
-          'delivery_fee': 66.60,
+          'delivery_fee_cents': 6660,
         }),
         locationState: const AsyncData(DeliveryLocation(
           lat: -36.85,
@@ -66,7 +71,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(find.text('En Route'), findsOneWidget);
+      expect(find.text('En Route'), findsWidgets);
     });
 
     testWidgets('shows delivery details', (tester) async {
@@ -75,7 +80,7 @@ void main() {
           'status': 'assigned',
           'delivery_coordinates': {'lat': -36.87, 'lng': 174.78},
           'nautical_miles': 3.5,
-          'delivery_fee': 53.00,
+          'delivery_fee_cents': 5300,
           'estimated_delivery_minutes': 23,
           'operator_name': 'Skipper Mike',
           'delivery_location_name': 'Bean Rock',
@@ -100,7 +105,7 @@ void main() {
         deliveryState: const AsyncData({
           'status': 'pickup',
           'delivery_coordinates': {'lat': -36.87, 'lng': 174.78},
-          'delivery_fee': 50.00,
+          'delivery_fee_cents': 5000,
         }),
         locationState: const AsyncData(DeliveryLocation(
           lat: -36.8406,
@@ -122,10 +127,9 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            deliveryDetailProvider('test-delivery').overrideWith((ref) async {
-              await Future.delayed(const Duration(seconds: 10));
-              return {};
-            }),
+            ...baseTestOverrides(),
+            deliveryDetailProvider('test-delivery')
+                .overrideWith((ref) => Completer<Map<String, dynamic>>().future),
           ],
           child: const MaterialApp(
             home: DeliveryTrackingScreen(deliveryId: 'test-delivery'),

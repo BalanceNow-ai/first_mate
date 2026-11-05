@@ -1,31 +1,32 @@
+// TODO(client pass 2): server-owned tiers; remove the client-side mirror below.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:helm_marine/core/api/api_service.dart';
+import 'package:helm_marine/core/session/session.dart';
 
 /// Crew Points balance.
 final crewPointsProvider =
     FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
-  final apiService = ref.read(apiServiceProvider);
+  final apiService = ref.watch(userApiProvider);
   return apiService.getCrewPoints();
 });
 
 /// Current multiplier with tier info.
 final crewMultiplierProvider =
     FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
-  final apiService = ref.read(apiServiceProvider);
+  final apiService = ref.watch(userApiProvider);
   return apiService.getCrewMultiplier();
 });
 
 /// Signature Experiences from Strapi.
 final experiencesProvider =
     FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
-  final apiService = ref.read(apiServiceProvider);
+  final apiService = ref.watch(userApiProvider);
   return apiService.getSignatureExperiences();
 });
 
 /// User's crew teams.
 final crewTeamsProvider =
     FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
-  final apiService = ref.read(apiServiceProvider);
+  final apiService = ref.watch(userApiProvider);
   return apiService.getCrewTeams();
 });
 

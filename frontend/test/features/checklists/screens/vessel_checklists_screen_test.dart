@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:helm_marine/features/checklists/providers/checklist_provider.dart';
 import 'package:helm_marine/features/checklists/screens/vessel_checklists_screen.dart';
 
+import '../../../helpers/fakes.dart';
+
 void main() {
   group('VesselChecklistsScreen', () {
     Widget buildTestWidget({
@@ -11,6 +13,7 @@ void main() {
     }) {
       return ProviderScope(
         overrides: [
+          ...baseTestOverrides(),
           if (checklistsState != null)
             vesselChecklistsProvider('vessel-1').overrideWith((ref) async {
               if (checklistsState is AsyncError) throw checklistsState.error!;

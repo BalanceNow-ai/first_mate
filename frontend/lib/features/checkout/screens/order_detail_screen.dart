@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:helm_marine/core/api/api_service.dart';
+// TODO(client pass 2): typed Order model once the commerce contract is merged.
+import 'package:helm_marine/core/money/money.dart';
+import 'package:helm_marine/core/session/session.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
 
 final orderDetailProvider = FutureProvider.autoDispose
     .family<Map<String, dynamic>, String>((ref, orderId) async {
-  final apiService = ref.read(apiServiceProvider);
+  final apiService = ref.watch(userApiProvider);
   return apiService.getOrder(orderId);
 });
 
@@ -23,11 +25,9 @@ class OrderDetailScreen extends ConsumerWidget {
       body: orderState.when(
         data: (order) {
           final orderStatus = order['status'] as String? ?? 'pending';
-          final subtotal =
-              (order['subtotal'] as num?)?.toDouble() ?? 0;
-          final shipping =
-              (order['shipping_cost'] as num?)?.toDouble() ?? 0;
-          final total = (order['total'] as num?)?.toDouble() ?? 0;
+          final subtotal = order['subtotal_cents'] as int? ?? 0;
+          final shipping = order['shipping_cents'] as int? ?? 0;
+          final total = order['total_cents'] as int? ?? 0;
           final deliveryType = order['delivery_type'] as String? ?? 'courier';
           final trackingNumber = order['tracking_number'] as String?;
           final courier = order['courier'] as String?;
@@ -93,8 +93,7 @@ class OrderDetailScreen extends ConsumerWidget {
                         const Divider(),
                         ...items.map((item) {
                           final qty = item['quantity'] as int? ?? 1;
-                          final unitPrice =
-                              (item['unit_price'] as num?)?.toDouble() ?? 0;
+                          final lineTotal = item['line_total_cents'] as int? ?? 0;
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 6),
                             child: Row(
@@ -106,7 +105,7 @@ class OrderDetailScreen extends ConsumerWidget {
                                   ),
                                 ),
                                 Text(
-                                  '\$${(unitPrice * qty).toStringAsFixed(2)}',
+                                  formatCents(lineTotal),
                                   style: const TextStyle(
                                       fontWeight: FontWeight.w500),
                                 ),
@@ -272,9 +271,9 @@ class _StatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: _color.withOpacity(0.1),
+        color: _color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _color.withOpacity(0.3)),
+        border: Border.all(color: _color.withValues(alpha: 0.3)),
       ),
       child: Text(
         status.toUpperCase(),
@@ -290,7 +289,7 @@ class _StatusChip extends StatelessWidget {
 
 class _TotalRow extends StatelessWidget {
   final String label;
-  final double value;
+  final int value;
   final bool isBold;
 
   const _TotalRow({
@@ -312,7 +311,7 @@ class _TotalRow extends StatelessWidget {
                 fontSize: isBold ? 16 : 14,
               )),
           Text(
-            '\$${value.toStringAsFixed(2)}',
+            formatCents(value),
             style: TextStyle(
               fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
               fontSize: isBold ? 16 : 14,

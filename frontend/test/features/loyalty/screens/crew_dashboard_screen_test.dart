@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:helm_marine/features/loyalty/providers/loyalty_provider.dart';
 import 'package:helm_marine/features/loyalty/screens/crew_dashboard_screen.dart';
 
+import '../../../helpers/fakes.dart';
+
 void main() {
   group('CrewDashboardScreen', () {
     Widget buildTestWidget({
@@ -14,6 +16,7 @@ void main() {
     }) {
       return ProviderScope(
         overrides: [
+          ...baseTestOverrides(),
           if (pointsState != null)
             crewPointsProvider.overrideWith((ref) async {
               if (pointsState is AsyncError) throw pointsState.error!;
@@ -42,6 +45,7 @@ void main() {
     }
 
     testWidgets('shows crew rewards title', (tester) async {
+      _tallViewport(tester);
       await tester.pumpWidget(buildTestWidget(
         pointsState: const AsyncData({'points_balance': 1250, 'tier': 'crew'}),
         multiplierState: const AsyncData({
@@ -57,6 +61,7 @@ void main() {
     });
 
     testWidgets('shows points balance', (tester) async {
+      _tallViewport(tester);
       await tester.pumpWidget(buildTestWidget(
         pointsState:
             const AsyncData({'points_balance': 2500, 'tier': 'bosun'}),
@@ -74,6 +79,7 @@ void main() {
     });
 
     testWidgets('shows empty teams message', (tester) async {
+      _tallViewport(tester);
       await tester.pumpWidget(buildTestWidget(
         pointsState:
             const AsyncData({'points_balance': 0, 'tier': 'deckhand'}),
@@ -88,6 +94,7 @@ void main() {
     });
 
     testWidgets('shows crew teams', (tester) async {
+      _tallViewport(tester);
       await tester.pumpWidget(buildTestWidget(
         pointsState:
             const AsyncData({'points_balance': 500, 'tier': 'deckhand'}),
@@ -111,6 +118,7 @@ void main() {
 
     testWidgets('shows dynamic signature experiences from provider',
         (tester) async {
+      _tallViewport(tester);
       await tester.pumpWidget(buildTestWidget(
         pointsState:
             const AsyncData({'points_balance': 0, 'tier': 'deckhand'}),
@@ -142,6 +150,7 @@ void main() {
     });
 
     testWidgets('shows empty experiences message', (tester) async {
+      _tallViewport(tester);
       await tester.pumpWidget(buildTestWidget(
         pointsState:
             const AsyncData({'points_balance': 0, 'tier': 'deckhand'}),
@@ -156,6 +165,7 @@ void main() {
     });
 
     testWidgets('shows experience cost in CP', (tester) async {
+      _tallViewport(tester);
       await tester.pumpWidget(buildTestWidget(
         pointsState:
             const AsyncData({'points_balance': 0, 'tier': 'deckhand'}),
@@ -176,4 +186,11 @@ void main() {
       expect(find.text('8000'), findsOneWidget);
     });
   });
+}
+
+/// The dashboard is a lazily built list; give it room so every section builds.
+void _tallViewport(WidgetTester tester) {
+  tester.view.physicalSize = const Size(1080, 4000);
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.reset);
 }

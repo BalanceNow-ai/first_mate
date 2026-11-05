@@ -1,3 +1,5 @@
+// TODO(client pass 2): typed checklist contract (tiers, persisted ticks,
+// stock-safe "add missing" results, printable export).
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -168,7 +170,7 @@ class _VesselChecklistsScreenState
                   children: [
                     Icon(Icons.checklist,
                         size: 64,
-                        color: HelmTheme.primary.withOpacity(0.3)),
+                        color: HelmTheme.primary.withValues(alpha: 0.3)),
                     const SizedBox(height: 16),
                     Text(
                       'No checklists yet',
@@ -403,7 +405,7 @@ class _ChecklistItemTile extends StatelessWidget {
         ],
       ),
       trailing: productId != null
-          ? Icon(Icons.link, size: 16, color: HelmTheme.success)
+          ? const Icon(Icons.link, size: 16, color: HelmTheme.success)
           : IconButton(
               icon: Icon(Icons.link_off, size: 16, color: Colors.grey[400]),
               tooltip: 'Link product',
@@ -440,7 +442,7 @@ class _LinkProductDialogState extends State<_LinkProductDialog> {
     try {
       final products = await widget.apiService.getProducts(search: query, limit: 5);
       setState(() {
-        _results = products
+        _results = products.items
             .map((p) => {'id': p.id, 'name': p.name, 'sku': p.sku})
             .toList();
       });

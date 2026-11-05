@@ -31,7 +31,7 @@ void main() {
     });
 
     test('copyWith preserves all fields', () {
-      final state = const CheckoutState(
+      const state = CheckoutState(
         currentStep: 1,
         deliveryType: 'helm_dash',
         shippingAddress: {'city': 'Auckland'},

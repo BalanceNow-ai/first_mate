@@ -1,5 +1,7 @@
+// TODO(client pass 2): First Mate contract — citations, product references with
+// fitment, explicit add-to-cart actions, AI availability from /config/public.
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
 import 'package:helm_marine/features/ai_chat/providers/chat_provider.dart';
@@ -91,7 +93,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              color: HelmTheme.error.withOpacity(0.1),
+              color: HelmTheme.error.withValues(alpha: 0.1),
               child: Text(
                 chatState.error!,
                 style: const TextStyle(color: HelmTheme.error, fontSize: 12),
@@ -105,7 +107,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               color: Theme.of(context).scaffoldBackgroundColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, -2),
                 ),
@@ -173,10 +175,10 @@ class _MessageBubble extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isUser) ...[
-            CircleAvatar(
+            const CircleAvatar(
               radius: 16,
               backgroundColor: HelmTheme.primary,
-              child: const Icon(Icons.sailing, size: 16, color: Colors.white),
+              child: Icon(Icons.sailing, size: 16, color: Colors.white),
             ),
             const SizedBox(width: 8),
           ],
@@ -242,7 +244,7 @@ class _MessageBubble extends StatelessWidget {
                         blockquoteDecoration: BoxDecoration(
                           border: Border(
                             left: BorderSide(
-                              color: HelmTheme.primary.withOpacity(0.5),
+                              color: HelmTheme.primary.withValues(alpha: 0.5),
                               width: 3,
                             ),
                           ),
@@ -267,10 +269,10 @@ class _TypingIndicator extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          CircleAvatar(
+          const CircleAvatar(
             radius: 16,
             backgroundColor: HelmTheme.primary,
-            child: const Icon(Icons.sailing, size: 16, color: Colors.white),
+            child: Icon(Icons.sailing, size: 16, color: Colors.white),
           ),
           const SizedBox(width: 8),
           Container(
@@ -367,7 +369,7 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.sailing, size: 64, color: HelmTheme.primary.withOpacity(0.3)),
+            Icon(Icons.sailing, size: 64, color: HelmTheme.primary.withValues(alpha: 0.3)),
             const SizedBox(height: 16),
             Text(
               'First Mate AI',
@@ -384,7 +386,7 @@ class _EmptyState extends StatelessWidget {
               style: TextStyle(color: Colors.grey[600]),
             ),
             const SizedBox(height: 24),
-            Wrap(
+            const Wrap(
               spacing: 8,
               runSpacing: 8,
               alignment: WrapAlignment.center,
@@ -410,8 +412,8 @@ class _SuggestionChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return ActionChip(
       label: Text(label, style: const TextStyle(fontSize: 12)),
-      backgroundColor: HelmTheme.primary.withOpacity(0.08),
-      side: BorderSide(color: HelmTheme.primary.withOpacity(0.2)),
+      backgroundColor: HelmTheme.primary.withValues(alpha: 0.08),
+      side: BorderSide(color: HelmTheme.primary.withValues(alpha: 0.2)),
       onPressed: () {
         // This would ideally send the message, but we'd need the provider ref
         // In practice, the parent would handle this via a callback
