@@ -281,6 +281,20 @@ carriers were exercised only through fakes at the SDK/HTTP boundary or local sub
 | Independent backend review | separate reviewer, probes under `/tmp` | 14 findings (6 proven by failing probes) → all fixed; probes kept as `test_review_regressions.py` |
 | Independent client/contract review | separate reviewer | 12 findings → all fixed (H1/H2/M1 in checkout, others in rewards, session storage, build checks, a11y) |
 
+**Correction increment (2026-11-06, code at `42f5b75`, docs at `67bc13e`+).** Same environment.
+
+| Check | Command | Result |
+|---|---|---|
+| Backend regression (fresh DB, standalone Typesense up) | `TEST_DATABASE_URL=…/helm_test_fm2 pytest -q -rs` | **423 passed, 1 skipped** (SMTP-sink test, as before) |
+| Backend lint/format | `ruff check app alembic && ruff format --check app alembic` | clean |
+| New regression modules | test_grounding_support, test_fitment_scope_contract, test_refund_compensation, test_push_delivery_outcomes, test_lock_order, test_migrations::test_0004_… | pass; each FM case fails on `f4f3a97` (lock races: `DeadlockDetectedError`) |
+| Reviewer probes re-run | `docs/08_delivery/evidence/review_f4f3a97_probes_after.json` | G1–G4 not certified / suppressed; F1 rejected + `unknown`; R1/R2 one restoration; N1 failing device reported; identity unchanged |
+| Clean stack install | `local_stack.sh reset --yes && up && seed && cli sync-search && cli fitment-audit` | exit 0; empty DB → 0005; 32 products indexed; 0 malformed fitment rules; `/ready` true, Celery heartbeat fresh |
+| API journey | `python scripts/e2e/api_journey.py` | **39/39** |
+| Browser journeys | catalogue / commerce / engagement | **12/12**, **15/15**, **25/25** ×3 consecutive |
+| Flutter | not re-run | no client source changed in this increment (the new grounding fields are additive and ignored by the client model) |
+| Second independent review | separate reviewer on `f4f3a97..a95be4a` | 4 confirmed + 1 low + 3 traced findings → all fixed in `42f5b75` (§3.7) |
+
 Performance (local stack above, 2 API workers, through nginx; 300 requests per
 endpoint; **local evidence only — not production performance**):
 
