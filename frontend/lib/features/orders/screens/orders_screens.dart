@@ -11,6 +11,7 @@ import 'package:helm_marine/features/cart/providers/cart_provider.dart';
 import 'package:helm_marine/features/checkout/payment/payment_controller.dart';
 import 'package:helm_marine/features/checkout/payment/payment_panel.dart';
 import 'package:helm_marine/features/checkout/payment/stripe_web_bridge.dart';
+import 'package:helm_marine/features/checkout/providers/checkout_provider.dart';
 import 'package:helm_marine/features/orders/data/commerce_api.dart';
 import 'package:helm_marine/features/orders/providers/orders_providers.dart';
 import 'package:helm_marine/features/orders/widgets/order_widgets.dart';
@@ -284,8 +285,11 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(paymentStatusLabel(order.paymentStatus)),
-                      if (order.paymentProvider == 'local')
+                      if (order.paymentProvider == 'local' && order.isPaid)
                         const Text('Paid through the local TEST MODE provider — no real charge.'),
+                      if (order.isUnderPaymentReview)
+                        const Text('Payment received but the order needs staff review; '
+                            'you\'ll be contacted or refunded.'),
                       if (order.refundedCents > 0)
                         Text('Refunds: ${formatCents(order.refundedCents)} returned to your card.'),
                     ],
@@ -433,13 +437,28 @@ class _Section extends StatelessWidget {
 }
 
 /// `/orders/:orderId/pay` — retry or complete payment for an existing order.
-class OrderPaymentScreen extends StatelessWidget {
+class OrderPaymentScreen extends ConsumerWidget {
   const OrderPaymentScreen({super.key, required this.orderId});
 
   final String orderId;
 
+  static const _terminal = {
+    PaymentPhase.paid,
+    PaymentPhase.underReview,
+    PaymentPhase.cancelled,
+    PaymentPhase.expired,
+    PaymentPhase.closed,
+  };
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Once this order's payment is over, a checkout attempt still holding it
+    // must not reappear on /checkout.
+    ref.listen(paymentControllerProvider(orderId), (_, next) {
+      if (_terminal.contains(next.phase) && ref.read(checkoutProvider).orderId == orderId) {
+        ref.read(checkoutProvider.notifier).reset();
+      }
+    });
     return Scaffold(
       appBar: AppBar(title: const Text('Payment')),
       body: ContentWidth(

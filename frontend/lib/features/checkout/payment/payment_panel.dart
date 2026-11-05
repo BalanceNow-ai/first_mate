@@ -11,6 +11,7 @@ import 'package:helm_marine/core/money/money.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
 import 'package:helm_marine/core/widgets/state_views.dart';
 import 'package:helm_marine/features/checkout/payment/payment_controller.dart';
+import 'package:helm_marine/features/checkout/payment/payment_readiness.dart';
 import 'package:helm_marine/features/checkout/payment/stripe_payment.dart';
 import 'package:helm_marine/features/checkout/payment/stripe_web_bridge.dart';
 import 'package:helm_marine/features/checkout/payment/web_card_payment_form.dart';
@@ -156,6 +157,26 @@ class _PaymentPanelState extends ConsumerState<PaymentPanel> {
           ),
           const SizedBox(height: 12),
           FilledButton.icon(
+            onPressed: () {
+              widget.onFinished?.call();
+              context.go('/orders/${order.id}');
+            },
+            icon: const Icon(Icons.receipt_long),
+            label: const Text('View order'),
+          ),
+        ];
+      case PaymentPhase.underReview:
+        return [
+          _Notice(
+            icon: Icons.manage_search,
+            color: HelmTheme.warning,
+            title: 'Payment under review',
+            message: 'Payment received but the order needs staff review; you\'ll be contacted or refunded. '
+                'Order ${order.orderNumber} is not confirmed yet — please don\'t pay again.',
+            liveRegion: true,
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
             onPressed: () {
               widget.onFinished?.call();
               context.go('/orders/${order.id}');
@@ -333,12 +354,12 @@ class _PaymentPanelState extends ConsumerState<PaymentPanel> {
             },
           ));
         }
-      } else if (!stripeSupportedHere) {
+      } else if (!ref.watch(stripeNativeSheetSupportedProvider)) {
         out.add(const _Notice(
           icon: Icons.web_asset_off,
           color: HelmTheme.warning,
-          title: 'Card payments on web are not available in this build',
-          message: 'Use the Helm mobile app to pay for this order.',
+          title: 'Card payments are not available in this version of the app',
+          message: 'Use the Helm website or mobile app to pay for this order.',
         ));
       } else if (intent == null) {
         out.add(const LoadingView(message: 'Preparing secure card payment…'));
