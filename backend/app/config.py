@@ -176,8 +176,17 @@ class Settings(BaseSettings):
     worker_heartbeat_stale_seconds: int = 180
 
     # --- [commerce workstream] additional settings ------------------------------
-
-
+    # Per-user request budgets for the money-moving endpoints.
+    rate_limit_checkout_per_minute: int = 10
+    rate_limit_payment_intent_per_minute: int = 30
+    rate_limit_quote_per_minute: int = 30
+    rate_limit_shipping_estimate_per_minute: int = 30  # public, per client address
+    # Orders whose payment is processing / awaiting customer action are not expired
+    # until this long after ``expires_at`` (the provider may still confirm them).
+    payment_processing_grace_minutes: int = 30
+    # Maximum orders released per run of the expiry task.
+    reservation_release_batch_size: int = 100
+    order_number_prefix: str = "HM"
 
     # --- [catalogue workstream] additional settings -----------------------------
 
