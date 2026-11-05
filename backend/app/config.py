@@ -205,6 +205,21 @@ class Settings(BaseSettings):
 
 
     # --- [rewards-delivery workstream] additional settings ----------------------
+    crew_max_members: int = 10  # spec: crews of 2-10 (pending invites count too)
+    crew_min_members_for_multiplier: int = 2
+    crew_invite_days: int = 14
+    points_per_dollar_redemption: int = 100  # 100 CP = $1 NZD
+    profile_verification_bonus_points: int = 1000  # Boat DB spec §4.2
+    helm_dash_location_max_age_seconds: int = 600  # reject reports older than 10 min
+    helm_dash_location_future_skew_seconds: int = 30  # device clock tolerance
+    resend_api_url: str = "https://api.resend.com"
+    fcm_api_url: str = "https://fcm.googleapis.com"
+    notification_batch_size: int = 50
+    notification_backoff_base_seconds: int = 60
+    notification_backoff_max_seconds: int = 21600
+    notification_claim_lease_seconds: int = 300
+    notification_http_timeout_seconds: float = 10.0
+    service_reminder_renotify_days: int = 7
 
 
 
