@@ -95,7 +95,7 @@ async def _resolve_vessel(
     ],
 )
 async def chat(
-    body: ChatRequest, user: CurrentUser, db: AsyncSession = Depends(get_db)
+    body: ChatRequest, user: CurrentUser, db: AsyncSession = Depends(get_db, scope="function")
 ) -> ChatResponse:
     """Ask the First Mate. Uses ``vessel_id`` (must be owned), else the conversation's
     vessel (re-checked), else the primary vessel."""
@@ -178,7 +178,7 @@ def _summary(c: AIConversation) -> dict:
 
 @router.get("/conversations", response_model=list[ConversationSummary])
 async def list_conversations(
-    user_id: CurrentUserId, db: AsyncSession = Depends(get_db)
+    user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
 ) -> list[dict]:
     """The current user's conversations (most recent first)."""
     rows = (
@@ -194,7 +194,7 @@ async def list_conversations(
 
 @router.get("/conversations/{conversation_id}", response_model=ConversationDetail)
 async def get_conversation(
-    conversation_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db)
+    conversation_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
 ) -> dict:
     """One of the current user's conversations with its stored messages."""
     c = await _owned_conversation(db, conversation_id, user_id)
@@ -207,7 +207,7 @@ async def get_conversation(
     dependencies=[Depends(mutation_limit())],
 )
 async def delete_conversation(
-    conversation_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db)
+    conversation_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
 ) -> Response:
     c = await _owned_conversation(db, conversation_id, user_id)
     await db.delete(c)

@@ -212,7 +212,7 @@ async def create_checkout(
     response: Response,
     user_id: CurrentUserId,
     idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> dict:
     """Turn the cart into an order with stock reserved for ``RESERVATION_MINUTES``.
 
@@ -239,7 +239,7 @@ async def create_checkout(
     dependencies=[Depends(checkout_limit())],
 )
 async def preview_checkout(
-    body: CheckoutRequest, user_id: CurrentUserId, db: AsyncSession = Depends(get_db)
+    body: CheckoutRequest, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
 ) -> dict:
     """The exact amounts checkout would charge for this body right now (no side effects)."""
     req = _checkout_request(body)
@@ -268,7 +268,7 @@ async def list_orders(
     user_id: CurrentUserId,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> dict:
     """The current user's orders, newest first."""
     return await _page(db, select(Order).where(Order.user_id == user_id), page, page_size)
@@ -284,7 +284,7 @@ async def admin_list_orders(
     order_number: str | None = Query(None, max_length=40),
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> dict:
     """All orders (dispatcher/admin) with optional filters."""
     for value, allowed, name in (
@@ -312,7 +312,7 @@ async def admin_list_orders(
 
 @router.get("/{order_id}", response_model=OrderResponse)
 async def get_order(
-    order_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db)
+    order_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
 ) -> dict:
     """One of the current user's orders (404 for anyone else's, staff included; staff
     use ``GET /orders/admin/{order_id}``)."""
@@ -326,7 +326,7 @@ async def get_order(
     "/{order_id}/cancel", response_model=OrderResponse, dependencies=[Depends(mutation_limit())]
 )
 async def cancel_order(
-    order_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db)
+    order_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
 ) -> dict:
     """Cancel an unpaid order: releases the stock and restores the cart and discount."""
     order = await reservations.lock_order(db, order_id, user_id=user_id)
@@ -361,7 +361,7 @@ async def _staff_order(db: AsyncSession, order_id: uuid.UUID) -> Order:
 
 @router.get("/admin/{order_id}", response_model=StaffOrderResponse)
 async def admin_get_order(
-    order_id: uuid.UUID, _staff: DispatcherUser, db: AsyncSession = Depends(get_db)
+    order_id: uuid.UUID, _staff: DispatcherUser, db: AsyncSession = Depends(get_db, scope="function")
 ) -> dict:
     """Any order with staff fields (dispatcher/admin)."""
     order = await _load_full(db, order_id)
@@ -379,7 +379,7 @@ async def update_fulfilment(
     order_id: uuid.UUID,
     body: FulfilmentUpdate,
     staff: DispatcherUser,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> dict:
     """Move a paid order through fulfilment (dispatcher/admin) using the shared state machine."""
     order = await _staff_order(db, order_id)
@@ -406,7 +406,7 @@ async def update_fulfilment(
     dependencies=[Depends(mutation_limit())],
 )
 async def refund_order(
-    order_id: uuid.UUID, body: RefundRequest, admin: AdminUser, db: AsyncSession = Depends(get_db)
+    order_id: uuid.UUID, body: RefundRequest, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
 ) -> dict:
     """Request a refund from the provider (admin). The order's refunded amount changes
     when the provider's signed ``charge.refunded`` event is processed."""
@@ -424,7 +424,7 @@ async def create_shipment(
     order_id: uuid.UUID,
     response: Response,
     staff: DispatcherUser,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> CourierShipment:
     """Book the courier label (dispatcher/admin). Development/test use the local contract
     adapter (test shipments only); live carrier booking answers 503."""

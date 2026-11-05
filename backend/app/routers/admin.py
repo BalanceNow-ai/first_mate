@@ -23,7 +23,7 @@ async def list_users(
     email: str | None = None,
     role: str | None = None,
     limit: int = Query(50, ge=1, le=200),
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> list[User]:
     """Find users by email fragment and/or role."""
     q = select(User).order_by(User.created_at.desc()).limit(limit)
@@ -36,7 +36,7 @@ async def list_users(
 
 @router.put("/users/{user_id}/role", response_model=UserResponse)
 async def set_role(
-    user_id: uuid.UUID, body: RoleUpdate, admin: AdminUser, db: AsyncSession = Depends(get_db)
+    user_id: uuid.UUID, body: RoleUpdate, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
 ) -> User:
     """Change a user's role. The last remaining admin cannot be demoted."""
     user = (await db.execute(select(User).where(User.id == user_id).with_for_update())).scalar_one_or_none()
@@ -58,7 +58,7 @@ async def audit_trail(
     admin: AdminUser,
     entity_type: str | None = None,
     limit: int = Query(100, ge=1, le=500),
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> list[dict]:
     """Recent privileged actions."""
     q = select(AuditLog).order_by(AuditLog.created_at.desc()).limit(limit)

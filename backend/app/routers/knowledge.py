@@ -59,7 +59,7 @@ async def _one(db: AsyncSession, source: KnowledgeSource) -> KnowledgeSourceResp
 @router.get("/sources", response_model=list[KnowledgeSourceResponse])
 async def list_sources(
     _: AdminUser,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db, scope="function"),
     admission_status: Literal["pending", "admitted", "revoked"] | None = Query(
         None, alias="status"
     ),
@@ -76,7 +76,7 @@ async def list_sources(
 
 
 @router.get("/sources/{source_id}", response_model=KnowledgeSourceResponse)
-async def get_source(source_id: uuid.UUID, _: AdminUser, db: AsyncSession = Depends(get_db)):
+async def get_source(source_id: uuid.UUID, _: AdminUser, db: AsyncSession = Depends(get_db, scope="function")):
     return await _one(db, await ingestion.get_source(db, source_id))
 
 
@@ -90,7 +90,7 @@ async def ingest_source(
     body: KnowledgeIngestRequest,
     admin: AdminUser,
     response: Response,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> KnowledgeIngestResponse:
     """Ingest a text/markdown document as a *pending* source (re-ingesting identical
     content is a no-op; changed content creates a new version and revokes the old)."""
@@ -125,7 +125,7 @@ async def admit_source(
     source_id: uuid.UUID,
     admin: AdminUser,
     body: KnowledgeAdmitRequest | None = None,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> KnowledgeSourceResponse:
     """Admit a source to retrieval (requires a verified licence)."""
     source = await ingestion.admit(db, source_id, admin.id, body.licence_verified if body else None)
@@ -137,7 +137,7 @@ async def admit_source(
     response_model=KnowledgeSourceResponse,
     dependencies=[Depends(mutation_limit())],
 )
-async def revoke_source(source_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db)):
+async def revoke_source(source_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")):
     """Revoke a source: it is excluded from retrieval immediately."""
     return await _one(db, await ingestion.revoke(db, source_id, admin.id))
 
@@ -148,7 +148,7 @@ async def revoke_source(source_id: uuid.UUID, admin: AdminUser, db: AsyncSession
     dependencies=[Depends(mutation_limit())],
 )
 async def delete_source(
-    source_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db)
+    source_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
 ) -> Response:
     """Delete a source and all of its chunks."""
     await ingestion.delete_source(db, source_id, admin.id)
@@ -161,7 +161,7 @@ async def delete_source(
     dependencies=[Depends(mutation_limit())],
 )
 async def reembed_source(
-    source_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db)
+    source_id: uuid.UUID, admin: AdminUser, db: AsyncSession = Depends(get_db, scope="function")
 ):
     """Recompute the source's chunk embeddings with the active embedding model."""
     source, count = await ingestion.reembed(db, source_id, admin.id)

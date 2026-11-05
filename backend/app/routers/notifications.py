@@ -23,7 +23,7 @@ from app.services import notifications
 from app.services.notification_templates import render
 
 router = APIRouter(prefix="/notifications", tags=["Notifications"])
-Db = Annotated[AsyncSession, Depends(get_db)]
+Db = Annotated[AsyncSession, Depends(get_db, scope="function")]
 PREF_FIELDS = (
     "email_enabled",
     "push_enabled",

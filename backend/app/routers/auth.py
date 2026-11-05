@@ -82,7 +82,7 @@ async def provision_profile(
     body: ProvisionRequest,
     principal: CurrentPrincipal,
     response: Response,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> ProvisionResponse:
     """Create (201) or return (200) the local profile for the authenticated subject."""
     return await _provision(body, principal, response, db)
@@ -99,7 +99,7 @@ async def register_user(
     body: ProvisionRequest,
     principal: CurrentPrincipal,
     response: Response,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> ProvisionResponse:
     """Deprecated alias of ``/auth/provision`` (identity always comes from the token)."""
     return await _provision(body, principal, response, db)

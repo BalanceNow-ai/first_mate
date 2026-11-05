@@ -133,7 +133,7 @@ async def get_optional_principal(
 
 async def get_current_user(
     principal: Annotated[Principal, Depends(get_principal)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db: Annotated[AsyncSession, Depends(get_db, scope="function")],
 ) -> User:
     """Dependency: the provisioned local user bound to the token subject."""
     user = (await db.execute(select(User).where(User.id == principal.subject))).scalar_one_or_none()

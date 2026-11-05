@@ -22,7 +22,7 @@ from app.services import delivery
 from app.services.notification_templates import DELIVERY_STATUS_LABELS
 
 router = APIRouter(prefix="/helm-dash", tags=["Helm Dash Delivery"])
-Db = Annotated[AsyncSession, Depends(get_db)]
+Db = Annotated[AsyncSession, Depends(get_db, scope="function")]
 AWAITING_POSITION = "Awaiting first position report"
 
 

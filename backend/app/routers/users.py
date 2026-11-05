@@ -20,7 +20,7 @@ async def get_profile(user: CurrentUser) -> User:
 
 @router.patch("/me", response_model=UserResponse, dependencies=[Depends(mutation_limit())])
 async def update_profile(
-    updates: UserUpdate, user: CurrentUser, db: AsyncSession = Depends(get_db)
+    updates: UserUpdate, user: CurrentUser, db: AsyncSession = Depends(get_db, scope="function")
 ) -> User:
     """Update name/phone. Unknown fields (e.g. ``role``) are rejected with 422."""
     for field, value in updates.model_dump(exclude_unset=True).items():

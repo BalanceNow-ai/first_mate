@@ -30,7 +30,7 @@ router = APIRouter(prefix="/shipping", tags=["Shipping & Quotes"])
     ],
 )
 async def create_quote(
-    body: QuoteRequest, user_id: CurrentUserId, db: AsyncSession = Depends(get_db)
+    body: QuoteRequest, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
 ) -> dict:
     """Price the current cart for a delivery type and destination. The quote is bound to
     this user and cart, expires after ``QUOTE_TTL_MINUTES`` and can be used once."""
@@ -49,7 +49,7 @@ async def create_quote(
 
 
 @router.get("/options", response_model=DeliveryOptionsResponse)
-async def delivery_options(user_id: CurrentUserId, db: AsyncSession = Depends(get_db)) -> dict:
+async def delivery_options(user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")) -> dict:
     """Which delivery types the current cart can use, with the reason when it cannot."""
     return await shipping_quotes.delivery_options(db, user_id)
 
@@ -65,7 +65,7 @@ async def delivery_options(user_id: CurrentUserId, db: AsyncSession = Depends(ge
         )
     ],
 )
-async def estimate(body: EstimateRequest, db: AsyncSession = Depends(get_db)) -> dict:
+async def estimate(body: EstimateRequest, db: AsyncSession = Depends(get_db, scope="function")) -> dict:
     """Public, informational price for product pages. Not a quote: it cannot be used at
     checkout (``bindable: false``)."""
     return await shipping_quotes.estimate(

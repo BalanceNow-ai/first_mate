@@ -33,7 +33,7 @@ async def health() -> dict:
 
 
 @router.get("/ready")
-async def ready(db: AsyncSession = Depends(get_db)) -> JSONResponse:
+async def ready(db: AsyncSession = Depends(get_db, scope="function")) -> JSONResponse:
     """Readiness: database reachable and migrated; reports worker heartbeat freshness."""
     settings = get_settings()
     checks: dict[str, dict] = {}
@@ -69,7 +69,7 @@ async def ready(db: AsyncSession = Depends(get_db)) -> JSONResponse:
 
 
 @router.get("/api/v1/config/public")
-async def public_config(db: AsyncSession = Depends(get_db)) -> dict:
+async def public_config(db: AsyncSession = Depends(get_db, scope="function")) -> dict:
     """Non-secret configuration the client needs to decide which features to show."""
     s = get_settings()
     enabled_areas = (

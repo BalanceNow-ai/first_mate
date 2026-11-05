@@ -40,7 +40,7 @@ from app.schemas.loyalty import (
 from app.services import cms, crews, loyalty
 
 router = APIRouter(prefix="/loyalty", tags=["Crew Rewards"])
-Db = Annotated[AsyncSession, Depends(get_db)]
+Db = Annotated[AsyncSession, Depends(get_db, scope="function")]
 Mutation = [Depends(mutation_limit())]
 
 

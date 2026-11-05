@@ -44,7 +44,7 @@ async def build_cart_response(db: AsyncSession, user_id: uuid.UUID) -> CartRespo
 
 
 @router.get("/", response_model=CartResponse)
-async def get_cart(user_id: CurrentUserId, db: AsyncSession = Depends(get_db)) -> CartResponse:
+async def get_cart(user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")) -> CartResponse:
     """The current user's cart with server-computed prices and per-line issues."""
     return await build_cart_response(db, user_id)
 
@@ -56,7 +56,7 @@ async def get_cart(user_id: CurrentUserId, db: AsyncSession = Depends(get_db)) -
     dependencies=[Depends(mutation_limit())],
 )
 async def add_to_cart(
-    item: CartItemCreate, user_id: CurrentUserId, db: AsyncSession = Depends(get_db)
+    item: CartItemCreate, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
 ) -> CartResponse:
     """Add a product (validated: active, quantity bounds, aggregate stock)."""
     await cart_service.add_item(db, user_id, item.product_id, item.quantity)
@@ -65,7 +65,7 @@ async def add_to_cart(
 
 @router.patch("/items/{item_id}", response_model=CartResponse, dependencies=[Depends(mutation_limit())])
 async def update_cart_item(
-    item_id: uuid.UUID, updates: CartItemUpdate, user_id: CurrentUserId, db: AsyncSession = Depends(get_db)
+    item_id: uuid.UUID, updates: CartItemUpdate, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
 ) -> CartResponse:
     """Set the quantity of a cart line."""
     await cart_service.set_quantity(db, user_id, item_id, updates.quantity)
@@ -74,7 +74,7 @@ async def update_cart_item(
 
 @router.delete("/items/{item_id}", response_model=CartResponse, dependencies=[Depends(mutation_limit())])
 async def remove_from_cart(
-    item_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db)
+    item_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
 ) -> CartResponse:
     """Remove a line from the cart (no error if already removed)."""
     await db.execute(delete(CartItem).where(CartItem.id == item_id, CartItem.user_id == user_id))
@@ -82,6 +82,6 @@ async def remove_from_cart(
 
 
 @router.delete("/", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(mutation_limit())])
-async def clear_cart(user_id: CurrentUserId, db: AsyncSession = Depends(get_db)) -> None:
+async def clear_cart(user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")) -> None:
     """Remove every line from the cart."""
     await db.execute(delete(CartItem).where(CartItem.user_id == user_id))

@@ -39,7 +39,7 @@ async def create_payment_intent(
     order_id: uuid.UUID,
     user_id: CurrentUserId,
     body: PaymentIntentRequest | None = None,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> dict:
     """Create or recover the order's card PaymentIntent (idempotent). The client confirms
     it with Stripe using ``client_secret``; card data never reaches this server."""
@@ -59,7 +59,7 @@ async def create_payment_intent(
 async def payment_webhook(
     request: Request,
     stripe_signature: str | None = Header(None, alias="Stripe-Signature"),
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> dict:
     """Signed provider events (Stripe format). Unsigned or wrongly signed requests are
     refused with 400; there is no unsigned path."""
@@ -86,7 +86,7 @@ async def local_confirm(
     payment_intent_id: str,
     body: LocalConfirmRequest,
     user_id: CurrentUserId,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db, scope="function"),
 ) -> dict:
     """TEST MODE ONLY (local provider in development/test; 404 otherwise). Simulates the
     customer's card outcome by building a Stripe-format event, signing it with the local

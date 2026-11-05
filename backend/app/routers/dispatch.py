@@ -44,7 +44,7 @@ from app.services import audit, delivery, payouts
 from app.services.loyalty import current_period, parse_period
 
 router = APIRouter(prefix="/dispatch", tags=["Helm Dash Dispatch & Operators"])
-Db = Annotated[AsyncSession, Depends(get_db)]
+Db = Annotated[AsyncSession, Depends(get_db, scope="function")]
 OperatorRole = Annotated[User, Depends(require_roles("operator"))]
 Mutation = [Depends(mutation_limit())]
 
