@@ -184,7 +184,15 @@ class Settings(BaseSettings):
 
 
     # --- [knowledge-ai workstream] additional settings --------------------------
-
+    knowledge_max_document_chars: int = 200_000  # per ingested document (API / CLI)
+    knowledge_chunk_chars: int = 800  # target chunk size (heading-aware)
+    knowledge_chunk_overlap_chars: int = 120
+    knowledge_max_chunks_per_source: int = 400
+    embedding_batch_size: int = 64  # texts per embeddings request
+    rag_candidate_pool: int = 40  # nearest neighbours fetched before applicability filtering
+    ai_tool_result_max_chars: int = 6000  # size bound of one tool result given to the model
+    ai_max_products: int = 5  # product references returned per answer
+    ai_max_specialists: int = 2  # keyword-routed specialist domains per turn
 
 
     # --- [rewards-delivery workstream] additional settings ----------------------
