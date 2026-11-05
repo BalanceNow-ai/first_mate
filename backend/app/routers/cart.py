@@ -1,130 +1,87 @@
-"""Shopping cart router."""
+"""Shopping cart router. All mutations go through ``app.services.cart_service``."""
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, status
+from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
+from app.core.rate_limit import mutation_limit
 from app.database import get_db
 from app.middleware.auth import CurrentUserId
 from app.models.cart import CartItem
-from app.models.product import Product
-from app.schemas.cart import CartItemCreate, CartItemUpdate, CartResponse
+from app.schemas.cart import CartItemCreate, CartItemResponse, CartItemUpdate, CartResponse
+from app.services import cart_service
+from app.services.catalogue import cart_product_summary
+from app.services.pricing import effective_price_cents
 
 router = APIRouter(prefix="/cart", tags=["Cart"])
 
 
-@router.get("/", response_model=CartResponse)
-async def get_cart(
-    user_id: CurrentUserId,
-    db: AsyncSession = Depends(get_db),
-) -> CartResponse:
-    """Get the current user's cart."""
-    result = await db.execute(
-        select(CartItem)
-        .where(CartItem.user_id == user_id)
-        .options(selectinload(CartItem.product))
-        .order_by(CartItem.created_at)
+def _item_response(item: CartItem) -> CartItemResponse:
+    unit = effective_price_cents(item.product)
+    return CartItemResponse(
+        id=item.id,
+        product_id=item.product_id,
+        quantity=item.quantity,
+        unit_price_cents=unit,
+        line_total_cents=unit * item.quantity,
+        product=cart_product_summary(item.product),
+        issues=cart_service.line_issues(item),
+        created_at=item.created_at,
     )
-    items = list(result.scalars().all())
 
-    subtotal = sum(float(item.product.price) * item.quantity for item in items)
+
+async def build_cart_response(db: AsyncSession, user_id: uuid.UUID) -> CartResponse:
+    items = await cart_service.load_cart(db, user_id)
+    lines = [_item_response(i) for i in items]
     return CartResponse(
-        items=items,
-        subtotal=round(subtotal, 2),
-        item_count=sum(item.quantity for item in items),
+        items=lines,
+        subtotal_cents=sum(line.line_total_cents for line in lines),
+        item_count=sum(line.quantity for line in lines),
+        has_issues=any(line.issues for line in lines),
     )
 
 
-@router.post("/items", status_code=status.HTTP_201_CREATED)
+@router.get("/", response_model=CartResponse)
+async def get_cart(user_id: CurrentUserId, db: AsyncSession = Depends(get_db)) -> CartResponse:
+    """The current user's cart with server-computed prices and per-line issues."""
+    return await build_cart_response(db, user_id)
+
+
+@router.post(
+    "/items",
+    response_model=CartResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(mutation_limit())],
+)
 async def add_to_cart(
-    item_data: CartItemCreate,
-    user_id: CurrentUserId,
-    db: AsyncSession = Depends(get_db),
-) -> dict:
-    """Add a product to the cart. If already in cart, increment quantity."""
-    # Verify product exists and is in stock
-    product_result = await db.execute(
-        select(Product).where(Product.id == item_data.product_id, Product.is_active.is_(True))
-    )
-    product = product_result.scalar_one_or_none()
-    if not product:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
-    if product.stock_quantity < item_data.quantity:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Insufficient stock. Only {product.stock_quantity} available.",
-        )
-
-    # Check if item already in cart
-    existing_result = await db.execute(
-        select(CartItem).where(
-            CartItem.user_id == user_id, CartItem.product_id == item_data.product_id
-        )
-    )
-    existing = existing_result.scalar_one_or_none()
-
-    if existing:
-        existing.quantity += item_data.quantity
-    else:
-        cart_item = CartItem(
-            user_id=user_id,
-            product_id=item_data.product_id,
-            quantity=item_data.quantity,
-        )
-        db.add(cart_item)
-
-    await db.flush()
-    return {"message": "Item added to cart"}
+    item: CartItemCreate, user_id: CurrentUserId, db: AsyncSession = Depends(get_db)
+) -> CartResponse:
+    """Add a product (validated: active, quantity bounds, aggregate stock)."""
+    await cart_service.add_item(db, user_id, item.product_id, item.quantity)
+    return await build_cart_response(db, user_id)
 
 
-@router.patch("/items/{item_id}")
+@router.patch("/items/{item_id}", response_model=CartResponse, dependencies=[Depends(mutation_limit())])
 async def update_cart_item(
-    item_id: uuid.UUID,
-    updates: CartItemUpdate,
-    user_id: CurrentUserId,
-    db: AsyncSession = Depends(get_db),
-) -> dict:
-    """Update the quantity of an item in the cart."""
-    result = await db.execute(
-        select(CartItem).where(CartItem.id == item_id, CartItem.user_id == user_id)
-    )
-    cart_item = result.scalar_one_or_none()
-    if not cart_item:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cart item not found")
-
-    cart_item.quantity = updates.quantity
-    await db.flush()
-    return {"message": "Cart item updated"}
+    item_id: uuid.UUID, updates: CartItemUpdate, user_id: CurrentUserId, db: AsyncSession = Depends(get_db)
+) -> CartResponse:
+    """Set the quantity of a cart line."""
+    await cart_service.set_quantity(db, user_id, item_id, updates.quantity)
+    return await build_cart_response(db, user_id)
 
 
-@router.delete("/items/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/items/{item_id}", response_model=CartResponse, dependencies=[Depends(mutation_limit())])
 async def remove_from_cart(
-    item_id: uuid.UUID,
-    user_id: CurrentUserId,
-    db: AsyncSession = Depends(get_db),
-) -> None:
-    """Remove an item from the cart."""
-    result = await db.execute(
-        select(CartItem).where(CartItem.id == item_id, CartItem.user_id == user_id)
-    )
-    cart_item = result.scalar_one_or_none()
-    if not cart_item:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cart item not found")
-
-    await db.delete(cart_item)
-    await db.flush()
+    item_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db)
+) -> CartResponse:
+    """Remove a line from the cart (no error if already removed)."""
+    await db.execute(delete(CartItem).where(CartItem.id == item_id, CartItem.user_id == user_id))
+    return await build_cart_response(db, user_id)
 
 
-@router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
-async def clear_cart(
-    user_id: CurrentUserId,
-    db: AsyncSession = Depends(get_db),
-) -> None:
-    """Clear all items from the cart."""
-    result = await db.execute(select(CartItem).where(CartItem.user_id == user_id))
-    for item in result.scalars().all():
-        await db.delete(item)
-    await db.flush()
+@router.delete("/", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(mutation_limit())])
+async def clear_cart(user_id: CurrentUserId, db: AsyncSession = Depends(get_db)) -> None:
+    """Remove every line from the cart."""
+    await db.execute(delete(CartItem).where(CartItem.user_id == user_id))

@@ -1,101 +1,54 @@
-"""Tests for the Vessel (My Vessel Garage) API."""
+"""Vessel CRUD through the canonical contract, with owner isolation."""
 
-import pytest
-from httpx import AsyncClient
+from app.tests.conftest import create_vessel
 
-from app.models.vessel import Vessel
-from app.tests.conftest import TEST_USER_ID
-
-
-@pytest.mark.asyncio
-async def test_create_vessel(client: AsyncClient, test_user):
-    """Test creating a new vessel."""
-    response = await client.post(
-        "/api/v1/vessels/",
-        json={
-            "nickname": "My Stabi",
-            "make": "Stabicraft",
-            "model": "2250 Ultracab",
-            "year": 2022,
-            "hull_type": "aluminium",
-            "engine_make": "Yamaha",
-            "engine_model": "F200XCA",
-            "engine_hours": 150,
-            "is_primary": True,
-        },
-    )
-    assert response.status_code == 201
-    data = response.json()
-    assert data["nickname"] == "My Stabi"
-    assert data["make"] == "Stabicraft"
-    assert data["model"] == "2250 Ultracab"
-    assert data["year"] == 2022
-    assert data["engine_make"] == "Yamaha"
-    assert data["is_primary"] is True
+VESSEL = {
+    "nickname": "My Stabi",
+    "make": "Stabicraft",
+    "model": "2050 Supercab",
+    "year": 2022,
+    "hull_type": "aluminium",
+    "length_ft": 20.5,
+    "engine_make": "Yamaha",
+    "engine_model": "F150",
+    "engine_hours": 120,
+}
 
 
-@pytest.mark.asyncio
-async def test_list_vessels(client: AsyncClient, test_user, test_vessel):
-    """Test listing all vessels in the user's garage."""
-    response = await client.get("/api/v1/vessels/")
-    assert response.status_code == 200
-    data = response.json()
-    assert len(data) == 1
-    assert data[0]["nickname"] == "My Stabi"
+async def test_create_read_update_delete(client, customer):
+    r = await client.post("/api/v1/vessels/", json=VESSEL, headers=customer.headers)
+    assert r.status_code == 201, r.text
+    v = r.json()
+    assert v["nickname"] == "My Stabi" and v["length_ft"] == 20.5
+    assert v["is_primary"] is True  # first vessel becomes primary
+    assert "name" not in v
+    vid = v["id"]
+    r = await client.patch(f"/api/v1/vessels/{vid}", json={"engine_model": "F200", "engine_year": 2023}, headers=customer.headers)
+    assert r.status_code == 200 and r.json()["engine_model"] == "F200"
+    assert len((await client.get("/api/v1/vessels/", headers=customer.headers)).json()) == 1
+    assert (await client.delete(f"/api/v1/vessels/{vid}", headers=customer.headers)).status_code == 204
+    assert (await client.get(f"/api/v1/vessels/{vid}", headers=customer.headers)).status_code == 404
 
 
-@pytest.mark.asyncio
-async def test_get_vessel(client: AsyncClient, test_user, test_vessel):
-    """Test getting a specific vessel."""
-    response = await client.get(f"/api/v1/vessels/{test_vessel.id}")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["nickname"] == "My Stabi"
-    assert data["make"] == "Stabicraft"
+async def test_year_and_nickname_required(client, customer):
+    for missing in ("year", "nickname", "make", "model"):
+        body = {k: v for k, v in VESSEL.items() if k != missing}
+        assert (await client.post("/api/v1/vessels/", json=body, headers=customer.headers)).status_code == 422
+    # Legacy client field name is rejected rather than silently ignored.
+    bad = {**VESSEL, "name": "x"}
+    assert (await client.post("/api/v1/vessels/", json=bad, headers=customer.headers)).status_code == 422
 
 
-@pytest.mark.asyncio
-async def test_update_vessel(client: AsyncClient, test_user, test_vessel):
-    """Test updating a vessel."""
-    response = await client.patch(
-        f"/api/v1/vessels/{test_vessel.id}",
-        json={"engine_hours": 200, "nickname": "The Beast"},
-    )
-    assert response.status_code == 200
-    data = response.json()
-    assert data["engine_hours"] == 200
-    assert data["nickname"] == "The Beast"
+async def test_owner_isolation(client, customer, other_customer):
+    theirs = await create_vessel(other_customer.id)
+    for method, kwargs in (("get", {}), ("patch", {"json": {"nickname": "x"}}), ("delete", {})):
+        r = await getattr(client, method)(f"/api/v1/vessels/{theirs.id}", headers=customer.headers, **kwargs)
+        assert r.status_code == 404
+    assert (await client.get("/api/v1/vessels/", headers=customer.headers)).json() == []
 
 
-@pytest.mark.asyncio
-async def test_delete_vessel(client: AsyncClient, test_user, test_vessel):
-    """Test deleting a vessel."""
-    response = await client.delete(f"/api/v1/vessels/{test_vessel.id}")
-    assert response.status_code == 204
-
-    # Verify it's gone
-    response = await client.get(f"/api/v1/vessels/{test_vessel.id}")
-    assert response.status_code == 404
-
-
-@pytest.mark.asyncio
-async def test_nickname_is_required(client: AsyncClient, test_user):
-    """Test that nickname is a required field."""
-    response = await client.post(
-        "/api/v1/vessels/",
-        json={
-            "make": "Stabicraft",
-            "model": "2250 Ultracab",
-            "year": 2022,
-        },
-    )
-    assert response.status_code == 422  # Validation error
-
-
-@pytest.mark.asyncio
-async def test_vessel_not_found(client: AsyncClient, test_user):
-    """Test getting a non-existent vessel returns 404."""
-    import uuid
-
-    response = await client.get(f"/api/v1/vessels/{uuid.uuid4()}")
-    assert response.status_code == 404
+async def test_single_primary(client, customer):
+    a = (await client.post("/api/v1/vessels/", json=VESSEL, headers=customer.headers)).json()
+    b = (await client.post("/api/v1/vessels/", json={**VESSEL, "nickname": "Tender", "is_primary": True}, headers=customer.headers)).json()
+    vessels = {v["id"]: v for v in (await client.get("/api/v1/vessels/", headers=customer.headers)).json()}
+    assert vessels[b["id"]]["is_primary"] and not vessels[a["id"]]["is_primary"]
