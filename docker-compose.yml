@@ -27,7 +27,7 @@ x-hardening: &hardening
 x-backend-env: &backend-env
   APP_ENV: development
   SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in .env (copy .env.example)}
-  ALLOWED_ORIGINS: ${HELM_PUBLIC_URL:?set HELM_PUBLIC_URL in .env}
+  ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-${HELM_PUBLIC_URL:?set HELM_PUBLIC_URL in .env}}
   PUBLIC_BASE_URL: ${HELM_PUBLIC_URL:?set HELM_PUBLIC_URL in .env}
   DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:?set POSTGRES_USER in .env}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:?set POSTGRES_DB in .env}
   REDIS_URL: redis://redis:6379/0
