@@ -10,20 +10,44 @@ This repository contains all product design, research, technical specifications,
 
 ```
 first_mate/
-├── docs/
-│   ├── 01_research/              # Market research, SKU intelligence, NZ data
-│   ├── 02_competitive_analysis/  # Burnsco, Marine Deals, Smart Marine audits
-│   ├── 03_product_design/        # Full product design specs (AI agents, loyalty, delivery, boat DB)
-│   ├── 04_technical_spec/        # Full technical specification, architecture, FDD/TDD features
-│   └── 05_wireframes/            # Interactive HTML wireframes (open index.html in browser)
-└── README.md
+├── backend/                  # FastAPI API, Celery workers, Alembic migrations, tests (PostgreSQL)
+├── frontend/                 # Flutter client (web, Android, iOS, macOS, Windows) + e2e journeys
+├── deploy/                   # nginx, deploy/backup/restore scripts (fail closed)
+├── scripts/                  # local_stack.sh, build.sh, e2e/ and perf/ tooling, fixture capture
+├── docker-compose.yml        # local acceptance stack (GoTrue, Mailpit, Postgres+pgvector, Redis, Typesense)
+├── docker-compose.prod.yml   # production topology (external Supabase)
+└── docs/
+    ├── 01_research/ … 07_code_reviews/   # research, specs, wireframes, historical phase reviews
+    └── 08_delivery/          # canonical plan + closure table, runbook, OpenAPI contract
 ```
+
+## Status
+
+The canonical, evidence-backed status of every requirement is the closure table in
+[`docs/08_delivery/Repair_Programme.md`](docs/08_delivery/Repair_Programme.md). It also
+lists the external credentials still required (Stripe, Supabase production project,
+OpenAI, Resend/FCM, Strapi, carrier APIs). Nothing here is claimed to be live in
+production.
+
+## Running it locally
+
+```bash
+cp .env.example .env
+scripts/local_stack.sh up      # builds images + web bundle, migrates, starts everything
+scripts/local_stack.sh seed    # synthetic demo data (local only)
+```
+
+Then open http://localhost:18080 (confirmation emails arrive in Mailpit at
+http://localhost:18025). Backend tests: `cd backend && pytest -q` against a disposable
+PostgreSQL database (`TEST_DATABASE_URL`). Client: `cd frontend && flutter test`.
+Operations, production prerequisites and rollback: `docs/08_delivery/Operations_Runbook.md`.
 
 ## Key Documents
 
 | Document | Description |
 |---|---|
-| `docs/04_technical_spec/Helm_Platform_Full_Specification.md` | **Master specification** — start here |
+| `docs/08_delivery/Repair_Programme.md` | **Current plan, decisions and closure table** — start here |
+| `docs/04_technical_spec/Helm_Platform_Full_Specification.md` | Master product specification |
 | `docs/05_wireframes/index.html` | **Interactive UI mockups** — open in browser |
 | `docs/03_product_design/NZ_Marine_Platform_Product_Design.md` | Full platform product design |
 | `docs/03_product_design/RAG_and_Checklist_Design_Specification.md` | AI agent & RAG architecture |
@@ -49,5 +73,5 @@ Helm is built on three pillars that no NZ competitor currently offers:
 | Frontend | Flutter (iOS, Android, Web, Windows, macOS) |
 | Backend | Python 3.11 + FastAPI |
 | Database | PostgreSQL 16 + pgvector |
-| AI Orchestration | LangChain / LlamaIndex |
-| LLM | OpenAI GPT-4.1 / Anthropic Claude 3 |
+| AI Orchestration | Bounded OpenAI tool-calling loop + pgvector RAG (decision D6) |
+| LLM | OpenAI (`OPENAI_CHAT_MODEL`, default gpt-4.1-mini); deterministic local substitute for tests |
