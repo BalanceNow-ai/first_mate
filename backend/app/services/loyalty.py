@@ -26,3 +26,8 @@ async def reserve_entitlement_for_order(db: AsyncSession, user_id, entitlement_i
 
 async def consume_order_entitlement(db: AsyncSession, order: Order) -> None:  # noqa: ARG001
     return None
+
+
+async def award_profile_verification_bonus(db: AsyncSession, user_id, request_id) -> None:  # noqa: ARG001
+    """1,000 CP once per approved crowdsourced profile (Boat DB spec §4.2)."""
+    return None

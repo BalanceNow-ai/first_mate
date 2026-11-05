@@ -175,6 +175,24 @@ class Settings(BaseSettings):
     sentry_traces_sample_rate: float = 0.1
     worker_heartbeat_stale_seconds: int = 180
 
+    # --- [commerce workstream] additional settings ------------------------------
+
+
+
+    # --- [catalogue workstream] additional settings -----------------------------
+
+
+
+    # --- [knowledge-ai workstream] additional settings --------------------------
+
+
+
+    # --- [rewards-delivery workstream] additional settings ----------------------
+
+
+
+    # --- end of workstream settings ---------------------------------------------
+
     # ----------------------------------------------------------------------------
     @property
     def is_local(self) -> bool:
