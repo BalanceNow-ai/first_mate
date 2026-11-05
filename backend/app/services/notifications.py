@@ -285,7 +285,7 @@ def backoff_seconds(attempts: int) -> int:
     return min(s.notification_backoff_base_seconds * 2 ** max(0, attempts - 1), s.notification_backoff_max_seconds)
 
 
-async def _claim(db: AsyncSession, now: datetime, limit: int) -> list[NotificationOutbox]:
+async def _claim(db: AsyncSession, now: datetime, limit: int) -> tuple[list[NotificationOutbox], uuid.UUID]:
     s = get_settings()
     rows = (
         (
@@ -311,10 +311,10 @@ async def _claim(db: AsyncSession, now: datetime, limit: int) -> list[Notificati
         row.next_attempt_at = lease
         row.lease_token = token
     await db.commit()
-    return list(rows)
+    return list(rows), token
 
 
-async def _renew_lease(db: AsyncSession, row: NotificationOutbox) -> bool:
+async def _renew_lease(db: AsyncSession, row: NotificationOutbox, token: uuid.UUID) -> bool:
     """Extend this claim's lease just before sending; False when another worker owns the row.
 
     A batch is sent sequentially, so later rows would otherwise outlive the lease taken at
@@ -325,7 +325,7 @@ async def _renew_lease(db: AsyncSession, row: NotificationOutbox) -> bool:
             update(NotificationOutbox)
             .where(
                 NotificationOutbox.id == row.id,
-                NotificationOutbox.lease_token == row.lease_token,
+                NotificationOutbox.lease_token == token,
                 NotificationOutbox.status == "sending",
             )
             .values(next_attempt_at=utcnow() + timedelta(seconds=seconds))
@@ -349,6 +349,28 @@ async def _still_owned(db: AsyncSession, row: NotificationOutbox, token: uuid.UU
             )
         ).scalar_one_or_none()
     return current == token
+
+
+async def _record_reached_devices(db: AsyncSession, row_id: uuid.UUID, reached: dict[str, dict]) -> None:
+    current = (
+        await db.execute(
+            select(NotificationOutbox.push_targets).where(NotificationOutbox.id == row_id).with_for_update()
+        )
+    ).scalar_one_or_none()
+    if current is None:
+        await db.rollback()
+        return
+    merged = dict(current)
+    for key, outcome in reached.items():
+        if merged.get(key, {}).get("status") not in PUSH_FINAL:
+            merged[key] = outcome
+    await db.execute(
+        update(NotificationOutbox)
+        .where(NotificationOutbox.id == row_id)
+        .values(push_targets=merged)
+        .execution_options(synchronize_session=False)
+    )
+    await db.commit()
 
 
 def _token_key(token: str) -> str:
@@ -425,13 +447,14 @@ async def dispatch_pending(db: AsyncSession, *, now: datetime | None = None, lim
     """Deliver due outbox rows. Safe to run concurrently (SKIP LOCKED + leases)."""
     settings = get_settings()
     now = now or utcnow()
-    rows = await _claim(db, now, limit or settings.notification_batch_size)
+    rows, token = await _claim(db, now, limit or settings.notification_batch_size)
     counts = {"claimed": len(rows), "sent": 0, "failed": 0, "dead": 0, "suppressed": 0, "lease_lost": 0}
     for row in rows:
+        # The fencing token is this claim's, never re-read from the row (another worker
+        # that reclaimed the row has written its own token there).
         if sa_inspect(row).expired:  # after a rollback for a lost lease
             await db.refresh(row)
-        token = row.lease_token
-        if not await _renew_lease(db, row):
+        if not await _renew_lease(db, row, token):
             counts["lease_lost"] += 1
             continue
         try:
@@ -460,8 +483,13 @@ async def dispatch_pending(db: AsyncSession, *, now: datetime | None = None, lim
         if row.status == "suppressed" and row.provider is None:
             row.provider = settings.email_provider if row.channel == "email" else settings.push_provider
         if not await _still_owned(db, row, token):
-            # Our lease ended and another worker reclaimed the row: its claim decides.
+            # Our lease ended and another worker reclaimed the row: its claim decides the
+            # row's status, but devices we did reach are recorded so no retry repeats them.
+            reached = {k: v for k, v in (row.push_targets or {}).items() if v.get("status") in PUSH_FINAL}
+            row_id = row.id
             await db.rollback()
+            if reached:
+                await _record_reached_devices(db, row_id, reached)
             counts["lease_lost"] += 1
             continue
         if row.status != "sending":

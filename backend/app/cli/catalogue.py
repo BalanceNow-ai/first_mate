@@ -37,11 +37,17 @@ async def _fitment_audit(args) -> int:
     """List fitment rules whose scope is malformed (FM-02); they evaluate as unknown."""
     from sqlalchemy import select
 
-    from app.models.product import ProductCompatibility
+    from app.models.product import FitmentRuleQuarantine, ProductCompatibility
     from app.services import fitment
 
     bad = 0
     async with async_session() as db:
+        quarantined = (
+            await db.execute(select(FitmentRuleQuarantine).order_by(FitmentRuleQuarantine.quarantined_at))
+        ).scalars()
+        for q in quarantined:
+            bad += 1
+            print(f"quarantined {q.original_id} product={q.product_id}: {q.problems} rule={q.rule}")
         rules = (await db.execute(select(ProductCompatibility).order_by(ProductCompatibility.id))).scalars()
         for rule in rules:
             problems = fitment.rule_scope_problems(fitment.rule_fields(rule))
@@ -49,7 +55,7 @@ async def _fitment_audit(args) -> int:
                 continue
             bad += 1
             print(f"{rule.id} product={rule.product_id} status={rule.verification_status}: {'; '.join(problems)}")
-    print(f"{bad} malformed fitment rule(s); they are evaluated as 'unknown' until corrected.")
+    print(f"{bad} malformed fitment rule(s); they support no fit until recreated correctly.")
     return 1 if bad else 0
 
 

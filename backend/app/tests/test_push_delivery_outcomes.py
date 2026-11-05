@@ -193,3 +193,64 @@ async def test_expired_lease_cannot_overwrite_a_reclaimed_row(customer, fcm, mon
     assert slow_counts["lease_lost"] == 1 and slow_counts["sent"] == 0
     row = await _row()
     assert row.status == "sent" and row.lease_token is None and row.attempts == 2
+
+
+async def test_lost_lease_fences_every_later_row_of_the_batch(customer, other_customer, fcm, monkeypatch):
+    """Second review: after the first lost lease, later rows of the stale batch must not be
+    treated as owned because the row now carries the reclaiming worker's token."""
+    monkeypatch.setattr(get_settings(), "notification_claim_lease_seconds", 1)
+    behaviour, sends = fcm
+    async with async_session() as s:
+        s.add_all(
+            [
+                PushDevice(user_id=customer.id, token=GOOD, platform="android"),
+                PushDevice(user_id=other_customer.id, token=FLAKY, platform="android"),
+            ]
+        )
+        await s.commit()
+        for user, key in ((customer.id, "row-a"), (other_customer.id, "row-b")):
+            await notifications.enqueue(
+                s,
+                template="points_earned",
+                category="rewards",
+                idempotency_key=key,
+                user_id=user,
+                payload={"points": 1, "balance": 1},
+                channels=("push",),
+            )
+            await s.commit()
+
+    original = notifications._deliver
+    w1_release, w2_release = asyncio.Event(), asyncio.Event()
+    w1_stalled, w2_stalled = [], []
+    phase = {"worker": 1}
+
+    async def gated(db, row):
+        if phase["worker"] == 1 and not w1_stalled:
+            w1_stalled.append(row.id)  # worker 1 stalls on row A
+            await w1_release.wait()
+        elif phase["worker"] == 2 and row.id != w1_stalled[0] and not w2_stalled:
+            w2_stalled.append(row.id)  # worker 2 is mid-delivery on row B
+            await w2_release.wait()
+        return await original(db, row)
+
+    monkeypatch.setattr(notifications, "_deliver", gated)
+    slow = asyncio.create_task(_dispatch())
+    while not w1_stalled:
+        await asyncio.sleep(0.05)
+    await asyncio.sleep(1.2)  # worker 1's lease on the whole batch has expired
+    phase["worker"] = 2
+    fast = asyncio.create_task(_dispatch(now=utcnow()))
+    while not w2_stalled:
+        await asyncio.sleep(0.05)
+    phase["worker"] = 0
+    w1_release.set()
+    slow_counts = await slow  # worker 1 resumes while worker 2 owns row B
+    w2_release.set()
+    fast_counts = await fast
+    assert slow_counts["lease_lost"] == 2 and slow_counts["sent"] == 0, slow_counts
+    assert fast_counts["sent"] == 2, fast_counts
+    assert sends.count(FLAKY) == 1  # row B was sent once, by the worker that owns it
+    async with async_session() as s:
+        rows = (await s.execute(select(NotificationOutbox))).scalars().all()
+    assert {r.status for r in rows} == {"sent"} and all(r.lease_token is None for r in rows)

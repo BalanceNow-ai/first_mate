@@ -263,3 +263,141 @@ async def test_fitment_changed_during_the_model_call_withdraws_the_proposal(clie
     [ref] = [p for p in body["products"] if p["id"] == str(plug.id)]
     assert ref["fitment"]["status"] != "verified_fit"
     assert "Fits My Stabi" not in body["message"]["content"]
+
+
+# --------------------------------------------------------------- second independent review (of the fix)
+@pytest.mark.parametrize(
+    "text,passage",
+    [
+        # one word reversed: no paraphrase allowance, relation words are content
+        ("Never run the engine with cooling water [1].", MANUAL),
+        ("Disable the bilge pump float switch every season [1].", BILGE),
+        (
+            "Never start the engine after running the bilge blower for 4 minutes [1].",
+            _chunk("Never start the engine before running the bilge blower for 4 minutes."),
+        ),
+        # recombination across passage sentences
+        (
+            "Every 300 hours, change the engine oil [1].",
+            _chunk("Change the engine oil every 100 hours. Replace the impeller every 300 hours."),
+        ),
+        (
+            "If the overheat alarm sounds, continue at idle [1].",
+            _chunk(
+                "If the overheat alarm sounds, stop the engine immediately. "
+                "If oil pressure is normal, continue at idle."
+            ),
+        ),
+        (
+            "Refuel while the engine is running [1].",
+            _chunk("Refuel with the engine off. Never refuel while the engine is running."),
+        ),
+        # a truncated fragment is never certified on its own
+        ("Run the engine dry, e.g. on a trailer [1].", MANUAL),
+    ],
+)
+def test_reversals_and_recombinations_are_removed(text, passage):
+    out = guard(text, passage)
+    assert out.status != "grounded", out.content
+    assert out.claims == []
+
+
+@pytest.mark.parametrize(
+    "text,passage",
+    [
+        (
+            "Never run the engine without cooling water, e.g. on a trailer [1].",
+            _chunk("Never run the engine without cooling water, e.g. on a trailer."),
+        ),
+        (
+            "Change the engine oil every 100 hours [1].",
+            _chunk("Change the engine oil every 100 hours and never run the engine without cooling water."),
+        ),
+        ("Do not use 10W-40 oil [1].", MANUAL),
+        ("Use 10W-30 oil [1].", _chunk("Use SAE 10W30 oil.")),
+        ("Change the oil every 100 hours [1].", _chunk("Oil change: every 100 h.")),
+        ("Change the oil every 100 hours [1].", _chunk("Change the oil every 100-hour interval.")),
+        (
+            "The oil interval is 100 hours [1].",
+            _chunk("See the table.", facts=[{"key": "oil_interval_hours", "value": "100"}]),
+        ),
+    ],
+)
+def test_faithful_restatements_survive(text, passage):
+    out = guard(text, passage)
+    assert out.status == "grounded", (text, out.content)
+    assert out.content.startswith(text.split(" [")[0])
+
+
+def test_generic_fit_claim_cannot_ride_on_a_verified_product():
+    from app.models.product import Product
+    from app.schemas.product import FitmentResult
+    from app.services.ai.tools import ProductRef
+
+    plug = Product(
+        id=uuid.uuid4(),
+        sku="SYN-PLUG-150",
+        name="Synthetic Spark Plug Set",
+        brand="Helm",
+        price_cents=1450,
+        stock_quantity=5,
+        is_active=True,
+        images=[],
+        oem_part_numbers=[],
+        fitment_scope="specific",
+    )
+    ref = ProductRef(plug, FitmentResult(status="verified_fit", message="Fits My Stabi", reasons=[]))
+    runtime = Ns(retrieved={}, products={plug.id: ref}, proposals=[])
+    for text in (
+        "The SYN-PLUG-150 fits your boat, as does any spark plug.",
+        "The SYN-PLUG-150 fits your boat and every other plug will work with it.",
+    ):
+        out = apply_guard(text, runtime, None)
+        assert "any spark plug" not in out.content and "every other plug" not in out.content, out.content
+    kept = apply_guard("The SYN-PLUG-150 fits your boat.", runtime, None)
+    assert "The SYN-PLUG-150 fits your boat." in kept.content
+
+
+async def test_product_deactivated_during_the_model_call_is_withdrawn(client, customer, monkeypatch):
+    await create_vessel(customer.id)
+    plug = await f150_plug()
+    await seed_corpus()
+    original = agent.revalidate
+
+    async def deactivate_then_revalidate(db, runtime, v):
+        from app.models.product import Product
+
+        async with async_session() as s:
+            (await s.get(Product, plug.id)).is_active = False
+            await s.commit()
+        await original(db, runtime, v)
+
+    monkeypatch.setattr(agent, "revalidate", deactivate_then_revalidate)
+    body = (
+        await client.post(CHAT, json={"message": "When should I change the spark plugs?"}, headers=customer.headers)
+    ).json()
+    assert all(p["id"] != str(plug.id) for p in body["products"])
+    assert body["actions"] == []
+
+
+async def test_vessel_deleted_during_the_model_call_drops_scoped_passages(
+    client, customer, hostile_provider, monkeypatch
+):
+    vessel = await create_vessel(customer.id)
+    await seed_corpus()
+    hostile_provider["draft"] = GOOD
+    original = agent.revalidate
+
+    async def delete_then_revalidate(db, runtime, v):
+        from app.models.vessel import Vessel
+
+        async with async_session() as s:
+            await s.delete(await s.get(Vessel, vessel.id))
+            await s.commit()
+        await original(db, runtime, v)
+
+    monkeypatch.setattr(agent, "revalidate", delete_then_revalidate)
+    r = await client.post(CHAT, json={"message": "When do I change plugs?"}, headers=customer.headers)
+    body = r.json()
+    assert body["grounding"]["status"] == "insufficient_evidence", body
+    assert not any("F150" in c["title"] for c in body["citations"])

@@ -135,7 +135,10 @@ async def test_invalid_citations_and_unverified_part_numbers_are_removed(client,
     def script(kwargs, n):
         if n == 1:
             return reply(None, [call("search_knowledge", {"query": "spark plugs"})])
-        return reply("Use SYN-PLUG-150 [1], replaced every 100 hours [1]. Some say ZZ-99999 works [7]. Also see [42].")
+        return reply(
+            "Use SYN-PLUG-150 [1]. The spark plugs are replaced every 100 engine hours [1]. "
+            "Some say ZZ-99999 works [7]. Also see [42]."
+        )
 
     openai_mode(script)
     body = (await chat(client, customer)).json()

@@ -288,7 +288,7 @@ class LocalExtractiveProvider:
                     verdict = f"fit unknown ({ref.fitment.message})"
                 else:
                     verdict = f"does not fit ({ref.fitment.message})"
-                line = f"- {ref.product.name} ({ref.product.sku}): {verdict}; {stock}."
+                line = f"- {ref.product.name} ({ref.product.sku}) — {verdict} — {stock}."
                 if line not in product_lines:
                     product_lines.append(line)
         if product_lines:

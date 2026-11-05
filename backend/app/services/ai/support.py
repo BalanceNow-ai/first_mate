@@ -1,25 +1,28 @@
 """Deterministic claim/evidence support for First Mate answers (decision D21).
 
 A *claim* is any clause of a drafted answer that is not plain framing ("here is what the
-sources say:") or a statement about a tool-returned product. A claim is **supported**
-only when one admitted passage unit that the same sentence cites:
+sources say:") or a statement about a tool-returned product. A claim sentence is
+**supported** only when ONE sentence (or structured fact) of a passage that the claim
+sentence itself cites:
 
-* contains every number, number+unit pair and identifier (part code, model code) the
-  claim states — exactly, after normalisation (``100 hours`` ≠ ``9999 hours``,
-  ``100 hours`` ≠ ``100 minutes``, ``10W-30`` ≠ ``10W-40``);
-* has the same polarity — a negated passage ("Never run the engine without cooling
-  water") cannot support an affirmative claim and vice versa;
-* contains the claim's content words: all of them for a quantitative/identifier claim,
-  at least ``PARAPHRASE_COVERAGE`` of them otherwise.
+* contains every content word of all the claim's clauses (after light stemming) —
+  there is no paraphrase allowance, so "check" cannot become "disable", "without"
+  cannot become "with" and "before" cannot become "after";
+* contains every number, number+unit pair and identifier exactly, after normalisation
+  (``100 hours`` = ``100-hour`` = ``100 h``; ``10W-30`` = ``10W30``; but ``100 hours`` ≠
+  ``9999 hours`` ≠ ``100 minutes``);
+* agrees in polarity clause by clause: each claim clause must have the same negation as
+  the clause of that passage sentence it overlaps most (numbers and identifiers weigh
+  double); ties must all agree.
 
-Passage units are the sentences of the cited chunk, split into polarity scopes at
-contrastive connectives ("but", "however", ";"), plus the chunk's structured facts.
+Because the whole claim must sit in one passage sentence, statements from different
+passage sentences cannot be recombined ("every 300 hours, change the oil" against
+"oil every 100 hours. Impeller every 300 hours." is unsupported).
 
-The check is lexical. It does not parse which noun a number belongs to *within one
-passage sentence*, so a sentence that lists several intervals can support a claim that
-recombines them; and it cannot judge whether a passage is true. It never upgrades a
-claim the passage does not lexically contain — unsupported text is removed, never
-certified.
+Limits: the check is lexical. Within ONE passage sentence that lists several values it
+cannot tell which noun each value belongs to; it cannot judge whether a passage is true
+or whether it applies more finely than its declared scope. It never upgrades text the
+passage does not lexically contain — unsupported text is removed, never certified.
 """
 
 from __future__ import annotations
@@ -27,34 +30,28 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-PARAPHRASE_COVERAGE = 0.75
-
 _WORD = re.compile(r"[a-z0-9°%]+(?:[-'.][a-z0-9]+)*")
 _THOUSANDS = re.compile(r"(?<=\d),(?=\d{3}\b)")
-_SENTENCE = re.compile(r"(?<=[.!?])\s+")
-# Polarity scopes: a contrastive connective or a semicolon starts a new scope.
-_SCOPE = re.compile(r";|\s(?:but|however|although|though|whereas|while|except)\s", re.IGNORECASE)
-# Clauses within a scope (they inherit the scope's polarity).
-_CLAUSE = re.compile(r"[,;]|\s(?:and|or|then|so|which|whichever)\s", re.IGNORECASE)
+# Clauses (each with its own polarity).
+_CLAUSE = re.compile(
+    r"[,;:]|\s(?:and|or|nor|then|so|which|whichever|but|however|although|though|whereas|while|except)\s",
+    re.IGNORECASE,
+)
+_ABBREVIATIONS = ("e.g.", "i.e.", "etc.", "approx.", "vs.", "no.", "min.", "max.", "incl.", "esp.", "fig.", "cf.")
 
 _NEGATIONS = {"not", "no", "never", "nor", "cannot", "neither", "none", "nothing"}
 _NEGATION_STEMS = ("avoid",)
 
+# Only words with no bearing on what is claimed. Prepositions of relation, time and
+# quantity (with, before, after, every, only, all, …) are content and must match.
 STOPWORDS = {
     "a",
     "an",
     "the",
     "to",
     "of",
-    "in",
-    "on",
-    "at",
-    "by",
-    "for",
-    "with",
     "and",
     "or",
-    "but",
     "is",
     "are",
     "was",
@@ -77,20 +74,12 @@ STOPWORDS = {
     "i",
     "my",
     "me",
-    "as",
-    "if",
-    "so",
-    "then",
-    "than",
-    "there",
-    "their",
     "they",
     "them",
-    "from",
-    "into",
-    "about",
-    "every",
-    "each",
+    "their",
+    "there",
+    "as",
+    "so",
     "can",
     "could",
     "may",
@@ -110,29 +99,13 @@ STOPWORDS = {
     "please",
     "also",
     "just",
-    "only",
-    "any",
-    "all",
-    "some",
     "very",
-    "up",
-    "out",
     "use",
     "used",
     "using",
     "uses",
-    "when",
-    "whenever",
-    "after",
-    "before",
-    "per",
-    "any",
-    "via",
     "which",
     "whichever",
-    "what",
-    "who",
-    "how",
     "here",
     "s",
     "re",
@@ -140,9 +113,17 @@ STOPWORDS = {
     "ve",
     "d",
     "t",
-    "also",
-    "first",
-    "comes",
+    # Prepositions with no reversible meaning (with/without, before/after, on/off, above/
+    # below, over/under, more/less, every/only/all/any stay content and must match).
+    "in",
+    "at",
+    "by",
+    "for",
+    "from",
+    "into",
+    "about",
+    "per",
+    "via",
 }
 
 NUMBER_WORDS = {
@@ -244,6 +225,19 @@ _UNIT_ALIASES = {
     "°f": "degree_f",
     "c": "degree_c",
 }
+_NUMBER_UNIT = re.compile(r"\b(\d+(?:\.\d+)?)-?([a-z%°]{1,8})\b(?![-\d])")
+
+
+def split_sentences(text: str) -> list[str]:
+    """Sentence split that does not break after common abbreviations ("e.g. on a trailer")."""
+    parts = re.split(r"(?<=[.!?])\s+", text)
+    out: list[str] = []
+    for part in parts:
+        if out and out[-1].lower().endswith(_ABBREVIATIONS):
+            out[-1] = f"{out[-1]} {part}"
+        else:
+            out.append(part)
+    return out
 
 
 def _stem(word: str) -> str:
@@ -256,6 +250,16 @@ def _stem(word: str) -> str:
     return word[:-1] if word.endswith("e") and len(word) > 3 else word
 
 
+def _unit(word: str) -> str | None:
+    return _UNIT_ALIASES.get(word) or _UNIT_ALIASES.get(_stem(word))
+
+
+def _normalise(text: str) -> str:
+    text = _THOUSANDS.sub("", text.lower().replace("’", "'"))
+    # "100-hour", "100h", "12v" → "100 hour", "100 h", "12 v" when the suffix is a unit.
+    return _NUMBER_UNIT.sub(lambda m: f"{m.group(1)} {m.group(2)}" if _unit(m.group(2)) else m.group(0), text)
+
+
 def _is_numeric(token: str) -> bool:
     return any(ch.isdigit() for ch in token) or token in NUMBER_WORDS
 
@@ -265,34 +269,33 @@ def _is_negation(token: str) -> bool:
 
 
 def words(text: str) -> list[str]:
-    return _WORD.findall(_THOUSANDS.sub("", text.lower().replace("’", "'")))
+    return [w.strip("'.") for w in _WORD.findall(_normalise(text))]
+
+
+def _token(word: str) -> str:
+    if any(ch.isdigit() for ch in word):
+        return word.replace("-", "")  # identifiers: 10W-30 == 10W30
+    unit = _unit(word)
+    return unit if unit else _stem(word)
 
 
 def content_tokens(text: str) -> set[str]:
     out = set()
     for w in words(text):
-        w = w.strip("'.")
         if not w or w in STOPWORDS or _is_negation(w):
             continue
-        out.add(_stem(w))
+        out.add(_token(w))
     return out
 
 
 def is_negative(text: str) -> bool:
+    """ "without" is a content word, not negation: it must match the passage literally."""
     return any(_is_negation(w) for w in words(text))
-
-
-def _numerics(tokens: set[str]) -> set[str]:
-    return {t for t in tokens if _is_numeric(t)}
-
-
-def _unit(word: str) -> str | None:
-    return _UNIT_ALIASES.get(word) or _UNIT_ALIASES.get(_stem(word))
 
 
 def _pairs(text: str) -> set[tuple[str, str]]:
     """(number, unit) pairs: a unit within the next two words of a bare number."""
-    ws = [w.strip("'.") for w in words(text)]
+    ws = words(text)
     pairs = set()
     for i, w in enumerate(ws):
         if not (w.replace(".", "", 1).isdigit() or w in NUMBER_WORDS):
@@ -305,17 +308,6 @@ def _pairs(text: str) -> set[tuple[str, str]]:
     return pairs
 
 
-@dataclass(frozen=True)
-class Unit:
-    """One piece of passage evidence: a polarity scope of a sentence, or a structured fact."""
-
-    ref: int
-    text: str
-    tokens: frozenset[str]
-    pairs: frozenset[tuple[str, str]]
-    negative: bool
-
-
 @dataclass
 class Clause:
     text: str
@@ -325,7 +317,18 @@ class Clause:
 
     @property
     def numerics(self) -> set[str]:
-        return _numerics(self.tokens)
+        return {t for t in self.tokens if _is_numeric(t)}
+
+
+@dataclass(frozen=True)
+class Unit:
+    """One piece of passage evidence: a sentence (with its clauses) or a structured fact."""
+
+    ref: int
+    text: str
+    tokens: frozenset[str]
+    pairs: frozenset[tuple[str, str]]
+    clauses: tuple[tuple[frozenset[str], bool], ...]
 
 
 @dataclass
@@ -334,33 +337,31 @@ class Support:
     evidence: list[Unit] = field(default_factory=list)
 
 
-def scopes(sentence: str) -> list[str]:
-    return [s.strip() for s in _SCOPE.split(sentence) if s and s.strip()]
-
-
 def clauses(sentence: str) -> list[Clause]:
-    """Split a claim sentence into clauses that inherit their scope's polarity."""
-    out = []
-    for scope in scopes(sentence):
-        negative = is_negative(scope)
-        for part in _CLAUSE.split(scope):
-            if part and part.strip():
-                out.append(Clause(part.strip(), content_tokens(part), _pairs(part), negative))
-    return out
+    """Split a sentence into clauses, each with its own polarity."""
+    return [
+        Clause(part.strip(), content_tokens(part), _pairs(part), is_negative(part))
+        for part in _CLAUSE.split(sentence)
+        if part and part.strip()
+    ]
 
 
 def passage_units(ref: int, content: str, facts: list[dict]) -> list[Unit]:
     units: list[Unit] = []
-    for raw in _SENTENCE.split(" ".join(content.split())):
+    for raw in split_sentences(" ".join(content.split())):
         sentence = raw.strip().lstrip("#>-*• ").strip()
         if not sentence:
             continue
-        parts = scopes(sentence)
-        polarities = {is_negative(p) for p in parts}
-        if len(parts) > 1 and len(polarities) == 1:
-            units.append(_unit_for(ref, sentence, polarities.pop()))
-        for part in parts:
-            units.append(_unit_for(ref, part, is_negative(part)))
+        parts = clauses(sentence)
+        units.append(
+            Unit(
+                ref,
+                sentence,
+                frozenset(content_tokens(sentence)),
+                frozenset(_pairs(sentence)),
+                tuple((frozenset(c.tokens), c.negative) for c in parts),
+            )
+        )
     for fact in facts or []:
         key = str(fact.get("key", "")).replace("_", " ").strip()
         value = str(fact.get("value", "")).strip()
@@ -368,32 +369,38 @@ def passage_units(ref: int, content: str, facts: list[dict]) -> list[Unit]:
             continue
         label = str(fact.get("label") or key)
         text = f"{label}: {value}"
-        tokens = content_tokens(f"{label} {key} {value}")
-        pairs = _pairs(f"{value} {key}") | _pairs(text)
-        units.append(Unit(ref, text, frozenset(tokens), frozenset(pairs), is_negative(value)))
+        tokens = frozenset(content_tokens(f"{label} {key} {value}"))
+        pairs = set(_pairs(text))
+        if value.replace(".", "", 1).isdigit():
+            pairs |= {(value, u) for w in words(f"{label} {key}") if (u := _unit(w))}
+        negative = is_negative(value)
+        units.append(Unit(ref, text, tokens, frozenset(pairs), ((tokens, negative),)))
     return units
 
 
-def _unit_for(ref: int, text: str, negative: bool) -> Unit:
-    return Unit(ref, text, frozenset(content_tokens(text)), frozenset(_pairs(text)), negative)
+def _weight(tokens) -> int:
+    return sum(2 if _is_numeric(t) else 1 for t in tokens)
 
 
-def clause_supported_by(clause: Clause, unit: Unit) -> bool:
-    if not clause.tokens:
-        return True
-    if clause.negative != unit.negative:
+def supported_by(claim: list[Clause], unit: Unit) -> bool:
+    """Whether one passage unit supports every clause of a claim sentence."""
+    tokens = set().union(*(c.tokens for c in claim))
+    pairs = set().union(*(c.pairs for c in claim))
+    if not tokens or not tokens <= unit.tokens or not pairs <= unit.pairs:
         return False
-    if not clause.numerics <= unit.tokens:
-        return False
-    if not clause.pairs <= unit.pairs:
-        return False
-    covered = len(clause.tokens & unit.tokens) / len(clause.tokens)
-    return covered >= (1.0 if clause.numerics else PARAPHRASE_COVERAGE)
+    for clause in claim:
+        if not clause.tokens:
+            continue
+        scored = [(_weight(clause.tokens & toks), negative) for toks, negative in unit.clauses]
+        best = max(score for score, _ in scored)
+        if best == 0 or any(neg != clause.negative for score, neg in scored if score == best):
+            return False
+    return True
 
 
-def support(clause: Clause, units: list[Unit]) -> Support:
-    """The best supporting unit for a claim clause (fewest extra words), if any."""
-    candidates = [u for u in units if clause_supported_by(clause, u)]
+def support(claim: list[Clause], units: list[Unit]) -> Support:
+    """The tightest single passage unit supporting the whole claim sentence, if any."""
+    candidates = [u for u in units if supported_by(claim, u)]
     if not candidates:
         return Support(False)
     return Support(True, [min(candidates, key=lambda u: len(u.tokens))])

@@ -57,10 +57,11 @@ async def revalidate(db: AsyncSession, runtime: TurnRuntime, vessel: Vessel | No
             await db.execute(select(Vessel).where(Vessel.id == vessel.id).execution_options(populate_existing=True))
         ).scalar_one_or_none()
         runtime.profile = await fitment_service.load_vessel_profile(db, current) if current is not None else None
-        # Passages are re-scoped against the vessel as it is now.
+        # Passages are re-scoped against the vessel as it is now; if the vessel was deleted,
+        # only general (unscoped) passages remain usable.
         for ref, chunk in list(runtime.retrieved.items()):
             fit = applicability(chunk.applies_to, runtime.profile)
-            if fit is None:
+            if fit is None or (current is None and chunk.applies_to):
                 del runtime.retrieved[ref]
             else:
                 runtime.retrieved[ref] = dataclasses.replace(chunk, applicability=fit)
@@ -75,8 +76,9 @@ async def revalidate(db: AsyncSession, runtime: TurnRuntime, vessel: Vessel | No
                 )
             ).scalars()
         }
-        for pid in [pid for pid in runtime.products if pid not in fresh_products]:
+        for pid in [pid for pid in runtime.products if pid not in fresh_products or not fresh_products[pid].is_active]:
             del runtime.products[pid]
+            fresh_products.pop(pid, None)
         fitments = await runtime._fitments(list(fresh_products.values()))
         for pid, ref in runtime.products.items():
             ref.product = fresh_products[pid]

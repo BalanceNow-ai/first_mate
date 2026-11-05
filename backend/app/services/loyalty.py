@@ -181,6 +181,15 @@ async def lock_accounts(db: AsyncSession, user_ids) -> None:
         await lock_account(db, user_id)
 
 
+async def lock_crew_periods(db: AsyncSession, keys) -> None:
+    """Transaction-scoped advisory locks on (crew, period), in ascending order (D22).
+
+    Serialises a period's bonus run with refunds that claw that bonus back, so the set of
+    bonus recipients a refund reads cannot change before it locks their accounts."""
+    for team_id, period in sorted(set(keys), key=lambda k: (str(k[0]), k[1])):
+        await db.execute(select(func.pg_advisory_xact_lock(func.hashtextextended(f"crew:{team_id}:{period}", 0))))
+
+
 async def get_by_key(db: AsyncSession, key: str) -> PointsTransaction | None:
     return (
         await db.execute(select(PointsTransaction).where(PointsTransaction.idempotency_key == key))
@@ -351,6 +360,7 @@ async def reverse_for_refund(db: AsyncSession, order: Order, newly_refunded_cent
     # clawback, the crew's bonus recipients) is locked up front in the global order.
     accounts = {order.user_id}
     if earn is not None and earn.team_id and earn.period:
+        await lock_crew_periods(db, [(earn.team_id, earn.period)])
         accounts |= set(await _bonus_recipients(db, earn.team_id, earn.period))
     await lock_accounts(db, accounts)
     if earn is not None:
@@ -565,6 +575,11 @@ async def calculate_monthly_multipliers(db: AsyncSession, period: str | None = N
     period = period or previous_period()
     parse_period(period)
     settings = get_settings()
+    rows = await _earn_rows(db, PointsTransaction.period == period, PointsTransaction.team_id.is_not(None))
+    # D22: every crew-period lock, then every account, each in one global order — and the
+    # spend is re-read under those locks.
+    await lock_crew_periods(db, [(r.team_id, period) for r in rows])
+    await lock_accounts(db, [r.user_id for r in rows])
     rows = await _earn_rows(db, PointsTransaction.period == period, PointsTransaction.team_id.is_not(None))
     by_team: dict[uuid.UUID, list[_EarnRow]] = {}
     for row in rows:

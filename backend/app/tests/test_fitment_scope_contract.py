@@ -87,8 +87,8 @@ async def test_database_rejects_malformed_rows(name):
         "vessel_dependents": REVIEW_RULE,
         "engine_dependents": {"vessel_make": "Stabicraft", "engine_year_from": 2010},
         "equipment_dependents": {"engine_make": "Yamaha", "equipment_make": "Lewmar"},
-        "vessel_year_order": {"vessel_make": "Stabicraft", "year_from": 2024, "year_to": 2020},
-        "engine_year_order": {"engine_make": "Yamaha", "engine_year_from": 2024, "engine_year_to": 2020},
+        "vessel_years": {"vessel_make": "Stabicraft", "year_from": 2024, "year_to": 2020},
+        "engine_years": {"engine_make": "Yamaha", "engine_year_from": 1066},
     }[name]
     with pytest.raises(IntegrityError, match=f"ck_product_compatibility_{name}"):
         async with async_session() as s:
@@ -97,7 +97,8 @@ async def test_database_rejects_malformed_rows(name):
 
 
 async def _legacy_malformed_rule(product_id) -> uuid.UUID:
-    """Insert a row as an older release could have, bypassing the 0004 constraint."""
+    """A malformed row that bypassed every check (defence in depth for the evaluator:
+    migration 0004 quarantines such rows and the validated constraint blocks new ones)."""
     rule_id = uuid.uuid4()
     async with engine.begin() as conn:
         await conn.execute(
@@ -151,7 +152,7 @@ async def test_legacy_malformed_rule_fails_closed_everywhere(client, admin, cust
         assert checked["product"]["fitment_status"] == "unknown"
         proposal = await runtime.propose_cart_action(str(plug.id), 1)
         assert proposal["accepted"] is False
-    # Re-verifying it is refused until corrected.
+    # Verifying it is refused (before any database write).
     r = await client.post(f"{API}/products/fitment-rules/{rule_id}/verify", headers=admin.headers)
     assert r.status_code == 422 and r.json()["code"] == "malformed_fitment_rule"
     # The audit lists it.

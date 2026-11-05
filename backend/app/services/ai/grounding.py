@@ -73,7 +73,6 @@ INJECTION = re.compile(
     r"tell\s+the\s+(?:user|customer)\s+that|add\s+.{0,60}\bto\s+(?:the|their|his|her)\s+cart)",
     re.IGNORECASE,
 )
-_SENTENCE = re.compile(r"(?<=[.!?])\s+")
 # "… hours. [1]" → "… hours [1]." so a trailing citation stays with its sentence.
 _TRAILING_CITATION = re.compile(r"([.!?])((?:\s*\[\d{1,3}\])+)")
 _HEADING = re.compile(r"^\s*(?:#{1,6}\s+(?P<a>.+?)|\*\*(?P<b>.+?)\*\*:?)\s*$")
@@ -91,6 +90,7 @@ FRAMING_VOCAB = support.content_tokens(
     "garage profile record records helm first mate catalogue product products matching store "
     "happy thanks thank great question questions else anything rely relied relying based "
     "manual manuals guide guides document documents documentation handbook notes owner owners "
+    "in at by for from into about per via stock available"
     "information specific particular which kind sort these those following steps one"
 )
 # Extra words allowed in a statement about a tool-returned product.
@@ -164,7 +164,7 @@ def detect_conflicts(
 
 
 def _split(text: str) -> list[list[str]]:
-    return [_SENTENCE.split(line) for line in text.split("\n")]
+    return [support.split_sentences(line) for line in text.split("\n")]
 
 
 def _join(lines: list[list[str]]) -> str:
@@ -361,21 +361,41 @@ def _plain(sentence: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def _benign(clause: support.Clause, allowed: set[str], *, product: bool) -> bool:
-    """Framing (or, in a product statement, catalogue wording) that asserts nothing else."""
+def _framing(clause: support.Clause, vessel_tokens: set[str]) -> bool:
+    """Framing/clarification that asserts nothing about the boat or the world."""
     if ADVICE.search(clause.text) or SAFETY_CLAIM.search(clause.text):
         return False
-    if not product and FIT_CLAIM.search(clause.text) and not _FIT_NEGATION.search(clause.text):
+    if FIT_CLAIM.search(clause.text) and not _FIT_NEGATION.search(clause.text):
         return False
-    vocab = FRAMING_VOCAB | PRODUCT_VOCAB if product else FRAMING_VOCAB
-    return clause.tokens <= (vocab | allowed)
+    return clause.tokens <= (FRAMING_VOCAB | vessel_tokens)
+
+
+def _catalogue(clause: support.Clause, refs: list[ProductRef], vessel_tokens: set[str]) -> bool:
+    """A statement about a product named IN THIS CLAUSE, in catalogue/fitment wording only.
+
+    Fit wording was already checked against central fitment (``_fix_fit_claims``); a
+    clause that names no product ("…, as does any spark plug") is never catalogue."""
+    if ADVICE.search(clause.text) or SAFETY_CLAIM.search(clause.text):
+        return False
+    named = [r for r in refs if _mentions(clause.text, r)]
+    if not named:
+        return False
+    if FIT_CLAIM.search(clause.text) and not _FIT_NEGATION.search(clause.text):
+        if not all(r.positive for r in named):
+            return False
+    allowed = FRAMING_VOCAB | PRODUCT_VOCAB | vessel_tokens
+    for ref in named:
+        allowed |= _product_identity(ref)
+    return clause.tokens <= allowed
 
 
 def _judge(sentence: str, ctx: _Context) -> tuple[str | None, dict | None, str]:
     """Return (sentence to keep or None, claim record or None, kind).
 
     ``kind`` is ``claim`` (passage-supported), ``product`` (checked against the catalogue
-    and central fitment) or ``framing``."""
+    and central fitment) or ``framing``. A sentence is kept when its non-framing clauses
+    are together supported by ONE passage sentence it cites, or when every clause is
+    framing or a catalogue statement about a product named in that clause."""
     if is_instruction_like(sentence):
         return None, None, ""
     refs = sorted({int(n) for n in CITATION.findall(sentence) if int(n) in ctx.retrieved})
@@ -399,48 +419,34 @@ def _judge(sentence: str, ctx: _Context) -> tuple[str | None, dict | None, str]:
             return None, None, ""
         if fixed != sentence:
             return fixed, None, "product"  # server-generated fitment statement
-    allowed = set(ctx.vessel_tokens)
-    for ref in mentioned:
-        allowed |= _product_identity(ref)
 
-    units = ctx.units_for(refs)
-    evidence: list[support.Unit] = []
-    claim_texts: list[str] = []
-    body = plain
-    lead, colon, rest = plain.partition(":")
-    lead_clause = support.Clause(lead, support.content_tokens(lead), set(), False)
-    if colon and rest.strip() and _benign(lead_clause, allowed, product=False):
-        body = rest  # "Here is what the manual says: …" — judge what follows the framing
-    for clause in support.clauses(body):
-        # Passage support first, so a cited fact keeps its citation even when it also
-        # names a catalogue product; otherwise it must be framing/catalogue wording.
-        found = support.support(clause, units) if clause.tokens else support.Support(False)
+    parts = support.clauses(plain)
+    claim = [c for c in parts if c.tokens and not _framing(c, ctx.vessel_tokens)]
+    if claim and refs:
+        found = support.support(claim, ctx.units_for(refs))
         if found.supported:
-            evidence += found.evidence
-            claim_texts.append(clause.text)
-        elif not _benign(clause, allowed, product=bool(mentioned)):
-            return None, None, ""
-    if not evidence:
-        # Nothing here needed a passage: citations would overstate what it rests on.
-        kind = "product" if mentioned else "framing"
-        return re.sub(r"[ \t]+([.,;:!?])", r"\1", CITATION.sub("", sentence)).rstrip(), None, kind
-    used = sorted({u.ref for u in evidence})
-    kept = CITATION.sub(lambda m: m.group(0) if int(m.group(1)) in used else "", sentence)
-    kept = re.sub(r"[ \t]+([.,;:!?])", r"\1", kept)
-    claim = {
-        "text": plain,
-        "refs": used,
-        "evidence": [
-            {
-                "ref": u.ref,
-                "passage": u.text,
-                "applicability": ctx.retrieved[u.ref].applicability,
-                "applies_to": ctx.retrieved[u.ref].applies_to,
+            used = sorted({u.ref for u in found.evidence})
+            kept = CITATION.sub(lambda m: m.group(0) if int(m.group(1)) in used else "", sentence)
+            kept = re.sub(r"[ \t]+([.,;:!?])", r"\1", kept)
+            record = {
+                "text": plain,
+                "refs": used,
+                "evidence": [
+                    {
+                        "ref": u.ref,
+                        "passage": u.text,
+                        "applicability": ctx.retrieved[u.ref].applicability,
+                        "applies_to": ctx.retrieved[u.ref].applies_to,
+                    }
+                    for u in found.evidence
+                ],
             }
-            for u in dict.fromkeys(evidence)
-        ],
-    }
-    return kept, claim, "claim"
+            return kept, record, "claim"
+    if not all(_catalogue(c, ctx.product_refs, ctx.vessel_tokens) for c in claim):
+        return None, None, ""
+    # Nothing here rests on a passage: citations would overstate what it rests on.
+    kind = "product" if claim else "framing"
+    return re.sub(r"[ \t]+([.,;:!?])", r"\1", CITATION.sub("", sentence)).rstrip(), None, kind
 
 
 def apply_guard(
