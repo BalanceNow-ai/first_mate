@@ -29,11 +29,14 @@ async def order_refunded(db: AsyncSession, order: Order, newly_refunded_cents: i
     await notifications.order_refunded(db, order, newly_refunded_cents)
 
 
-async def order_released(db: AsyncSession, order: Order) -> None:
-    """An unpaid order was cancelled or expired; its reservation has been released."""
-    from app.services import loyalty
+async def order_released(db: AsyncSession, order: Order) -> None:  # noqa: ARG001
+    """An unpaid order was cancelled or expired; its reservation has been released.
 
-    await loyalty.release_order_entitlement(db, order)
+    The commerce release path has already returned the stock, restored the cart and
+    re-issued any reserved discount entitlement (services.entitlements) before this is
+    raised, so there is currently nothing further to do here.
+    """
+    return None
 
 
 async def order_status_changed(db: AsyncSession, order: Order, previous: str) -> None:
