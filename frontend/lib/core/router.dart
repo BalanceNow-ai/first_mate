@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:helm_marine/core/routes/catalogue_routes.dart';
+import 'package:helm_marine/core/routes/commerce_routes.dart';
+import 'package:helm_marine/core/routes/engagement_routes.dart';
 import 'package:helm_marine/core/auth/auth_controller.dart';
 import 'package:helm_marine/core/widgets/app_shell.dart';
 import 'package:helm_marine/features/ai_chat/screens/chat_screen.dart';
@@ -142,6 +145,9 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(path: 'edit', builder: (context, state) => const EditProfileScreen()),
             ],
           ),
+          ...catalogueRoutes,
+          ...commerceRoutes,
+          ...engagementRoutes,
         ],
       ),
     ],
