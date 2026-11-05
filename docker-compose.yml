@@ -1,107 +1,294 @@
-version: "3.9"
+# =============================================================================
+# Helm — LOCAL acceptance stack (development only; never deploy this file)
+#
+#   cp .env.example .env          # local-safe defaults
+#   scripts/local_stack.sh up     # builds the web bundle + images, starts everything
+#
+# Only the web proxy (default http://localhost:18080) and the Mailpit UI
+# (http://localhost:18025) are published, bound to 127.0.0.1. Postgres, Redis, Typesense,
+# GoTrue, the API and the workers are reachable only on internal Docker networks.
+#
+#   /          Flutter web build (or a placeholder page, see scripts/local_stack.sh)
+#   /api/      FastAPI (gunicorn/uvicorn, production image, APP_ENV=development)
+#   /auth/v1/  real Supabase GoTrue (local issuer; HS256 secret shared with the API)
+#   /health    liveness      /ready  readiness (db, redis, worker heartbeat)
+#
+# Every required value comes from .env via ${VAR:?}; nothing here contains a secret.
+# Local substitutes (local payments, local AI, fixture CMS, SMTP sink) are accepted by
+# the API only because APP_ENV=development (Repair Programme decision D5).
+# =============================================================================
+name: helm
+
+x-hardening: &hardening
+  read_only: true
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: ["ALL"]
+
+x-backend-env: &backend-env
+  APP_ENV: development
+  SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in .env (copy .env.example)}
+  ALLOWED_ORIGINS: ${HELM_PUBLIC_URL:?set HELM_PUBLIC_URL in .env}
+  PUBLIC_BASE_URL: ${HELM_PUBLIC_URL:?set HELM_PUBLIC_URL in .env}
+  DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:?set POSTGRES_USER in .env}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:?set POSTGRES_DB in .env}
+  REDIS_URL: redis://redis:6379/0
+  # Auth: tokens are issued by the local GoTrue below and verified with the shared
+  # server-only HS256 secret. Issuer = ${SUPABASE_URL}/auth/v1 = GOTRUE_JWT_ISSUER.
+  AUTH_MODE: hs256
+  SUPABASE_URL: ${HELM_PUBLIC_URL:?set HELM_PUBLIC_URL in .env}
+  SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET:?set SUPABASE_JWT_SECRET in .env (>= 32 chars)}
+  SUPABASE_JWT_AUDIENCE: authenticated
+  SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
+  RATE_LIMIT_BACKEND: ${RATE_LIMIT_BACKEND:?set RATE_LIMIT_BACKEND in .env}
+  # Local substitutes (development/test only).
+  PAYMENT_PROVIDER: ${PAYMENT_PROVIDER:?set PAYMENT_PROVIDER in .env}
+  LLM_PROVIDER: ${LLM_PROVIDER:?set LLM_PROVIDER in .env}
+  EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:?set EMBEDDING_PROVIDER in .env}
+  AI_ENABLED: ${AI_ENABLED:?set AI_ENABLED in .env}
+  CMS_PROVIDER: ${CMS_PROVIDER:?set CMS_PROVIDER in .env}
+  EMAIL_PROVIDER: ${EMAIL_PROVIDER:?set EMAIL_PROVIDER in .env}
+  SMTP_SINK_HOST: mailpit
+  SMTP_SINK_PORT: "1025"
+  PUSH_PROVIDER: log_sink
+  COURIER_RATE_MODE: ${COURIER_RATE_MODE:?set COURIER_RATE_MODE in .env}
+  HELM_DASH_ENABLED: ${HELM_DASH_ENABLED:?set HELM_DASH_ENABLED in .env}
+  SEARCH_BACKEND: ${SEARCH_BACKEND:?set SEARCH_BACKEND in .env}
+  TYPESENSE_HOST: typesense
+  TYPESENSE_PORT: "8108"
+  TYPESENSE_PROTOCOL: http
+  TYPESENSE_API_KEY: ${TYPESENSE_API_KEY:?set TYPESENSE_API_KEY in .env}
+  # gunicorn / celery
+  FORWARDED_ALLOW_IPS: ${HELM_EDGE_SUBNET:?set HELM_EDGE_SUBNET in .env}
+  WEB_CONCURRENCY: ${WEB_CONCURRENCY:-2}
+  CELERY_CONCURRENCY: ${CELERY_CONCURRENCY:-2}
+
+x-backend: &backend
+  image: ${HELM_BACKEND_IMAGE:-helm-backend:local}
+  build:
+    context: ./backend
+    dockerfile: Dockerfile.prod
+    target: production
+    secrets: [build_ca]
+  <<: *hardening
+  tmpfs: ["/tmp:size=64m,mode=1777"]
+  environment: *backend-env
+  networks: [data]
 
 services:
-  # PostgreSQL 16 with pgvector extension
+  # --- data stores (internal network only, never published) -------------------
   db:
     image: pgvector/pgvector:pg16
-    container_name: helm-db
     environment:
-      POSTGRES_USER: helm
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: helm_db
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
+    volumes: ["pg_data:/var/lib/postgresql/data"]
+    security_opt: ["no-new-privileges:true"]
+    shm_size: 256m
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U helm -d helm_db"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 20
+    networks: [data]
+    restart: unless-stopped
 
-  # Redis — cache, Celery broker, rate limiting
   redis:
-    image: redis:7-alpine
-    container_name: helm-redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
+    image: redis:7.4-alpine
+    command: ["redis-server", "--save", "60", "1", "--appendonly", "no"]
+    volumes: ["redis_data:/data"]
+    security_opt: ["no-new-privileges:true"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [data]
+    restart: unless-stopped
 
-  # Typesense — product search engine
   typesense:
     image: typesense/typesense:27.1
-    container_name: helm-typesense
     environment:
-      TYPESENSE_API_KEY: helm-typesense-api-key
+      TYPESENSE_API_KEY: ${TYPESENSE_API_KEY:?set TYPESENSE_API_KEY in .env}
       TYPESENSE_DATA_DIR: /data
-    ports:
-      - "8108:8108"
-    volumes:
-      - typesense_data:/data
+      TYPESENSE_ENABLE_CORS: "false"
+    volumes: ["typesense_data:/data"]
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8108 && printf 'GET /health HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q '\"ok\":true' <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    networks: [data]
+    restart: unless-stopped
 
-  # FastAPI backend
+  # --- local mail sink (SMTP for GoTrue + API; UI published on 127.0.0.1) ---------
+  mailpit:
+    image: axllent/mailpit:v1.27
+    user: "65534:65534"
+    environment:
+      MP_MAX_MESSAGES: "1000"
+    <<: *hardening
+    tmpfs: ["/tmp:size=64m,mode=1777"]
+    ports:
+      - "${HELM_BIND_ADDRESS:-127.0.0.1}:${HELM_MAIL_UI_PORT:-18025}:8025"
+    networks: [data, public]
+    restart: unless-stopped
+
+  # --- local Supabase Auth (GoTrue) --------------------------------------------
+  auth-db-init:
+    image: pgvector/pgvector:pg16
+    entrypoint: ["/bin/sh", "/init/auth-db-init.sh"]
+    environment:
+      PGHOST: db
+      PGUSER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      GOTRUE_DB_PASSWORD: ${GOTRUE_DB_PASSWORD:?set GOTRUE_DB_PASSWORD in .env}
+      GOTRUE_DB_NAME: helm_auth
+    volumes: ["./deploy/local/auth-db-init.sh:/init/auth-db-init.sh:ro"]
+    user: "999:999"
+    <<: *hardening
+    depends_on:
+      db: { condition: service_healthy }
+    networks: [data]
+    restart: "no"
+
+  auth:
+    image: supabase/gotrue:v2.197.0
+    depends_on:
+      auth-db-init: { condition: service_completed_successfully }
+      mailpit: { condition: service_started }
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      PORT: "9999"
+      API_EXTERNAL_URL: ${HELM_PUBLIC_URL:?set HELM_PUBLIC_URL in .env}/auth/v1
+      GOTRUE_SITE_URL: ${HELM_PUBLIC_URL:?set HELM_PUBLIC_URL in .env}
+      GOTRUE_URI_ALLOW_LIST: ${HELM_PUBLIC_URL:?set HELM_PUBLIC_URL in .env}/**
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${GOTRUE_DB_PASSWORD:?set GOTRUE_DB_PASSWORD in .env}@db:5432/helm_auth?search_path=auth&sslmode=disable
+      GOTRUE_DB_NAMESPACE: auth
+      # JWT: HS256 with the secret the API verifies with; issuer/audience match the
+      # API's expectation (SUPABASE_URL + /auth/v1, audience "authenticated").
+      GOTRUE_JWT_SECRET: ${SUPABASE_JWT_SECRET:?set SUPABASE_JWT_SECRET in .env}
+      GOTRUE_JWT_ISSUER: ${HELM_PUBLIC_URL:?set HELM_PUBLIC_URL in .env}/auth/v1
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_EXP: "3600"
+      GOTRUE_DISABLE_SIGNUP: "false"
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_EXTERNAL_PHONE_ENABLED: "false"
+      GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED: "false"
+      # true  = sign-up returns a session immediately (no e-mail)
+      # false = sign-up sends a confirmation e-mail (visible in Mailpit) and returns no session
+      GOTRUE_MAILER_AUTOCONFIRM: ${GOTRUE_MAILER_AUTOCONFIRM:?set GOTRUE_MAILER_AUTOCONFIRM (true|false) in .env}
+      GOTRUE_MAILER_SECURE_EMAIL_CHANGE_ENABLED: "true"
+      # E-mail links are resolved against the external URL's origin, so they must carry
+      # the proxy prefix to route through the web proxy (nginx strips /auth/v1).
+      GOTRUE_MAILER_URLPATHS_CONFIRMATION: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_INVITE: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_RECOVERY: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: /auth/v1/verify
+      GOTRUE_SMTP_HOST: mailpit
+      GOTRUE_SMTP_PORT: "1025"
+      # No SMTP credentials: Go refuses AUTH PLAIN over an unencrypted connection, and
+      # Mailpit accepts unauthenticated mail on the internal network.
+      GOTRUE_SMTP_ADMIN_EMAIL: no-reply@helm.local
+      GOTRUE_SMTP_SENDER_NAME: Helm (local)
+      GOTRUE_RATE_LIMIT_EMAIL_SENT: "1000"
+      GOTRUE_LOG_LEVEL: info
+    <<: *hardening
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:9999/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks: [data, edge]
+    restart: unless-stopped
+
+  # --- backend ------------------------------------------------------------------
+  migrate:
+    <<: *backend
+    command: ["migrate"]
+    depends_on:
+      db: { condition: service_healthy }
+    restart: "no"
+
   api:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: helm-api
-    environment:
-      DATABASE_URL: postgresql+asyncpg://helm:password@db:5432/helm_db
-      REDIS_URL: redis://redis:6379/0
-      TYPESENSE_HOST: typesense
-      TYPESENSE_PORT: 8108
-      TYPESENSE_API_KEY: helm-typesense-api-key
-      APP_ENV: development
-      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:8080
-    ports:
-      - "8000:8000"
+    <<: *backend
+    command: ["api"]
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      typesense:
-        condition: service_started
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
+    networks: [data, edge]
+    restart: unless-stopped
+
+  worker:
+    <<: *backend
+    command: ["worker"]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
+    restart: unless-stopped
+
+  beat:
+    <<: *backend
+    command: ["beat"]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
+    volumes: ["beat_data:/var/lib/helm/beat"]
+    restart: unless-stopped
+
+  # --- web: nginx serving the Flutter build + reverse proxy -----------------------
+  web:
+    image: nginxinc/nginx-unprivileged:1.29-alpine
+    environment:
+      NGINX_ENTRYPOINT_QUIET_LOGS: "1"
     volumes:
-      - ./backend:/app
-
-  # Celery worker — background task processing
-  celery-worker:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: helm-celery-worker
-    command: celery -A app.celery_app worker --loglevel=info
-    environment:
-      DATABASE_URL: postgresql+asyncpg://helm:password@db:5432/helm_db
-      REDIS_URL: redis://redis:6379/0
+      - ./deploy/nginx/local.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./deploy/nginx/snippets:/etc/nginx/snippets:ro
+      # Populated by scripts/local_stack.sh (Flutter build, or the placeholder page).
+      - ${HELM_WEB_ROOT:-./.local/web}:/usr/share/nginx/html:ro
+    <<: *hardening
+    tmpfs: ["/tmp:size=32m,mode=1777"]
+    ports:
+      - "${HELM_BIND_ADDRESS:-127.0.0.1}:${HELM_WEB_PORT:-18080}:8080"
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      api: { condition: service_healthy }
+      auth: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      public: {}
+      edge: {}
+    restart: unless-stopped
 
-  # Celery Beat — periodic task scheduler
-  celery-beat:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: helm-celery-beat
-    command: celery -A app.celery_app beat --loglevel=info
-    environment:
-      DATABASE_URL: postgresql+asyncpg://helm:password@db:5432/helm_db
-      REDIS_URL: redis://redis:6379/0
-    depends_on:
-      redis:
-        condition: service_healthy
+networks:
+  # Data stores, workers and the API. internal: no route to the internet.
+  data:
+    internal: true
+  # Proxy <-> API/GoTrue. Fixed subnet so the API can trust X-Forwarded-* from it only.
+  edge:
+    internal: true
+    ipam:
+      config:
+        - subnet: ${HELM_EDGE_SUBNET:?set HELM_EDGE_SUBNET in .env}
+  # Published ports (web, Mailpit UI).
+  public: {}
 
 volumes:
-  postgres_data:
+  pg_data:
   redis_data:
   typesense_data:
+  beat_data:
+
+secrets:
+  # Optional CA bundle for image builds behind a TLS-intercepting proxy. The default is
+  # an empty file (no extra CA). Must live inside the project directory (compose/bake
+  # file-access rule); scripts/local_stack.sh copies HELM_BUILD_CA_FILE into .local/.
+  build_ca:
+    file: ${HELM_BUILD_CA_FILE:-./deploy/no-build-ca.pem}

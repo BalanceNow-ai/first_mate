@@ -1,48 +1,100 @@
-FROM python:3.11-slim AS builder
+# syntax=docker/dockerfile:1.7
+# =============================================================================
+# Helm backend — production image (API, migrate, Celery worker, Celery beat)
+#
+#   docker build -f Dockerfile.prod --target production -t helm-backend:TAG .
+#
+# Stages
+#   wheels      download/build every locked dependency (hash-checked) — has build tools
+#   source      application tree without the test suite
+#   runtime     python:3.11-slim + virtualenv installed from the wheels; non-root
+#   test        runtime + dev lock + app/tests (needs TEST_DATABASE_URL; see
+#               docs/08_delivery/Operations_Runbook.md). Never shipped.
+#   production  final image (default target)
+#
+# Tests do NOT run during the image build: they need a PostgreSQL database and are
+# run outside the image (or via the `test` target against a disposable database).
+#
+# Optional build secret `build_ca`: an extra CA bundle for builds behind a TLS-
+# intercepting proxy (`--secret id=build_ca,src=/path/ca.crt`). Unused when absent;
+# it is a secret mount, so it never lands in an image layer.
+# =============================================================================
+ARG PYTHON_IMAGE=python:3.11.18-slim-trixie
 
-WORKDIR /app
-
-# Install system dependencies for building
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libpq-dev \
+# --- wheels ------------------------------------------------------------------
+FROM ${PYTHON_IMAGE} AS wheels
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends build-essential \
     && rm -rf /var/lib/apt/lists/*
+WORKDIR /build
+COPY requirements.lock .
+RUN --mount=type=secret,id=build_ca,required=false \
+    if [ -s /run/secrets/build_ca ]; then export PIP_CERT=/run/secrets/build_ca; fi; \
+    pip wheel --no-cache-dir --disable-pip-version-check \
+        --require-hashes --no-deps -r requirements.lock -w /wheels
 
-# Copy project definition and install all dependencies (including dev for tests)
-COPY pyproject.toml .
-RUN pip install --no-cache-dir -e ".[dev]"
-
-# Copy application code
+# --- source ------------------------------------------------------------------
+FROM ${PYTHON_IMAGE} AS source
+WORKDIR /src
 COPY app/ app/
 COPY alembic/ alembic/
-COPY alembic.ini .
+COPY alembic.ini gunicorn.conf.py ./
+COPY docker/ docker/
+RUN rm -rf app/tests \
+    && find . -name '__pycache__' -prune -exec rm -rf {} + \
+    && chmod 0755 docker/entrypoint.sh docker/healthcheck.py
 
-# Run tests in the builder stage
-RUN python -m pytest app/tests/ -v --tb=short
+# --- runtime -----------------------------------------------------------------
+FROM ${PYTHON_IMAGE} AS runtime
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    VIRTUAL_ENV=/opt/venv \
+    PATH=/opt/venv/bin:$PATH \
+    HOME=/tmp \
+    CELERY_BEAT_SCHEDULE=/var/lib/helm/beat/celerybeat-schedule
 
-# --- Production stage ---
-FROM python:3.11-slim AS production
+# Every dependency comes from the hash-checked wheels built above (no index access,
+# no compiler in this stage). Wheels that pip downloaded keep their PyPI hashes, so
+# --require-hashes verifies them again here. NOTE: if a future dependency has no
+# binary wheel, the locally built wheel will not match the lock's sdist hash and this
+# step fails loudly — add a wheel-producing source rather than dropping the check.
+COPY requirements.lock /tmp/requirements.lock
+RUN --mount=type=bind,from=wheels,source=/wheels,target=/wheels \
+    python -m venv /opt/venv \
+    && pip install --no-index --find-links /wheels --require-hashes -r /tmp/requirements.lock \
+    && rm -f /tmp/requirements.lock \
+    && groupadd --system --gid 10001 helm \
+    && useradd --system --uid 10001 --gid helm --no-create-home --home-dir /nonexistent \
+         --shell /usr/sbin/nologin helm \
+    && install -d -o helm -g helm -m 0750 /var/lib/helm /var/lib/helm/beat
 
 WORKDIR /app
+COPY --from=source /src/ /app/
+# Byte-compile at build time: the root filesystem is read-only at runtime.
+RUN python -m compileall -q /app/app /app/alembic /opt/venv/lib >/dev/null
 
-# Install only runtime system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy project definition and install production dependencies only
-COPY pyproject.toml .
-RUN pip install --no-cache-dir -e .
-
-# Copy application code from builder (already tested)
-COPY --from=builder /app/app/ app/
-COPY --from=builder /app/alembic/ alembic/
-COPY --from=builder /app/alembic.ini .
-
-# Create non-root user
-RUN useradd --create-home appuser
-USER appuser
-
+USER helm:helm
 EXPOSE 8000
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD ["python", "/app/docker/healthcheck.py"]
+ENTRYPOINT ["/app/docker/entrypoint.sh"]
+CMD ["api"]
 
-CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "app.main:app", "--bind", "0.0.0.0:8000"]
+# --- test (optional, never deployed) ------------------------------------------
+# docker build -f Dockerfile.prod --target test -t helm-backend:test .
+# docker run --rm --network <net> -e TEST_DATABASE_URL=postgresql+asyncpg://... helm-backend:test
+FROM runtime AS test
+USER root
+COPY requirements-dev.lock /tmp/requirements-dev.lock
+RUN --mount=type=secret,id=build_ca,required=false \
+    if [ -s /run/secrets/build_ca ]; then export PIP_CERT=/run/secrets/build_ca; fi; \
+    pip install --require-hashes -r /tmp/requirements-dev.lock && rm -f /tmp/requirements-dev.lock
+COPY pyproject.toml /app/pyproject.toml
+COPY app/tests/ /app/app/tests/
+USER helm:helm
+CMD ["python", "-m", "pytest", "-q", "-p", "no:cacheprovider"]
+
+# --- production (default target) ----------------------------------------------
+FROM runtime AS production
