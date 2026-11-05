@@ -80,6 +80,7 @@ def create_app() -> FastAPI:
         allow_credentials=False,
         allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
         allow_headers=["Authorization", "Content-Type", "Idempotency-Key"],
+        expose_headers=["Content-Disposition", "Retry-After"],
     )
     prefix = settings.api_v1_prefix
     for module in (
