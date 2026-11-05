@@ -34,7 +34,9 @@ void main() {
       'u1',
       ApiError(statusCode: 403, code: 'profile_not_provisioned', detail: 'x'),
     );
-    expect(go(failed, '/vessels'), '/provisioning');
+    expect(go(failed, '/provisioning'), isNull);
+    // A reload on a deep link returns there once the profile is loaded.
+    expect(go(s, '/vessels/abc'), '/provisioning?from=%2Fvessels%2Fabc');
   });
 
   test('signed in leaves auth pages for home or the remembered page', () {

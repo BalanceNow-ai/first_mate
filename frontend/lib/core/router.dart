@@ -45,7 +45,9 @@ String? authRedirect(AuthState auth, Uri uri) {
     case AuthPhase.provisioning:
     case AuthPhase.provisioningFailed:
       if (location == '/provisioning') return null;
-      final from = uri.queryParameters['from'];
+      // Keep the page a restored session was opened on (e.g. after a reload).
+      final from = uri.queryParameters['from'] ??
+          (location == '/' || _flowRoutes.contains(location) ? null : uri.toString());
       return Uri(path: '/provisioning', queryParameters: from == null ? null : {'from': from})
           .toString();
     case AuthPhase.signedIn:
