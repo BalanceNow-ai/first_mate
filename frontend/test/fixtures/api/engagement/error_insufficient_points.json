@@ -1,0 +1,6 @@
+{
+  "detail": "Not enough Crew Points for this redemption",
+  "code": "insufficient_points",
+  "points_balance": 622,
+  "points_required": 1000000
+}

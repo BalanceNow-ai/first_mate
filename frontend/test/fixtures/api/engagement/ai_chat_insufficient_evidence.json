@@ -1,0 +1,23 @@
+{
+  "conversation_id": "cbf5e6aa-dba9-4c24-b733-18824b1f62be",
+  "message": {
+    "role": "assistant",
+    "content": "I couldn't find an admitted source that answers this for Kahawai (2021 Stabicraft 2050 Supercab), so I won't guess at part numbers, compatibility or safety requirements.\n\nCould you tell me a bit more — which system or component this is about, the symptom you're seeing, or the exact model of the part?",
+    "created_at": "2026-11-05T07:50:12.438526Z"
+  },
+  "grounding": {
+    "status": "insufficient_evidence",
+    "specialists_consulted": [
+      "anchoring"
+    ],
+    "note": "No admitted source passage supported an answer."
+  },
+  "citations": [],
+  "products": [],
+  "actions": [],
+  "vessel": {
+    "id": "e1080e35-be26-4bb5-8bf3-4f23b5f5ec5f",
+    "label": "Kahawai (2021 Stabicraft 2050 Supercab)"
+  },
+  "mode": "local_extractive"
+}

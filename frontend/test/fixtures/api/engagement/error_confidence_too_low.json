@@ -1,0 +1,4 @@
+{
+  "detail": "A rule needs confidence ≥ 0.7 to be verified",
+  "code": "confidence_too_low"
+}

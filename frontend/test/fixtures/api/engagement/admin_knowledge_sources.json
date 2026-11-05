@@ -1,0 +1,124 @@
+[
+  {
+    "id": "173a932f-8b77-4e94-bd7d-b9cfa44d3ec6",
+    "title": "Synthetic service notes — Yamaha F150 outboard",
+    "publisher": "Helm synthetic test fixture",
+    "url": null,
+    "licence": "Synthetic test fixture (no third-party content)",
+    "licence_verified": false,
+    "admission_status": "admitted",
+    "is_synthetic": true,
+    "domain": "engine",
+    "applies_to": {
+      "engine_make": "Yamaha",
+      "engine_model": "F150"
+    },
+    "checksum": "3357d37ace5da1d18c735ffc2e7c0063906dd8fed537264f29fa33785529a046",
+    "version": "1",
+    "admitted_by": null,
+    "admitted_at": "2026-11-05T07:10:53.497711Z",
+    "chunk_count": 5,
+    "embedding_models": [
+      "local_hash-v1"
+    ],
+    "created_at": "2026-11-05T07:10:53.490653Z",
+    "updated_at": "2026-11-05T07:10:53.497948Z"
+  },
+  {
+    "id": "931021d1-627e-4ce7-9364-d9ced0d9d508",
+    "title": "Synthetic service notes — Suzuki DF140 outboard",
+    "publisher": "Helm synthetic test fixture",
+    "url": null,
+    "licence": "Synthetic test fixture (no third-party content)",
+    "licence_verified": false,
+    "admission_status": "admitted",
+    "is_synthetic": true,
+    "domain": "engine",
+    "applies_to": {
+      "engine_make": "Suzuki",
+      "engine_model": "DF140"
+    },
+    "checksum": "bd1027961ff5bf04ccec3d513bb889fbcf1067c68d10a06d05ef1f63613d79e9",
+    "version": "1",
+    "admitted_by": null,
+    "admitted_at": "2026-11-05T07:10:53.484648Z",
+    "chunk_count": 3,
+    "embedding_models": [
+      "local_hash-v1"
+    ],
+    "created_at": "2026-11-05T07:10:53.477900Z",
+    "updated_at": "2026-11-05T07:10:53.485044Z"
+  },
+  {
+    "id": "a8053ce2-d22c-4039-bc8b-fef3df390b2c",
+    "title": "Synthetic pre-departure safety checklist",
+    "publisher": "Helm synthetic test fixture",
+    "url": null,
+    "licence": "Synthetic test fixture (no third-party content)",
+    "licence_verified": false,
+    "admission_status": "admitted",
+    "is_synthetic": true,
+    "domain": "safety",
+    "applies_to": {},
+    "checksum": "0da8cef1f879a60a09fab73a146ffb6e40362d28fec9540843e185137ae5c2a9",
+    "version": "1",
+    "admitted_by": null,
+    "admitted_at": "2026-11-05T07:10:53.470116Z",
+    "chunk_count": 4,
+    "embedding_models": [
+      "local_hash-v1"
+    ],
+    "created_at": "2026-11-05T07:10:53.463743Z",
+    "updated_at": "2026-11-05T07:10:53.470393Z"
+  },
+  {
+    "id": "0e460dcb-83b8-4763-8473-af9221e2abd0",
+    "title": "Synthetic Helmsynth HX90 service guide B",
+    "publisher": "Helm synthetic test fixture",
+    "url": null,
+    "licence": "Synthetic test fixture (no third-party content)",
+    "licence_verified": false,
+    "admission_status": "admitted",
+    "is_synthetic": true,
+    "domain": "engine",
+    "applies_to": {
+      "engine_make": "Helmsynth",
+      "engine_model": "HX90"
+    },
+    "checksum": "74edb5846672ea616b0525203f80d73113c3aa55a2ddf7af69de73bde424b1e0",
+    "version": "1",
+    "admitted_by": null,
+    "admitted_at": "2026-11-05T07:10:53.458437Z",
+    "chunk_count": 2,
+    "embedding_models": [
+      "local_hash-v1"
+    ],
+    "created_at": "2026-11-05T07:10:53.453218Z",
+    "updated_at": "2026-11-05T07:10:53.458707Z"
+  },
+  {
+    "id": "a2ad2df1-f6af-44bc-bb24-5e270661d64a",
+    "title": "Synthetic Helmsynth HX90 service guide A",
+    "publisher": "Helm synthetic test fixture",
+    "url": null,
+    "licence": "Synthetic test fixture (no third-party content)",
+    "licence_verified": false,
+    "admission_status": "admitted",
+    "is_synthetic": true,
+    "domain": "engine",
+    "applies_to": {
+      "engine_make": "Helmsynth",
+      "engine_model": "HX90"
+    },
+    "checksum": "a1134c84c36e655dc20e44fdf7546873ef92c929ddb16631065988c1f6f2ac2f",
+    "version": "1",
+    "admitted_by": null,
+    "admitted_at": "2026-11-05T07:10:53.448288Z",
+    "chunk_count": 2,
+    "embedding_models": [
+      "local_hash-v1"
+    ],
+    "created_at": "2026-11-05T07:10:53.441616Z",
+    "updated_at": "2026-11-05T07:10:53.448601Z"
+  }
+]

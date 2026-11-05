@@ -1,0 +1,14 @@
+{
+  "detail": "Request validation failed",
+  "code": "validation_error",
+  "errors": [
+    {
+      "loc": [
+        "body",
+        "name"
+      ],
+      "msg": "String should have at least 2 characters",
+      "type": "string_too_short"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "7b344b98-a9e5-4e07-9f4d-d4ea59304e2e",
+  "name": "Fixture Crew c08a6176",
+  "my_role": "captain",
+  "members": [
+    {
+      "user_id": "6b2e90e3-a7e7-44e1-b5fd-ba0587f03aac",
+      "display_name": "Fixture Skipper",
+      "role": "captain",
+      "joined_at": "2026-11-05T07:50:13.277581Z",
+      "points_balance": 22,
+      "is_you": true
+    }
+  ],
+  "member_count": 1,
+  "pending_invite_count": 0,
+  "max_members": 10,
+  "wallet_points": 22,
+  "wallet_note": "The Crew Wallet shows members' combined balances; each member redeems only their own points.",
+  "created_at": "2026-11-05T07:50:13.275800Z"
+}

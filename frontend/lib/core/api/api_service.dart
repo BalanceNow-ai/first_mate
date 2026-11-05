@@ -140,26 +140,8 @@ class ApiService {
 
   // --- Pass-2 screens: untyped until their contracts are merged -------------
   // TODO(client pass 2): replace these Map-based calls with typed models.
-
-  Future<Map<String, dynamic>> sendChatMessage({
-    required String message,
-    String? vesselId,
-    String? conversationId,
-  }) =>
-      _call(
-        () => _dio.post('/ai/chat', data: {
-          'message': message,
-          'vessel_id': ?vesselId,
-          'conversation_id': ?conversationId,
-        }),
-        _map,
-      );
-
-  Future<List<Map<String, dynamic>>> getConversations() =>
-      _call(() => _dio.get('/ai/conversations'), _list);
-
-  Future<Map<String, dynamic>> getConversation(String id) =>
-      _call(() => _dio.get('/ai/conversations/$id'), _map);
+  // First Mate (`/ai/*`) and Crew Rewards (`/loyalty/*`) are typed in
+  // features/ai_chat/data/first_mate_api.dart and features/loyalty/data/loyalty_api.dart.
 
   Future<List<Map<String, dynamic>>> getVesselChecklists(String vesselId) =>
       _call(() => _dio.get('/checklists/vessel/$vesselId'), _list);
@@ -192,20 +174,6 @@ class ApiService {
 
   Future<Map<String, dynamic>> getShippingRates(Map<String, dynamic> data) =>
       _call(() => _dio.post('/shipping/rates', data: data), _map);
-
-  Future<List<Map<String, dynamic>>> getSignatureExperiences() =>
-      _call(() => _dio.get('/loyalty/experiences'), _list);
-
-  Future<Map<String, dynamic>> getCrewPoints() => _call(() => _dio.get('/loyalty/points'), _map);
-
-  Future<Map<String, dynamic>> getCrewMultiplier() =>
-      _call(() => _dio.get('/loyalty/multiplier'), _map);
-
-  Future<List<Map<String, dynamic>>> getCrewTeams() =>
-      _call(() => _dio.get('/loyalty/teams'), _list);
-
-  Future<Map<String, dynamic>> redeemPoints(Map<String, dynamic> data) =>
-      _call(() => _dio.post('/loyalty/points/redeem', data: data), _map);
 
   Future<Map<String, dynamic>> getHelmDashQuote(double lat, double lng) => _call(
         () => _dio.post('/helm-dash/quote', data: {'delivery_lat': lat, 'delivery_lng': lng}),

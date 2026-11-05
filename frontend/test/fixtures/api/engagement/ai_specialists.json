@@ -1,0 +1,62 @@
+[
+  {
+    "key": "engine",
+    "name": "Engine & Propulsion Pro",
+    "description": "Outboard and inboard engines, servicing, fuel systems, cooling and propellers."
+  },
+  {
+    "key": "electrical",
+    "name": "Electrical & Solar Sage",
+    "description": "12V/24V systems, batteries, charging, solar, wiring and lighting."
+  },
+  {
+    "key": "plumbing",
+    "name": "Pumps & Plumbing Pro",
+    "description": "Bilge pumps, freshwater and sanitation systems, hoses and fittings."
+  },
+  {
+    "key": "galley",
+    "name": "Galley Guru",
+    "description": "Stoves, fridges, gas systems and watermakers."
+  },
+  {
+    "key": "game_fishing",
+    "name": "Game Fishing Guide",
+    "description": "Big-game rods, reels, lures, rigging and technique."
+  },
+  {
+    "key": "anchoring",
+    "name": "Anchoring & Mooring Master",
+    "description": "Anchors, chain, rode, windlasses and mooring."
+  },
+  {
+    "key": "safety",
+    "name": "Safety & Compliance Officer",
+    "description": "Lifejackets, EPIRBs, flares, fire extinguishers and voyage safety checks."
+  },
+  {
+    "key": "rigging",
+    "name": "Rigging & Deck Specialist",
+    "description": "Sails, lines, blocks, winches and deck hardware."
+  },
+  {
+    "key": "electronics",
+    "name": "Electronics & Navigation Expert",
+    "description": "Chartplotters, VHF, AIS, radar, sonar and autopilots."
+  },
+  {
+    "key": "trailer",
+    "name": "Trailer & Towing Advisor",
+    "description": "Boat trailers, bearings, brakes, winches and towing."
+  },
+  {
+    "key": "fishing",
+    "name": "Soft Bait & Inshore Specialist",
+    "description": "Inshore fishing tackle, soft baits, knots and species."
+  },
+  {
+    "key": "boat_oem",
+    "name": "Boat OEM Specialist",
+    "description": "Factory specifications and fitted equipment for boat makes and models."
+  }
+]

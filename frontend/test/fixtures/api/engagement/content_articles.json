@@ -1,0 +1,29 @@
+{
+  "available": true,
+  "provider": "local_fixture",
+  "items": [
+    {
+      "id": "synthetic-outboard-winter-prep",
+      "slug": "synthetic-outboard-winter-prep",
+      "title": "[SYNTHETIC] Preparing an outboard for winter lay-up",
+      "summary": "Synthetic placeholder article for local development. Not maintenance advice.",
+      "category": "Maintenance",
+      "author": null,
+      "published_at": "2026-01-15T09:00:00+13:00",
+      "image_url": null,
+      "is_synthetic": true
+    },
+    {
+      "id": "synthetic-safety-gear-checklist",
+      "slug": "synthetic-safety-gear-checklist",
+      "title": "[SYNTHETIC] Safety gear before you leave the ramp",
+      "summary": "Synthetic placeholder article for local development. Not safety guidance.",
+      "category": "Safety",
+      "author": null,
+      "published_at": "2026-02-01T09:00:00+13:00",
+      "image_url": null,
+      "is_synthetic": true
+    }
+  ],
+  "reason": null
+}
