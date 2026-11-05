@@ -15,12 +15,14 @@ recorded as ``suppressed`` (auditable, never sent).
 
 from __future__ import annotations
 
+import hashlib
 import logging
 import uuid
 from datetime import date, datetime, timedelta
 from typing import Any
 
-from sqlalchemy import delete, func, or_, select
+from sqlalchemy import delete, func, or_, select, update
+from sqlalchemy import inspect as sa_inspect
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -302,12 +304,58 @@ async def _claim(db: AsyncSession, now: datetime, limit: int) -> list[Notificati
         .all()
     )
     lease = now + timedelta(seconds=s.notification_claim_lease_seconds)
+    token = uuid.uuid4()
     for row in rows:
         row.status = "sending"  # a crashed worker's rows are reclaimed when the lease ends
         row.attempts += 1
         row.next_attempt_at = lease
+        row.lease_token = token
     await db.commit()
     return list(rows)
+
+
+async def _renew_lease(db: AsyncSession, row: NotificationOutbox) -> bool:
+    """Extend this claim's lease just before sending; False when another worker owns the row.
+
+    A batch is sent sequentially, so later rows would otherwise outlive the lease taken at
+    claim time and be reclaimed (and sent twice) by another worker."""
+    seconds = get_settings().notification_claim_lease_seconds
+    renewed = (
+        await db.execute(
+            update(NotificationOutbox)
+            .where(
+                NotificationOutbox.id == row.id,
+                NotificationOutbox.lease_token == row.lease_token,
+                NotificationOutbox.status == "sending",
+            )
+            .values(next_attempt_at=utcnow() + timedelta(seconds=seconds))
+            .returning(NotificationOutbox.id)
+            .execution_options(synchronize_session=False)
+        )
+    ).first()
+    await db.commit()
+    return renewed is not None
+
+
+async def _still_owned(db: AsyncSession, row: NotificationOutbox, token: uuid.UUID | None) -> bool:
+    """Fence the completion write: lock the row and check our claim still owns it."""
+    with db.no_autoflush:
+        current = (
+            await db.execute(
+                select(NotificationOutbox.lease_token)
+                .where(NotificationOutbox.id == row.id)
+                .with_for_update()
+                .execution_options(populate_existing=False)
+            )
+        ).scalar_one_or_none()
+    return current == token
+
+
+def _token_key(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
+PUSH_FINAL = {"sent", "invalid", "failed_permanent"}
 
 
 async def _deliver(db: AsyncSession, row: NotificationOutbox) -> tuple[str, str | None]:
@@ -326,23 +374,51 @@ async def _deliver(db: AsyncSession, row: NotificationOutbox) -> tuple[str, str 
         if row.user_id
         else []
     )
+    # Per-device outcomes persist across attempts (FM-04): a retry targets only devices
+    # that have not received the message nor failed permanently.
+    targets: dict[str, dict] = dict(row.push_targets or {})
+    pending = [t for t in tokens if targets.get(_token_key(t), {}).get("status") not in PUSH_FINAL]
+    delivered = [v for v in targets.values() if v.get("status") == "sent"]
+    if not pending and delivered:
+        return row.provider or get_settings().push_provider, _message_ids(targets)
     data = {"template": row.template, "outbox_id": str(row.id)}
     for k in ("order_id", "delivery_id", "redemption_id"):
         if (row.payload or {}).get(k):
             data[k] = str(row.payload[k])
     push = await providers.send_push(
-        tokens,
+        pending,
         title=rendered.push_title,
         body=rendered.push_body,
         data=data,
         outbox_id=str(row.id),
         template=row.template,
     )
+    for token, message_id in push.sent.items():
+        targets[_token_key(token)] = {"status": "sent", "message_id": message_id}
+    for token in push.invalid_tokens:
+        targets[_token_key(token)] = {"status": "invalid"}
+    transient: list[providers.ProviderError] = []
+    for token, error in push.failed.items():
+        targets[_token_key(token)] = {"status": "failed_permanent" if error.permanent else "retry", "error": error.code}
+        if not error.permanent:
+            transient.append(error)
+    row.push_targets = targets  # a new dict, so the JSONB change is persisted
+    row.provider = push.provider
     if push.invalid_tokens:
         await db.execute(delete(PushDevice).where(PushDevice.token.in_(push.invalid_tokens)))
-    if push.provider == "fcm" and not push.message_ids:
-        raise providers.ProviderError("fcm_all_tokens_unregistered", permanent=True)
-    return push.provider, ",".join(push.message_ids)[:500] or None
+    if transient:
+        raise transient[0]  # retried later, for the pending devices only
+    if push.provider == "fcm" and not any(v.get("status") == "sent" for v in targets.values()):
+        errors = [v["error"] for v in targets.values() if v.get("error")]
+        raise providers.ProviderError(errors[0] if errors else "fcm_all_tokens_unregistered", permanent=True)
+    return push.provider, _message_ids(targets)
+
+
+def _message_ids(targets: dict[str, dict]) -> str | None:
+    return (
+        ",".join(v["message_id"] for v in targets.values() if v.get("status") == "sent" and v.get("message_id"))[:500]
+        or None
+    )
 
 
 async def dispatch_pending(db: AsyncSession, *, now: datetime | None = None, limit: int | None = None) -> dict:
@@ -350,8 +426,14 @@ async def dispatch_pending(db: AsyncSession, *, now: datetime | None = None, lim
     settings = get_settings()
     now = now or utcnow()
     rows = await _claim(db, now, limit or settings.notification_batch_size)
-    counts = {"claimed": len(rows), "sent": 0, "failed": 0, "dead": 0, "suppressed": 0}
+    counts = {"claimed": len(rows), "sent": 0, "failed": 0, "dead": 0, "suppressed": 0, "lease_lost": 0}
     for row in rows:
+        if sa_inspect(row).expired:  # after a rollback for a lost lease
+            await db.refresh(row)
+        token = row.lease_token
+        if not await _renew_lease(db, row):
+            counts["lease_lost"] += 1
+            continue
         try:
             provider, message_id = await _deliver(db, row)
         except providers.Suppressed as exc:
@@ -377,6 +459,13 @@ async def dispatch_pending(db: AsyncSession, *, now: datetime | None = None, lim
             row.sent_at, row.last_error, row.next_attempt_at = utcnow(), None, None
         if row.status == "suppressed" and row.provider is None:
             row.provider = settings.email_provider if row.channel == "email" else settings.push_provider
+        if not await _still_owned(db, row, token):
+            # Our lease ended and another worker reclaimed the row: its claim decides.
+            await db.rollback()
+            counts["lease_lost"] += 1
+            continue
+        if row.status != "sending":
+            row.lease_token = None
         counts[row.status] = counts.get(row.status, 0) + 1
         await db.commit()
     return counts

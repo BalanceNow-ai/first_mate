@@ -18,7 +18,7 @@ import json
 import logging
 import smtplib
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from email.message import EmailMessage
 
 import httpx
@@ -145,9 +145,16 @@ async def _smtp_sink(message: Email, outbox_id: str) -> SendResult:
 # ------------------------------------------------------------------------------- push
 @dataclass
 class PushResult:
+    """Per-device outcome of one push attempt (FM-04).
+
+    ``sent`` maps token → provider message id; ``failed`` maps token → the error
+    (``permanent`` or transient); ``invalid_tokens`` are unregistered devices."""
+
     provider: str
     message_ids: list[str]
     invalid_tokens: list[str]
+    sent: dict[str, str] = field(default_factory=dict)
+    failed: dict[str, ProviderError] = field(default_factory=dict)
 
 
 async def send_push(
@@ -166,7 +173,7 @@ async def send_push(
             template,
             len(tokens),
         )
-        return PushResult("log_sink", [], [])
+        return PushResult("log_sink", [], [], sent={t: "" for t in tokens})
     if provider == "fcm":
         if not settings.firebase_project_id or not settings.firebase_service_account_json:
             raise Suppressed("fcm_not_configured")
@@ -221,9 +228,9 @@ async def _fcm_access_token(client: httpx.AsyncClient) -> str:
 async def _fcm(tokens: list[str], title: str, body: str, data: dict[str, str]) -> PushResult:
     settings = get_settings()
     url = f"{settings.fcm_api_url.rstrip('/')}/v1/projects/{settings.firebase_project_id}/messages:send"
-    ids: list[str] = []
+    sent: dict[str, str] = {}
     invalid: list[str] = []
-    errors: list[ProviderError] = []
+    failed: dict[str, ProviderError] = {}
     async with _client() as client:
         access = await _fcm_access_token(client)
         for token in tokens:
@@ -234,16 +241,17 @@ async def _fcm(tokens: list[str], title: str, body: str, data: dict[str, str]) -
                     json={"message": {"token": token, "notification": {"title": title, "body": body}, "data": data}},
                 )
             except httpx.HTTPError as exc:
-                errors.append(ProviderError(f"fcm_{type(exc).__name__}"))
+                failed[token] = ProviderError(f"fcm_{type(exc).__name__}")
                 continue
             if resp.status_code < 300:
-                ids.append(str(resp.json().get("name", "")))
+                try:
+                    sent[token] = str(resp.json().get("name", ""))
+                except ValueError:
+                    sent[token] = ""
             elif resp.status_code in (400, 404) and "UNREGISTERED" in resp.text:
                 invalid.append(token)
             else:
-                errors.append(_classify("fcm", resp.status_code))
-    if errors and not ids:
-        transient = [e for e in errors if not e.permanent]
-        raise transient[0] if transient else errors[0]
-    # The caller removes unregistered tokens; all-invalid is reported via the result.
-    return PushResult("fcm", ids, invalid)
+                failed[token] = _classify("fcm", resp.status_code)
+    # Every device's outcome is returned; the outbox persists them and retries only the
+    # transiently failed devices (never re-sending to a device that already received it).
+    return PushResult("fcm", list(sent.values()), invalid, sent=sent, failed=failed)

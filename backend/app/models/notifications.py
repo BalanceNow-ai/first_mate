@@ -36,6 +36,10 @@ class NotificationOutbox(Base):
     provider: Mapped[str | None] = mapped_column(String, nullable=True)
     provider_message_id: Mapped[str | None] = mapped_column(String, nullable=True)
     sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Push: per-device outcome keyed by sha256(token) — sent | invalid | failed_permanent | retry.
+    push_targets: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict, server_default="{}")
+    # Fencing token of the claim that currently owns a "sending" row.
+    lease_token: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
     created_at: Mapped[datetime] = created_at_col()
 
 
