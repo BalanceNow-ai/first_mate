@@ -92,11 +92,15 @@ class LoyaltyApi {
   Future<ExperienceCatalogue> experiences() =>
       _call(() => _dio.get('/loyalty/experiences'), (d) => ExperienceCatalogue.fromJson(_map(d)));
 
-  Future<Redemption> redeemExperience(String experienceId, {String? note}) => _call(
-        () => _dio.post('/loyalty/redeem/experience', data: {
-          'experience_id': experienceId,
-          if (note != null && note.trim().isNotEmpty) 'note': note.trim(),
-        }),
+  Future<Redemption> redeemExperience(String experienceId,
+          {String? note, required String idempotencyKey}) =>
+      _call(
+        () => _dio.post('/loyalty/redeem/experience',
+            data: {
+              'experience_id': experienceId,
+              if (note != null && note.trim().isNotEmpty) 'note': note.trim(),
+            },
+            options: Options(headers: {'Idempotency-Key': idempotencyKey})),
         (d) => Redemption.fromJson(_map(d)),
       );
 

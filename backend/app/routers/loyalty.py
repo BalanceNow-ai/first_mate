@@ -195,8 +195,15 @@ async def list_experiences(user: CurrentUser) -> dict:
 @router.post(
     "/redeem/experience", response_model=RedemptionOut, status_code=status.HTTP_201_CREATED, dependencies=Mutation
 )
-async def redeem_experience(body: ExperienceRedeem, user: CurrentUser, db: Db) -> ExperienceRedemption:
-    return await loyalty.redeem_experience(db, user.id, body.experience_id, body.note)
+async def redeem_experience(
+    body: ExperienceRedeem,
+    user: CurrentUser,
+    db: Db,
+    idempotency_key: Annotated[str | None, Header(max_length=200)] = None,
+) -> ExperienceRedemption:
+    """Redeem points for a Signature Experience (validated against a fresh catalogue).
+    Send an ``Idempotency-Key`` so a repeated or retried request never debits twice."""
+    return await loyalty.redeem_experience(db, user.id, body.experience_id, body.note, idempotency_key)
 
 
 @router.get("/redemptions", response_model=list[RedemptionOut])

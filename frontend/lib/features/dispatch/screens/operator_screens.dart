@@ -31,6 +31,9 @@ final devicePositionReaderProvider = Provider<Future<DeviceReading> Function()>(
 final geolocationAvailableProvider = Provider<bool>((ref) => geolocationSupported);
 
 /// `/staff/operator` — availability and my jobs.
+/// Readings less precise than this are not shared as a vessel position.
+const double maxShareableAccuracyM = 1000;
+
 class OperatorHomeScreen extends ConsumerStatefulWidget {
   const OperatorHomeScreen({super.key});
 
@@ -190,6 +193,18 @@ class _OperatorJobScreenState extends ConsumerState<OperatorJobScreen> {
     });
     try {
       final reading = await ref.read(devicePositionReaderProvider)();
+      final accuracy = reading.accuracyM;
+      if (accuracy != null && accuracy > maxShareableAccuracyM) {
+        // A coarse (e.g. network/IP-based) fix is not a usable vessel position.
+        if (!mounted) return;
+        setState(() {
+          _shareError = true;
+          _shareStatus = 'Your device only reported a rough position '
+              '(±${(accuracy / 1000).toStringAsFixed(1)} km), so it was not shared. '
+              'Turn on precise location / GPS and try again.';
+        });
+        return;
+      }
       final receipt = await ref.read(staffApiProvider).reportLocation(
             widget.deliveryId,
             lat: reading.lat,

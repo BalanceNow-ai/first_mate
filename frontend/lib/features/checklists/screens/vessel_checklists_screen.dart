@@ -558,13 +558,21 @@ class _LinkedProduct extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        InkWell(
+        Semantics(
+          link: true,
+          label: 'View ${product.name}',
+          excludeSemantics: true,
+          child: InkWell(
           onTap: () => context.go('/products/${product.id}'),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Text(product.name,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                    color: HelmTheme.primary, decoration: TextDecoration.underline)),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(product.name,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                      color: HelmTheme.primary, decoration: TextDecoration.underline)),
+            ),
+          ),
           ),
         ),
         Wrap(
@@ -664,9 +672,11 @@ class _LinkProductDialogState extends ConsumerState<_LinkProductDialog> {
     final vesselName = vesselShortName(_vesselLabel);
     return AlertDialog(
       title: Text('Link a product to "${widget.item.itemName}"'),
+      scrollable: true,
       content: SizedBox(
         width: 560,
-        height: 480,
+        // Fits small phones with the keyboard open and large text.
+        height: (MediaQuery.sizeOf(context).height * 0.6).clamp(280.0, 480.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

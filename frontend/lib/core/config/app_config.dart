@@ -114,6 +114,8 @@ class AppConfig {
     } else if (isRelease && !_localDevelopment && _isLoopback(api.host)) {
       out.add('API_BASE_URL points at ${api.host}; release builds need the '
           'public API address.');
+    } else if (isRelease && !_localDevelopment && api.scheme != 'https') {
+      out.add('API_BASE_URL must use https:// in release builds.');
     }
     final supa = Uri.tryParse(supabaseUrl);
     if (supabaseUrl.isEmpty) {
@@ -125,6 +127,8 @@ class AppConfig {
     } else if (isRelease && !_localDevelopment && _isLoopback(supa.host)) {
       out.add('SUPABASE_URL points at ${supa.host}; release builds need the '
           'hosted Supabase project.');
+    } else if (isRelease && !_localDevelopment && supa.scheme != 'https') {
+      out.add('SUPABASE_URL must use https:// in release builds.');
     }
     if (supabaseAnonKey.isEmpty) {
       out.add('SUPABASE_ANON_KEY (the public anon key) is not set.');

@@ -173,10 +173,21 @@ class _CartLineTile extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      InkWell(
-                        onTap: () => context.go('/products/${line.productId}'),
-                        child: Text(p.name,
-                            style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                      Semantics(
+                        link: true,
+                        label: 'View ${p.name}',
+                        excludeSemantics: true,
+                        child: InkWell(
+                          onTap: () => context.go('/products/${line.productId}'),
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(minHeight: 48),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(p.name,
+                                  style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                        ),
                       ),
                       if (p.brand != null) Text(p.brand!, style: theme.textTheme.bodySmall),
                       const SizedBox(height: 4),

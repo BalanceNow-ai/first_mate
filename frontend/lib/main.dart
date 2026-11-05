@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:helm_marine/core/auth/secure_session_storage.dart';
 import 'package:helm_marine/app.dart';
 import 'package:helm_marine/core/auth/auth_gateway.dart';
 import 'package:helm_marine/core/config/app_config.dart';
@@ -37,7 +38,14 @@ Future<void> main() async {
 
   // Restores the persisted session (if any) before the first frame.
   try {
-    await Supabase.initialize(url: config.supabaseUrl, publishableKey: config.supabaseAnonKey);
+    await Supabase.initialize(
+      url: config.supabaseUrl,
+      publishableKey: config.supabaseAnonKey,
+      // Native builds keep the session in the platform keystore, not plain prefs.
+      authOptions: SecureSessionStorage.applies
+          ? FlutterAuthClientOptions(localStorage: SecureSessionStorage())
+          : const FlutterAuthClientOptions(),
+    );
   } catch (e) {
     runApp(StartupErrorApp(
       title: 'Sign-in could not start',

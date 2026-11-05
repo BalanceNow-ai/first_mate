@@ -247,3 +247,20 @@ async def test_insufficient_points_for_experience(client, customer):
     assert r.status_code == 409 and r.json()["code"] == "insufficient_points"
     async with async_session() as s:
         assert list((await s.execute(select(ExperienceRedemption))).scalars()) == []
+
+
+async def test_experience_redemption_is_idempotent_per_request_key(client, customer):
+    await grant_points(customer.id, 100_000)
+    before = await balance(customer.id)
+    headers = {**customer.headers, "Idempotency-Key": "exp-req-123456"}
+    body = {"experience_id": "synthetic-test-day-trip"}
+    first = await client.post(f"{P}/redeem/experience", json=body, headers=headers)
+    second = await client.post(f"{P}/redeem/experience", json=body, headers=headers)
+    assert first.status_code == 201 and second.status_code == 201
+    assert first.json()["id"] == second.json()["id"]
+    cost = first.json()["points_cost"]
+    assert await balance(customer.id) == before - cost
+    async with async_session() as s:
+        assert len(list((await s.execute(select(ExperienceRedemption))).scalars())) == 1
+    pts = (await client.get(f"{P}/points", headers=customer.headers)).json()
+    assert pts["points_per_dollar"] == 100

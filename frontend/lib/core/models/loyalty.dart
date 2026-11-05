@@ -27,6 +27,7 @@ class PointsSummary {
     this.crewId,
     this.crewWalletPoints,
     this.pointsOwed = 0,
+    this.pointsPerDollar = 100,
   });
 
   final int pointsBalance;
@@ -48,6 +49,9 @@ class PointsSummary {
   /// omit it) and 0 when nothing is owed.
   final int pointsOwed;
 
+  /// Server redemption rate (Crew Points per NZ\$1 of discount).
+  final int pointsPerDollar;
+
   String get valueText => formatCents(pointsValueCents, currency: currency);
 
   factory PointsSummary.fromJson(Map<String, dynamic> json) => PointsSummary(
@@ -63,6 +67,7 @@ class PointsSummary {
         crewId: opt<String>(json, 'crew_id'),
         crewWalletPoints: opt<int>(json, 'crew_wallet_points'),
         pointsOwed: opt<int>(json, 'points_owed') ?? 0,
+        pointsPerDollar: opt<int>(json, 'points_per_dollar') ?? 100,
       );
 }
 

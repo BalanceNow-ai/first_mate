@@ -58,6 +58,16 @@ void main() {
       }
     });
 
+    test('release builds require https unless APP_ENV=development', () {
+      final c = AppConfig.resolve(
+        isRelease: true,
+        apiBaseUrl: 'http://api.example.com/api/v1',
+        supabaseUrl: 'http://x.supabase.co',
+        supabaseAnonKey: 'anon',
+      );
+      expect(c.problems().where((p) => p.contains('https')), hasLength(2));
+    });
+
     test('an explicit development release build (local stack) may use loopback', () {
       final dev = AppConfig.resolve(
         isRelease: true,

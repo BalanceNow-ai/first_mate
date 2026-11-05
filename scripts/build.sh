@@ -34,6 +34,9 @@ if [ "$APP_ENV" != "development" ]; then
     case "$v" in *localhost*|*127.0.0.1*|*0.0.0.0*)
       echo "ERROR: local URL '$v' with APP_ENV=$APP_ENV (only allowed for development)" >&2; exit 1 ;;
     esac
+    case "$v" in https://*|"") ;; *)
+      echo "ERROR: '$v' must use https:// for APP_ENV=$APP_ENV" >&2; exit 1 ;;
+    esac
   done
   [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_ANON_KEY" ] \
     || { echo "ERROR: SUPABASE_URL and SUPABASE_ANON_KEY are required for APP_ENV=$APP_ENV" >&2; exit 1; }

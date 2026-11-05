@@ -603,6 +603,7 @@ async def points_summary(db: AsyncSession, user_id: uuid.UUID) -> dict:
         "points_balance": account.points_balance,
         "lifetime_earned": account.lifetime_earned,
         "points_owed": account.points_owed,
+        "points_per_dollar": get_settings().points_per_dollar_redemption,
         "points_value_cents": account.points_balance * 100 // get_settings().points_per_dollar_redemption,
         "currency": "NZD",
         "tier": tier,
@@ -702,10 +703,23 @@ async def void_entitlement(db: AsyncSession, user_id: uuid.UUID, entitlement_id:
 
 # ---------------------------------------------------------------------- experiences
 async def redeem_experience(
-    db: AsyncSession, user_id: uuid.UUID, experience_id: str, note: str | None
+    db: AsyncSession, user_id: uuid.UUID, experience_id: str, note: str | None, request_key: str | None = None
 ) -> ExperienceRedemption:
-    """Validate against a fresh catalogue fetch, debit points, create the record."""
+    """Validate against a fresh catalogue fetch, debit points, create the record.
+
+    With ``request_key`` the operation is idempotent per user: a repeat returns the
+    redemption created by the first request without debiting again."""
     from app.services import cms
+
+    ledger_key = None
+    if request_key:
+        ledger_key = f"redeem_experience:{user_id}:{request_key}"
+        await lock_account(db, user_id)
+        prior = await get_by_key(db, ledger_key)
+        if prior is not None and prior.redemption_id is not None:
+            existing = await db.get(ExperienceRedemption, prior.redemption_id)
+            if existing is not None:
+                return existing
 
     catalogue = await cms.fetch_experiences(fresh=True)
     if not catalogue.available:
@@ -743,7 +757,7 @@ async def redeem_experience(
         user_id=user_id,
         kind="redeem_experience",
         points=-cost,
-        idempotency_key=f"redeem_experience:{redemption.id}",
+        idempotency_key=ledger_key or f"redeem_experience:{redemption.id}",
         description=f"Experience: {item['title']}",
         redemption_id=redemption.id,
     )

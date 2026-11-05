@@ -24,6 +24,7 @@ ARG NGINX_IMAGE=nginxinc/nginx-unprivileged:1.29-alpine
 FROM alpine:3.22 AS preflight
 ARG API_BASE_URL=""
 ARG SUPABASE_URL=""
+ARG SUPABASE_ANON_KEY=""
 ARG APP_ENV=production
 RUN set -eu; \
     case "$APP_ENV" in development|test|staging|production) ;; \
@@ -33,8 +34,11 @@ RUN set -eu; \
       for v in "$API_BASE_URL" "$SUPABASE_URL"; do \
         case "$v" in *localhost*|*127.0.0.1*|*0.0.0.0*) \
           echo "ERROR: API_BASE_URL/SUPABASE_URL point at a local address but APP_ENV=$APP_ENV" >&2; exit 1;; esac; \
+        case "$v" in https://*|"") ;; \
+          *) echo "ERROR: API_BASE_URL/SUPABASE_URL must use https:// when APP_ENV=$APP_ENV" >&2; exit 1;; esac; \
       done; \
       if [ -z "$SUPABASE_URL" ]; then echo "ERROR: SUPABASE_URL is required when APP_ENV=$APP_ENV" >&2; exit 1; fi; \
+      if [ -z "$SUPABASE_ANON_KEY" ]; then echo "ERROR: SUPABASE_ANON_KEY (public key) is required when APP_ENV=$APP_ENV" >&2; exit 1; fi; \
     fi; \
     echo "client configuration accepted (APP_ENV=$APP_ENV)" > /preflight.ok
 

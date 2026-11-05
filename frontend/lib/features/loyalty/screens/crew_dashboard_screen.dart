@@ -825,9 +825,10 @@ class _DiscountForm extends ConsumerStatefulWidget {
 }
 
 class _DiscountFormState extends ConsumerState<_DiscountForm> {
-  static const step = 100;
+  /// Redemption rate from the server (points per \$1); redemptions are whole dollars.
+  int get step => widget.points.pointsPerDollar <= 0 ? 100 : widget.points.pointsPerDollar;
   final _form = GlobalKey<FormState>();
-  final _amount = TextEditingController(text: '$step');
+  late final _amount = TextEditingController(text: '$step');
   bool _busy = false;
   Entitlement? _result;
   String? _key;
@@ -881,7 +882,7 @@ class _DiscountFormState extends ConsumerState<_DiscountForm> {
             children: [
               Text('Redeem for a discount', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 4),
-              Text('100 Crew Points = \$1.00 off. Redeem in multiples of 100 from your own balance '
+              Text('$step Crew Points = \$1.00 off. Redeem in multiples of $step from your own balance '
                   '(${formatPoints(balance)} available).'),
               const SizedBox(height: 12),
               TextFormField(
@@ -890,7 +891,9 @@ class _DiscountFormState extends ConsumerState<_DiscountForm> {
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: InputDecoration(
                   labelText: 'Points to redeem',
-                  helperText: value != null && value > 0 ? 'Worth ${formatCents(value)} off' : null,
+                  helperText: value != null && value > 0 && value % step == 0
+                      ? 'Worth ${formatCents(value * 100 ~/ step)} off'
+                      : null,
                 ),
                 validator: (v) {
                   final n = int.tryParse(v?.trim() ?? '');
@@ -1087,14 +1090,28 @@ class RedemptionTile extends StatelessWidget {
   }
 }
 
-class _ExperienceCard extends ConsumerWidget {
+class _ExperienceCard extends ConsumerStatefulWidget {
   const _ExperienceCard({required this.experience, required this.balance});
 
   final Experience experience;
   final int? balance;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_ExperienceCard> createState() => _ExperienceCardState();
+}
+
+class _ExperienceCardState extends ConsumerState<_ExperienceCard> {
+  bool _busy = false;
+
+  /// One key per intended redemption, kept across retries after a failure so a
+  /// repeated request can never debit points twice.
+  String? _key;
+
+  Experience get experience => widget.experience;
+  int? get balance => widget.balance;
+
+  @override
+  Widget build(BuildContext context) {
     final e = experience;
     final short = balance != null && balance! < e.pointsCost;
     return Card(
@@ -1128,8 +1145,8 @@ class _ExperienceCard extends ConsumerWidget {
               Row(
                 children: [
                   FilledButton(
-                    onPressed: short ? null : () => _redeem(context, ref),
-                    child: const Text('Redeem experience'),
+                    onPressed: short || _busy ? null : () => _redeem(context),
+                    child: Text(_busy ? 'Redeeming…' : 'Redeem experience'),
                   ),
                   if (short) ...[
                     const SizedBox(width: 12),
@@ -1143,7 +1160,7 @@ class _ExperienceCard extends ConsumerWidget {
     );
   }
 
-  Future<void> _redeem(BuildContext context, WidgetRef ref) async {
+  Future<void> _redeem(BuildContext context) async {
     final note = TextEditingController();
     final ok = await showDialog<bool>(
       context: context,
@@ -1171,9 +1188,14 @@ class _ExperienceCard extends ConsumerWidget {
       ),
     );
     final text = note.text;
-    if (ok != true || !context.mounted) return;
+    if (ok != true || !context.mounted || _busy) return;
+    _key ??= 'exp-${DateTime.now().microsecondsSinceEpoch}-${Random().nextInt(0x3fffffff)}';
+    setState(() => _busy = true);
     try {
-      final r = await ref.read(loyaltyApiProvider).redeemExperience(experience.id, note: text);
+      final r = await ref
+          .read(loyaltyApiProvider)
+          .redeemExperience(experience.id, note: text, idempotencyKey: _key!);
+      _key = null;
       refreshRewards(ref);
       if (!context.mounted) return;
       await showDialog<void>(
@@ -1195,6 +1217,8 @@ class _ExperienceCard extends ConsumerWidget {
       );
     } catch (e) {
       if (context.mounted) showErrorSnackBar(context, e, prefix: 'Could not redeem');
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 }
