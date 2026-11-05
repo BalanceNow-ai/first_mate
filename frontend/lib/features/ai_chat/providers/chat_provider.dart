@@ -1,6 +1,11 @@
+// TODO(client pass 2): move to the First Mate contract (citations, product
+// references, explicit cart actions) once the AI workstream is merged.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
+import 'package:helm_marine/core/api/api_error.dart';
 import 'package:helm_marine/core/api/api_service.dart';
-import 'package:helm_marine/main.dart';
+import 'package:helm_marine/core/monitoring/monitoring.dart';
+import 'package:helm_marine/core/session/session.dart';
 
 class ChatMessage {
   final String role; // 'user' or 'assistant'
@@ -44,9 +49,11 @@ class ChatState {
 
 class ChatNotifier extends StateNotifier<ChatState> {
   final ApiService _apiService;
+  final Monitoring _monitoring;
   final String? vesselId;
 
-  ChatNotifier(this._apiService, {this.vesselId}) : super(const ChatState());
+  ChatNotifier(this._apiService, this._monitoring, {this.vesselId})
+      : super(const ChatState());
 
   Future<void> sendMessage(String text) async {
     final isNewConversation = state.conversationId == null && state.messages.isEmpty;
@@ -58,7 +65,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     );
 
     if (isNewConversation) {
-      posthog.capture(eventName: 'ai_conversation_started', properties: {
+      _monitoring.capture('ai_conversation_started', properties: {
         'has_vessel_context': vesselId != null,
       });
     }
@@ -84,7 +91,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: e.toString(),
+        error: describeError(e),
       );
     }
   }
@@ -98,14 +105,14 @@ class ChatNotifier extends StateNotifier<ChatState> {
 final chatProvider = StateNotifierProvider.autoDispose
     .family<ChatNotifier, ChatState, String?>(
   (ref, vesselId) {
-    final apiService = ref.read(apiServiceProvider);
-    return ChatNotifier(apiService, vesselId: vesselId);
+    final apiService = ref.watch(userApiProvider);
+    return ChatNotifier(apiService, ref.read(monitoringProvider), vesselId: vesselId);
   },
 );
 
 /// Provider for conversation history list.
 final conversationListProvider =
     FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
-  final apiService = ref.read(apiServiceProvider);
+  final apiService = ref.watch(userApiProvider);
   return apiService.getConversations();
 });

@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:helm_marine/core/api/api_service.dart';
+import 'package:helm_marine/core/monitoring/monitoring.dart';
 import 'package:helm_marine/features/ai_chat/providers/chat_provider.dart';
 import 'package:helm_marine/features/ai_chat/screens/chat_screen.dart';
+
+import '../../../helpers/fakes.dart';
 
 void main() {
   group('ChatScreen', () {
     testWidgets('shows empty state with First Mate AI title', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(home: ChatScreen()),
+        ProviderScope(
+          overrides: baseTestOverrides(),
+          child: const MaterialApp(home: ChatScreen()),
         ),
       );
       await tester.pump();
@@ -20,8 +26,9 @@ void main() {
 
     testWidgets('shows suggestion chips in empty state', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(home: ChatScreen()),
+        ProviderScope(
+          overrides: baseTestOverrides(),
+          child: const MaterialApp(home: ChatScreen()),
         ),
       );
       await tester.pump();
@@ -34,8 +41,9 @@ void main() {
     testWidgets('shows vessel chat title when vesselId provided',
         (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(home: ChatScreen(vesselId: 'test-vessel')),
+        ProviderScope(
+          overrides: baseTestOverrides(),
+          child: const MaterialApp(home: ChatScreen(vesselId: 'test-vessel')),
         ),
       );
       await tester.pump();
@@ -45,8 +53,9 @@ void main() {
 
     testWidgets('has message input field', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(home: ChatScreen()),
+        ProviderScope(
+          overrides: baseTestOverrides(),
+          child: const MaterialApp(home: ChatScreen()),
         ),
       );
       await tester.pump();
@@ -59,9 +68,11 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            ...baseTestOverrides(),
             chatProvider(null).overrideWith((ref) {
               final notifier = ChatNotifier(
-                _FakeApiService(),
+                ApiService(Dio()),
+                const Monitoring.disabled(),
               );
               notifier.state = ChatState(
                 messages: [
@@ -85,9 +96,11 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            ...baseTestOverrides(),
             chatProvider(null).overrideWith((ref) {
               final notifier = ChatNotifier(
-                _FakeApiService(),
+                ApiService(Dio()),
+                const Monitoring.disabled(),
               );
               notifier.state = ChatState(
                 messages: [
@@ -108,9 +121,4 @@ void main() {
       expect(find.byType(MarkdownBody), findsOneWidget);
     });
   });
-}
-
-/// Minimal fake for tests that don't need real API calls.
-class _FakeApiService {
-  // Unused — ChatNotifier only calls API during sendMessage
 }

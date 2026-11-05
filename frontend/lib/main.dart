@@ -1,42 +1,71 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:posthog_flutter/posthog_flutter.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:helm_marine/app.dart';
+import 'package:helm_marine/core/auth/auth_gateway.dart';
+import 'package:helm_marine/core/config/app_config.dart';
+import 'package:helm_marine/core/monitoring/monitoring.dart';
+import 'package:helm_marine/core/startup/startup_error_app.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// PostHog analytics instance accessible throughout the app.
-final posthog = Posthog();
+const _configHint = 'Build with --dart-define=API_BASE_URL=https://<api-host>/api/v1 '
+    '--dart-define=SUPABASE_URL=https://<project>.supabase.co '
+    '--dart-define=SUPABASE_ANON_KEY=<public anon key>.';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Sentry DSN — empty string disables Sentry in development
-  const sentryDsn = String.fromEnvironment('SENTRY_DSN', defaultValue: '');
+  final config = AppConfig.fromEnvironment();
+  final problems = config.problems();
+  if (problems.isNotEmpty) {
+    runApp(StartupErrorApp(
+      title: 'Helm is not configured',
+      problems: problems,
+      hint: _configHint,
+    ));
+    return;
+  }
 
-  if (sentryDsn.isNotEmpty) {
+  // Restores the persisted session (if any) before the first frame.
+  try {
+    await Supabase.initialize(url: config.supabaseUrl, publishableKey: config.supabaseAnonKey);
+  } catch (e) {
+    runApp(StartupErrorApp(
+      title: 'Sign-in could not start',
+      problems: ['Supabase failed to initialise (${e.runtimeType}).'],
+      hint: 'Check SUPABASE_URL / SUPABASE_ANON_KEY and your connection, then reload.',
+    ));
+    return;
+  }
+
+  final monitoring = await Monitoring.start(config);
+
+  void run() {
+    runApp(ProviderScope(
+      // Failures are shown with a "Try again" action instead of silent retries.
+      retry: (retryCount, error) => null,
+      overrides: [
+        appConfigProvider.overrideWithValue(config),
+        authGatewayProvider.overrideWithValue(SupabaseAuthGateway(Supabase.instance.client.auth)),
+        monitoringProvider.overrideWithValue(monitoring),
+      ],
+      child: const HelmApp(),
+    ));
+  }
+
+  if (config.sentryEnabled) {
     await SentryFlutter.init(
       (options) {
-        options.dsn = sentryDsn;
+        options.dsn = config.sentryDsn;
+        options.environment = config.appEnv;
         options.tracesSampleRate = 0.1;
-        options.environment =
-            const String.fromEnvironment('APP_ENV', defaultValue: 'development');
+        options.sendDefaultPii = false;
       },
-      appRunner: () => _initAndRun(),
+      appRunner: run,
     );
   } else {
-    _initAndRun();
+    run();
   }
-}
-
-void _initAndRun() {
-  // PostHog initialisation — API key from environment
-  const posthogApiKey =
-      String.fromEnvironment('POSTHOG_API_KEY', defaultValue: '');
-  if (posthogApiKey.isNotEmpty) {
-    Posthog().setup(
-      PostHogConfig(posthogApiKey)..host = 'https://app.posthog.com',
-    );
-  }
-
-  runApp(const ProviderScope(child: HelmApp()));
 }

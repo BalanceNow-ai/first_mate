@@ -1,10 +1,17 @@
+// TODO(client pass 2): rebuild on the commerce contracts — server delivery
+// quotes, payment methods from /config/public (with recorded reasons), local
+// test payments in development, idempotent order creation. This pass only
+// moves money display to server-provided integer cents.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:flutter_stripe/flutter_stripe.dart' hide Card;
 import 'package:go_router/go_router.dart';
+import 'package:helm_marine/core/models/cart.dart';
+import 'package:helm_marine/core/money/money.dart';
+import 'package:helm_marine/core/monitoring/monitoring.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
+import 'package:helm_marine/features/cart/providers/cart_provider.dart';
 import 'package:helm_marine/features/checkout/providers/checkout_provider.dart';
-import 'package:helm_marine/main.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
@@ -154,8 +161,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           );
                         }
                         notifier.confirmPayment();
-                        posthog.capture(eventName: 'order_completed', properties: {
-                          'order_id': ref.read(checkoutProvider).orderId,
+                        ref.read(monitoringProvider).capture('order_completed', properties: {
+                          'order_id': ref.read(checkoutProvider).orderId ?? '',
                         });
                         _goToPage(2);
                       } on StripeException catch (e) {
@@ -254,7 +261,7 @@ class _ShippingStep extends StatelessWidget {
   final String deliveryType;
   final ValueChanged<String> onDeliveryTypeChanged;
   final VoidCallback onContinue;
-  final AsyncValue<Map<String, dynamic>> cartState;
+  final AsyncValue<Cart> cartState;
 
   const _ShippingStep({
     required this.formKey,
@@ -314,9 +321,9 @@ class _ShippingStep extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: HelmTheme.accent.withOpacity(0.1),
+              color: HelmTheme.accent.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: HelmTheme.accent.withOpacity(0.3)),
+              border: Border.all(color: HelmTheme.accent.withValues(alpha: 0.3)),
             ),
             child: const Column(
               children: [
@@ -424,9 +431,6 @@ class _ShippingStep extends StatelessWidget {
         // Cart summary
         cartState.whenOrNull(
           data: (cart) {
-            final subtotal =
-                (cart['subtotal'] as num?)?.toDouble() ?? 0;
-            final itemCount = cart['item_count'] as int? ?? 0;
             return Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -441,33 +445,16 @@ class _ShippingStep extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('$itemCount items'),
-                        Text('\$${subtotal.toStringAsFixed(2)}'),
+                        Text('${cart.itemCount} items'),
+                        Text(formatCents(cart.subtotalCents, currency: cart.currency)),
                       ],
                     ),
-                    Row(
+                    const Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Shipping'),
-                        Text(subtotal >= 150
-                            ? 'FREE'
-                            : '\$9.90'),
-                      ],
-                    ),
-                    const Divider(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Total',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        Text(
-                          '\$${(subtotal + (subtotal >= 150 ? 0 : 9.90)).toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: HelmTheme.primary,
-                            fontSize: 18,
-                          ),
-                        ),
+                        Text('Shipping'),
+                        // Server-quoted in client pass 2; never computed here.
+                        Text('Quoted at payment'),
                       ],
                     ),
                   ],
@@ -518,7 +505,7 @@ class _DeliveryOption extends StatelessWidget {
             color: isSelected ? HelmTheme.primary : Colors.grey[300]!,
             width: isSelected ? 2 : 1,
           ),
-          color: isSelected ? HelmTheme.primary.withOpacity(0.05) : null,
+          color: isSelected ? HelmTheme.primary.withValues(alpha: 0.05) : null,
         ),
         child: Row(
           children: [
@@ -560,7 +547,7 @@ class _PaymentStep extends StatelessWidget {
   final String? error;
   final String? clientSecret;
   final VoidCallback onConfirmOrder;
-  final AsyncValue<Map<String, dynamic>> cartState;
+  final AsyncValue<Cart> cartState;
 
   const _PaymentStep({
     required this.paymentMethod,
@@ -646,22 +633,19 @@ class _PaymentStep extends StatelessWidget {
         // Order total
         cartState.whenOrNull(
           data: (cart) {
-            final subtotal =
-                (cart['subtotal'] as num?)?.toDouble() ?? 0;
-            final shipping = subtotal >= 150 ? 0.0 : 9.90;
             return Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Total',
+                    const Text('Subtotal',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
                         )),
                     Text(
-                      '\$${(subtotal + shipping).toStringAsFixed(2)} NZD',
+                      formatCents(cart.subtotalCents, currency: cart.currency, showCode: true),
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: HelmTheme.primary,
@@ -681,7 +665,7 @@ class _PaymentStep extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: HelmTheme.error.withOpacity(0.1),
+              color: HelmTheme.error.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(error!, style: const TextStyle(color: HelmTheme.error)),
@@ -738,7 +722,7 @@ class _PaymentOption extends StatelessWidget {
             color: isSelected ? HelmTheme.primary : Colors.grey[300]!,
             width: isSelected ? 2 : 1,
           ),
-          color: isSelected ? HelmTheme.primary.withOpacity(0.05) : null,
+          color: isSelected ? HelmTheme.primary.withValues(alpha: 0.05) : null,
         ),
         child: Row(
           children: [
@@ -793,7 +777,7 @@ class _ConfirmationStep extends StatelessWidget {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: HelmTheme.success.withOpacity(0.1),
+                color: HelmTheme.success.withValues(alpha: 0.1),
               ),
               child:
                   const Icon(Icons.check_circle, size: 64, color: HelmTheme.success),

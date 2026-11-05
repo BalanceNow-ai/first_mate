@@ -19,7 +19,7 @@ class OnboardingScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: HelmTheme.primary.withOpacity(0.1),
+                  color: HelmTheme.primary.withValues(alpha: 0.1),
                 ),
                 child: const Icon(
                   Icons.sailing,

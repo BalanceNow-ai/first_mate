@@ -1,13 +1,12 @@
+// TODO(client pass 2): bind to the Helm Dash delivery contract (reported
+// operator positions and status events, not interpolated positions).
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mapbox_gl/mapbox_gl.dart';
+import 'package:helm_marine/core/money/money.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
+import 'package:helm_marine/core/widgets/helm_map.dart';
 import 'package:helm_marine/features/helm_dash/providers/delivery_provider.dart';
-
-const String _mapboxAccessToken = String.fromEnvironment(
-  'MAPBOX_ACCESS_TOKEN',
-  defaultValue: '',
-);
+import 'package:latlong2/latlong.dart';
 
 // Westhaven Marina, Auckland
 const _warehouseLatLng = LatLng(-36.8406, 174.7530);
@@ -30,8 +29,7 @@ class DeliveryTrackingScreen extends ConsumerWidget {
           final status = delivery['status'] as String? ?? 'pending';
           final nm =
               (delivery['nautical_miles'] as num?)?.toDouble();
-          final fee =
-              (delivery['delivery_fee'] as num?)?.toDouble() ?? 0;
+          final feeCents = delivery['delivery_fee_cents'] as int? ?? 0;
           final etaMinutes =
               delivery['estimated_delivery_minutes'] as int?;
           final operatorName = delivery['operator_name'] as String?;
@@ -47,7 +45,7 @@ class DeliveryTrackingScreen extends ConsumerWidget {
                 )
               : null;
 
-          final vesselLocation = liveLocationState.valueOrNull;
+          final vesselLocation = liveLocationState.value;
 
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -57,8 +55,9 @@ class DeliveryTrackingScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(16),
                 child: SizedBox(
                   height: 280,
-                  child: _mapboxAccessToken.isNotEmpty
-                      ? _MapboxView(
+                  child: ref.watch(mapTilesProvider) != null
+                      ? _MapView(
+                          tiles: ref.watch(mapTilesProvider)!,
                           warehouseLatLng: _warehouseLatLng,
                           destLatLng: destLatLng,
                           vesselLocation: vesselLocation,
@@ -107,7 +106,7 @@ class DeliveryTrackingScreen extends ConsumerWidget {
                       _DetailRow(
                         icon: Icons.attach_money,
                         label: 'Delivery Fee',
-                        value: '\$${fee.toStringAsFixed(2)} NZD',
+                        value: formatCents(feeCents, showCode: true),
                       ),
                       if (etaMinutes != null)
                         _DetailRow(
@@ -205,114 +204,67 @@ class DeliveryTrackingScreen extends ConsumerWidget {
   }
 }
 
-/// Live Mapbox GL map widget with markers for warehouse, destination, and vessel.
-class _MapboxView extends StatefulWidget {
+/// Tile map with markers for warehouse, destination and vessel.
+class _MapView extends StatelessWidget {
+  final MapTiles tiles;
   final LatLng warehouseLatLng;
   final LatLng? destLatLng;
   final DeliveryLocation? vesselLocation;
   final String status;
 
-  const _MapboxView({
+  const _MapView({
+    required this.tiles,
     required this.warehouseLatLng,
     this.destLatLng,
     this.vesselLocation,
     required this.status,
   });
 
-  @override
-  State<_MapboxView> createState() => _MapboxViewState();
-}
-
-class _MapboxViewState extends State<_MapboxView> {
-  MapboxMapController? _controller;
-
   LatLng get _center {
-    if (widget.vesselLocation != null) {
-      return LatLng(widget.vesselLocation!.lat, widget.vesselLocation!.lng);
+    if (vesselLocation != null) {
+      return LatLng(vesselLocation!.lat, vesselLocation!.lng);
     }
-    if (widget.destLatLng != null) {
+    if (destLatLng != null) {
       return LatLng(
-        (widget.warehouseLatLng.latitude + widget.destLatLng!.latitude) / 2,
-        (widget.warehouseLatLng.longitude + widget.destLatLng!.longitude) / 2,
+        (warehouseLatLng.latitude + destLatLng!.latitude) / 2,
+        (warehouseLatLng.longitude + destLatLng!.longitude) / 2,
       );
     }
-    return widget.warehouseLatLng;
-  }
-
-  @override
-  void didUpdateWidget(covariant _MapboxView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (_controller != null) {
-      _addMarkers();
-    }
-  }
-
-  void _onMapCreated(MapboxMapController controller) {
-    _controller = controller;
-    _addMarkers();
-  }
-
-  Future<void> _addMarkers() async {
-    final controller = _controller;
-    if (controller == null) return;
-
-    await controller.clearSymbols();
-
-    // Warehouse marker
-    await controller.addSymbol(SymbolOptions(
-      geometry: widget.warehouseLatLng,
-      iconImage: 'harbor',
-      iconSize: 1.5,
-      textField: 'Warehouse',
-      textOffset: const Offset(0, 1.5),
-      textSize: 11,
-    ));
-
-    // Destination marker
-    if (widget.destLatLng != null) {
-      await controller.addSymbol(SymbolOptions(
-        geometry: widget.destLatLng!,
-        iconImage: 'marker',
-        iconSize: 1.5,
-        textField: 'Delivery',
-        textOffset: const Offset(0, 1.5),
-        textSize: 11,
-      ));
-    }
-
-    // Vessel marker (live position)
-    if (widget.vesselLocation != null) {
-      await controller.addSymbol(SymbolOptions(
-        geometry: LatLng(
-          widget.vesselLocation!.lat,
-          widget.vesselLocation!.lng,
-        ),
-        iconImage: 'ferry',
-        iconSize: 1.5,
-        textField: widget.vesselLocation!.label,
-        textOffset: const Offset(0, 1.5),
-        textSize: 11,
-      ));
-    }
+    return warehouseLatLng;
   }
 
   @override
   Widget build(BuildContext context) {
-    return MapboxMap(
-      accessToken: _mapboxAccessToken,
-      initialCameraPosition: CameraPosition(
-        target: _center,
-        zoom: 12.0,
-      ),
-      styleString: MapboxStyles.OUTDOORS,
-      onMapCreated: _onMapCreated,
-      myLocationEnabled: false,
-      trackCameraPosition: false,
+    return HelmMap(
+      tiles: tiles,
+      center: _center,
+      markers: [
+        MapMarker(
+          point: warehouseLatLng,
+          label: 'Warehouse',
+          icon: Icons.warehouse,
+          color: HelmTheme.navy,
+        ),
+        if (destLatLng != null)
+          MapMarker(
+            point: destLatLng!,
+            label: 'Delivery point',
+            icon: Icons.location_on,
+            color: HelmTheme.error,
+          ),
+        if (vesselLocation != null)
+          MapMarker(
+            point: LatLng(vesselLocation!.lat, vesselLocation!.lng),
+            label: vesselLocation!.label,
+            icon: Icons.directions_boat,
+            color: HelmTheme.ocean,
+          ),
+      ],
     );
   }
 }
 
-/// Fallback map view when no Mapbox token is configured.
+/// Fallback view when no map tiles are configured.
 class _FallbackMapView extends StatelessWidget {
   final String status;
   final Map<String, dynamic>? coords;
@@ -326,10 +278,10 @@ class _FallbackMapView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: HelmTheme.primary.withOpacity(0.08),
-        border: Border.all(color: HelmTheme.primary.withOpacity(0.2)),
+        color: HelmTheme.primary.withValues(alpha: 0.08),
+        border: Border.all(color: HelmTheme.primary.withValues(alpha: 0.2)),
       ),
       child: Stack(
         children: [
@@ -440,7 +392,7 @@ class _MapPin extends StatelessWidget {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: color.withOpacity(0.3),
+                color: color.withValues(alpha: 0.3),
                 blurRadius: 8,
                 spreadRadius: 2,
               ),
@@ -525,9 +477,9 @@ class _StatusBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _color.withOpacity(0.1),
+        color: _color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _color.withOpacity(0.3)),
+        border: Border.all(color: _color.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [

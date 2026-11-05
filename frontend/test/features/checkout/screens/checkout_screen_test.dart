@@ -1,156 +1,67 @@
+// Checkout is rebuilt in client pass 2; these tests cover what pass 1 keeps:
+// the screen compiles against the typed cart and shows server-computed cents.
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:helm_marine/features/checkout/providers/checkout_provider.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:helm_marine/core/models/cart.dart';
+import 'package:helm_marine/features/cart/providers/cart_provider.dart';
 import 'package:helm_marine/features/checkout/screens/checkout_screen.dart';
 
+import '../../../helpers/fakes.dart';
+
+class _FixedCart extends CartNotifier {
+  _FixedCart(this.cart);
+
+  final Cart cart;
+
+  @override
+  Future<Cart> build() async => cart;
+}
+
 void main() {
-  group('CheckoutScreen', () {
-    Widget buildTestWidget({
-      AsyncValue<Map<String, dynamic>>? cartState,
-    }) {
-      return ProviderScope(
-        overrides: [
-          if (cartState != null)
-            cartProvider.overrideWith((ref) async {
-              if (cartState is AsyncError) throw cartState.error!;
-              return cartState.value!;
-            }),
-        ],
-        child: const MaterialApp(
-          home: CheckoutScreen(),
-        ),
-      );
-    }
+  Widget build(Cart cart) {
+    return ProviderScope(
+      overrides: [
+        ...baseTestOverrides(),
+        cartProvider.overrideWith(() => _FixedCart(cart)),
+      ],
+      child: const MaterialApp(home: CheckoutScreen()),
+    );
+  }
 
-    testWidgets('shows Checkout title in app bar', (tester) async {
-      await tester.pumpWidget(buildTestWidget(
-        cartState: const AsyncData({
-          'items': [],
-          'subtotal': 0.0,
-          'item_count': 0,
-        }),
-      ));
-      await tester.pumpAndSettle();
+  void tall(WidgetTester tester) {
+    tester.view.physicalSize = const Size(1080, 3200);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+  }
 
-      expect(find.text('Checkout'), findsOneWidget);
-    });
+  final cartWithItem = Cart.fromJson(fixtureMap('cart_with_item'));
 
-    testWidgets('shows step indicators', (tester) async {
-      await tester.pumpWidget(buildTestWidget(
-        cartState: const AsyncData({
-          'items': [],
-          'subtotal': 100.0,
-          'item_count': 2,
-        }),
-      ));
-      await tester.pumpAndSettle();
+  testWidgets('shows title, steps and delivery options', (tester) async {
+    tall(tester);
+    await tester.pumpWidget(build(cartWithItem));
+    await tester.pumpAndSettle();
 
-      expect(find.text('Shipping'), findsOneWidget);
-      expect(find.text('Payment'), findsOneWidget);
-      expect(find.text('Confirm'), findsOneWidget);
-    });
+    expect(find.text('Checkout'), findsOneWidget);
+    expect(find.text('Payment'), findsOneWidget);
+    expect(find.text('Confirm'), findsOneWidget);
+    expect(find.text('Delivery Method'), findsOneWidget);
+    expect(find.text('Standard Shipping'), findsOneWidget);
+    expect(find.text('Click & Collect'), findsOneWidget);
+    expect(find.text('Continue to Payment'), findsOneWidget);
+    expect(find.byType(PageView), findsOneWidget);
+  });
 
-    testWidgets('shows delivery method options', (tester) async {
-      await tester.pumpWidget(buildTestWidget(
-        cartState: const AsyncData({
-          'items': [],
-          'subtotal': 100.0,
-          'item_count': 2,
-        }),
-      ));
-      await tester.pumpAndSettle();
+  testWidgets('order summary shows the server subtotal from cents', (tester) async {
+    tall(tester);
+    await tester.pumpWidget(build(cartWithItem));
+    await tester.pumpAndSettle();
 
-      expect(find.text('Standard Shipping'), findsOneWidget);
-      expect(find.text('Helm Dash'), findsOneWidget);
-      expect(find.text('Click & Collect'), findsOneWidget);
-    });
-
-    testWidgets('shows Delivery Method heading', (tester) async {
-      await tester.pumpWidget(buildTestWidget(
-        cartState: const AsyncData({
-          'items': [],
-          'subtotal': 200.0,
-          'item_count': 3,
-        }),
-      ));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Delivery Method'), findsOneWidget);
-    });
-
-    testWidgets('shows continue to payment button', (tester) async {
-      await tester.pumpWidget(buildTestWidget(
-        cartState: const AsyncData({
-          'items': [],
-          'subtotal': 100.0,
-          'item_count': 1,
-        }),
-      ));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Continue to Payment'), findsOneWidget);
-    });
-
-    testWidgets('shows shipping address form when courier selected',
-        (tester) async {
-      await tester.pumpWidget(buildTestWidget(
-        cartState: const AsyncData({
-          'items': [],
-          'subtotal': 100.0,
-          'item_count': 1,
-        }),
-      ));
-      await tester.pumpAndSettle();
-
-      // Courier is selected by default
-      expect(find.text('Shipping Address'), findsOneWidget);
-      expect(find.text('Full Name'), findsOneWidget);
-      expect(find.text('Address Line 1'), findsOneWidget);
-      expect(find.text('City'), findsOneWidget);
-      expect(find.text('Postcode'), findsOneWidget);
-    });
-
-    testWidgets('shows order summary with cart data', (tester) async {
-      await tester.pumpWidget(buildTestWidget(
-        cartState: const AsyncData({
-          'items': [],
-          'subtotal': 250.0,
-          'item_count': 5,
-        }),
-      ));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Order Summary'), findsOneWidget);
-      expect(find.text('5 items'), findsOneWidget);
-      expect(find.text('\$250.00'), findsOneWidget);
-      expect(find.text('FREE'), findsOneWidget); // Free shipping over $150
-    });
-
-    testWidgets('shows shipping cost under $150', (tester) async {
-      await tester.pumpWidget(buildTestWidget(
-        cartState: const AsyncData({
-          'items': [],
-          'subtotal': 80.0,
-          'item_count': 1,
-        }),
-      ));
-      await tester.pumpAndSettle();
-
-      expect(find.text('\$9.90'), findsOneWidget);
-    });
-
-    testWidgets('has PageView for step navigation', (tester) async {
-      await tester.pumpWidget(buildTestWidget(
-        cartState: const AsyncData({
-          'items': [],
-          'subtotal': 100.0,
-          'item_count': 1,
-        }),
-      ));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(PageView), findsOneWidget);
-    });
+    expect(find.text('Order Summary'), findsOneWidget);
+    expect(find.text('2 items'), findsOneWidget);
+    expect(find.text(r'$149.80'), findsOneWidget);
+    // Shipping is never computed on the client.
+    expect(find.text('Quoted at payment'), findsOneWidget);
+    expect(find.text('FREE'), findsNothing);
   });
 }

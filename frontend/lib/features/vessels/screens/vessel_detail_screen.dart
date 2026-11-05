@@ -1,14 +1,15 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:helm_marine/core/models/vessel.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
+import 'package:helm_marine/core/widgets/state_views.dart';
 import 'package:helm_marine/features/vessels/providers/vessel_provider.dart';
 
 class VesselDetailScreen extends ConsumerWidget {
-  final String vesselId;
-
   const VesselDetailScreen({super.key, required this.vesselId});
+
+  final String vesselId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -16,18 +17,12 @@ class VesselDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: vesselState.whenOrNull(data: (v) => Text(v.name)) ??
-            const Text('Vessel Details'),
+        title: Text(vesselState.value?.nickname ?? 'Vessel'),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
             tooltip: 'Edit vessel',
             onPressed: () => context.go('/vessels/$vesselId/edit'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.chat),
-            tooltip: 'Ask First Mate about this vessel',
-            onPressed: () => context.go('/vessels/$vesselId/chat'),
           ),
           IconButton(
             icon: const Icon(Icons.delete_outline),
@@ -37,198 +32,176 @@ class VesselDetailScreen extends ConsumerWidget {
         ],
       ),
       body: vesselState.when(
-        data: (vessel) => ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            // Vessel image / placeholder
-            Container(
-              height: 200,
-              decoration: BoxDecoration(
-                color: HelmTheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: vessel.imageUrl != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: CachedNetworkImage(
-                          imageUrl: vessel.imageUrl!,
-                          fit: BoxFit.cover,
-                        ),
-                    )
-                  : const Center(
-                      child: Icon(Icons.directions_boat,
-                          size: 80, color: HelmTheme.primary),
-                    ),
-            ),
-            const SizedBox(height: 24),
-
-            // Vessel info
-            Text(
-              vessel.name,
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineSmall
-                  ?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            if (vessel.isPrimary) ...[
-              const SizedBox(height: 8),
-              Chip(
-                label: const Text('Primary Vessel'),
-                backgroundColor: HelmTheme.primary.withOpacity(0.1),
-                labelStyle: const TextStyle(color: HelmTheme.primary),
-              ),
-            ],
-            const SizedBox(height: 24),
-
-            // Specifications
-            _SectionTitle(title: 'Specifications'),
-            const SizedBox(height: 8),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    _DetailRow(label: 'Make', value: vessel.make),
-                    _DetailRow(label: 'Model', value: vessel.model),
-                    if (vessel.year != null)
-                      _DetailRow(label: 'Year', value: vessel.year.toString()),
-                    if (vessel.hullMaterial != null)
-                      _DetailRow(
-                          label: 'Hull Material', value: vessel.hullMaterial!),
-                    if (vessel.lengthFt != null)
-                      _DetailRow(
-                          label: 'Length',
-                          value: '${vessel.lengthFt!.toStringAsFixed(1)} ft'),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Engine
-            if (vessel.engineType != null ||
-                vessel.engineMake != null ||
-                vessel.engineModel != null) ...[
-              _SectionTitle(title: 'Engine'),
-              const SizedBox(height: 8),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      if (vessel.engineType != null)
-                        _DetailRow(label: 'Type', value: vessel.engineType!),
-                      if (vessel.engineMake != null)
-                        _DetailRow(label: 'Make', value: vessel.engineMake!),
-                      if (vessel.engineModel != null)
-                        _DetailRow(label: 'Model', value: vessel.engineModel!),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-
-            // Actions
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => context.go('/vessels/$vesselId/chat'),
-                    icon: const Icon(Icons.chat),
-                    label: const Text('Ask First Mate'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => context.go('/products'),
-                    icon: const Icon(Icons.shopping_bag),
-                    label: const Text('Find Parts'),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () =>
-                    context.go('/vessels/$vesselId/checklists'),
-                icon: const Icon(Icons.checklist),
-                label: const Text('Voyage Checklists'),
-              ),
-            ),
-          ],
-        ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Text('Failed to load vessel: $error'),
+        data: (vessel) => ContentWidth(child: _VesselDetails(vessel: vessel)),
+        loading: () => const LoadingView(message: 'Loading vessel'),
+        error: (error, _) => ErrorView(
+          error: error,
+          title: 'Could not load this vessel',
+          onRetry: () => ref.invalidate(vesselDetailProvider(vesselId)),
         ),
       ),
     );
   }
 
-  void _confirmDelete(BuildContext context, WidgetRef ref) {
-    showDialog(
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Vessel'),
+        title: const Text('Delete vessel'),
         content: const Text(
-            'Are you sure you want to remove this vessel from your garage?'),
+            'Remove this vessel from your garage? Its equipment, checklists and service '
+            'history are removed too.'),
         actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await ref.read(vesselListProvider.notifier).deleteVessel(vesselId);
-              if (context.mounted) context.go('/vessels');
-            },
+            onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: HelmTheme.error),
             child: const Text('Delete'),
           ),
         ],
       ),
     );
+    if (confirmed != true) return;
+    try {
+      await ref.read(vesselListProvider.notifier).deleteVessel(vesselId);
+      if (context.mounted) context.go('/vessels');
+    } catch (e) {
+      if (context.mounted) showErrorSnackBar(context, e, prefix: 'Could not delete vessel');
+    }
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  final String title;
+class _VesselDetails extends StatelessWidget {
+  const _VesselDetails({required this.vessel});
 
-  const _SectionTitle({required this.title});
+  final Vessel vessel;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: Theme.of(context)
-          .textTheme
-          .titleMedium
-          ?.copyWith(fontWeight: FontWeight.bold),
+    final theme = Theme.of(context);
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Row(
+          children: [
+            CircleAvatar(
+              radius: 32,
+              backgroundColor: HelmTheme.primary.withValues(alpha: 0.12),
+              child: const Icon(Icons.directions_boat, size: 32, color: HelmTheme.primary),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(vessel.nickname,
+                      style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(vessel.description, style: theme.textTheme.bodyLarge),
+                  if (vessel.isPrimary) ...[
+                    const SizedBox(height: 4),
+                    const Chip(label: Text('Primary vessel')),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        _Section(title: 'Vessel', rows: [
+          ('Make', vessel.make),
+          ('Model', vessel.model),
+          ('Year', '${vessel.year}'),
+          if (vessel.hullType != null) ('Hull', enumLabel(vessel.hullType!)),
+          if (vessel.lengthFt != null) ('Length', '${_trim(vessel.lengthFt!)} ft'),
+          if (vessel.propulsionType != null) ('Propulsion', enumLabel(vessel.propulsionType!)),
+          if (vessel.primaryUse != null) ('Primary use', vessel.primaryUse!),
+          if (vessel.hin != null) ('HIN', vessel.hin!),
+        ]),
+        const SizedBox(height: 16),
+        _Section(
+          title: 'Engine',
+          rows: [
+            if (vessel.engineMake != null) ('Make', vessel.engineMake!),
+            if (vessel.engineModel != null) ('Model', vessel.engineModel!),
+            if (vessel.engineYear != null) ('Year', '${vessel.engineYear}'),
+            if (vessel.engineHours != null) ('Hours', '${vessel.engineHours} h'),
+            if (vessel.engineSerial != null) ('Serial', vessel.engineSerial!),
+          ],
+          empty: 'No engine details yet — add them so we can check part fitment.',
+        ),
+        const SizedBox(height: 24),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            ElevatedButton.icon(
+              onPressed: () => context.go('/products'),
+              icon: const Icon(Icons.storefront),
+              label: const Text('Find parts'),
+            ),
+            OutlinedButton.icon(
+              onPressed: () => context.go('/vessels/${vessel.id}/chat'),
+              icon: const Icon(Icons.chat),
+              label: const Text('Ask First Mate'),
+            ),
+            OutlinedButton.icon(
+              onPressed: () => context.go('/vessels/${vessel.id}/checklists'),
+              icon: const Icon(Icons.checklist),
+              label: const Text('Voyage checklists'),
+            ),
+          ],
+        ),
+      ],
     );
   }
+
+  static String _trim(double v) =>
+      v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(1);
 }
 
-class _DetailRow extends StatelessWidget {
-  final String label;
-  final String value;
+class _Section extends StatelessWidget {
+  const _Section({required this.title, required this.rows, this.empty});
 
-  const _DetailRow({required this.label, required this.value});
+  final String title;
+  final List<(String, String)> rows;
+  final String? empty;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: TextStyle(color: Colors.grey[600])),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
-        ],
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Semantics(
+              header: true,
+              child: Text(title,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold)),
+            ),
+            const SizedBox(height: 8),
+            if (rows.isEmpty && empty != null) Text(empty!),
+            for (final (label, value) in rows)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 120,
+                      child: Text(label, style: const TextStyle(color: HelmTheme.mutedText)),
+                    ),
+                    Expanded(
+                      child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

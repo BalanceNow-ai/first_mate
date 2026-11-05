@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:helm_marine/features/checkout/screens/order_detail_screen.dart';
 
+import '../../../helpers/fakes.dart';
+
 void main() {
   group('OrderDetailScreen', () {
     Widget buildTestWidget({
@@ -11,6 +13,7 @@ void main() {
     }) {
       return ProviderScope(
         overrides: [
+          ...baseTestOverrides(),
           if (orderState != null)
             orderDetailProvider(orderId).overrideWith((ref) async {
               if (orderState is AsyncError) throw orderState.error!;
@@ -29,9 +32,9 @@ void main() {
         orderState: const AsyncData({
           'id': 'abc12345-6789-0000-0000-000000000000',
           'status': 'paid',
-          'subtotal': 100.0,
-          'shipping_cost': 9.90,
-          'total': 109.90,
+          'subtotal_cents': 10000,
+          'shipping_cents': 990,
+          'total_cents': 10990,
           'delivery_type': 'courier',
           'items': [],
           'created_at': '2026-01-15T10:30:00Z',
@@ -48,9 +51,9 @@ void main() {
         orderState: const AsyncData({
           'id': 'abc12345-6789-0000-0000-000000000000',
           'status': 'pending',
-          'subtotal': 50.0,
-          'shipping_cost': 9.90,
-          'total': 59.90,
+          'subtotal_cents': 5000,
+          'shipping_cents': 990,
+          'total_cents': 5990,
           'delivery_type': 'courier',
           'items': [],
           'created_at': '',
@@ -67,9 +70,9 @@ void main() {
         orderState: const AsyncData({
           'id': 'abc12345-6789-0000-0000-000000000000',
           'status': 'shipped',
-          'subtotal': 100.0,
-          'shipping_cost': 0.0,
-          'total': 100.0,
+          'subtotal_cents': 10000,
+          'shipping_cents': 0,
+          'total_cents': 10000,
           'delivery_type': 'courier',
           'items': [],
           'created_at': '2026-02-01T12:00:00Z',
@@ -86,15 +89,16 @@ void main() {
         orderState: const AsyncData({
           'id': 'abc12345-6789-0000-0000-000000000000',
           'status': 'paid',
-          'subtotal': 125.80,
-          'shipping_cost': 9.90,
-          'total': 135.70,
+          'subtotal_cents': 12580,
+          'shipping_cents': 990,
+          'total_cents': 13570,
           'delivery_type': 'courier',
           'items': [
             {
               'product_id': 'p-1',
               'quantity': 2,
-              'unit_price': 62.90,
+              'unit_price_cents': 6290,
+              'line_total_cents': 12580,
             },
           ],
           'created_at': '2026-01-20T14:00:00Z',
@@ -104,7 +108,8 @@ void main() {
 
       expect(find.text('Items'), findsOneWidget);
       expect(find.text('Product (x2)'), findsOneWidget);
-      expect(find.text('\$125.80'), findsOneWidget);
+      // Line total and subtotal (both server-provided cents).
+      expect(find.text('\$125.80'), findsNWidgets(2));
     });
 
     testWidgets('shows totals section', (tester) async {
@@ -113,9 +118,9 @@ void main() {
         orderState: const AsyncData({
           'id': 'abc12345-6789-0000-0000-000000000000',
           'status': 'paid',
-          'subtotal': 200.0,
-          'shipping_cost': 0.0,
-          'total': 200.0,
+          'subtotal_cents': 20000,
+          'shipping_cents': 0,
+          'total_cents': 20000,
           'delivery_type': 'courier',
           'items': [],
           'created_at': '',
@@ -134,9 +139,9 @@ void main() {
         orderState: const AsyncData({
           'id': 'abc12345-6789-0000-0000-000000000000',
           'status': 'shipped',
-          'subtotal': 100.0,
-          'shipping_cost': 9.90,
-          'total': 109.90,
+          'subtotal_cents': 10000,
+          'shipping_cents': 990,
+          'total_cents': 10990,
           'delivery_type': 'courier',
           'tracking_number': 'NZ123456789',
           'courier': 'NZ Post',
@@ -157,9 +162,9 @@ void main() {
         orderState: const AsyncData({
           'id': 'abc12345-6789-0000-0000-000000000000',
           'status': 'pending',
-          'subtotal': 75.0,
-          'shipping_cost': 25.0,
-          'total': 100.0,
+          'subtotal_cents': 7500,
+          'shipping_cents': 2500,
+          'total_cents': 10000,
           'delivery_type': 'helm_dash',
           'items': [],
           'created_at': '',
@@ -176,9 +181,9 @@ void main() {
         orderState: const AsyncData({
           'id': 'abc12345-6789-0000-0000-000000000000',
           'status': 'pending',
-          'subtotal': 50.0,
-          'shipping_cost': 0.0,
-          'total': 50.0,
+          'subtotal_cents': 5000,
+          'shipping_cents': 0,
+          'total_cents': 5000,
           'delivery_type': 'click_and_collect',
           'items': [],
           'created_at': '',
@@ -208,9 +213,9 @@ void main() {
         orderState: const AsyncData({
           'id': 'abc12345-6789-0000-0000-000000000000',
           'status': 'delivered',
-          'subtotal': 50.0,
-          'shipping_cost': 0.0,
-          'total': 50.0,
+          'subtotal_cents': 5000,
+          'shipping_cents': 0,
+          'total_cents': 5000,
           'delivery_type': 'courier',
           'items': [],
           'created_at': '2026-02-15T09:00:00Z',

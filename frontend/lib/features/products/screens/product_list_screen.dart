@@ -1,9 +1,12 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:helm_marine/core/theme/helm_theme.dart';
+import 'package:helm_marine/core/models/product.dart';
+import 'package:helm_marine/core/models/vessel.dart';
+import 'package:helm_marine/core/widgets/fitment_badge.dart';
+import 'package:helm_marine/core/widgets/state_views.dart';
 import 'package:helm_marine/features/products/providers/product_provider.dart';
+import 'package:helm_marine/features/products/widgets/product_widgets.dart';
 import 'package:helm_marine/features/vessels/providers/vessel_provider.dart';
 
 class ProductListScreen extends ConsumerStatefulWidget {
@@ -14,394 +17,284 @@ class ProductListScreen extends ConsumerStatefulWidget {
 }
 
 class _ProductListScreenState extends ConsumerState<ProductListScreen> {
-  final _searchController = TextEditingController();
+  late final TextEditingController _search;
+
+  @override
+  void initState() {
+    super.initState();
+    _search = TextEditingController(text: ref.read(productFilterProvider).search ?? '');
+  }
 
   @override
   void dispose() {
-    _searchController.dispose();
+    _search.dispose();
     super.dispose();
   }
 
-  void _onSearch(String query) {
-    ref.read(productFilterProvider.notifier).state =
-        ref.read(productFilterProvider).copyWith(
-              search: query.isEmpty ? null : query,
-              clearSearch: query.isEmpty,
-              offset: 0,
-            );
+  void _updateFilter(ProductFilter Function(ProductFilter) change) =>
+      ref.read(productFilterProvider.notifier).update(change);
+
+  void _submitSearch(String value) {
+    final q = value.trim();
+    _updateFilter((f) => q.isEmpty ? f.copyWith(clearSearch: true) : f.copyWith(search: q));
   }
 
   @override
   Widget build(BuildContext context) {
-    final productsState = ref.watch(productListProvider);
     final filter = ref.watch(productFilterProvider);
-    final categoriesState = ref.watch(productCategoriesProvider);
-    final brandsState = ref.watch(productBrandsProvider);
-    final vesselsState = ref.watch(vesselListProvider);
-
-    final primaryVessel = vesselsState.valueOrNull
-        ?.where((v) => v.isPrimary)
-        .firstOrNull;
+    final page = ref.watch(productListProvider);
+    final categories = ref.watch(productCategoriesProvider).value ?? const <String>[];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Products'),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(56),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: TextField(
-              controller: _searchController,
-              onSubmitted: _onSearch,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'Search marine parts...',
-                hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
-                prefixIcon:
-                    Icon(Icons.search, color: Colors.white.withOpacity(0.7)),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear, color: Colors.white70),
-                        tooltip: 'Clear search',
-                        onPressed: () {
-                          _searchController.clear();
-                          _onSearch('');
-                        },
-                      )
-                    : null,
-                filled: true,
-                fillColor: Colors.white.withOpacity(0.15),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 0),
-              ),
-            ),
-          ),
-        ),
-      ),
+      appBar: AppBar(title: const Text('Shop')),
       body: Column(
         children: [
-          // Filter bar
-          _FilterBar(
-            filter: filter,
-            categories: categoriesState.valueOrNull ?? [],
-            brands: brandsState.valueOrNull ?? [],
-            hasPrimaryVessel: primaryVessel != null,
-            primaryVesselId: primaryVessel?.id,
-            onFilterChanged: (newFilter) {
-              ref.read(productFilterProvider.notifier).state = newFilter;
-            },
-          ),
-
-          // Product grid
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () async {
-                ref.invalidate(productListProvider);
-                ref.invalidate(productCategoriesProvider);
-                ref.invalidate(productBrandsProvider);
-              },
-              child: productsState.when(
-                data: (products) {
-                  if (products.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.search_off,
-                              size: 64, color: Colors.grey[300]),
-                          const SizedBox(height: 16),
-                          const Text('No products found'),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Try adjusting your search or filters',
-                            style: TextStyle(color: Colors.grey[600]),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  return GridView.builder(
-                    padding: const EdgeInsets.all(16),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.7,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                    ),
-                    itemCount: products.length,
-                    itemBuilder: (context, index) {
-                      final product = products[index];
-                      return Card(
-                        clipBehavior: Clip.antiAlias,
-                        child: InkWell(
-                          onTap: () =>
-                              context.go('/products/${product.id}'),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                flex: 3,
-                                child: Container(
-                                  width: double.infinity,
-                                  color: Colors.grey[100],
-                                  child: product.imageUrl != null
-                                      ? CachedNetworkImage(
-                                          imageUrl: product.imageUrl!,
-                                          fit: BoxFit.cover,
-                                          errorWidget: (_, __, ___) =>
-                                              const Icon(
-                                            Icons.image_not_supported,
-                                            size: 40,
-                                            color: Colors.grey,
-                                          ),
-                                        )
-                                      : const Icon(
-                                          Icons.inventory_2_outlined,
-                                          size: 40,
-                                          color: Colors.grey,
-                                        ),
-                                ),
-                              ),
-                              Expanded(
-                                flex: 2,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      if (product.brand != null)
-                                        Text(
-                                          product.brand!,
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            color: Colors.grey[600],
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        product.name,
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      const Spacer(),
-                                      Row(
-                                        children: [
-                                          if (product.isOnSale) ...[
-                                            Text(
-                                              '\$${product.price.toStringAsFixed(2)}',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.grey[500],
-                                                decoration: TextDecoration
-                                                    .lineThrough,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 4),
-                                          ],
-                                          Text(
-                                            '\$${product.effectivePrice.toStringAsFixed(2)}',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
-                                              color: product.isOnSale
-                                                  ? HelmTheme.error
-                                                  : HelmTheme.primary,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-                loading: () =>
-                    const Center(child: CircularProgressIndicator()),
-                error: (error, _) => Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error_outline,
-                          size: 48, color: HelmTheme.error),
-                      const SizedBox(height: 16),
-                      Text('Failed to load products\n$error',
-                          textAlign: TextAlign.center),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () =>
-                            ref.invalidate(productListProvider),
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: TextField(
+              controller: _search,
+              textInputAction: TextInputAction.search,
+              onSubmitted: _submitSearch,
+              decoration: InputDecoration(
+                labelText: 'Search parts and equipment',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.clear),
+                  tooltip: 'Clear search',
+                  onPressed: () {
+                    _search.clear();
+                    _submitSearch('');
+                  },
                 ),
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FilterBar extends StatelessWidget {
-  final ProductFilter filter;
-  final List<String> categories;
-  final List<String> brands;
-  final bool hasPrimaryVessel;
-  final String? primaryVesselId;
-  final ValueChanged<ProductFilter> onFilterChanged;
-
-  const _FilterBar({
-    required this.filter,
-    required this.categories,
-    required this.brands,
-    required this.hasPrimaryVessel,
-    this.primaryVesselId,
-    required this.onFilterChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+          const _VesselSelector(),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                FilterChip(
+                  label: const Text('On sale'),
+                  selected: filter.onSale,
+                  onSelected: (v) => _updateFilter((f) => f.copyWith(onSale: v)),
+                ),
+                const SizedBox(width: 8),
+                FilterChip(
+                  label: const Text('In stock'),
+                  selected: filter.inStockOnly,
+                  onSelected: (v) => _updateFilter((f) => f.copyWith(inStockOnly: v)),
+                ),
+                for (final c in categories) ...[
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: Text(enumLabel(c.replaceAll('_', ' '))),
+                    selected: filter.category == c,
+                    onSelected: (v) => _updateFilter(
+                        (f) => v ? f.copyWith(category: c) : f.copyWith(clearCategory: true)),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: page.when(
+              data: (p) => _ProductGrid(page: p, onPage: (o) => _updateFilter((f) => f.copyWith(offset: o))),
+              loading: () => const LoadingView(message: 'Loading products'),
+              error: (e, _) => ErrorView(
+                error: e,
+                title: 'Could not load products',
+                onRetry: () => ref.invalidate(productListProvider),
+              ),
+            ),
           ),
         ],
       ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            // Category dropdown
-            _FilterDropdown(
-              label: 'Category',
-              value: filter.category,
-              items: categories,
-              onChanged: (value) {
-                onFilterChanged(filter.copyWith(
-                  category: value,
-                  clearCategory: value == null,
-                  offset: 0,
-                ));
-              },
-            ),
-            const SizedBox(width: 8),
+    );
+  }
+}
 
-            // Brand dropdown
-            _FilterDropdown(
-              label: 'Brand',
-              value: filter.brand,
-              items: brands,
-              onChanged: (value) {
-                onFilterChanged(filter.copyWith(
-                  brand: value,
-                  clearBrand: value == null,
-                  offset: 0,
-                ));
-              },
-            ),
-            const SizedBox(width: 8),
+/// Which vessel fitment is evaluated against.
+class _VesselSelector extends ConsumerWidget {
+  const _VesselSelector();
 
-            // On Sale toggle
-            FilterChip(
-              label: const Text('On Sale'),
-              selected: filter.onSale,
-              onSelected: (selected) {
-                onFilterChanged(filter.copyWith(onSale: selected, offset: 0));
-              },
-              selectedColor: HelmTheme.error.withOpacity(0.15),
-              checkmarkColor: HelmTheme.error,
-            ),
-
-            // Vessel compatible toggle (only if user has a primary vessel)
-            if (hasPrimaryVessel) ...[
-              const SizedBox(width: 8),
-              FilterChip(
-                label: const Text('Fits My Vessel'),
-                selected: filter.vesselCompatible,
-                onSelected: (selected) {
-                  onFilterChanged(filter.copyWith(
-                    vesselCompatible: selected,
-                    vesselId: selected ? primaryVesselId : null,
-                    offset: 0,
-                  ));
-                },
-                selectedColor: HelmTheme.success.withOpacity(0.15),
-                checkmarkColor: HelmTheme.success,
-              ),
-            ],
-          ],
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vessels = ref.watch(vesselListProvider).value ?? const <Vessel>[];
+    if (vessels.isEmpty) return const SizedBox(height: 8);
+    final useFitment = ref.watch(useVesselFitmentProvider);
+    final current = ref.watch(shoppingVesselProvider);
+    const none = '__none__';
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      child: DropdownButtonFormField<String>(
+        key: ValueKey('vessel-${useFitment ? current?.id : none}'),
+        initialValue: useFitment ? current?.id : none,
+        isExpanded: true,
+        decoration: const InputDecoration(
+          labelText: 'Check fitment for',
+          prefixIcon: Icon(Icons.directions_boat),
         ),
+        items: [
+          for (final v in vessels)
+            DropdownMenuItem(value: v.id, child: Text(v.label, overflow: TextOverflow.ellipsis)),
+          const DropdownMenuItem(
+            value: none,
+            child: Text('No vessel (browse everything)', overflow: TextOverflow.ellipsis),
+          ),
+        ],
+        onChanged: (id) {
+          if (id == null || id == none) {
+            ref.read(useVesselFitmentProvider.notifier).set(false);
+          } else {
+            ref.read(useVesselFitmentProvider.notifier).set(true);
+            ref.read(selectedVesselIdProvider.notifier).select(id);
+          }
+        },
       ),
     );
   }
 }
 
-class _FilterDropdown extends StatelessWidget {
-  final String label;
-  final String? value;
-  final List<String> items;
-  final ValueChanged<String?> onChanged;
+class _ProductGrid extends StatelessWidget {
+  const _ProductGrid({required this.page, required this.onPage});
 
-  const _FilterDropdown({
-    required this.label,
-    required this.value,
-    required this.items,
-    required this.onChanged,
-  });
+  final ProductPage page;
+  final ValueChanged<int> onPage;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
-        borderRadius: BorderRadius.circular(20),
-        color: value != null ? HelmTheme.primary.withOpacity(0.08) : null,
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String?>(
-          value: value,
-          hint: Text(label, style: const TextStyle(fontSize: 13)),
-          isDense: true,
-          icon: const Icon(Icons.arrow_drop_down, size: 18),
-          style: const TextStyle(fontSize: 13, color: Colors.black87),
-          items: [
-            DropdownMenuItem<String?>(
-              value: null,
-              child: Text('All $label'),
+    if (page.items.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Text('No products match these filters.', textAlign: TextAlign.center),
+        ),
+      );
+    }
+    // Card height grows with the user's text size so nothing is clipped.
+    final textScale = MediaQuery.textScalerOf(context).scale(14) / 14;
+    final first = page.offset + 1;
+    final last = page.offset + page.items.length;
+    return CustomScrollView(
+      slivers: [
+        if (page.vessel != null)
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            sliver: SliverToBoxAdapter(
+              child: Text('Fitment checked against ${page.vessel!.label}',
+                  style: Theme.of(context).textTheme.bodySmall),
             ),
-            ...items.map((item) => DropdownMenuItem(
-                  value: item,
-                  child: Text(item),
-                )),
+          ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          sliver: SliverGrid(
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 300,
+              mainAxisExtent: 170 + 230 * textScale,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, i) => ProductCard(product: page.items[i], vesselLabel: page.vessel?.label),
+              childCount: page.items.length,
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.chevron_left),
+                  tooltip: 'Previous page',
+                  onPressed: page.offset > 0
+                      ? () => onPage((page.offset - page.limit).clamp(0, page.total))
+                      : null,
+                ),
+                Text('$first–$last of ${page.total}'),
+                IconButton(
+                  icon: const Icon(Icons.chevron_right),
+                  tooltip: 'Next page',
+                  onPressed: page.hasMore ? () => onPage(page.offset + page.limit) : null,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Short vessel name for a fitment badge from the server's `nickname (…)` label.
+String? vesselShortName(String? label) {
+  if (label == null) return null;
+  final i = label.indexOf(' (');
+  return i > 0 ? label.substring(0, i) : label;
+}
+
+class ProductCard extends StatelessWidget {
+  const ProductCard({super.key, required this.product, this.vesselLabel});
+
+  final Product product;
+  final String? vesselLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      margin: EdgeInsets.zero,
+      child: InkWell(
+        onTap: () => context.go('/products/${product.id}'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              height: 150,
+              child: ProductImage(url: product.primaryImage, semanticLabel: product.name),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (product.brand != null)
+                      Text(product.brand!, style: theme.textTheme.labelMedium),
+                    Text(
+                      product.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const Spacer(),
+                    if (product.fitment != null) ...[
+                      FitmentBadge(
+                        fitment: product.fitment!,
+                        vesselName: vesselShortName(vesselLabel),
+                        dense: true,
+                      ),
+                      const SizedBox(height: 6),
+                    ],
+                    PriceText(
+                      effectiveCents: product.effectivePriceCents,
+                      regularCents: product.priceCents,
+                      onSale: product.onSale,
+                      currency: product.currency,
+                    ),
+                    const SizedBox(height: 4),
+                    StockLabel(inStock: product.inStock, quantity: product.stockQuantity),
+                  ],
+                ),
+              ),
+            ),
           ],
-          onChanged: onChanged,
         ),
       ),
     );

@@ -1,12 +1,10 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+// TODO(client pass 2): rebuild checkout on the commerce contracts (server
+// quotes, idempotent orders, payment intents, local test payments). The cart
+// itself now comes from `features/cart/providers/cart_provider.dart`.
+import 'package:flutter_riverpod/legacy.dart';
+import 'package:helm_marine/core/api/api_error.dart';
 import 'package:helm_marine/core/api/api_service.dart';
-
-/// Cart data provider.
-final cartProvider =
-    FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
-  final apiService = ref.read(apiServiceProvider);
-  return apiService.getCart();
-});
+import 'package:helm_marine/core/session/session.dart';
 
 /// Checkout state managed across the 3-step flow.
 class CheckoutState {
@@ -114,7 +112,7 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
     } catch (e) {
       state = state.copyWith(
         isProcessing: false,
-        error: e.toString(),
+        error: describeError(e),
       );
       return false;
     }
@@ -135,5 +133,6 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
 
 final checkoutProvider =
     StateNotifierProvider<CheckoutNotifier, CheckoutState>((ref) {
-  return CheckoutNotifier(ref.read(apiServiceProvider));
+  // Watching the user-scoped API resets checkout state when the user changes.
+  return CheckoutNotifier(ref.watch(userApiProvider));
 });

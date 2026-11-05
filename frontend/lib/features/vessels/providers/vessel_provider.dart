@@ -1,51 +1,71 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:helm_marine/core/api/api_service.dart';
 import 'package:helm_marine/core/models/vessel.dart';
+import 'package:helm_marine/core/session/session.dart';
 
-/// Provider for the list of user vessels.
-final vesselListProvider = AsyncNotifierProvider<VesselListNotifier, List<Vessel>>(
-  VesselListNotifier.new,
-);
+/// The signed-in user's vessels (primary first, as ordered by the server).
+final vesselListProvider =
+    AsyncNotifierProvider<VesselListNotifier, List<Vessel>>(VesselListNotifier.new);
 
 class VesselListNotifier extends AsyncNotifier<List<Vessel>> {
   @override
   Future<List<Vessel>> build() async {
-    final apiService = ref.read(apiServiceProvider);
-    return apiService.getVessels();
+    final api = ref.watch(userApiProvider);
+    if (ref.watch(currentUserIdProvider) == null) return const [];
+    return api.getVessels();
   }
 
-  Future<void> refresh() async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      final apiService = ref.read(apiServiceProvider);
-      return apiService.getVessels();
-    });
-  }
-
-  Future<Vessel> createVessel(Map<String, dynamic> data) async {
-    final apiService = ref.read(apiServiceProvider);
-    final vessel = await apiService.createVessel(data);
+  Future<Vessel> createVessel(VesselDraft draft) async {
+    final vessel = await ref.read(userApiProvider).createVessel(draft);
     ref.invalidateSelf();
     return vessel;
   }
 
-  Future<Vessel> updateVessel(String id, Map<String, dynamic> data) async {
-    final apiService = ref.read(apiServiceProvider);
-    final vessel = await apiService.updateVessel(id, data);
+  Future<Vessel> updateVessel(String id, VesselDraft draft) async {
+    final vessel = await ref.read(userApiProvider).updateVessel(id, draft);
     ref.invalidateSelf();
+    ref.invalidate(vesselDetailProvider(id));
     return vessel;
   }
 
   Future<void> deleteVessel(String id) async {
-    final apiService = ref.read(apiServiceProvider);
-    await apiService.deleteVessel(id);
+    await ref.read(userApiProvider).deleteVessel(id);
     ref.invalidateSelf();
+    ref.invalidate(vesselDetailProvider(id));
   }
 }
 
-/// Provider for a single vessel detail.
-final vesselDetailProvider =
-    FutureProvider.autoDispose.family<Vessel, String>((ref, id) async {
-  final apiService = ref.read(apiServiceProvider);
-  return apiService.getVessel(id);
+/// One of the signed-in user's vessels (404 for anyone else's).
+final vesselDetailProvider = FutureProvider.autoDispose.family<Vessel, String>((ref, id) {
+  final api = ref.watch(userApiProvider);
+  requireUserId(ref);
+  return api.getVessel(id);
+});
+
+/// The vessel the shop evaluates fitment against: the user's explicit choice,
+/// else their primary vessel, else none. Reset when the user changes.
+final selectedVesselIdProvider =
+    NotifierProvider<SelectedVesselNotifier, String?>(SelectedVesselNotifier.new);
+
+class SelectedVesselNotifier extends Notifier<String?> {
+  @override
+  String? build() {
+    ref.watch(currentUserIdProvider);
+    return null;
+  }
+
+  void select(String? vesselId) => state = vesselId;
+}
+
+/// The resolved shopping vessel (choice → primary → first), or null.
+final shoppingVesselProvider = Provider<Vessel?>((ref) {
+  final vessels = ref.watch(vesselListProvider).value ?? const <Vessel>[];
+  if (vessels.isEmpty) return null;
+  final chosen = ref.watch(selectedVesselIdProvider);
+  for (final v in vessels) {
+    if (v.id == chosen) return v;
+  }
+  for (final v in vessels) {
+    if (v.isPrimary) return v;
+  }
+  return vessels.first;
 });

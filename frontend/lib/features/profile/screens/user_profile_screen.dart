@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:helm_marine/core/auth/auth_provider.dart';
+import 'package:helm_marine/core/auth/auth_controller.dart';
+import 'package:helm_marine/core/models/user.dart';
+import 'package:helm_marine/core/money/money.dart';
+import 'package:helm_marine/core/session/session.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
 import 'package:helm_marine/features/profile/providers/profile_provider.dart';
 
@@ -17,7 +20,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authStateProvider);
+    final authState = AsyncValue<User?>.data(ref.watch(currentUserProvider));
     final ordersState = ref.watch(orderHistoryProvider);
 
     return Scaffold(
@@ -38,7 +41,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                     children: [
                       CircleAvatar(
                         radius: 36,
-                        backgroundColor: HelmTheme.primary.withOpacity(0.1),
+                        backgroundColor: HelmTheme.primary.withValues(alpha: 0.1),
                         child: Text(
                           (user.fullName ?? user.email)
                               .substring(0, 1)
@@ -77,10 +80,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                         width: double.infinity,
                         child: OutlinedButton.icon(
                           onPressed: () async {
-                            await ref
-                                .read(authStateProvider.notifier)
-                                .signOut();
-                            if (context.mounted) context.go('/login');
+                            // The router returns to /login once signed out.
+                            await ref.read(authControllerProvider.notifier).signOut();
                           },
                           icon: const Icon(Icons.logout, size: 18),
                           label: const Text('Log Out'),
@@ -134,7 +135,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                 children: orders.map((order) {
                   final orderId = order['id']?.toString() ?? '';
                   final status = order['status'] as String? ?? '';
-                  final total = (order['total'] as num?)?.toDouble() ?? 0;
+                  final total = order['total_cents'] as int? ?? 0;
                   final createdAt = order['created_at'] as String? ?? '';
 
                   String dateStr = '';
@@ -158,7 +159,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                           ? '$dateStr — ${status.toUpperCase()}'
                           : status.toUpperCase()),
                       trailing: Text(
-                        '\$${total.toStringAsFixed(2)}',
+                        formatCents(total),
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: HelmTheme.primary,
@@ -195,7 +196,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
               subtitle: const Text('Receive order updates and promotions'),
               value: _pushNotifications,
               onChanged: (v) => setState(() => _pushNotifications = v),
-              activeColor: HelmTheme.primary,
+              activeThumbColor: HelmTheme.primary,
               secondary: const Icon(Icons.notifications_outlined),
             ),
           ),
