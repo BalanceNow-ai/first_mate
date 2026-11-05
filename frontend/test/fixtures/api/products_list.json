@@ -1,0 +1,161 @@
+{
+  "items": [
+    {
+      "id": "35161ccf-0a40-4c32-b737-f9b105578eb1",
+      "sku": "FX-IMP-B5AF329D",
+      "name": "Water Pump Impeller Kit",
+      "description": "OEM-equivalent impeller kit.",
+      "brand": "Sierra",
+      "category": "engine_parts",
+      "sub_category": "cooling",
+      "currency": "NZD",
+      "price_cents": 8990,
+      "sale_price_cents": 7490,
+      "effective_price_cents": 7490,
+      "on_sale": true,
+      "stock_quantity": 12,
+      "in_stock": true,
+      "weight_grams": 180,
+      "images": [
+        "https://cdn.example.invalid/impeller.jpg"
+      ],
+      "specifications": {
+        "vanes": 6
+      },
+      "oem_part_numbers": [
+        "47-43026Q06"
+      ],
+      "part_role": "impeller",
+      "fitment_scope": "specific",
+      "dangerous_goods": false,
+      "is_active": true,
+      "created_at": "2026-11-05T06:14:37.214705Z",
+      "updated_at": "2026-11-05T06:14:37.214711Z",
+      "fitment": {
+        "status": "verified_fit",
+        "vessel_id": "c9371621-ec4b-4485-990e-0492c2b070e7",
+        "message": "Fits Sea Biscuit (2018 Haines Hunter SF600)",
+        "reasons": [
+          "engine matches verified fitment"
+        ],
+        "matched_rule_ids": [
+          "3a8882db-d511-451c-84ae-f56d90660f80"
+        ]
+      }
+    },
+    {
+      "id": "7cfe5887-c503-4ae9-89f8-e60145c75231",
+      "sku": "FX-FLT-B5AF329D",
+      "name": "Fuel Filter Element",
+      "description": null,
+      "brand": "Racor",
+      "category": "engine_parts",
+      "sub_category": "fuel",
+      "currency": "NZD",
+      "price_cents": 3450,
+      "sale_price_cents": null,
+      "effective_price_cents": 3450,
+      "on_sale": false,
+      "stock_quantity": 4,
+      "in_stock": true,
+      "weight_grams": 250,
+      "images": [],
+      "specifications": null,
+      "oem_part_numbers": [
+        "S3213"
+      ],
+      "part_role": "fuel_filter",
+      "fitment_scope": "specific",
+      "dangerous_goods": false,
+      "is_active": true,
+      "created_at": "2026-11-05T06:14:37.217510Z",
+      "updated_at": "2026-11-05T06:14:37.217514Z",
+      "fitment": {
+        "status": "verified_mismatch",
+        "vessel_id": "c9371621-ec4b-4485-990e-0492c2b070e7",
+        "message": "Does not fit Sea Biscuit (2018 Haines Hunter SF600)",
+        "reasons": [
+          "verified for Yamaha F150 engines"
+        ],
+        "matched_rule_ids": []
+      }
+    },
+    {
+      "id": "d44c8287-1ef9-4b10-8642-d11c06778851",
+      "sku": "FX-TIE-B5AF329D",
+      "name": "UV Stabilised Cable Ties (100)",
+      "description": null,
+      "brand": "Helm",
+      "category": "hardware",
+      "sub_category": null,
+      "currency": "NZD",
+      "price_cents": 1299,
+      "sale_price_cents": null,
+      "effective_price_cents": 1299,
+      "on_sale": false,
+      "stock_quantity": 0,
+      "in_stock": false,
+      "weight_grams": 300,
+      "images": [],
+      "specifications": null,
+      "oem_part_numbers": [],
+      "part_role": null,
+      "fitment_scope": "universal",
+      "dangerous_goods": false,
+      "is_active": true,
+      "created_at": "2026-11-05T06:14:37.219257Z",
+      "updated_at": "2026-11-05T06:14:37.219261Z",
+      "fitment": {
+        "status": "universal",
+        "vessel_id": "c9371621-ec4b-4485-990e-0492c2b070e7",
+        "message": "Suitable for any vessel, including Sea Biscuit (2018 Haines Hunter SF600)",
+        "reasons": [
+          "product is verified as universal"
+        ],
+        "matched_rule_ids": []
+      }
+    },
+    {
+      "id": "dc04109b-d3c5-43bd-baa0-50ca41e9da5d",
+      "sku": "FX-FLR-B5AF329D",
+      "name": "Marine Distress Flares (pack of 3)",
+      "description": null,
+      "brand": "Pains Wessex",
+      "category": "safety",
+      "sub_category": null,
+      "currency": "NZD",
+      "price_cents": 14900,
+      "sale_price_cents": null,
+      "effective_price_cents": 14900,
+      "on_sale": false,
+      "stock_quantity": 6,
+      "in_stock": true,
+      "weight_grams": 900,
+      "images": [],
+      "specifications": null,
+      "oem_part_numbers": [],
+      "part_role": null,
+      "fitment_scope": "unspecified",
+      "dangerous_goods": true,
+      "is_active": true,
+      "created_at": "2026-11-05T06:14:37.220294Z",
+      "updated_at": "2026-11-05T06:14:37.220297Z",
+      "fitment": {
+        "status": "unknown",
+        "vessel_id": "c9371621-ec4b-4485-990e-0492c2b070e7",
+        "message": "Fit for Sea Biscuit (2018 Haines Hunter SF600) is unknown \u2014 no verified fitment data",
+        "reasons": [
+          "no verified fitment data for this product"
+        ],
+        "matched_rule_ids": []
+      }
+    }
+  ],
+  "total": 4,
+  "offset": 0,
+  "limit": 20,
+  "vessel": {
+    "id": "c9371621-ec4b-4485-990e-0492c2b070e7",
+    "label": "Sea Biscuit (2018 Haines Hunter SF600)"
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "detail": "Only 12 available",
+  "code": "insufficient_stock",
+  "available_quantity": 12
+}
