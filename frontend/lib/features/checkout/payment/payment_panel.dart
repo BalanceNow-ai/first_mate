@@ -12,6 +12,8 @@ import 'package:helm_marine/core/theme/helm_theme.dart';
 import 'package:helm_marine/core/widgets/state_views.dart';
 import 'package:helm_marine/features/checkout/payment/payment_controller.dart';
 import 'package:helm_marine/features/checkout/payment/stripe_payment.dart';
+import 'package:helm_marine/features/checkout/payment/stripe_web_bridge.dart';
+import 'package:helm_marine/features/checkout/payment/web_card_payment_form.dart';
 import 'package:helm_marine/features/orders/widgets/order_widgets.dart';
 
 /// Pays for one order: payment methods from `/config/public`, the provider's
@@ -302,7 +304,36 @@ class _PaymentPanelState extends ConsumerState<PaymentPanel> {
         },
       ));
     } else if (payments.provider == 'stripe') {
-      if (!stripeSupportedHere) {
+      final webBridge = ref.watch(stripeWebBridgeFactoryProvider);
+      if (webBridge != null) {
+        // Web: Stripe.js Payment Element (card only), loaded on demand.
+        if (intent == null) {
+          out.add(const LoadingView(message: 'Preparing secure card payment…'));
+        } else {
+          if (phase == PaymentPhase.requiresAction) {
+            out.add(const _Notice(
+              icon: Icons.verified_user,
+              color: HelmTheme.warning,
+              title: 'Your bank needs you to confirm this payment',
+              message: 'Pay again with the card below to complete authentication.',
+            ));
+            out.add(const SizedBox(height: 12));
+          }
+          out.add(WebCardPaymentForm(
+            key: ValueKey('web-card-${intent.clientSecret}'),
+            createBridge: webBridge,
+            orderId: order.id,
+            clientSecret: intent.clientSecret,
+            publishableKey: intent.publishableKey ?? payments.stripePublishableKey,
+            payLabel: 'Pay ${formatCents(order.totalCents)}',
+            disabled: state.busy || state.waiting || phase == PaymentPhase.processing,
+            onSubmitted: () async {
+              if (mounted) setState(() => _retrying = false);
+              await _controller.awaitServerResult();
+            },
+          ));
+        }
+      } else if (!stripeSupportedHere) {
         out.add(const _Notice(
           icon: Icons.web_asset_off,
           color: HelmTheme.warning,
