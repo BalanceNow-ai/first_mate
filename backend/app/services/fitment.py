@@ -22,7 +22,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from decimal import Decimal
 
-from sqlalchemy import and_, exists, func, or_, select
+from sqlalchemy import and_, exists, false, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -312,7 +312,7 @@ def candidate_clause(profile: VesselProfile):
 
     rule_match = or_(
         n(ProductCompatibility.vessel_make) == norm(profile.make),
-        n(ProductCompatibility.engine_make).in_(engine_makes) if engine_makes else False,
+        n(ProductCompatibility.engine_make).in_(engine_makes) if engine_makes else false(),
         and_(
             ProductCompatibility.equipment_category_id.isnot(None),
             or_(ProductCompatibility.equipment_make.is_(None), n(ProductCompatibility.equipment_make).in_(fact_makes))

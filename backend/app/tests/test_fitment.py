@@ -62,3 +62,21 @@ async def test_vessel_rule_year_range_and_universal(customer):
     assert (await _eval(u, vessel)).status == "universal"
     none = await create_product(fitment_scope="unspecified")
     assert (await _eval(none, vessel)).status == "unknown"
+
+
+async def test_candidate_clause_prefilters_by_make(customer):
+    from sqlalchemy import select
+
+    from app.models.product import Product
+
+    vessel = await create_vessel(customer.id, engine_make=None, engine_model=None)
+    fit = await create_product(fitment_scope="specific", name="Hull rule product")
+    await add_fitment_rule(fit.id, engine_make=None, engine_model=None, vessel_make="Stabicraft")
+    other = await create_product(fitment_scope="specific", name="Other make")
+    await add_fitment_rule(other.id, engine_make=None, engine_model=None, vessel_make="Rayglass")
+    universal = await create_product(fitment_scope="universal", name="Zip ties")
+    async with async_session() as db:
+        v = await db.get(Vessel, vessel.id)
+        profile = await fitment.load_vessel_profile(db, v)
+        ids = set((await db.execute(select(Product.id).where(fitment.candidate_clause(profile)))).scalars())
+    assert ids == {fit.id, universal.id}
