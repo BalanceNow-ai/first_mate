@@ -1,0 +1,42 @@
+[
+  {
+    "id": "synthetic-kingfish-masterclass",
+    "title": "[SYNTHETIC] Hauraki Gulf Kingfish Masterclass",
+    "description": "Synthetic local-development fixture modelled on the spec's example catalogue. Not a real, bookable experience.",
+    "points_cost": 150000,
+    "location": "Hauraki Gulf",
+    "capacity": 4,
+    "available": true,
+    "is_synthetic": true
+  },
+  {
+    "id": "synthetic-scallop-sauvignon",
+    "title": "[SYNTHETIC] Marlborough Sounds Scallop & Sauvignon Trip",
+    "description": "Synthetic local-development fixture modelled on the spec's example catalogue. Not a real, bookable experience.",
+    "points_cost": 100000,
+    "location": "Marlborough Sounds",
+    "capacity": 2,
+    "available": true,
+    "is_synthetic": true
+  },
+  {
+    "id": "synthetic-test-day-trip",
+    "title": "[SYNTHETIC] Test Harbour Day Trip",
+    "description": "Low-cost synthetic entry for exercising the redemption workflow locally. Not a real, bookable experience.",
+    "points_cost": 500,
+    "location": "Waitemata Harbour",
+    "capacity": 2,
+    "available": true,
+    "is_synthetic": true
+  },
+  {
+    "id": "synthetic-sold-out",
+    "title": "[SYNTHETIC] Fiordland Discovery Voyage (unavailable)",
+    "description": "Synthetic entry marked unavailable to exercise the sold-out path.",
+    "points_cost": 500000,
+    "location": "Fiordland",
+    "capacity": 2,
+    "available": false,
+    "is_synthetic": true
+  }
+]
