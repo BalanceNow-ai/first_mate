@@ -105,3 +105,11 @@ Commands, environment, SHA, results.
 
 - 2026-11-05: preflight complete; heads verified (`main@49877e2`,
   `claude/helm-marine-platform-Vrt0W@421deef`, unchanged since review); plan recorded.
+- 2026-11-05: Phase A foundation landed on `claude/new-session-bkkwp6` (`36d0251`…`85332b0`):
+  config validation, verified auth, roles, schema + migrations 0001/0002 with legacy-data
+  upgrade proof, cents, cart service, central fitment, Celery registry, CLI, PostgreSQL
+  tests (55 passing). Parallel workstreams started from `1934508`: commerce,
+  catalogue/vessel data, knowledge/First Mate, rewards/delivery/notifications, Flutter
+  foundation, build/deployment. Next: integrate workstream branches, add a merge
+  migration if several add revisions, Flutter pass 2 (checkout, chat, checklists,
+  rewards, dispatch), independent review, full validation, land on `main`.
