@@ -153,7 +153,7 @@ containerised stack (§5), `M:` migration test.
 | B01 | Undeclared Gunicorn | Declared (`gunicorn`, `uvicorn-worker`), hashed locks | image build | RV |
 | B02 | Docker builder tests needed absent files | Tests run outside the image or in the optional `test` target | image builds (prod, dev, test target) | RV |
 | B03 | Real migrations; empty install and representative upgrade | 0001 (exact Phase-7 DDL), 0002 (data-preserving backfills), 0003 | M:test_migrations (legacy data upgrade, no drift, constraint names), J:empty-DB migrate in containers | RV |
-| B04 | Flutter platform scaffolding; missing font | web/android/ios/macos/windows generated; unused font removed | flutter build web | RV (store signing/icons: DFS with brand assets) |
+| B04 | Flutter platform scaffolding; missing font | web/android/ios/macos/windows generated; unused font removed; Android minSdk 26 (required by sentry_flutter 10); Stripe push-provisioning excluded from lint classpaths (private Google SDK) | web release build; **Android release APK built** (`flutter build apk --release`, minSdk 26 / target 36, INTERNET permission) | RV for web + Android; iOS/macOS/Windows builds: BLK (need macOS/Xcode or Windows hosts; scaffolding committed); store signing keys/icons: DFS with brand assets |
 | B05 | Locked dependencies | `requirements*.lock` (hashed), `pubspec.lock` | builds | RV |
 | B06 | Celery tasks referenced but absent | All scheduled tasks implemented and registered; heartbeat → `/ready` | B:test_tasks_ops, container logs | RV |
 | B07 | Typesense collection and sync | Collection provisioning, full + incremental sync, Postgres fallback | B:test_search*, container `sync-search` | RV |
@@ -218,6 +218,7 @@ carriers were exercised only through fakes at the SDK/HTTP boundary or local sub
 | Backend lint/format | `ruff check app alembic && ruff format --check app alembic` | clean |
 | Flutter static analysis | `flutter analyze` | No issues |
 | Flutter tests | `flutter test` | **303 passed** (incl. contract tests on real server payloads) |
+| Android release APK | `flutter build apk --release` (production defines; local Gradle init script mirrors Maven Central because repo.maven.apache.org rate-limited this sandbox) | built `app-release.apk` (82.5 MB), minSdk 26, targetSdk 36, INTERNET permission; signed with the debug key (no release keystore provided) |
 | Web release build (production defines) | `flutter build web --release --dart-define=API_BASE_URL=https://… APP_ENV=production` | built; `main.dart.js` contains 0 × `localhost:8000` and the configured https API |
 | Web image preflight | `docker build --target preflight …` | refuses http URLs, loopback and missing anon key for production; accepts valid https config |
 | Clean stack install | `scripts/local_stack.sh reset --yes && scripts/local_stack.sh up && … seed && … cli sync-search` | exit 0; empty DB migrated to 0003; seed-demo; 32 products indexed; `/ready` → database 0003, redis ok, celery heartbeat fresh |
@@ -295,3 +296,14 @@ role/label-driven browser journeys; **no formal WCAG 2.1 AA audit was performed*
   foundation, build/deployment. Next: integrate workstream branches, add a merge
   migration if several add revisions, Flutter pass 2 (checkout, chat, checklists,
   rewards, dispatch), independent review, full validation, land on `main`.
+- 2026-11-05: all workstreams integrated (backend: commerce, catalogue/vessel data,
+  knowledge/First Mate, rewards/delivery/notifications, build/deploy; client: foundation,
+  catalogue/vessels/checklists, checkout/orders/Helm Dash/dispatch, First Mate/rewards/
+  admin, Stripe web Payment Element). Two independent reviews (backend 14 findings,
+  client 12 findings) fixed. Final validation recorded in §5; Android release APK built;
+  PR BalanceNow-ai/first_mate#8 opened for merge into `main`.
+- **Next (outside this programme's authority):** provide the §6 credentials in a
+  staging environment and run live validation of Stripe (incl. 3-D Secure and webhooks),
+  Supabase JWKS, OpenAI quality on licensed content, Resend/FCM, Strapi; provision
+  hosting/TLS/DNS; sign mobile builds; formal WCAG audit; production load test.
+
