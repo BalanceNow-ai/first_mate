@@ -12,7 +12,7 @@ import uuid
 from typing import Literal
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import func, select
+from sqlalchemy import String, cast, func, literal, select, union_all
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
@@ -34,21 +34,30 @@ SearchSort = Literal["relevance", "name", "price_asc", "price_desc", "newest"]
 
 
 async def _postgres_facets(db: AsyncSession, filters: ProductFilters) -> dict[str, list[FacetValue]]:
+    """All facet counts in one round-trip (UNION ALL of the four groupings)."""
     clauses = filters.clauses()
-    out: dict[str, list[FacetValue]] = {}
-    for name, col in (("category", Product.category), ("brand", Product.brand), ("part_role", Product.part_role)):
-        rows = (
-            await db.execute(
-                select(col, func.count())
-                .where(*clauses, col.isnot(None))
-                .group_by(col)
-                .order_by(func.count().desc(), col)
-            )
-        ).all()
-        out[name] = [FacetValue(value=v, count=c) for v, c in rows]
+    parts = [
+        select(literal(name).label("facet"), cast(col, String).label("value"), func.count().label("n"))
+        .where(*clauses, col.isnot(None))
+        .group_by(col)
+        for name, col in (("category", Product.category), ("brand", Product.brand), ("part_role", Product.part_role))
+    ]
     in_stock = Product.stock_quantity > 0
-    rows = (await db.execute(select(in_stock, func.count()).where(*clauses).group_by(in_stock))).all()
-    out["in_stock"] = [FacetValue(value=bool(v), count=c) for v, c in sorted(rows, key=lambda r: not r[0])]
+    parts.append(
+        select(literal("in_stock").label("facet"), cast(in_stock, String).label("value"), func.count().label("n"))
+        .where(*clauses)
+        .group_by(in_stock)
+    )
+    rows = (await db.execute(union_all(*parts))).all()
+    out: dict[str, list[FacetValue]] = {"category": [], "brand": [], "part_role": [], "in_stock": []}
+    for facet, value, n in rows:
+        if facet == "in_stock":
+            out[facet].append(FacetValue(value=value == "true", count=n))
+        else:
+            out[facet].append(FacetValue(value=value, count=n))
+    for name in ("category", "brand", "part_role"):
+        out[name].sort(key=lambda f: (-f.count, f.value))
+    out["in_stock"].sort(key=lambda f: not f.value)
     return out
 
 
@@ -61,29 +70,24 @@ async def _postgres_search(db, filters, sort, offset, limit, profile, compatible
 
 async def _typesense_search(db, filters, sort, offset, limit, profile, compatible_only, client=None):
     settings = get_settings()
-    own = client is None
-    client = client or search_index.TypesenseClient.from_settings(settings)
+    client = client or search_index.shared_search_client()
     notice = None
-    try:
-        window = settings.typesense_compatible_window if (profile is not None and compatible_only) else None
-        params = {
-            "q": (filters.q or "").strip() or "*",
-            "query_by": search_index.QUERY_BY,
-            "facet_by": ",".join(search_index.FACET_FIELDS),
-            "offset": 0 if window else offset,
-            "limit": window or limit,
-        }
-        fb = search_index.filter_by(filters, profile, compatible_only)
-        if fb:
-            params["filter_by"] = fb
-        if sort == "price_asc":
-            params["sort_by"] = "effective_price_cents:asc"
-        elif sort == "price_desc":
-            params["sort_by"] = "effective_price_cents:desc"
-        raw = await client.search(params)
-    finally:
-        if own:
-            await client.close()
+    window = settings.typesense_compatible_window if (profile is not None and compatible_only) else None
+    params = {
+        "q": (filters.q or "").strip() or "*",
+        "query_by": search_index.QUERY_BY,
+        "facet_by": ",".join(search_index.FACET_FIELDS),
+        "offset": 0 if window else offset,
+        "limit": window or limit,
+    }
+    fb = search_index.filter_by(filters, profile, compatible_only)
+    if fb:
+        params["filter_by"] = fb
+    if sort == "price_asc":
+        params["sort_by"] = "effective_price_cents:asc"
+    elif sort == "price_desc":
+        params["sort_by"] = "effective_price_cents:desc"
+    raw = await client.search(params)
 
     try:
         hit_ids = [uuid.UUID(h["document"]["id"]) for h in raw.get("hits", [])]

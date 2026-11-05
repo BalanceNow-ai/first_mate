@@ -1,0 +1,11 @@
+requests=300 concurrency=10 base=http://localhost:18080
+endpoint                                          p50     p95     p99  target  err  result
+GET /products (public, page 24)                  30.6    50.8    95.4     200    0  PASS
+GET /products (vessel, compatible_only)          60.6    93.1   181.1     200    0  PASS
+GET /products/{id}                               17.8    33.5    44.1     200    0  PASS
+GET /search/products?q=filter                    42.8    70.1    77.8     100    0  PASS
+GET /search/products?q=filter (vessel)           50.1    92.3   108.8     100    0  PASS
+GET /cart                                        20.5    39.9    44.8     200    0  PASS
+GET /vessels                                     23.4    33.9    38.4     200    0  PASS
+GET /orders                                      29.8    44.3    49.9     200    0  PASS
+GET /loyalty/points                              60.3    97.0   111.4     200    0  PASS

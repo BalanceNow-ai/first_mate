@@ -361,3 +361,24 @@ def parse_facets(raw: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
             {"value": c.get("value"), "count": int(c.get("count", 0))} for c in facet.get("counts", [])
         ]
     return out
+
+
+_shared_clients: dict[int, TypesenseClient] = {}
+
+
+def shared_search_client() -> TypesenseClient:
+    """A keep-alive client reused for customer searches on the current event loop.
+
+    Avoids a new TCP connection per search. Keyed by loop so clients never cross
+    event loops (tests run many)."""
+    import asyncio
+
+    loop = asyncio.get_running_loop()
+    key = id(loop)
+    client = _shared_clients.get(key)
+    if client is None or client._client.is_closed:
+        if len(_shared_clients) > 32:  # loops that have gone away
+            _shared_clients.clear()
+        client = TypesenseClient.from_settings()
+        _shared_clients[key] = client
+    return client
