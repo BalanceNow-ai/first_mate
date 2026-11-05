@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Helm local stack</title>
+  <style>
+    body { font: 16px/1.5 system-ui, sans-serif; max-width: 40rem; margin: 3rem auto; padding: 0 1rem; color: #1b2a3a; }
+    code { background: #eef2f6; padding: .1rem .3rem; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <h1>Helm local stack — placeholder</h1>
+  <p>The Flutter web bundle was not built (the build failed or Flutter is not installed),
+     so the proxy is serving this placeholder. The API and auth endpoints work:</p>
+  <ul>
+    <li><a href="/health"><code>/health</code></a> — API liveness</li>
+    <li><a href="/ready"><code>/ready</code></a> — readiness (database, redis, worker heartbeat)</li>
+    <li><code>/api/v1/…</code> — API &nbsp; <code>/auth/v1/…</code> — local Supabase GoTrue</li>
+  </ul>
+  <p>Re-run <code>scripts/local_stack.sh web</code> after fixing the Flutter build.</p>
+</body>
+</html>
