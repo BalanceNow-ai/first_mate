@@ -1554,6 +1554,35 @@
     "title": "ChatResponse",
     "type": "object"
    },
+   "CheckedClaim": {
+    "properties": {
+     "evidence": {
+      "items": {
+       "$ref": "#/components/schemas/ClaimEvidence"
+      },
+      "title": "Evidence",
+      "type": "array"
+     },
+     "refs": {
+      "items": {
+       "type": "integer"
+      },
+      "title": "Refs",
+      "type": "array"
+     },
+     "text": {
+      "title": "Text",
+      "type": "string"
+     }
+    },
+    "required": [
+     "text",
+     "refs",
+     "evidence"
+    ],
+    "title": "CheckedClaim",
+    "type": "object"
+   },
    "ChecklistItemResponse": {
     "properties": {
      "alternatives": {
@@ -1995,6 +2024,36 @@
      "is_synthetic"
     ],
     "title": "Citation",
+    "type": "object"
+   },
+   "ClaimEvidence": {
+    "description": "The admitted passage unit that supports one checked statement (decision D21).",
+    "properties": {
+     "applicability": {
+      "title": "Applicability",
+      "type": "string"
+     },
+     "applies_to": {
+      "additionalProperties": true,
+      "title": "Applies To",
+      "type": "object"
+     },
+     "passage": {
+      "title": "Passage",
+      "type": "string"
+     },
+     "ref": {
+      "title": "Ref",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "ref",
+     "passage",
+     "applicability",
+     "applies_to"
+    ],
+    "title": "ClaimEvidence",
     "type": "object"
    },
    "CompatibilityResponse": {
@@ -4586,9 +4645,22 @@
    },
    "Grounding": {
     "properties": {
+     "claims": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/CheckedClaim"
+      },
+      "title": "Claims",
+      "type": "array"
+     },
      "note": {
       "title": "Note",
       "type": "string"
+     },
+     "removed_statements": {
+      "default": 0,
+      "title": "Removed Statements",
+      "type": "integer"
      },
      "specialists_consulted": {
       "items": {
@@ -7625,6 +7697,11 @@
      "points_owed": {
       "default": 0,
       "title": "Points Owed",
+      "type": "integer"
+     },
+     "points_per_dollar": {
+      "default": 100,
+      "title": "Points Per Dollar",
       "type": "integer"
      },
      "points_value_cents": {
@@ -17664,7 +17741,27 @@
   },
   "/api/v1/loyalty/redeem/experience": {
    "post": {
+    "description": "Redeem points for a Signature Experience (validated against a fresh catalogue).\nSend an ``Idempotency-Key`` so a repeated or retried request never debits twice.",
     "operationId": "redeem_experience_api_v1_loyalty_redeem_experience_post",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "idempotency-key",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 200,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Idempotency-Key"
+      }
+     }
+    ],
     "requestBody": {
      "content": {
       "application/json": {

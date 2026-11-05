@@ -6,6 +6,11 @@ started 2026-11-05 against `main@49877e2`. It supersedes the phase prompts in
 review approvals and the historical "115 passed" figure are **not** evidence for
 anything recorded here; every status below cites fresh validation.
 
+**2026-11-06 correction increment.** An independent review of the landed
+`main@f4f3a97` reproduced five defects (FM-01…FM-05, §3.7). The affected rows (V05, V09,
+V10, C08, R01–R03, N01–N03) were reopened and are re-closed below only with the new
+proof; H06 and H07 are split into what exists and what is not implemented.
+
 Status vocabulary (one per row):
 
 - `RESOLVED_AND_VERIFIED` — implemented and proven by executed tests / journeys listed.
@@ -104,7 +109,7 @@ containerised stack (§5), `M:` migration test.
 | C03/C04 | Reservation lifecycle; no oversell; release once; recoverable carts | Conditional decrement reservations; consume/release/restock exactly once; expiry task (SKIP LOCKED) restores cart + entitlement | B:test_commerce_lifecycle (concurrent last item, expiry twice, cancel) | RV |
 | C05 | Idempotent order and intent | `Idempotency-Key` checkout; intent reuse; per-request refund keys | B:test_commerce_checkout, test_payments_*, J:api_journey (double tap) | RV |
 | C06/C07 | Authentic webhooks; identity/amount/currency/binding; duplicates/out-of-order | Signature always required; PaymentEvent dedupe; binding + amount + currency checks; deferral of refunds before success | B:test_payments_local, test_payments_stripe, J:api_journey (unsigned rejected) | RV (Stripe live: EXT) |
-| C08 | Refunds and partial refunds | Cumulative refund deltas; restock only for full pre-dispatch refunds; points reversed proportionally (owed when spent); undispatched Helm Dash job cancelled | B:test_commerce_lifecycle, test_loyalty_ledger, review follow-ups | RV |
+| C08 | Refunds and partial refunds | Cumulative refund deltas; restock only for full pre-dispatch refunds; earned-point reversal, crew-bonus recomputation and discount-point return run independently (FM-03); undispatched Helm Dash job cancelled; one global lock order (D22, FM-05) | B:test_commerce_lifecycle, test_loyalty_ledger, test_refund_compensation (signed refund events, replays, racing redemption), test_lock_order (two-connection races), review follow-ups | RV (reopened by FM-03/FM-05, re-closed) |
 | C09 | Server-owned quotes; click & collect without courier pricing | `DeliveryQuote` bound to user/cart/type/destination/expiry/single use; DG restriction; operating areas | B:test_shipping_quotes, J:commerce journey | RV (courier rates use a configured rate card; carrier APIs EXT) |
 | C10 | Card data with Stripe; pending/3DS/failed; client success never marks paid | Server-confirmed status only; local TEST MODE emits signed events through the real webhook path; Stripe PaymentSheet (mobile) and Payment Element (web) | J:commerce (decline → retry → paid), F:checkout tests | EXT (live Stripe keys) |
 | C11 | Afterpay/Laybuy only if supported | Not offered; disabled with recorded reason (D7) | B:test_system, F:checkout | RV (as disabled) |
@@ -118,12 +123,12 @@ containerised stack (§5), `M:` migration test.
 | V02 | HIN capture/decoding/manual fallback; unknown never invented | `services/hin.py`; manufacturer only from recorded MIC; suggestion-only | B:test_hin*, J:catalogue (synthetic MIC decode, explicit accept) | RV |
 | V03 | Equipment changes; bounded curation | Owner edits reset verification; admin approve/reject queue; 1,000 CP once per vessel | B:test_equipment*, review regression P5, J:engagement (admin verifies rule) | RV |
 | V04 | Source-attributed seed data; synthetic marked | Brand names from the spec table without MIC codes; synthetic manufacturer/products/fitment/knowledge flagged synthetic; no licensed manuals ingested | B:seed tests | RV (real NZ fleet data: DFS via the curation workflow) |
-| V05 | Central fitment; unknown never "fits" | `services/fitment.py` used by catalogue, detail, search, AI, checklists | B:test_fitment, test_products_*, J:api_journey, J:engagement (engine change) | RV |
+| V05 | Central fitment; unknown never "fits"; no declared restriction ignored | `services/fitment.py` used by catalogue, detail, search, AI, checklists; one rule-scope contract (`core/fitment_rules.py`) in request validation, verification, DB CHECKs (0004) and — fail closed for legacy rows — the evaluator; `cli fitment-audit` | B:test_fitment, test_fitment_scope_contract (schema → DB → verify → detail/list/search/AI), test_products_*, J:api_journey, J:engagement (engine change) | RV (reopened by FM-02, re-closed) |
 | V06 | Ingestion, embeddings, pgvector, citations; offline substitute | Licence-tracked sources, admission, chunking, HNSW cosine retrieval; `local_hash` + `local_extractive` test-only | B:test_rag_core, test_ai_chat | RV (OpenAI quality: EXT) |
 | V07 | Keyword stub / `RAGDocument.title` | Replaced by retrieval service; legacy chunks never retrieved | B:test_rag_core, M:test_migrations | RV |
 | V08 | Domain specialists | Shared parameterised registry (12 domains) | B:test_ai_chat | RV |
-| V09 | Context binding; untrusted data | Tools bound to user/vessel; delimited tool output; injection filter | B:test_ai_openai_provider (injection), review | RV |
-| V10 | Absent/conflicting evidence | `insufficient_evidence` / `conflicting` with clarifying question; per-clause fit-claim guard | B:test_ai_chat, review regressions P3 | RV |
+| V09 | Context binding; untrusted data; a citation must support its sentence | Tools bound to user/vessel; delimited tool output; injection filter; claim/evidence support contract (D21): a claim survives only when a passage its own sentence cites contains its numbers, units, identifiers and polarity; answers carry the supporting passage per claim | B:test_ai_openai_provider (injection), test_grounding_support (review probes G1–G4, 9 adversarial classes, both providers through the API) | RV (reopened by FM-01, re-closed; the check is lexical — see D21 limits; OpenAI answer quality: EXT) |
+| V10 | Absent/conflicting/unsupported evidence | Non-grounded answers are a controlled limitation + clarifying question (the draft is discarded; only catalogue/fitment-checked product statements remain); evidence, applicability, fitment and proposals revalidated at answer time | B:test_ai_chat, test_grounding_support (revoked source / changed engine during the model call), review regressions P3 | RV (reopened by FM-01, re-closed) |
 | V11 | Structured product refs; explicit-intent cart action | `products[]` with fitment; `actions[]` executed only via `POST /cart/items` on tap | B:test_ai_chat, J:engagement, J:api_journey | RV |
 | VA | Acceptance example (source → cite → verified stocked product → add; change engine / remove source) | As specified | B:test_ai_chat::acceptance, test_integration_journeys, J:engagement | RV |
 
@@ -132,7 +137,7 @@ containerised stack (§5), `M:` migration test.
 | ID | Finding / requirement | Implementation | Proof | Status |
 |---|---|---|---|---|
 | K01–K05 | Tiers + inheritance + tailoring; persistence; fitment linking; predictable add-missing; delete/regenerate/export; spares ≠ compliance | `services/checklists.py`, export HTML/CSV with disclaimer | B:test_checklists*, J:catalogue (reload persistence, add-missing 7 then 0, exports) | RV |
-| R01–R03 | Award once from authentic paid events; ledger; refund reversals; concurrency-safe; paid spend; NZ periods | Locked ledger with idempotency keys; owed points; bonus clawback | B:test_loyalty_*, review regressions P1/P2, follow-ups | RV |
+| R01–R03 | Award once from authentic paid events; ledger; refund reversals; concurrency-safe; paid spend; NZ periods | Locked ledger with idempotency keys; owed points; bonus clawback on every refund that lowers net spend; discount points returned once on full refund (D14) independent of earned points; multi-account paths lock in one order (D22) | B:test_loyalty_*, test_refund_compensation, test_lock_order, review regressions P1/P2, follow-ups | RV (reopened by FM-03/FM-05, re-closed) |
 | R04 | Multiple crews | One crew per user (unique), deterministic captain hand-over | B:test_crew_rules | RV |
 | R05 | Discount entitlement single use; experience fulfilment record | `DiscountEntitlement` reserved→consumed; `ExperienceRedemption` lifecycle | B:test_loyalty_redemption, test_integration_journeys | RV |
 | R06 | Team management and redemption UI | Crew Rewards tabs | J:engagement (crew + invite accepted in second browser) | RV |
@@ -141,10 +146,12 @@ containerised stack (§5), `M:` migration test.
 | H03 | Dispatch/operator UI and transitions | Responsive web consoles; transition table; active-operator checks | J:commerce (assign → accept → picked up → delivered) | RV |
 | H04 | Authentic tracking; simulation labelled; no interpolation | Latest reported position only; `simulated` labelled | J:commerce (browser geolocation reading shown as device report) | RV |
 | H05 | Operating areas / unavailable states | Admin-managed areas; outside area → 422 | B:test_shipping_quotes | RV |
-| H06 | Courier rates, label/tracking boundaries | Rate card + adapter boundary; local contract adapter (test shipments) | B:test_commerce_lifecycle (shipment) | EXT (NZ Post/Aramex credentials + docs) |
-| H07 | Payout records/reconciliation; live disabled | `OperatorPayout` (`rate_unconfigured` without share), approval, reconciliation | B:test_dispatch_admin | EXT (live payouts disabled; Stripe Connect not implemented) |
+| H06a | Courier rates; manual fulfilment and tracking entry | Configured rate card; staff record carrier + tracking number; local contract adapter (test shipments, local environments only) | B:test_commerce_lifecycle (shipment) | RV (rate card / manual fulfilment) |
+| H06b | Live NZ Post / Aramex booking, labels and tracking | **Not implemented.** `courier.get_adapter` refuses outside local environments; start-up rejects live booking | config tests | BLK (needs carrier API documentation and test accounts to build against — not merely credentials) |
+| H07a | Payout records, approval, reconciliation | `OperatorPayout` (`rate_unconfigured` without share), approval, reconciliation | B:test_dispatch_admin | RV (records only; no money moves) |
+| H07b | Live operator payouts | **Not implemented** (no Stripe Connect provider); start-up rejects live payouts | config tests | BLK (needs a Stripe Connect platform account and a payout design decision) |
 | H08 | No certification/DG claims | DG items restricted to configured delivery types; certification stored as unverified text | B:test_shipping_quotes | RV |
-| N01–N03 | Outbox, retries, preferences, reminders, CMS; local sinks; handlers | Outbox with backoff/dead-letter; Resend/FCM adapters; Mailpit sink locally | B:test_notifications_*, J:api_journey (order email in Mailpit) | RV locally; EXT (Resend/FCM credentials) |
+| N01–N03 | Outbox, retries, preferences, reminders, CMS; local sinks; handlers | Outbox with backoff/dead-letter; Resend/FCM adapters; per-device push outcomes — retries go only to devices still pending (FM-04); claim lease renewed per row and fenced by a lease token | B:test_notifications_*, test_push_delivery_outcomes (200/500, 200/429, timeout, invalid, permanent, multi-attempt, expired-lease race), J:api_journey (order email in Mailpit) | RV locally (reopened by FM-04, re-closed); EXT (Resend/FCM credentials). Guarantee: email at-least-once with provider idempotency; push at-least-once per device — a provider call still in flight when its lease expires can be repeated (FCM has no idempotency key), a retry never re-sends to a device recorded as delivered |
 
 ### 3.6 Build and deployment (brief §9)
 
@@ -152,7 +159,7 @@ containerised stack (§5), `M:` migration test.
 |---|---|---|---|---|
 | B01 | Undeclared Gunicorn | Declared (`gunicorn`, `uvicorn-worker`), hashed locks | image build | RV |
 | B02 | Docker builder tests needed absent files | Tests run outside the image or in the optional `test` target | image builds (prod, dev, test target) | RV |
-| B03 | Real migrations; empty install and representative upgrade | 0001 (exact Phase-7 DDL), 0002 (data-preserving backfills), 0003 | M:test_migrations (legacy data upgrade, no drift, constraint names), J:empty-DB migrate in containers | RV |
+| B03 | Real migrations; empty install and representative upgrade | 0001 (exact Phase-7 DDL), 0002 (data-preserving backfills), 0003, 0004 (fitment scope CHECKs, NOT VALID + audit), 0005 (push outcomes, lease token); compatibility of each with the serving release in the runbook §7a | M:test_migrations (legacy data upgrade, no drift, constraint names), J:empty-DB migrate in containers | RV |
 | B04 | Flutter platform scaffolding; missing font | web/android/ios/macos/windows generated; unused font removed; Android minSdk 26 (required by sentry_flutter 10); Stripe push-provisioning excluded from lint classpaths (private Google SDK) | web release build; **Android release APK built** (`flutter build apk --release`, minSdk 26 / target 36, INTERNET permission) | RV for web + Android; iOS/macOS/Windows builds: BLK (need macOS/Xcode or Windows hosts; scaffolding committed); store signing keys/icons: DFS with brand assets |
 | B05 | Locked dependencies | `requirements*.lock` (hashed), `pubspec.lock` | builds | RV |
 | B06 | Celery tasks referenced but absent | All scheduled tasks implemented and registered; heartbeat → `/ready` | B:test_tasks_ops, container logs | RV |
@@ -163,6 +170,33 @@ containerised stack (§5), `M:` migration test.
 | B11 | Production bundle API config | dart-defines; build preflight refuses localhost for production | release build checks | RV |
 | B12 | Image/error/loading states, a11y, responsive | Placeholders, retry states, semantics tree on web, rail/bottom nav | F:widget tests, browser journeys | RV (formal WCAG audit not performed) |
 | B13 | Measured performance vs targets (p95 < 200 ms API, < 100 ms search) | `scripts/perf/measure_api.py`; search reuses a keep-alive Typesense client, facets in one query | §5: all targets met at concurrency 1 and 10 on the local stack | RV (local evidence; production performance not measured) |
+
+### 3.7 Independent review of `main@f4f3a97` (2026-11-06)
+
+| ID | Finding (reproduced by the reviewer's probes) | Fix | Proof (each fails on `f4f3a97`, passes now) | Status |
+|---|---|---|---|---|
+| FM-01 | Answer guard certified contradicted/unsupported sentences as `grounded` because a valid citation index existed; unsupported instructions survived an insufficient-evidence reply | D21 claim/evidence contract; controlled non-grounded reply; claim evidence in the response; answer-time revalidation of sources, applicability, fitment, proposals; system prompt requires per-sentence citations | B:test_grounding_support (31 cases incl. G1–G4, both providers via the API), test_ai_* | RV |
+| FM-02 | Rule `{engine F150, vessel_model 2250, year_to 2000}` accepted and evaluated `verified_fit` for a 2022 Rayglass 2500 | Rule-scope contract in schema, verification, DB (0004) and evaluator (fail closed); audit CLI | B:test_fitment_scope_contract (20 cases) | RV |
+| FM-03 | Full refund skipped returning discount points when no earned point remained to reverse (zero-earn order; earlier partial refund) | Independent, idempotent compensation steps; also found and fixed: crew-bonus clawback skipped for a refund crossing a tier without a further whole point | B:test_refund_compensation (6 cases via signed `charge.refunded`) | RV |
+| FM-04 | Partial FCM success marked the notification sent and lost the transiently failing device | Per-device outcomes persisted; retry only pending devices; lease renewal + fencing token | B:test_push_delivery_outcomes (7 cases) | RV |
+| FM-05 | Opposing lock orders: payment success vs voiding its discount; refund vs operator action | D22 single lock order; also found and fixed: two refunds in one crew locking members' accounts in opposite orders | B:test_lock_order (3 two-connection barrier races; all three raise `DeadlockDetectedError` on `f4f3a97`) | RV |
+
+Additional concerns raised by the review:
+
+| Concern | Disposition |
+|---|---|
+| Knowledge applicability covers only vessel/engine make and model | Unchanged and stated (D21 limits). Model-year, serial-range, regional/legal-date or equipment-specific applicability is **not** checked; add those fields before admitting content that depends on them. DFS. |
+| No answer-time revalidation of fitment or revoked sources | Implemented (`agent.revalidate`). RV — B:test_grounding_support. |
+| Outbox lease outlived by slow batches; no fencing | Implemented (FM-04). RV. |
+| Request-start authorization is not continuous | Documented as the model (D23). |
+| Migrations run while the previous release serves | Per-revision compatibility and the maintenance requirement for 0002 documented (runbook §7a); 0003–0005 are additive. Production execution BLK (no authority). |
+| Android build ≠ distribution | Unchanged: debug-signed APK, no release keystore (B04). |
+| Enabled integrations need failure-mode validation, not just keys | Recorded in §6: each external feature stays disabled until its live failure modes are exercised in staging. |
+
+Review probe re-run on the corrected code: `docs/08_delivery/evidence/review_f4f3a97_probes_after.json`
+(G1–G3 not certified, G4 instruction suppressed, F1 rejected by the schema and `unknown`
+as a legacy row, R1/R2 one restoration each, N1 failing device reported for retry,
+identity probes unchanged).
 
 ## 4. Contract conventions, decisions and defaults
 
@@ -201,6 +235,9 @@ containerised stack (§5), `M:` migration test.
 | D18 | Customer search goes through the API (`/search/products`), not Typesense directly, so fitment stays centralised; Typesense is a prefilter and Postgres is the fallback. |
 | D19 | Admin refunds need a per-request `Idempotency-Key`; crew invites are capped at 20 per crew per rolling day. |
 | D20 | Points tier (deckhand…captain) is display-only and creates no cashback entitlement. |
+| D21 | **Grounding is a per-claim evidence contract** (`services/ai/support.py`). Each clause of a draft is framing, a catalogue/fitment statement about a tool-returned product, or a claim. A claim survives only when a passage cited *by its own sentence* has all its numbers, number+unit pairs and identifiers, the same polarity (negation scopes split at "but/however/;"), and its content words (all of them for quantitative claims, ≥ 75 % otherwise). Unsupported sentences are removed (counted in `removed_statements`), never certified; `grounded` needs ≥ 1 supported claim; otherwise the reply is a controlled limitation + question. Each claim is returned with its supporting passage and the passage's applicability. **Limits:** the check is lexical — it cannot tell which noun a number belongs to *inside one passage sentence*, cannot judge whether a passage is true or applies more finely than make/model, and does not replace live evaluation of model quality on licensed content. |
+| D22 | **Lock order**: `Order → DiscountEntitlement → HelmDashDelivery → CrewPoints` (several accounts in ascending `str(user_id)`, taken together up front via `loyalty.lock_accounts`). Locking delivery lookups lock the order first; voiding locks the entitlement before the account; a refund cancels the delivery before touching points. |
+| D23 | **Authorization model**: identity, role and ownership are checked at the start of each request, and the request's effects commit in that request's transaction. A role or ownership change takes effect for subsequent requests; there is no continuous re-authorization during a request already in progress. |
 
 ## 5. Validation log
 
@@ -284,6 +321,10 @@ role/label-driven browser journeys; **no formal WCAG 2.1 AA audit was performed*
 | Typesense, Redis, Sentry, PostHog, Mapbox tiles | per runbook | search falls back to PostgreSQL; monitoring off; maps show areas without base tiles |
 | Hosting / TLS / DNS | host, certificates, DNS, backups location | **BLOCKED**: no authority to provision or deploy (brief §1) |
 
+A credential alone does not enable a feature: each integration above also needs its
+failure modes (timeouts, declines, retries, revoked keys, partial failures) exercised in
+a staging environment before it is turned on for customers.
+
 ## 7. Checkpoint (for continuation across sessions)
 
 - 2026-11-05: preflight complete; heads verified (`main@49877e2`,
@@ -302,6 +343,10 @@ role/label-driven browser journeys; **no formal WCAG 2.1 AA audit was performed*
   admin, Stripe web Payment Element). Two independent reviews (backend 14 findings,
   client 12 findings) fixed. Final validation recorded in §5; Android release APK built;
   PR BalanceNow-ai/first_mate#8 opened for merge into `main`.
+- 2026-11-06: independent review of `main@f4f3a97` (5 findings) → correction increment
+  on `claude/new-session-bkkwp6`: FM-01 `e1e086b`, FM-02 `5868cf7`, FM-03 `a5547c3`,
+  FM-04 `a14b378`, FM-05 `b1a8bac`; migrations 0004/0005; affected rows re-closed (§3.7);
+  validation in §5 (correction increment rows).
 - **Next (outside this programme's authority):** provide the §6 credentials in a
   staging environment and run live validation of Stripe (incl. 3-D Secure and webhooks),
   Supabase JWKS, OpenAI quality on licensed content, Resend/FCM, Strapi; provision

@@ -265,6 +265,39 @@ deploy/deploy.sh                                               # runs 0001 -> 00
 Only stamp a database whose schema really is the Phase-7 schema. A brand-new database
 needs nothing: `migrate` creates everything from `0001`.
 
+### 7a. Schema compatibility while the previous release is serving
+
+`deploy.sh` migrates (step 5) **before** it replaces the running containers (step 6), so
+the previous release briefly serves against the new schema. Every revision must
+therefore be either backward compatible with the previous release (expand first,
+contract in a later release) or deployed under maintenance:
+
+| Revision | Compatible with the previous release while it serves? | Deploy |
+|---|---|---|
+| 0002 (Phase-7 → cents, roles, …) | **No** — rewrites money columns and data | maintenance: `docker compose … stop api worker beat` before `deploy.sh`, announce downtime, rollback = restore (§9) |
+| 0003 (points owed, ledger kinds) | yes (additive column and wider CHECK) | normal |
+| 0004 (fitment-rule scope CHECKs, `NOT VALID`) | yes; the old release can no longer *insert* a malformed rule (it gets a database error instead of storing it) | normal |
+| 0005 (push per-device outcomes, lease token) | yes (additive columns with defaults; ignored by the old release) | normal; downgrade available |
+
+A rollback of the application across 0003–0005 is code-only (§9); the schema can stay.
+Rollback with representative writes has been exercised only on the local stack.
+
+### 7b. Fitment-rule scope audit (revision 0004)
+
+0004 adds the scope constraints `NOT VALID` (new and updated rows are checked at once)
+and validates them only when no existing row violates them. Rows that do violate them
+are never trusted: the evaluator treats them as `unknown`, verification refuses them and
+the public "known to fit" list hides them. List them, correct or delete each through the
+admin API, then validate:
+
+```bash
+docker compose --env-file .env.prod -f docker-compose.prod.yml run --rm --no-deps api cli fitment-audit
+# exit 0 and "0 malformed fitment rule(s)" once clean, then for each constraint:
+#   ALTER TABLE product_compatibility VALIDATE CONSTRAINT ck_product_compatibility_<name>;
+#   (nonblank_scope, vessel_dependents, engine_dependents, equipment_dependents,
+#    vessel_year_order, engine_year_order)
+```
+
 ## 8. Backup and restore
 
 ```bash
