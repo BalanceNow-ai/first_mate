@@ -1,5 +1,5 @@
 {
-  "source": "b1a8bac8e94413d201eee46a66116db6efd1bec9",
+  "source": "42f5b757f92e032b0e5606863daf380110658615",
   "kind": "the reviewer's focused probes (First_Mate_Review_Probes.py) re-run on the corrected code with the defect assertions removed; observations only. Changes to the probe harness: F1 records the request-schema result and evaluates the same rule as a legacy row; the R probes stub lock_accounts/refresh_tier/clawback (the fake DB cannot serve them); N1 records per-device failures returned by the adapter.",
   "observations": [
     {
