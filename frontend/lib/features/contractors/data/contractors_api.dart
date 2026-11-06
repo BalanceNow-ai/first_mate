@@ -28,10 +28,11 @@ class ContractorsApi {
   static List<T> _list<T>(dynamic d, T Function(Map<String, dynamic>) f) => [for (final e in d as List) f(_map(e))];
 
   /// Active organizations an owner can invite (a listing grants no access).
-  Future<List<DirectoryEntry>> directory({String? query, int limit = 20}) => _call(
+  Future<List<DirectoryEntry>> directory({String? query, int limit = 20, int offset = 0}) => _call(
         () => _dio.get('/contractors/directory', queryParameters: {
           if (query != null && query.trim().isNotEmpty) 'q': query.trim(),
           'limit': limit,
+          if (offset > 0) 'offset': offset,
         }),
         (d) => _list(d, DirectoryEntry.fromJson),
       );
@@ -40,8 +41,12 @@ class ContractorsApi {
   Future<List<MyMembership>> myMemberships() =>
       _call(() => _dio.get('/contractors/me'), (d) => _list(d, MyMembership.fromJson));
 
-  Future<ContractorInbox> inbox() =>
-      _call(() => _dio.get('/contractors/me/jobs'), (d) => ContractorInbox.fromJson(_map(d)));
+  /// One page of assigned jobs and (for administrators) pending invitations; each list
+  /// is paged with the same limit/offset.
+  Future<ContractorInbox> inbox({int limit = 50, int offset = 0}) => _call(
+        () => _dio.get('/contractors/me/jobs', queryParameters: {'limit': limit, if (offset > 0) 'offset': offset}),
+        (d) => ContractorInbox.fromJson(_map(d)),
+      );
 
   Future<List<InvitationSummary>> orgInvitations(String orgId, {String? status}) => _call(
         () => _dio.get('/contractors/organizations/$orgId/invitations', queryParameters: {'status': ?status}),

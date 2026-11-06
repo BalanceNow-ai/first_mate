@@ -43,10 +43,16 @@ class InvoicesApi {
 
   static Options _key(String key) => Options(headers: {'Idempotency-Key': key});
 
+  /// Resolves a signed document link against the API origin: object-store links are
+  /// absolute already, local-storage links are server-relative
+  /// (`/api/v1/service-assets/local-download?…`).
+  Uri resolve(String url) => Uri.parse(_dio.options.baseUrl).resolve(url);
+
   // --- invoices ---------------------------------------------------------------
 
-  Future<List<InvoiceSummary>> list({String? jobId}) => apiCall(
-        () => _dio.get('/invoices', queryParameters: {'job_id': ?jobId}),
+  Future<List<InvoiceSummary>> list({String? jobId, int limit = 50, int offset = 0}) => apiCall(
+        () => _dio.get('/invoices',
+            queryParameters: {'job_id': ?jobId, 'limit': limit, if (offset > 0) 'offset': offset}),
         (d) => [for (final i in asMapList(d)) InvoiceSummary.fromJson(i)],
       );
 

@@ -161,7 +161,9 @@ void main() {
 
   testWidgets('preparation: provisional badges and unknowns; add to cart only on an explicit tap', (tester) async {
     final backend = ownerBackend();
-    backend.json('GET $p/preparation-items', 200, sj('preparation_items_contractor'));
+    // The OWNER's view of the list after the contractor confirmed, asked and rejected.
+    final items = sjList('preparation_items_owner_view');
+    backend.json('GET $p/preparation-items', 200, items);
     backend.json('POST /cart/items', 201, fixture('cart_with_item'));
     final app = SjApp(tester, backend);
     await app.start('/service-jobs/$jobId/preparation');
@@ -169,9 +171,17 @@ void main() {
     expect(find.text('Contractor confirmed'), findsWidgets);
     expect(find.text('Still unknown:'), findsWidgets);
     expect(find.text('Confirm requirement'), findsNothing, reason: 'owners do not confirm requirements');
+    Finder card(String status) => find
+        .ancestor(of: find.text(items.singleWhere((i) => i['status'] == status)['name'] as String), matching: find.byType(Card))
+        .first;
+    expect(find.descendant(of: card('rejected'), matching: find.text('Add to cart')), findsNothing,
+        reason: 'never offered for a rejected item');
     expect(backend.calls('POST /cart/items'), isEmpty);
-    await app.tap(find.text('Add to cart'));
+    final confirmed = items.singleWhere((i) => i['status'] == 'contractor_confirmed');
+    await app.tap(find.descendant(of: card('contractor_confirmed'), matching: find.text('Add to cart')));
     expect(backend.calls('POST /cart/items'), hasLength(1));
+    expect((backend.calls('POST /cart/items').single.body as Map)['product_id'],
+        ((confirmed['candidates'] as List).first as Map)['product_id']);
     expect(find.textContaining('to your cart'), findsOneWidget);
   });
 

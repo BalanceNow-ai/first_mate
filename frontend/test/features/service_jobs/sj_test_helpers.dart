@@ -106,9 +106,12 @@ FakeBackend contractorBackend() {
 
 /// The real app (router, shell) with a fake picker/opener, signed in.
 class SjApp {
-  SjApp(this.tester, this.backend, {FakePicker? picker})
+  SjApp(this.tester, this.backend, {FakePicker? picker, this.overrides = const []})
       : picker = picker ?? FakePicker(),
         opener = FakeOpener();
+
+  /// Extra provider overrides (e.g. a small list page size).
+  final List<Override> overrides;
 
   final WidgetTester tester;
   final FakeBackend backend;
@@ -130,6 +133,7 @@ class SjApp {
         return 'Downloaded ${file.filename}';
       }),
       uploadPollIntervalProvider.overrideWithValue(Duration.zero),
+      ...this.overrides,
     ];
     container = ProviderContainer(overrides: overrides, retry: (_, _) => null);
     tester.view.physicalSize = size;

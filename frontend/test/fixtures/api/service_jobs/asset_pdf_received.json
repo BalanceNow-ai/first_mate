@@ -1,6 +1,6 @@
 {
-  "id": "023fe36c-7c25-4c32-a81b-7f9e3fdd1a73",
-  "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+  "id": "138848e1-7a87-4a4c-933a-2d07c33615ac",
+  "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
   "purpose": "job_document",
   "status": "quarantined",
   "uploaded_by_role": "owner",
@@ -16,8 +16,8 @@
   "quality": {},
   "duplicate_of_id": null,
   "rejection_reason": null,
-  "upload_expires_at": "2026-11-07T06:25:02.367115Z",
+  "upload_expires_at": "2026-11-07T07:32:15.369758Z",
   "version": 2,
-  "created_at": "2026-11-06T06:25:02.367611Z",
-  "updated_at": "2026-11-06T06:25:02.388690Z"
+  "created_at": "2026-11-06T07:32:15.370235Z",
+  "updated_at": "2026-11-06T07:32:15.672457Z"
 }

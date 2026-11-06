@@ -1,15 +1,44 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:helm_marine/core/api/action_keys.dart';
+import 'package:helm_marine/core/api/paged.dart';
 import 'package:helm_marine/core/session/session.dart';
 import 'package:helm_marine/features/invoices/data/document_upload.dart';
 import 'package:helm_marine/features/invoices/data/invoice_models.dart';
 import 'package:helm_marine/features/invoices/data/invoices_api.dart';
 
-/// The signed-in owner's invoices, newest first (optionally for one job).
-final invoiceListProvider = FutureProvider.autoDispose.family<List<InvoiceSummary>, String?>((ref, jobId) {
-  final api = ref.watch(invoicesApiProvider);
-  requireUserId(ref);
-  return api.list(jobId: jobId);
+/// Idempotency keys for invoice actions: one per logical action, reused on retry and
+/// discarded on success (kept outside the per-invoice controller so a retry after the
+/// screen was rebuilt still reuses it).
+final invoiceActionKeysProvider = Provider<ActionKeys>((ref) {
+  ref.watch(currentUserIdProvider);
+  return ActionKeys(newIdempotencyKey);
 });
+
+/// The signed-in owner's invoices, newest first (optionally for one job), a page at
+/// a time ("Load more" reads the next page).
+final invoiceListProvider =
+    AsyncNotifierProvider.autoDispose.family<InvoiceListController, Paged<InvoiceSummary>, String?>(
+        InvoiceListController.new);
+
+class InvoiceListController extends PagedNotifier<InvoiceSummary> {
+  InvoiceListController(this.jobId);
+
+  final String? jobId;
+
+  @override
+  String get listName => 'invoices';
+
+  @override
+  Future<Paged<InvoiceSummary>> build() {
+    ref.watch(invoicesApiProvider);
+    requireUserId(ref);
+    return super.build();
+  }
+
+  @override
+  Future<List<InvoiceSummary>> fetchPage({required int offset, required int limit}) =>
+      ref.read(invoicesApiProvider).list(jobId: jobId, limit: limit, offset: offset);
+}
 
 /// One invoice. Every mutation replaces the state with the server's detail
 /// response; nothing is computed on the device.
@@ -89,9 +118,14 @@ class InvoiceController extends AsyncNotifier<InvoiceDetail> {
     await reload();
   }
 
+  /// Sends a draft. Retrying the same send (same draft version and attachments) reuses
+  /// its Idempotency-Key, so a lost response never sends the question twice.
   Future<void> sendQuestion(InvoiceQuestion q, List<String> assetIds) async {
-    await _api.sendQuestion(invoiceId, q.id,
-        expectedVersion: q.version, assetIds: assetIds, idempotencyKey: newIdempotencyKey('send'));
+    final attachments = ([...assetIds]..sort()).join(',');
+    await ref.read(invoiceActionKeysProvider).run(
+        'send',
+        '$invoiceId|${q.id}|${q.version}|$attachments',
+        (key) => _api.sendQuestion(invoiceId, q.id, expectedVersion: q.version, assetIds: assetIds, idempotencyKey: key));
     await reload();
   }
 }

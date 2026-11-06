@@ -1,47 +1,47 @@
 [
   {
-    "id": "44d9aca1-94eb-4564-bfd8-8e69ebac5889",
+    "id": "68a71790-1fac-470b-864d-5b981433d86c",
     "title": "Sink repair",
-    "job_id": "3f0c7f8a-4c6c-4232-9013-99ade16bf582",
+    "job_id": "b2ae3232-4337-4a54-bbd2-498316044265",
     "standalone": false,
     "status": "owner_reviewed",
     "version": 3,
-    "current_revision_id": "abcd6cf0-c301-46bc-a05c-452e3f9c764d",
+    "current_revision_id": "d3106c4f-e3b7-425a-a0de-53a776b5d96b",
     "revision_number": 1,
     "supplier_name": "Fixture Harbour Marine",
     "total": "458.82",
     "currency": "NZD",
-    "created_at": "2026-11-06T06:27:22.512999Z",
-    "updated_at": "2026-11-06T06:27:23.608977Z"
+    "created_at": "2026-11-06T07:32:41.928669Z",
+    "updated_at": "2026-11-06T07:32:43.042206Z"
   },
   {
-    "id": "ae51872c-168a-4ba3-81aa-1297d48a0db9",
+    "id": "227f678a-fe0b-488b-9245-1a76585ff7e3",
     "title": "Photo of invoice",
     "job_id": null,
     "standalone": true,
     "status": "extraction_draft",
     "version": 2,
-    "current_revision_id": "b8ebc588-7b96-46f5-9cda-5c40e860725c",
+    "current_revision_id": "59a9c726-adf6-4078-873f-4381cbf39e8e",
     "revision_number": 1,
     "supplier_name": null,
     "total": null,
     "currency": null,
-    "created_at": "2026-11-06T06:27:20.108013Z",
-    "updated_at": "2026-11-06T06:27:20.219433Z"
+    "created_at": "2026-11-06T07:32:39.532001Z",
+    "updated_at": "2026-11-06T07:32:39.652704Z"
   },
   {
-    "id": "64b75be0-f63a-4233-8a3d-a1ab878f3529",
+    "id": "ad7a3928-fa46-44a8-b477-fc8174cf131a",
     "title": "Harbour Marine invoice",
     "job_id": null,
     "standalone": true,
     "status": "owner_reviewed",
     "version": 5,
-    "current_revision_id": "488ab77d-3f39-447b-9d9b-89f7de3c64e1",
+    "current_revision_id": "f698f8ad-dc81-4015-8a62-062e287176e1",
     "revision_number": 1,
     "supplier_name": "Fixture Harbour Marine",
     "total": "458.82",
     "currency": "NZD",
-    "created_at": "2026-11-06T06:27:17.705283Z",
-    "updated_at": "2026-11-06T06:27:18.923436Z"
+    "created_at": "2026-11-06T07:32:37.972567Z",
+    "updated_at": "2026-11-06T07:32:38.380196Z"
   }
 ]

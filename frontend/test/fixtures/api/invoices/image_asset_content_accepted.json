@@ -1,5 +1,5 @@
 {
-  "id": "05189886-0a8a-4c0e-add3-7aa34a03c9ae",
+  "id": "e6331560-0cda-4c90-8849-3b7367912fb9",
   "job_id": null,
   "purpose": "invoice",
   "status": "quarantined",
@@ -16,8 +16,8 @@
   "quality": {},
   "duplicate_of_id": null,
   "rejection_reason": null,
-  "upload_expires_at": "2026-11-07T06:27:19.043610Z",
+  "upload_expires_at": "2026-11-07T07:32:38.482995Z",
   "version": 2,
-  "created_at": "2026-11-06T06:27:19.044131Z",
-  "updated_at": "2026-11-06T06:27:19.069930Z"
+  "created_at": "2026-11-06T07:32:38.483451Z",
+  "updated_at": "2026-11-06T07:32:38.499545Z"
 }

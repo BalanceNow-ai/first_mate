@@ -1,6 +1,6 @@
 {
-  "id": "6d92a76c-7cba-4a69-ac69-8cf579ba0dd3",
-  "vessel_id": "2e9b721c-6e85-48b0-8527-1f2384407263",
+  "id": "825db48c-1270-4554-998f-5468c1687a6b",
+  "vessel_id": "391062c8-7c60-4c24-bbcc-202b68ea01c9",
   "entry_point": "vessel",
   "title": "Navigation lights flicker",
   "status": "evidence_collection",
@@ -8,8 +8,8 @@
   "evidence_revision": 1,
   "disputed": false,
   "archived_at": null,
-  "created_at": "2026-11-06T06:25:08.361223Z",
-  "updated_at": "2026-11-06T06:25:08.393399Z",
+  "created_at": "2026-11-06T07:32:21.826823Z",
+  "updated_at": "2026-11-06T07:32:21.860202Z",
   "viewer": {
     "role": "contractor",
     "sections": [
@@ -18,13 +18,13 @@
       "measurements",
       "preparation"
     ],
-    "organization_id": "6b227433-4c77-44a5-aec1-11fffde39628",
-    "assignment_id": "a64651ce-4bec-40ae-96b7-f452597a95e3",
+    "organization_id": "f3af1153-00e5-444d-b892-8b8dbe1478dc",
+    "assignment_id": "fa42e907-a736-41bb-b251-c9cd9095375d",
     "restricted_access": false
   },
   "snapshot_state": "brief",
-  "snapshot_brief_id": "fbb72479-36f1-4331-acbf-7483ddbcf187",
-  "snapshot_published_at": "2026-11-06T06:25:08.546283Z",
+  "snapshot_brief_id": "b7a3bc97-03b7-4c23-9e43-a2ef2c8c833d",
+  "snapshot_published_at": "2026-11-06T07:32:22.030302Z",
   "issue_description": "The port navigation light flickers when the engine starts.",
   "affected_system": "Electrical",
   "affected_equipment": "Navigation lights",
@@ -48,7 +48,7 @@
       "propulsion_type": "outboard"
     },
     "equipment": [],
-    "captured_at": "2026-11-06T06:25:08.360794+00:00",
+    "captured_at": "2026-11-06T07:32:21.826184+00:00",
     "corrections": [],
     "owner_confirmed": false,
     "uncertain_categories": []
@@ -63,11 +63,11 @@
   "gaps": [],
   "technician_inspection_required": false,
   "assignment": {
-    "id": "a64651ce-4bec-40ae-96b7-f452597a95e3",
-    "job_id": "6d92a76c-7cba-4a69-ac69-8cf579ba0dd3",
+    "id": "fa42e907-a736-41bb-b251-c9cd9095375d",
+    "job_id": "825db48c-1270-4554-998f-5468c1687a6b",
     "organization": {
-      "id": "6b227433-4c77-44a5-aec1-11fffde39628",
-      "name": "Fixture Marine ecaf6296",
+      "id": "f3af1153-00e5-444d-b892-8b8dbe1478dc",
+      "name": "Fixture Marine cda525ff",
       "trading_name": "Fixture Marine Services"
     },
     "status": "accepted",
@@ -78,16 +78,16 @@
       "preparation"
     ],
     "live_updates": false,
-    "invited_at": "2026-11-06T06:25:08.437772Z",
-    "accepted_at": "2026-11-06T06:25:08.470447Z",
+    "invited_at": "2026-11-06T07:32:21.906829Z",
+    "accepted_at": "2026-11-06T07:32:21.932398Z",
     "revoked_at": null,
     "version": 3,
     "members": [
       {
-        "user_id": "70cc3540-4da9-4f13-8e08-b2845ea240db",
+        "user_id": "60d99bf1-bead-4f28-96b8-1649c76ec4e5",
         "name": "Fixture Technician",
         "restricted_access": false,
-        "added_at": "2026-11-06T06:25:08.472793Z"
+        "added_at": "2026-11-06T07:32:21.935451Z"
       }
     ]
   }

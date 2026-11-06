@@ -969,6 +969,7 @@ class Measurement {
     this.sourceObservationId,
     this.recordedBy,
     this.recordedByOtherOrganization = false,
+    this.confirmedByOtherOrganization = false,
     this.confirmation,
     this.supersedesId,
     this.supersededById,
@@ -998,9 +999,13 @@ class Measurement {
   final Provenance provenance;
   final String? recordedBy;
 
-  /// Another contractor organisation recorded or confirmed this (their people and
-  /// notes are withheld; the value stays as evidence).
+  /// Another contractor organisation RECORDED this (the recorder and their notes are
+  /// withheld; the value stays as evidence). Judged separately from the confirmer.
   final bool recordedByOtherOrganization;
+
+  /// Another contractor organisation CONFIRMED this (who confirmed is withheld). The
+  /// recorder may still be the owner or the reader's own organisation.
+  final bool confirmedByOtherOrganization;
   final Confirmation? confirmation;
   final String? supersedesId;
   final String? supersededById;
@@ -1010,15 +1015,16 @@ class Measurement {
   final DateTime createdAt;
 
   /// Recorded or confirmed by another contractor organisation (shown without names).
-  bool get fromOtherOrganization => recordedByOtherOrganization || provenance.otherOrganization;
+  bool get fromOtherOrganization =>
+      recordedByOtherOrganization || provenance.otherOrganization || confirmedByOtherOrganization;
 
-  /// A contractor of another organisation recorded it (the recorder is withheld).
-  bool get recordedByAnotherOrganization =>
-      fromOtherOrganization && provenance.recordedByRole == 'contractor' && recordedBy == null;
+  /// Another organisation recorded it (the recorder is withheld) — from the server's
+  /// recorder flags only, never inferred from the confirmer.
+  bool get recordedByAnotherOrganization => recordedByOtherOrganization || provenance.otherOrganization;
 
-  /// Another organisation confirmed it (who confirmed is withheld).
-  bool get confirmedByAnotherOrganization =>
-      fromOtherOrganization && confirmation?.confirmedAt != null && confirmation?.confirmedBy == null;
+  /// Another organisation confirmed it (who confirmed is withheld) — from the server's
+  /// `confirmed_by_other_organization`, independent of who recorded it.
+  bool get confirmedByAnotherOrganization => confirmedByOtherOrganization && confirmation?.confirmedAt != null;
 
   /// Value as recorded with its original unit (no invented precision).
   String get displayValue {
@@ -1053,6 +1059,7 @@ class Measurement {
       provenance: Provenance.fromJson(reqMap(json, 'provenance')),
       recordedBy: opt<String>(json, 'recorded_by'),
       recordedByOtherOrganization: opt<bool>(json, 'recorded_by_other_organization') ?? false,
+      confirmedByOtherOrganization: opt<bool>(json, 'confirmed_by_other_organization') ?? false,
       confirmation: c == null ? null : Confirmation.fromJson(c),
       supersedesId: opt<String>(json, 'supersedes_id'),
       supersededById: opt<String>(json, 'superseded_by_id'),
@@ -1212,6 +1219,7 @@ class PreparationItem {
     this.sourceNote,
     this.confirmedProduct,
     this.confirmedBy,
+    this.confirmedByOtherOrganization = false,
     this.confirmedAt,
     this.confirmedJobRevision,
     this.replacedById,
@@ -1238,6 +1246,10 @@ class PreparationItem {
   final List<CatalogueCandidate> candidates;
   final CatalogueCandidate? confirmedProduct;
   final String? confirmedBy;
+
+  /// Confirmed by another contractor organisation: the server withholds who
+  /// (`confirmed_by_other_organization`, with `confirmed_by` null).
+  final bool confirmedByOtherOrganization;
   final DateTime? confirmedAt;
   final int? confirmedJobRevision;
   final bool evidenceChangedSinceConfirmation;
@@ -1251,9 +1263,9 @@ class PreparationItem {
 
   bool get isActive => !const {'rejected', 'replaced', 'superseded'}.contains(status);
 
-  /// Confirmed by another contractor organisation: the server withholds who
-  /// (`confirmed_by` is null while `confirmed_at` is set).
-  bool get confirmedByOtherOrganization => confirmedAt != null && confirmedBy == null;
+  /// A live item whose candidates may be bought (never a rejected, replaced or
+  /// superseded one).
+  bool get isLive => const {'suggested', 'needs_evidence', 'contractor_confirmed'}.contains(status);
 
   factory PreparationItem.fromJson(Map<String, dynamic> json) {
     final cp = optMap(json, 'confirmed_product');
@@ -1279,6 +1291,7 @@ class PreparationItem {
       candidates: _list(json, 'candidates', CatalogueCandidate.fromJson),
       confirmedProduct: cp == null ? null : CatalogueCandidate.fromJson(cp),
       confirmedBy: opt<String>(json, 'confirmed_by'),
+      confirmedByOtherOrganization: opt<bool>(json, 'confirmed_by_other_organization') ?? false,
       confirmedAt: _optDate(json, 'confirmed_at'),
       confirmedJobRevision: opt<int>(json, 'confirmed_job_revision'),
       evidenceChangedSinceConfirmation: req<bool>(json, 'evidence_changed_since_confirmation'),

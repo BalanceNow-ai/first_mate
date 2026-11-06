@@ -1,6 +1,6 @@
 {
-  "id": "b752afa1-7be5-4020-b90b-817437fa2acb",
-  "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+  "id": "7f3b0446-bffa-48c9-845e-12e9cc34e0b2",
+  "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
   "purpose": "job_photo",
   "status": "available",
   "uploaded_by_role": "owner",
@@ -22,10 +22,10 @@
     "mean_luminance": 109.8,
     "label_legibility": "not_assessed"
   },
-  "duplicate_of_id": "da35ae6e-9899-4c77-a124-ea3241a27ebc",
+  "duplicate_of_id": "c52df3b5-b660-42bf-9801-7d42d03f9595",
   "rejection_reason": null,
-  "upload_expires_at": "2026-11-07T06:25:00.242267Z",
+  "upload_expires_at": "2026-11-07T07:32:13.230898Z",
   "version": 3,
-  "created_at": "2026-11-06T06:25:00.242954Z",
-  "updated_at": "2026-11-06T06:25:00.354955Z"
+  "created_at": "2026-11-06T07:32:13.231393Z",
+  "updated_at": "2026-11-06T07:32:13.326241Z"
 }

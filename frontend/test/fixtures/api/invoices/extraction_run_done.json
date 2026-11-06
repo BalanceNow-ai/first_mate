@@ -1,12 +1,12 @@
 {
-  "id": "feb636b1-35f7-450a-8dab-b9e9835ad8fc",
+  "id": "9424e05e-783f-4c9a-8b12-228079a91b68",
   "status": "draft_ready",
-  "invoice_revision_id": "488ab77d-3f39-447b-9d9b-89f7de3c64e1",
+  "invoice_revision_id": "f698f8ad-dc81-4015-8a62-062e287176e1",
   "provider": "local_fixture",
   "model": "local-fixture-v1",
   "attempts": 1,
   "error": null,
   "stale_reason": null,
-  "created_at": "2026-11-06T06:27:17.755262Z",
-  "updated_at": "2026-11-06T06:27:17.854374Z"
+  "created_at": "2026-11-06T07:32:38.022466Z",
+  "updated_at": "2026-11-06T07:32:38.116235Z"
 }

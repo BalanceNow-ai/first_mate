@@ -121,8 +121,13 @@ class _ReviewFormState extends ConsumerState<_ReviewForm> {
         context,
         ref,
         widget.job.id,
-        () => ref.read(serviceJobsApiProvider).submitFeedback(widget.job.id, widget.o.myDirection,
-            expectedVersion: saved.mine?.version, idempotencyKey: newIdempotencyKey('feedback')),
+        // One key for submitting this review: a retry reuses it (the draft's version may
+        // move when it is re-saved, the action does not).
+        () => ref.read(serviceActionKeysProvider).run(
+            'feedback',
+            '${widget.job.id}|${widget.o.myDirection}',
+            (key) => ref.read(serviceJobsApiProvider).submitFeedback(widget.job.id, widget.o.myDirection,
+                expectedVersion: saved.mine?.version, idempotencyKey: key)),
         success: 'Review submitted',
       );
     }

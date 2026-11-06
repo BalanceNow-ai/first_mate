@@ -1,7 +1,7 @@
 [
   {
-    "id": "0ed70eb5-9bc7-4264-ac3e-7ad18611f143",
-    "job_id": "6d92a76c-7cba-4a69-ac69-8cf579ba0dd3",
+    "id": "b1f34ca8-706c-4262-b2a9-4f541deb9eaa",
+    "job_id": "825db48c-1270-4554-998f-5468c1687a6b",
     "dimension": "route_length",
     "component": "Port light cable run",
     "value_text": "3.2",
@@ -23,16 +23,17 @@
     "provenance": {
       "badge": "contractor_confirmed",
       "label": "Contractor confirmed (tape measure)",
-      "recorded_by": null,
+      "recorded_by": "5cfee740-8410-4f69-9f23-78bde6dd70b7",
       "recorded_by_role": "owner",
       "method": "owner_tape",
-      "other_organization": true
+      "other_organization": false
     },
-    "recorded_by": null,
-    "recorded_by_other_organization": true,
+    "recorded_by": "5cfee740-8410-4f69-9f23-78bde6dd70b7",
+    "recorded_by_other_organization": false,
+    "confirmed_by_other_organization": true,
     "confirmation": {
       "confirmed_by": null,
-      "confirmed_at": "2026-11-06T06:25:08.633125Z",
+      "confirmed_at": "2026-11-06T07:32:22.146400Z",
       "method": "contractor_site"
     },
     "supersedes_id": null,
@@ -40,11 +41,11 @@
     "is_current": true,
     "job_revision": 1,
     "notes": null,
-    "created_at": "2026-11-06T06:25:08.391364Z"
+    "created_at": "2026-11-06T07:32:21.858244Z"
   },
   {
-    "id": "ed94d25f-63c2-4356-8973-de174568dada",
-    "job_id": "6d92a76c-7cba-4a69-ac69-8cf579ba0dd3",
+    "id": "d7b84f76-343b-433b-b4ce-5c48f2ab591e",
+    "job_id": "825db48c-1270-4554-998f-5468c1687a6b",
     "dimension": "other",
     "component": "Light fitting screws",
     "value_text": "M4",
@@ -66,24 +67,25 @@
     "provenance": {
       "badge": "owner_measured",
       "label": "Owner measured (owner's own method)",
-      "recorded_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
+      "recorded_by": "5cfee740-8410-4f69-9f23-78bde6dd70b7",
       "recorded_by_role": "owner",
       "method": "owner_other",
       "other_organization": false
     },
-    "recorded_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
+    "recorded_by": "5cfee740-8410-4f69-9f23-78bde6dd70b7",
     "recorded_by_other_organization": false,
+    "confirmed_by_other_organization": false,
     "confirmation": null,
     "supersedes_id": null,
     "superseded_by_id": null,
     "is_current": true,
     "job_revision": 2,
     "notes": null,
-    "created_at": "2026-11-06T06:25:08.598712Z"
+    "created_at": "2026-11-06T07:32:22.102656Z"
   },
   {
-    "id": "05621cd0-31ef-4645-a8fd-b6ba9f5a4809",
-    "job_id": "6d92a76c-7cba-4a69-ac69-8cf579ba0dd3",
+    "id": "9daf9d0d-7264-4576-8feb-6d8cc4e201d5",
+    "job_id": "825db48c-1270-4554-998f-5468c1687a6b",
     "dimension": "other",
     "component": "Cable gauge",
     "value_text": "1.5 mm²",
@@ -112,9 +114,10 @@
     },
     "recorded_by": null,
     "recorded_by_other_organization": true,
+    "confirmed_by_other_organization": true,
     "confirmation": {
       "confirmed_by": null,
-      "confirmed_at": "2026-11-06T06:25:08.648798Z",
+      "confirmed_at": "2026-11-06T07:32:22.162809Z",
       "method": "contractor_site"
     },
     "supersedes_id": null,
@@ -122,6 +125,6 @@
     "is_current": true,
     "job_revision": 4,
     "notes": null,
-    "created_at": "2026-11-06T06:25:08.649191Z"
+    "created_at": "2026-11-06T07:32:22.163206Z"
   }
 ]

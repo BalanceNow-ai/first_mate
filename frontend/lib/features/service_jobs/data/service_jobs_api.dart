@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:helm_marine/core/api/action_keys.dart';
 import 'package:helm_marine/core/api/api_client.dart';
 import 'package:helm_marine/core/api/api_error.dart';
 import 'package:helm_marine/core/files/file_saver.dart';
@@ -24,6 +25,13 @@ String newIdempotencyKey(String tag) {
   final hex = List.generate(16, (_) => _random.nextInt(256).toRadixString(16).padLeft(2, '0')).join();
   return 'helm-$tag-$hex';
 }
+
+/// Idempotency keys for service-job actions (scope decisions, feedback submission…):
+/// one per logical action, reused on retry and discarded on success.
+final serviceActionKeysProvider = Provider<ActionKeys>((ref) {
+  ref.watch(currentUserIdProvider);
+  return ActionKeys(newIdempotencyKey);
+});
 
 class ServiceJobsApi {
   ServiceJobsApi(this._dio);
@@ -49,10 +57,13 @@ class ServiceJobsApi {
   Uri resolve(String url) => Uri.parse(_dio.options.baseUrl).resolve(url);
 
   // ------------------------------------------------------------------ jobs
-  Future<List<JobListItem>> listJobs({String? status, bool includeArchived = false}) => _call(
+  Future<List<JobListItem>> listJobs({String? status, bool includeArchived = false, int limit = 50, int offset = 0}) =>
+      _call(
         () => _dio.get('/service-jobs/', queryParameters: {
           'status': ?status,
           if (includeArchived) 'include_archived': true,
+          'limit': limit,
+          if (offset > 0) 'offset': offset,
         }),
         (d) => _list(d, JobListItem.fromJson),
       );

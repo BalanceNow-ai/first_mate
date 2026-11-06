@@ -1,7 +1,7 @@
 {
   "item": {
-    "id": "ca663815-a2b8-43e3-8454-fdc32a88898f",
-    "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+    "id": "a7a1e9e6-1320-45d8-a650-f1bc0659cd72",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
     "category": "part",
     "name": "Hose clamps",
     "purpose": "Secure each hose end on its fitting",
@@ -18,19 +18,19 @@
       "required_od": "32.5 mm",
       "required_od_state": "owner_measured",
       "evidence_request_ids": [
-        "6269d1a2-17fe-46ad-9083-51cb910fa322"
+        "78dfcb7a-e283-4687-88ad-616ec348b100"
       ]
     },
     "depends_on": [
       {
-        "measurement_id": "02043a96-eeca-4eb3-a5ef-fcf878e11a11",
+        "measurement_id": "4ca0b05a-8618-4ac4-b59d-850a62bc2901",
         "dimension": "hose_external_diameter",
         "value_text": "32.5",
         "unit": "mm",
         "state": "owner_measured"
       },
       {
-        "measurement_id": "76382ab8-7029-485c-9f71-5151bdd82a38",
+        "measurement_id": "f07e2072-8209-4b21-8c5b-bcbc84da940f",
         "dimension": "hose_internal_diameter",
         "value_text": "25",
         "unit": "mm",
@@ -38,7 +38,7 @@
       }
     ],
     "supporting_asset_ids": [
-      "da35ae6e-9899-4c77-a124-ea3241a27ebc"
+      "c52df3b5-b660-42bf-9801-7d42d03f9595"
     ],
     "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
     "origin": "assistant",
@@ -67,21 +67,22 @@
     ],
     "confirmed_product": null,
     "confirmed_by": null,
+    "confirmed_by_other_organization": false,
     "confirmed_at": null,
     "confirmed_job_revision": null,
     "evidence_changed_since_confirmation": false,
     "replaced_by_id": null,
     "evidence_request_ids": [
-      "6269d1a2-17fe-46ad-9083-51cb910fa322"
+      "78dfcb7a-e283-4687-88ad-616ec348b100"
     ],
     "job_revision": 10,
     "version": 2,
     "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
-    "created_at": "2026-11-06T06:25:05.796403Z",
-    "updated_at": "2026-11-06T06:25:07.611225Z"
+    "created_at": "2026-11-06T07:32:19.234565Z",
+    "updated_at": "2026-11-06T07:32:21.057956Z"
   },
   "evidence_request": {
-    "id": "6269d1a2-17fe-46ad-9083-51cb910fa322",
+    "id": "78dfcb7a-e283-4687-88ad-616ec348b100",
     "category": "markings",
     "prompt": "Photograph any printing on the clamp band",
     "reason": "Shows the clamp range",

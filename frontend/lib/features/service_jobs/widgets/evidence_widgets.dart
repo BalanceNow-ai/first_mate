@@ -162,6 +162,8 @@ class AssetTile extends ConsumerWidget {
     ];
     final retake = owner && (a.status == 'rejected' || (a.isAvailable && qualityNeedsRetake(a.quality)));
     final interrupted = owner && a.status == 'upload_pending' && a.uploadedByMe;
+    final isDocument = a.purpose == 'job_document';
+    final noun = isDocument ? 'document' : 'photo';
     return Card(
       color: HelmTheme.surface,
       margin: const EdgeInsets.only(bottom: 8),
@@ -189,7 +191,9 @@ class AssetTile extends ConsumerWidget {
           ],
           if (interrupted) ...[
             const SizedBox(height: 6),
-            const Text('This upload was interrupted. Choose the same photo again to finish it.'),
+            Text(isDocument
+                ? 'This upload was interrupted. Choose the same document (PDF) again to finish it.'
+                : 'This upload was interrupted. Choose the same photo again to finish it.'),
           ],
           if (a.duplicateOfId != null) ...[
             const SizedBox(height: 6),
@@ -215,7 +219,16 @@ class AssetTile extends ConsumerWidget {
                 label: 'Finish upload',
                 icon: Icons.upload,
                 onPressed: () async {
-                  final media = await ref.read(mediaPickerProvider).pick(camera: false);
+                  // The picker matches what was being uploaded: a PDF can only be re-chosen
+                  // with the document picker, a photo from the gallery.
+                  final PickedMedia? media;
+                  try {
+                    final picker = ref.read(mediaPickerProvider);
+                    media = isDocument ? await picker.pickDocument() : await picker.pick(camera: false);
+                  } catch (e) {
+                    if (context.mounted) showErrorSnackBar(context, e, prefix: 'Could not open the $noun');
+                    return;
+                  }
                   if (media == null) return;
                   await ref.read(uploadsProvider(job.id).notifier).resume(a, media);
                   refreshServiceJob(ref, job.id);
@@ -223,9 +236,11 @@ class AssetTile extends ConsumerWidget {
               ),
             if (retake)
               ActionButton(
-                label: 'Retake',
-                icon: Icons.photo_camera,
-                onPressed: () => pickAndUpload(context, ref, job.id, requestId: a.evidenceRequestId, camera: true),
+                label: isDocument ? 'Choose another document' : 'Retake',
+                icon: isDocument ? Icons.picture_as_pdf_outlined : Icons.photo_camera,
+                onPressed: () => isDocument
+                    ? pickAndUpload(context, ref, job.id, requestId: a.evidenceRequestId, document: true)
+                    : pickAndUpload(context, ref, job.id, requestId: a.evidenceRequestId, camera: true),
               ),
             if (owner || (a.uploadedByMe && !a.isAvailable))
               ActionButton(
@@ -234,7 +249,7 @@ class AssetTile extends ConsumerWidget {
                 tone: Tone.bad,
                 onPressed: () async {
                   final ok = await confirmAction(context,
-                      title: 'Delete this photo?',
+                      title: 'Delete this $noun?',
                       message: 'The file is removed from Helm. Copies someone already downloaded cannot be recalled.',
                       confirm: 'Delete',
                       destructive: true);
@@ -242,7 +257,7 @@ class AssetTile extends ConsumerWidget {
                     await runJobAction(context, ref, job.id, () async {
                       await ref.read(serviceJobsApiProvider).deleteAsset(a.id, expectedVersion: a.version);
                       return true;
-                    }, success: 'Photo deleted');
+                    }, success: isDocument ? 'Document deleted' : 'Photo deleted');
                   }
                 },
               ),
@@ -319,13 +334,30 @@ class ObservationsSection extends ConsumerWidget {
 }
 
 /// Honest analysis availability: manual capture always keeps working.
-class AnalysisPanel extends ConsumerWidget {
+///
+/// A run in progress is followed until it finishes — also after a reload, from the
+/// run status the server reports — and following stops when the panel goes away.
+class AnalysisPanel extends ConsumerStatefulWidget {
   const AnalysisPanel({super.key, required this.job});
 
   final ServiceJob job;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AnalysisPanel> createState() => _AnalysisPanelState();
+}
+
+class _AnalysisPanelState extends ConsumerState<AnalysisPanel> {
+  /// The run being followed (one poller per panel).
+  String? _following;
+
+  /// Runs already followed here (a run still unfinished after that is not re-polled
+  /// in a loop; the next refresh shows its status).
+  final Set<String> _followed = {};
+
+  ServiceJob get job => widget.job;
+
+  @override
+  Widget build(BuildContext context) {
     final status = ref.watch(analysisStatusProvider(job.id));
     return status.when(
       loading: () => const SizedBox.shrink(),
@@ -343,6 +375,12 @@ class AnalysisPanel extends ConsumerWidget {
           );
         }
         final latest = s.runs.isEmpty ? null : s.runs.last;
+        if (latest != null && latest.inProgress && _following == null && !_followed.contains(latest.id)) {
+          // Resume following a run that was already in progress (e.g. after a reload).
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && _following == null) _follow(latest);
+          });
+        }
         return SectionCard(
           title: 'Photo analysis',
           subtitle: s.substitute
@@ -354,19 +392,9 @@ class AnalysisPanel extends ConsumerWidget {
                   '${latest.observationCount == 1 ? '' : 's'}${latest.error == null ? '' : ' · ${latest.error}'}'),
             const SizedBox(height: 8),
             ActionButton(
-              label: latest?.inProgress == true ? 'Analysing…' : 'Analyse photos',
+              label: latest?.inProgress == true || _following != null ? 'Analysing…' : 'Analyse photos',
               icon: Icons.auto_awesome_outlined,
-              onPressed: latest?.inProgress == true
-                  ? null
-                  : () async {
-                      final run = await runJobAction(context, ref, job.id,
-                          () => ref.read(serviceJobsApiProvider).requestAnalysis(job.id,
-                              idempotencyKey: newIdempotencyKey('analysis')),
-                          success: 'Analysis queued');
-                      if (run != null) {
-                        await _waitFor(ref, job.id, run);
-                      }
-                    },
+              onPressed: latest?.inProgress == true || _following != null ? null : _analyse,
             ),
           ],
         );
@@ -374,18 +402,37 @@ class AnalysisPanel extends ConsumerWidget {
     );
   }
 
-  Future<void> _waitFor(WidgetRef ref, String jobId, AnalysisRun run) async {
+  Future<void> _analyse() async {
+    // One key per request to analyse: a retry after an error reuses it.
+    final keys = ref.read(serviceActionKeysProvider);
+    final api = ref.read(serviceJobsApiProvider);
+    final run = await runJobAction(context, ref, job.id,
+        () => keys.run('analysis', job.id, (key) => api.requestAnalysis(job.id, idempotencyKey: key)),
+        success: 'Analysis queued');
+    if (run != null && mounted) await _follow(run);
+  }
+
+  /// Polls [run] until it finishes, then refreshes the job. Never touches `ref`
+  /// once the panel is disposed.
+  Future<void> _follow(AnalysisRun run) async {
+    if (_following != null || !_followed.add(run.id)) return;
+    setState(() => _following = run.id);
     final api = ref.read(serviceJobsApiProvider);
     final interval = ref.read(uploadPollIntervalProvider);
+    final jobId = job.id;
     var current = run;
     for (var i = 0; i < 60 && current.inProgress; i++) {
       await Future<void>.delayed(interval);
+      if (!mounted) return;
       try {
         current = await api.analysisRun(jobId, run.id);
       } catch (_) {
         break;
       }
+      if (!mounted) return;
     }
+    if (!mounted) return;
+    setState(() => _following = null);
     refreshServiceJob(ref, jobId);
   }
 }

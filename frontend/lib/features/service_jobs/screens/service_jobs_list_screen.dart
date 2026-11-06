@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:helm_marine/core/api/paged.dart';
 import 'package:go_router/go_router.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
 import 'package:helm_marine/core/widgets/state_views.dart';
@@ -42,7 +43,7 @@ class ServiceJobsListScreen extends ConsumerWidget {
           title: 'Could not load your service jobs',
           onRetry: () => ref.invalidate(serviceJobListProvider),
         ),
-        data: (items) => RefreshIndicator(
+        data: (page) => RefreshIndicator(
           onRefresh: () => ref.refresh(serviceJobListProvider.future),
           child: ContentWidth(
             maxWidth: 900,
@@ -53,7 +54,7 @@ class ServiceJobsListScreen extends ConsumerWidget {
                   'Describe a problem, collect useful photos and measurements, and share a brief with a '
                   'contractor you choose. Drafts are saved as you go — open one to carry on.',
                 ),
-                if (items.isEmpty)
+                if (page.items.isEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 32),
                     child: Column(
@@ -72,7 +73,14 @@ class ServiceJobsListScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                for (final job in items) _JobCard(job: job),
+                for (final job in page.items) _JobCard(job: job),
+                LoadMoreButton(
+                  hasMore: page.hasMore,
+                  loadingMore: page.loadingMore,
+                  error: page.moreError,
+                  label: 'Load more jobs',
+                  onLoadMore: () => ref.read(serviceJobListProvider.notifier).loadMore(),
+                ),
               ],
             ),
           ),

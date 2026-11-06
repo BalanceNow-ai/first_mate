@@ -1,6 +1,6 @@
 {
-  "id": "2db69262-0e48-4f83-8a3e-5b238398f470",
-  "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+  "id": "e7e2b9e5-f95b-4bda-85e1-edd6ba961679",
+  "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
   "requester_role": "assistant",
   "organization_id": null,
   "category": "close_up",
@@ -13,9 +13,9 @@
   "unavailable_reason": null,
   "technician_inspection_required": false,
   "answer_note": "The hose is marked 25 mm ID",
-  "answered_at": "2026-11-06T06:25:04.591192Z",
+  "answered_at": "2026-11-06T07:32:17.968574Z",
   "version": 2,
-  "created_at": "2026-11-06T06:25:04.580854Z",
-  "updated_at": "2026-11-06T06:25:04.593431Z",
+  "created_at": "2026-11-06T07:32:17.955547Z",
+  "updated_at": "2026-11-06T07:32:17.969303Z",
   "options": []
 }

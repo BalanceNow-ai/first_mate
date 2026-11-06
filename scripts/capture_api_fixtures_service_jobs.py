@@ -427,6 +427,8 @@ def main() -> int:
                                               tok_cm, json={"expected_version": third["version"],
                                                             "note": "Not needed for this repair"}), 200)
     s.save("preparation_items_contractor", s.api("GET", f"/service-jobs/{jid}/preparation-items", tok_cm), 200)
+    # The owner's view of the same list after the contractor confirmed, asked and rejected.
+    s.save("preparation_items_owner_view", s.api("GET", f"/service-jobs/{jid}/preparation-items", tok_o), 200)
 
     # ------------------------------------------------------------------ scope
     scope = s.save("scope_proposed", s.api("POST", f"/service-jobs/{jid}/scopes", tok_cm, json={
@@ -561,7 +563,12 @@ def main() -> int:
     a5 = next(a for a in s.ok(s.api("GET", f"{p4}/assignments", tok_o), 200) if a["status"] == "invited")
     s.ok(s.api("POST", f"/contractors/assignments/{a5['id']}/accept", tok_ca, json={"member_user_ids": [ca_id]}), 200)
     s.save("job_contractor_live", s.api("GET", p4, tok_ca), 200)
-    s.save("measurements_other_org", s.api("GET", f"{p4}/measurements", tok_ca), 200)
+    other = s.save("measurements_other_org", s.api("GET", f"{p4}/measurements", tok_ca), 200)
+    # Recorder and confirmer are judged separately: the owner recorded the cable run and the
+    # first organisation confirmed it, so only the confirmer is withheld.
+    run_m = next(m for m in other if m["component"] == "Port light cable run")
+    if run_m["recorded_by_other_organization"] or not run_m.get("confirmed_by_other_organization"):
+        raise SystemExit(f"expected an owner-recorded, other-organisation-confirmed measurement: {run_m}")
     s.save("preparation_items_other_org", s.api("GET", f"{p4}/preparation-items", tok_ca), 200)
 
     print("\nWrote:")

@@ -1,7 +1,7 @@
 {
-  "assignment_id": "9155337d-e13d-4c63-bb6c-d4a6d05e8b18",
-  "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
-  "organization_id": "6b227433-4c77-44a5-aec1-11fffde39628",
+  "assignment_id": "3c4a832b-e0a8-4663-81d7-2da9395ab846",
+  "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+  "organization_id": "f3af1153-00e5-444d-b892-8b8dbe1478dc",
   "status": "accepted",
   "job_title": "Water under the sink when the pump runs",
   "vessel_make": "Stabicraft",
@@ -17,15 +17,15 @@
   ],
   "live_updates": true,
   "inviter_first_name": "Fixture",
-  "invited_at": "2026-11-06T06:25:05.927755Z",
-  "accepted_at": "2026-11-06T06:25:06.047819Z",
+  "invited_at": "2026-11-06T07:32:19.374532Z",
+  "accepted_at": "2026-11-06T07:32:19.504877Z",
   "version": 2,
   "members": [
     {
-      "user_id": "70cc3540-4da9-4f13-8e08-b2845ea240db",
+      "user_id": "60d99bf1-bead-4f28-96b8-1649c76ec4e5",
       "name": "Fixture Technician",
       "restricted_access": false,
-      "added_at": "2026-11-06T06:25:06.053358Z"
+      "added_at": "2026-11-06T07:32:19.509917Z"
     }
   ]
 }

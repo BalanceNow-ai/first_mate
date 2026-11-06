@@ -1,12 +1,12 @@
 [
   {
-    "id": "9584b253-6a70-495a-a3c0-485916a2e9e5",
-    "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+    "id": "d37f7b16-0321-4208-a9a5-4eec21c8acbf",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
     "revision_number": 1,
     "is_change": false,
     "supersedes_id": null,
-    "proposed_by": "70cc3540-4da9-4f13-8e08-b2845ea240db",
-    "organization_id": "6b227433-4c77-44a5-aec1-11fffde39628",
+    "proposed_by": "60d99bf1-bead-4f28-96b8-1649c76ec4e5",
+    "organization_id": "f3af1153-00e5-444d-b892-8b8dbe1478dc",
     "summary": "Replace the pump outlet hose and both clamps",
     "tasks": [
       {
@@ -41,27 +41,27 @@
     "exclusions": "Pump replacement",
     "assumptions": "Far-end fitting is serviceable",
     "status": "accepted",
-    "content_digest": "5d7d3ac4fc13de5a9ccd9ad107f6c5b139d55476fa31def82f13ec15ee0619eb",
+    "content_digest": "0bd345f7548b52f89a50d4b541273e50c857487d19c547a101ad876a0fb8593b",
     "is_current": false,
     "decision": {
-      "id": "a185e7e3-2e6f-47df-b808-a6c8f3b1e4db",
-      "scope_revision_id": "9584b253-6a70-495a-a3c0-485916a2e9e5",
+      "id": "abfee3b8-d2c2-4639-9308-5650a3246c4c",
+      "scope_revision_id": "d37f7b16-0321-4208-a9a5-4eec21c8acbf",
       "decision": "accepted",
-      "revision_digest": "5d7d3ac4fc13de5a9ccd9ad107f6c5b139d55476fa31def82f13ec15ee0619eb",
-      "decided_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
+      "revision_digest": "0bd345f7548b52f89a50d4b541273e50c857487d19c547a101ad876a0fb8593b",
+      "decided_by": "5cfee740-8410-4f69-9f23-78bde6dd70b7",
       "note": "Go ahead",
-      "decided_at": "2026-11-06T06:25:07.714101Z"
+      "decided_at": "2026-11-06T07:32:21.178556Z"
     },
-    "created_at": "2026-11-06T06:25:07.671678Z"
+    "created_at": "2026-11-06T07:32:21.145471Z"
   },
   {
-    "id": "497c9cd3-38e8-4b1f-87d6-48353f84d7a9",
-    "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+    "id": "531e55bb-a472-4aab-8f45-d36b6da7eb5e",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
     "revision_number": 2,
     "is_change": true,
-    "supersedes_id": "9584b253-6a70-495a-a3c0-485916a2e9e5",
-    "proposed_by": "70cc3540-4da9-4f13-8e08-b2845ea240db",
-    "organization_id": "6b227433-4c77-44a5-aec1-11fffde39628",
+    "supersedes_id": "d37f7b16-0321-4208-a9a5-4eec21c8acbf",
+    "proposed_by": "60d99bf1-bead-4f28-96b8-1649c76ec4e5",
+    "organization_id": "f3af1153-00e5-444d-b892-8b8dbe1478dc",
     "summary": "Also replace the outlet fitting",
     "tasks": [
       {
@@ -96,17 +96,17 @@
     "exclusions": null,
     "assumptions": null,
     "status": "change_requested",
-    "content_digest": "6e56ff0c80ce093673da4372d415d2bea4771a3f8dd82c610a7b38ede362e28b",
+    "content_digest": "f552bd141f5e6f8a5abad5721cb48a6e6f3081a2d3372d6f39e120b098557685",
     "is_current": true,
     "decision": {
-      "id": "318122c1-db14-4e7e-a338-577d37d5d9c1",
-      "scope_revision_id": "497c9cd3-38e8-4b1f-87d6-48353f84d7a9",
+      "id": "8c7a826f-313a-40bd-a318-ee66d073ccf3",
+      "scope_revision_id": "531e55bb-a472-4aab-8f45-d36b6da7eb5e",
       "decision": "change_requested",
-      "revision_digest": "6e56ff0c80ce093673da4372d415d2bea4771a3f8dd82c610a7b38ede362e28b",
-      "decided_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
+      "revision_digest": "f552bd141f5e6f8a5abad5721cb48a6e6f3081a2d3372d6f39e120b098557685",
+      "decided_by": "5cfee740-8410-4f69-9f23-78bde6dd70b7",
       "note": "Please quote the fitting separately",
-      "decided_at": "2026-11-06T06:25:07.801239Z"
+      "decided_at": "2026-11-06T07:32:21.254091Z"
     },
-    "created_at": "2026-11-06T06:25:07.760197Z"
+    "created_at": "2026-11-06T07:32:21.215280Z"
   }
 ]

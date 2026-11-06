@@ -1,19 +1,19 @@
 {
-  "id": "3454168b-7381-4321-b619-f456330ef032",
-  "invoice_revision_id": "abcd6cf0-c301-46bc-a05c-452e3f9c764d",
+  "id": "f71bd4a0-0312-4244-bd71-10fe01f4b17a",
+  "invoice_revision_id": "d3106c4f-e3b7-425a-a0de-53a776b5d96b",
   "status": "current",
-  "basis_digest": "bfc80cdc3d284bf8768b40b3d32f3ebb92d6c80f6b95c94abf0f17f0f2e56890",
+  "basis_digest": "799044eb53883b1dcd509d54bbcd4d486496e96bcca0391683fd103d12acd6f3",
   "stale": false,
-  "created_at": "2026-11-06T06:27:23.596733Z",
+  "created_at": "2026-11-06T07:32:43.027365Z",
   "content": {
     "version": "invoice-explanation-v1",
     "phrasing": "deterministic_template",
-    "invoice_id": "44d9aca1-94eb-4564-bfd8-8e69ebac5889",
-    "revision_id": "abcd6cf0-c301-46bc-a05c-452e3f9c764d",
+    "invoice_id": "68a71790-1fac-470b-864d-5b981433d86c",
+    "revision_id": "d3106c4f-e3b7-425a-a0de-53a776b5d96b",
     "revision_number": 1,
     "provisional": true,
     "needs_confirmation": [
-      "line:3bd70624-b8e9-4c36-8f7c-565fe8da7235"
+      "line:c58b1b0e-7c9b-48cf-85fa-fc66175be8b0"
     ],
     "currency": {
       "code": "NZD",
@@ -23,7 +23,7 @@
     "rounding_policy": "Rounding half-up to 2 decimal places (NZD minor unit).",
     "lines": [
       {
-        "line_id": "0f727051-6ca6-4ac0-8c9e-02b31ea5955e",
+        "line_id": "d545a5de-17c3-4800-8c60-97e7c137242a",
         "line_number": 1,
         "kind": "labour",
         "plain_language": "Labour — time charged for the work: Labour - replace hose and clamps. Quantity 2.5 (hr) at 95.00 each. Amount shown: 237.50.",
@@ -34,7 +34,7 @@
           }
         ],
         "arithmetic": {
-          "line_id": "0f727051-6ca6-4ac0-8c9e-02b31ea5955e",
+          "line_id": "d545a5de-17c3-4800-8c60-97e7c137242a",
           "line_number": 1,
           "computed": "237.50",
           "printed": "237.50",
@@ -58,7 +58,7 @@
         "needs_confirmation": false
       },
       {
-        "line_id": "15c1a1cd-ade0-446b-b370-b94c38797701",
+        "line_id": "9dbf860e-3bcf-4125-bf89-22e7b0cfce6d",
         "line_number": 2,
         "kind": "part",
         "plain_language": "A part or material supplied: Sanitation hose 25mm ID. Part number SH-25 (as printed). Quantity 1.5 (m) at 18.40 each. Amount shown: 27.60.",
@@ -69,7 +69,7 @@
           }
         ],
         "arithmetic": {
-          "line_id": "15c1a1cd-ade0-446b-b370-b94c38797701",
+          "line_id": "9dbf860e-3bcf-4125-bf89-22e7b0cfce6d",
           "line_number": 2,
           "computed": "27.60",
           "printed": "27.60",
@@ -93,7 +93,7 @@
         "needs_confirmation": false
       },
       {
-        "line_id": "3bd70624-b8e9-4c36-8f7c-565fe8da7235",
+        "line_id": "c58b1b0e-7c9b-48cf-85fa-fc66175be8b0",
         "line_number": 3,
         "kind": "part",
         "plain_language": "A part or material supplied: S/S hose clamp 316. Part number HC-316-32 (as printed). Quantity 3 (ea) at 6.50 each. Amount shown: 26.00.",
@@ -112,7 +112,7 @@
           }
         ],
         "arithmetic": {
-          "line_id": "3bd70624-b8e9-4c36-8f7c-565fe8da7235",
+          "line_id": "c58b1b0e-7c9b-48cf-85fa-fc66175be8b0",
           "line_number": 3,
           "computed": "19.50",
           "printed": "26.00",
@@ -136,7 +136,7 @@
         "needs_confirmation": true
       },
       {
-        "line_id": "8b9f8088-e7b2-4176-b706-74c38cf998a4",
+        "line_id": "b8520e37-ab7b-4290-82f6-52c9c94c6963",
         "line_number": 4,
         "kind": "call_out",
         "plain_language": "A call-out charge — a fee for attending, separate from time worked: Call-out fee. Quantity 1 (unit not stated) at 95.00 each. Amount shown: 95.00.",
@@ -147,7 +147,7 @@
           }
         ],
         "arithmetic": {
-          "line_id": "8b9f8088-e7b2-4176-b706-74c38cf998a4",
+          "line_id": "b8520e37-ab7b-4290-82f6-52c9c94c6963",
           "line_number": 4,
           "computed": "95.00",
           "printed": "95.00",
@@ -171,7 +171,7 @@
         "needs_confirmation": false
       },
       {
-        "line_id": "f8855b99-fcf3-4dc2-a2f1-8ee67a96b705",
+        "line_id": "b716a228-7a0d-44ea-acda-b09a403a2de4",
         "line_number": 5,
         "kind": "consumable",
         "plain_language": "Consumables — small materials used up during the job: Consumables / sundries. Amount shown: 12.00.",
@@ -186,7 +186,7 @@
           }
         ],
         "arithmetic": {
-          "line_id": "f8855b99-fcf3-4dc2-a2f1-8ee67a96b705",
+          "line_id": "b716a228-7a0d-44ea-acda-b09a403a2de4",
           "line_number": 5,
           "computed": null,
           "printed": "12.00",
@@ -223,7 +223,7 @@
       "blockers": [],
       "lines": [
         {
-          "line_id": "0f727051-6ca6-4ac0-8c9e-02b31ea5955e",
+          "line_id": "d545a5de-17c3-4800-8c60-97e7c137242a",
           "line_number": 1,
           "computed": "237.50",
           "printed": "237.50",
@@ -234,7 +234,7 @@
           "notes": []
         },
         {
-          "line_id": "15c1a1cd-ade0-446b-b370-b94c38797701",
+          "line_id": "9dbf860e-3bcf-4125-bf89-22e7b0cfce6d",
           "line_number": 2,
           "computed": "27.60",
           "printed": "27.60",
@@ -245,7 +245,7 @@
           "notes": []
         },
         {
-          "line_id": "3bd70624-b8e9-4c36-8f7c-565fe8da7235",
+          "line_id": "c58b1b0e-7c9b-48cf-85fa-fc66175be8b0",
           "line_number": 3,
           "computed": "19.50",
           "printed": "26.00",
@@ -256,7 +256,7 @@
           "notes": []
         },
         {
-          "line_id": "8b9f8088-e7b2-4176-b706-74c38cf998a4",
+          "line_id": "b8520e37-ab7b-4290-82f6-52c9c94c6963",
           "line_number": 4,
           "computed": "95.00",
           "printed": "95.00",
@@ -267,7 +267,7 @@
           "notes": []
         },
         {
-          "line_id": "f8855b99-fcf3-4dc2-a2f1-8ee67a96b705",
+          "line_id": "b716a228-7a0d-44ea-acda-b09a403a2de4",
           "line_number": 5,
           "computed": null,
           "printed": "12.00",
@@ -312,17 +312,17 @@
       "provisional": true,
       "scope_revisions": [
         {
-          "id": "6a5392c2-f020-436f-ac01-a013b859bcd2",
+          "id": "81935dc9-144f-41ad-92b8-1995a5f04a76",
           "revision_number": 1,
           "is_change": false,
           "currency": "NZD",
-          "decision_id": "243aac52-b1db-43aa-b7ee-063c72f01222",
-          "decided_at": "2026-11-06T06:27:21.430959+00:00"
+          "decision_id": "ca52019b-538b-4b0d-a456-8568ac6bba96",
+          "decided_at": "2026-11-06T07:32:40.847578+00:00"
         }
       ],
       "items": [
         {
-          "line_id": "0f727051-6ca6-4ac0-8c9e-02b31ea5955e",
+          "line_id": "d545a5de-17c3-4800-8c60-97e7c137242a",
           "line_number": 1,
           "description": "Labour - replace hose and clamps",
           "status": "matches",
@@ -330,19 +330,19 @@
           "additional_work": false,
           "differences": [],
           "approval": {
-            "scope_revision_id": "6a5392c2-f020-436f-ac01-a013b859bcd2",
+            "scope_revision_id": "81935dc9-144f-41ad-92b8-1995a5f04a76",
             "scope_revision_number": 1,
             "is_change": false,
-            "decision_id": "243aac52-b1db-43aa-b7ee-063c72f01222",
-            "decided_at": "2026-11-06T06:27:21.430959+00:00",
-            "decided_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
+            "decision_id": "ca52019b-538b-4b0d-a456-8568ac6bba96",
+            "decided_at": "2026-11-06T07:32:40.847578+00:00",
+            "decided_by": "7ee281cf-7f47-46eb-97ad-e6edd9c5fa8d",
             "scope_line_index": 0,
             "scope_line_description": "Labour - replace hose and clamps"
           },
           "approval_text": "In the accepted scope (scope revision 1), accepted by the owner on 2026-11-06."
         },
         {
-          "line_id": "15c1a1cd-ade0-446b-b370-b94c38797701",
+          "line_id": "9dbf860e-3bcf-4125-bf89-22e7b0cfce6d",
           "line_number": 2,
           "description": "Sanitation hose 25mm ID",
           "status": "matches",
@@ -350,19 +350,19 @@
           "additional_work": false,
           "differences": [],
           "approval": {
-            "scope_revision_id": "6a5392c2-f020-436f-ac01-a013b859bcd2",
+            "scope_revision_id": "81935dc9-144f-41ad-92b8-1995a5f04a76",
             "scope_revision_number": 1,
             "is_change": false,
-            "decision_id": "243aac52-b1db-43aa-b7ee-063c72f01222",
-            "decided_at": "2026-11-06T06:27:21.430959+00:00",
-            "decided_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
+            "decision_id": "ca52019b-538b-4b0d-a456-8568ac6bba96",
+            "decided_at": "2026-11-06T07:32:40.847578+00:00",
+            "decided_by": "7ee281cf-7f47-46eb-97ad-e6edd9c5fa8d",
             "scope_line_index": 1,
             "scope_line_description": "Sanitation hose 25mm ID"
           },
           "approval_text": "In the accepted scope (scope revision 1), accepted by the owner on 2026-11-06."
         },
         {
-          "line_id": "3bd70624-b8e9-4c36-8f7c-565fe8da7235",
+          "line_id": "c58b1b0e-7c9b-48cf-85fa-fc66175be8b0",
           "line_number": 3,
           "description": "S/S hose clamp 316",
           "status": "differs",
@@ -376,19 +376,19 @@
             }
           ],
           "approval": {
-            "scope_revision_id": "6a5392c2-f020-436f-ac01-a013b859bcd2",
+            "scope_revision_id": "81935dc9-144f-41ad-92b8-1995a5f04a76",
             "scope_revision_number": 1,
             "is_change": false,
-            "decision_id": "243aac52-b1db-43aa-b7ee-063c72f01222",
-            "decided_at": "2026-11-06T06:27:21.430959+00:00",
-            "decided_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
+            "decision_id": "ca52019b-538b-4b0d-a456-8568ac6bba96",
+            "decided_at": "2026-11-06T07:32:40.847578+00:00",
+            "decided_by": "7ee281cf-7f47-46eb-97ad-e6edd9c5fa8d",
             "scope_line_index": 2,
             "scope_line_description": "S/S hose clamp 316"
           },
           "approval_text": "In the accepted scope (scope revision 1), accepted by the owner on 2026-11-06."
         },
         {
-          "line_id": "8b9f8088-e7b2-4176-b706-74c38cf998a4",
+          "line_id": "b8520e37-ab7b-4290-82f6-52c9c94c6963",
           "line_number": 4,
           "description": "Call-out fee",
           "status": "differs",
@@ -407,19 +407,19 @@
             }
           ],
           "approval": {
-            "scope_revision_id": "6a5392c2-f020-436f-ac01-a013b859bcd2",
+            "scope_revision_id": "81935dc9-144f-41ad-92b8-1995a5f04a76",
             "scope_revision_number": 1,
             "is_change": false,
-            "decision_id": "243aac52-b1db-43aa-b7ee-063c72f01222",
-            "decided_at": "2026-11-06T06:27:21.430959+00:00",
-            "decided_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
+            "decision_id": "ca52019b-538b-4b0d-a456-8568ac6bba96",
+            "decided_at": "2026-11-06T07:32:40.847578+00:00",
+            "decided_by": "7ee281cf-7f47-46eb-97ad-e6edd9c5fa8d",
             "scope_line_index": 3,
             "scope_line_description": "Call-out fee"
           },
           "approval_text": "In the accepted scope (scope revision 1), accepted by the owner on 2026-11-06."
         },
         {
-          "line_id": "f8855b99-fcf3-4dc2-a2f1-8ee67a96b705",
+          "line_id": "b716a228-7a0d-44ea-acda-b09a403a2de4",
           "line_number": 5,
           "description": "Consumables / sundries",
           "status": "not_in_accepted_scope",
@@ -452,8 +452,8 @@
     ],
     "suggested_questions": [
       {
-        "key": "arith:line:3bd70624-b8e9-4c36-8f7c-565fe8da7235",
-        "line_id": "3bd70624-b8e9-4c36-8f7c-565fe8da7235",
+        "key": "arith:line:c58b1b0e-7c9b-48cf-85fa-fc66175be8b0",
+        "line_id": "c58b1b0e-7c9b-48cf-85fa-fc66175be8b0",
         "text": "Line 3 (S/S hose clamp 316) shows 26.00, but 3 × 6.50 works out to 19.50. Could you confirm how this amount was calculated?"
       },
       {
@@ -462,23 +462,23 @@
         "text": "The subtotal plus the printed tax comes to 457.82, and the printed total is 458.82. Could you explain the difference of 1.00?"
       },
       {
-        "key": "scope:differs:3bd70624-b8e9-4c36-8f7c-565fe8da7235:quantity",
-        "line_id": "3bd70624-b8e9-4c36-8f7c-565fe8da7235",
+        "key": "scope:differs:c58b1b0e-7c9b-48cf-85fa-fc66175be8b0:quantity",
+        "line_id": "c58b1b0e-7c9b-48cf-85fa-fc66175be8b0",
         "text": "Scope revision 1 shows quantity 4; line 3 of the invoice shows 3. Could you explain the difference?"
       },
       {
-        "key": "scope:differs:8b9f8088-e7b2-4176-b706-74c38cf998a4:amount",
-        "line_id": "8b9f8088-e7b2-4176-b706-74c38cf998a4",
+        "key": "scope:differs:b8520e37-ab7b-4290-82f6-52c9c94c6963:amount",
+        "line_id": "b8520e37-ab7b-4290-82f6-52c9c94c6963",
         "text": "Scope revision 1 shows amount 85.00; line 4 of the invoice shows 95.00. Could you explain the difference?"
       },
       {
-        "key": "scope:differs:8b9f8088-e7b2-4176-b706-74c38cf998a4:unit_price",
-        "line_id": "8b9f8088-e7b2-4176-b706-74c38cf998a4",
+        "key": "scope:differs:b8520e37-ab7b-4290-82f6-52c9c94c6963:unit_price",
+        "line_id": "b8520e37-ab7b-4290-82f6-52c9c94c6963",
         "text": "Scope revision 1 shows unit price 85.00; line 4 of the invoice shows 95.00. Could you explain the difference?"
       },
       {
-        "key": "scope:additional:f8855b99-fcf3-4dc2-a2f1-8ee67a96b705",
-        "line_id": "f8855b99-fcf3-4dc2-a2f1-8ee67a96b705",
+        "key": "scope:additional:b716a228-7a0d-44ea-acda-b09a403a2de4",
+        "line_id": "b716a228-7a0d-44ea-acda-b09a403a2de4",
         "text": "Line 5 (Consumables / sundries) isn't in the accepted scope we have on record. Could you let us know when and how this was agreed?"
       }
     ],

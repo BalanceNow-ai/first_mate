@@ -1,7 +1,7 @@
 [
   {
-    "id": "ad29a897-c634-4225-b7e0-1c80439ef44d",
-    "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+    "id": "5f425ef4-c443-464b-9371-f5fec1aee07e",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
     "revision_number": 1,
     "status": "published",
     "sections": [
@@ -16,21 +16,21 @@
       "members": [
         {
           "name": "Fixture Technician",
-          "user_id": "70cc3540-4da9-4f13-8e08-b2845ea240db"
+          "user_id": "60d99bf1-bead-4f28-96b8-1649c76ec4e5"
         }
       ],
-      "assignment_id": "9155337d-e13d-4c63-bb6c-d4a6d05e8b18",
-      "organization_id": "6b227433-4c77-44a5-aec1-11fffde39628",
+      "assignment_id": "3c4a832b-e0a8-4663-81d7-2da9395ab846",
+      "organization_id": "f3af1153-00e5-444d-b892-8b8dbe1478dc",
       "assignment_status": "accepted",
-      "organization_name": "Fixture Marine ecaf6296"
+      "organization_name": "Fixture Marine cda525ff"
     },
     "content": null,
     "job_revision": 10,
     "current_job_revision": 10,
-    "content_digest": "b9d0eb951276758bf2a6c0cd20255eb8b499b24f4fd6346a76894fdd5a39d058",
-    "created_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
-    "created_at": "2026-11-06T06:25:06.220227Z",
-    "published_at": "2026-11-06T06:25:06.250124Z",
+    "content_digest": "1f15d394635caa7c905a8833e205199e466ebd456c72095b2902d1102a7b2228",
+    "created_by": "5cfee740-8410-4f69-9f23-78bde6dd70b7",
+    "created_at": "2026-11-06T07:32:19.659984Z",
+    "published_at": "2026-11-06T07:32:19.684400Z",
     "is_current": true,
     "outdated": false,
     "outdated_reasons": [],

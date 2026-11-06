@@ -90,8 +90,20 @@ class SectionCard extends StatelessWidget {
   final Widget? trailing;
   final List<Widget> children;
 
+  /// Below this width the trailing action moves under the title instead of
+  /// squeezing it (e.g. a 320 px phone).
+  static const double _stackBelow = 420;
+
   @override
   Widget build(BuildContext context) {
+    final heading = Semantics(
+      header: true,
+      container: true,
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+      ),
+    );
     return Semantics(
       container: true,
       explicitChildNodes: true,
@@ -102,21 +114,23 @@ class SectionCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Semantics(
-                      header: true,
-                      container: true,
-                      child: Text(
-                        title,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                  ?trailing,
-                ],
-              ),
+              if (trailing == null)
+                heading
+              else
+                LayoutBuilder(
+                  builder: (context, constraints) => constraints.maxWidth < _stackBelow
+                      ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          heading,
+                          const SizedBox(height: 4),
+                          // Constrained: a long action label wraps rather than overflowing.
+                          ConstrainedBox(constraints: BoxConstraints(maxWidth: constraints.maxWidth), child: trailing),
+                        ])
+                      : Row(children: [
+                          Expanded(child: heading),
+                          const SizedBox(width: 8),
+                          Flexible(child: trailing!),
+                        ]),
+                ),
               if (subtitle != null) ...[
                 const SizedBox(height: 4),
                 Semantics(container: true, child: Text(subtitle!, style: const TextStyle(color: HelmTheme.mutedText))),

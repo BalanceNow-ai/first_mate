@@ -1,29 +1,29 @@
 {
-  "id": "64b75be0-f63a-4233-8a3d-a1ab878f3529",
+  "id": "ad7a3928-fa46-44a8-b477-fc8174cf131a",
   "title": "Harbour Marine invoice",
   "job_id": null,
   "standalone": true,
   "status": "owner_reviewed",
   "version": 5,
-  "current_revision_id": "488ab77d-3f39-447b-9d9b-89f7de3c64e1",
+  "current_revision_id": "f698f8ad-dc81-4015-8a62-062e287176e1",
   "revision_number": 1,
   "supplier_name": "Fixture Harbour Marine",
   "total": "458.82",
   "currency": "NZD",
-  "created_at": "2026-11-06T06:27:17.705283Z",
-  "updated_at": "2026-11-06T06:27:18.923436Z",
+  "created_at": "2026-11-06T07:32:37.972567Z",
+  "updated_at": "2026-11-06T07:32:38.380196Z",
   "provisional": false,
   "needs_confirmation": [],
   "revision": {
-    "id": "488ab77d-3f39-447b-9d9b-89f7de3c64e1",
+    "id": "f698f8ad-dc81-4015-8a62-062e287176e1",
     "revision_number": 1,
     "origin": "owner_upload",
     "status": "owner_reviewed",
-    "source_asset_id": "81c32f53-705b-4c07-8a00-4394ae071a15",
-    "uploaded_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
+    "source_asset_id": "6c0511b8-8b40-456a-9626-83ae6ef351d8",
+    "uploaded_by": "7ee281cf-7f47-46eb-97ad-e6edd9c5fa8d",
     "organization_id": null,
     "supersedes_id": null,
-    "created_at": "2026-11-06T06:27:17.707532Z",
+    "created_at": "2026-11-06T07:32:37.974045Z",
     "currency": "NZD",
     "rounding": "half_up",
     "version": 5,
@@ -42,8 +42,8 @@
         }
       }
     ],
-    "reviewed_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
-    "reviewed_at": "2026-11-06T06:27:18.923360+00:00",
+    "reviewed_by": "7ee281cf-7f47-46eb-97ad-e6edd9c5fa8d",
+    "reviewed_at": "2026-11-06T07:32:38.380127+00:00",
     "fields": {
       "supplier_name": {
         "name": "supplier_name",
@@ -66,7 +66,7 @@
       },
       "invoice_number": {
         "name": "invoice_number",
-        "value": "INV-06c6167d-S",
+        "value": "INV-e55a15b6-S",
         "source": "extracted",
         "certainty": "high",
         "page": 1,
@@ -78,7 +78,7 @@
         },
         "illegible": false,
         "needs_confirmation": false,
-        "extracted_value": "INV-06c6167d-S",
+        "extracted_value": "INV-e55a15b6-S",
         "by": null,
         "at": null,
         "history": []
@@ -98,8 +98,8 @@
         "illegible": false,
         "needs_confirmation": false,
         "extracted_value": "2026-10-30",
-        "by": "5368a570-19a8-49ca-95fc-a00cad92be93",
-        "at": "2026-11-06T06:27:18.900519+00:00",
+        "by": "7ee281cf-7f47-46eb-97ad-e6edd9c5fa8d",
+        "at": "2026-11-06T07:32:38.356792+00:00",
         "history": [
           {
             "value": "2026-10-30",
@@ -222,20 +222,20 @@
   },
   "revisions": [
     {
-      "id": "488ab77d-3f39-447b-9d9b-89f7de3c64e1",
+      "id": "f698f8ad-dc81-4015-8a62-062e287176e1",
       "revision_number": 1,
       "origin": "owner_upload",
       "status": "owner_reviewed",
-      "source_asset_id": "81c32f53-705b-4c07-8a00-4394ae071a15",
-      "uploaded_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
+      "source_asset_id": "6c0511b8-8b40-456a-9626-83ae6ef351d8",
+      "uploaded_by": "7ee281cf-7f47-46eb-97ad-e6edd9c5fa8d",
       "organization_id": null,
       "supersedes_id": null,
-      "created_at": "2026-11-06T06:27:17.707532Z"
+      "created_at": "2026-11-06T07:32:37.974045Z"
     }
   ],
   "lines": [
     {
-      "id": "0635d154-bb7e-48df-afb9-9e27aa108143",
+      "id": "67bf8568-27a4-479d-945c-cdee07b21179",
       "line_number": 1,
       "kind": "labour",
       "kind_certainty": "medium",
@@ -275,7 +275,7 @@
       "version": 1
     },
     {
-      "id": "813cab08-43be-4187-a117-efb7a134a4e4",
+      "id": "1992ec2f-7e0a-4594-9276-14abc0cc7ee7",
       "line_number": 2,
       "kind": "part",
       "kind_certainty": "medium",
@@ -315,7 +315,7 @@
       "version": 1
     },
     {
-      "id": "c1f26456-bc78-4fcb-8820-aba1bccaea08",
+      "id": "e297946a-6b01-475c-be0d-0142f1571274",
       "line_number": 3,
       "kind": "part",
       "kind_certainty": "medium",
@@ -352,12 +352,12 @@
       "corrected_fields": [
         "quantity"
       ],
-      "corrected_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
-      "corrected_at": "2026-11-06T06:27:18.878190Z",
+      "corrected_by": "7ee281cf-7f47-46eb-97ad-e6edd9c5fa8d",
+      "corrected_at": "2026-11-06T07:32:38.335755Z",
       "version": 2
     },
     {
-      "id": "e42268b1-a604-41a9-ac9a-d9e00651e100",
+      "id": "896ece06-8691-4bb4-9c19-5bd616134ebc",
       "line_number": 4,
       "kind": "call_out",
       "kind_certainty": "medium",
@@ -397,7 +397,7 @@
       "version": 1
     },
     {
-      "id": "be9d6d4e-5f27-478a-b73f-28557da62141",
+      "id": "0e33ad31-8739-4b0a-8c9f-419d5932635e",
       "line_number": 5,
       "kind": "consumable",
       "kind_certainty": "medium",
@@ -438,12 +438,12 @@
     }
   ],
   "explanation": {
-    "id": "afd3473e-b1c9-46bf-be96-89d4bea41d94",
-    "invoice_revision_id": "488ab77d-3f39-447b-9d9b-89f7de3c64e1",
+    "id": "34a453ea-35f4-41f7-84ff-15e4b219e7d1",
+    "invoice_revision_id": "f698f8ad-dc81-4015-8a62-062e287176e1",
     "status": "current",
-    "basis_digest": "f95a39cb2250167e817fcc0717e785fd4037421c45a3f0f9f671fb7cf3f09bea",
+    "basis_digest": "20e109d25b9ea1efe945f279d6d5df76f98f650d7b8b5c0b81e4b8968f9c65c0",
     "stale": false,
-    "created_at": "2026-11-06T06:27:18.949428Z",
+    "created_at": "2026-11-06T07:32:38.402727Z",
     "content": {
       "lines": [
         {
@@ -457,7 +457,7 @@
               "y": 0.1496
             }
           },
-          "line_id": "0635d154-bb7e-48df-afb9-9e27aa108143",
+          "line_id": "67bf8568-27a4-479d-945c-cdee07b21179",
           "glossary": [
             {
               "term": "hr",
@@ -468,7 +468,7 @@
           "arithmetic": {
             "notes": [],
             "status": "matches",
-            "line_id": "0635d154-bb7e-48df-afb9-9e27aa108143",
+            "line_id": "67bf8568-27a4-479d-945c-cdee07b21179",
             "printed": "237.50",
             "reasons": [],
             "computed": "237.50",
@@ -492,7 +492,7 @@
               "y": 0.1686
             }
           },
-          "line_id": "813cab08-43be-4187-a117-efb7a134a4e4",
+          "line_id": "1992ec2f-7e0a-4594-9276-14abc0cc7ee7",
           "glossary": [
             {
               "term": "id",
@@ -503,7 +503,7 @@
           "arithmetic": {
             "notes": [],
             "status": "matches",
-            "line_id": "813cab08-43be-4187-a117-efb7a134a4e4",
+            "line_id": "1992ec2f-7e0a-4594-9276-14abc0cc7ee7",
             "printed": "27.60",
             "reasons": [],
             "computed": "27.60",
@@ -527,7 +527,7 @@
               "y": 0.1876
             }
           },
-          "line_id": "c1f26456-bc78-4fcb-8820-aba1bccaea08",
+          "line_id": "e297946a-6b01-475c-be0d-0142f1571274",
           "glossary": [
             {
               "term": "ea",
@@ -546,7 +546,7 @@
           "arithmetic": {
             "notes": [],
             "status": "matches",
-            "line_id": "c1f26456-bc78-4fcb-8820-aba1bccaea08",
+            "line_id": "e297946a-6b01-475c-be0d-0142f1571274",
             "printed": "26.00",
             "reasons": [],
             "computed": "26.00",
@@ -570,7 +570,7 @@
               "y": 0.2067
             }
           },
-          "line_id": "e42268b1-a604-41a9-ac9a-d9e00651e100",
+          "line_id": "896ece06-8691-4bb4-9c19-5bd616134ebc",
           "glossary": [
             {
               "term": "call-out",
@@ -581,7 +581,7 @@
           "arithmetic": {
             "notes": [],
             "status": "matches",
-            "line_id": "e42268b1-a604-41a9-ac9a-d9e00651e100",
+            "line_id": "896ece06-8691-4bb4-9c19-5bd616134ebc",
             "printed": "95.00",
             "reasons": [],
             "computed": "95.00",
@@ -605,7 +605,7 @@
               "y": 0.2257
             }
           },
-          "line_id": "be9d6d4e-5f27-478a-b73f-28557da62141",
+          "line_id": "0e33ad31-8739-4b0a-8c9f-419d5932635e",
           "glossary": [
             {
               "term": "sundries",
@@ -620,7 +620,7 @@
           "arithmetic": {
             "notes": [],
             "status": "printed_only",
-            "line_id": "be9d6d4e-5f27-478a-b73f-28557da62141",
+            "line_id": "0e33ad31-8739-4b0a-8c9f-419d5932635e",
             "printed": "12.00",
             "reasons": [
               "missing_quantity",
@@ -654,7 +654,7 @@
           {
             "notes": [],
             "status": "matches",
-            "line_id": "0635d154-bb7e-48df-afb9-9e27aa108143",
+            "line_id": "67bf8568-27a4-479d-945c-cdee07b21179",
             "printed": "237.50",
             "reasons": [],
             "computed": "237.50",
@@ -665,7 +665,7 @@
           {
             "notes": [],
             "status": "matches",
-            "line_id": "813cab08-43be-4187-a117-efb7a134a4e4",
+            "line_id": "1992ec2f-7e0a-4594-9276-14abc0cc7ee7",
             "printed": "27.60",
             "reasons": [],
             "computed": "27.60",
@@ -676,7 +676,7 @@
           {
             "notes": [],
             "status": "matches",
-            "line_id": "c1f26456-bc78-4fcb-8820-aba1bccaea08",
+            "line_id": "e297946a-6b01-475c-be0d-0142f1571274",
             "printed": "26.00",
             "reasons": [],
             "computed": "26.00",
@@ -687,7 +687,7 @@
           {
             "notes": [],
             "status": "matches",
-            "line_id": "e42268b1-a604-41a9-ac9a-d9e00651e100",
+            "line_id": "896ece06-8691-4bb4-9c19-5bd616134ebc",
             "printed": "95.00",
             "reasons": [],
             "computed": "95.00",
@@ -698,7 +698,7 @@
           {
             "notes": [],
             "status": "printed_only",
-            "line_id": "be9d6d4e-5f27-478a-b73f-28557da62141",
+            "line_id": "0e33ad31-8739-4b0a-8c9f-419d5932635e",
             "printed": "12.00",
             "reasons": [
               "missing_quantity",
@@ -743,7 +743,7 @@
         "message": "This invoice is not linked to a service job, so there is no accepted scope to compare with."
       },
       "duplicates": [],
-      "invoice_id": "64b75be0-f63a-4233-8a3d-a1ab878f3529",
+      "invoice_id": "ad7a3928-fa46-44a8-b477-fc8174cf131a",
       "limitations": [
         "This explanation translates and checks the invoice's own figures. It does not judge whether prices are fair, whether anyone acted improperly, or give legal or tax advice.",
         "Tax is shown only as printed. No tax rate is assumed and tax compliance is not checked.",
@@ -768,7 +768,7 @@
         }
       ],
       "provisional": false,
-      "revision_id": "488ab77d-3f39-447b-9d9b-89f7de3c64e1",
+      "revision_id": "f698f8ad-dc81-4015-8a62-062e287176e1",
       "attributed_text": [],
       "revision_number": 1,
       "rounding_policy": "Rounding half-up to 2 decimal places (NZD minor unit).",
@@ -789,16 +789,16 @@
     "message": null,
     "substitute": true,
     "latest_run": {
-      "id": "feb636b1-35f7-450a-8dab-b9e9835ad8fc",
+      "id": "9424e05e-783f-4c9a-8b12-228079a91b68",
       "status": "draft_ready",
-      "invoice_revision_id": "488ab77d-3f39-447b-9d9b-89f7de3c64e1",
+      "invoice_revision_id": "f698f8ad-dc81-4015-8a62-062e287176e1",
       "provider": "local_fixture",
       "model": "local-fixture-v1",
       "attempts": 1,
       "error": null,
       "stale_reason": null,
-      "created_at": "2026-11-06T06:27:17.755262Z",
-      "updated_at": "2026-11-06T06:27:17.854374Z"
+      "created_at": "2026-11-06T07:32:38.022466Z",
+      "updated_at": "2026-11-06T07:32:38.116235Z"
     }
   }
 }

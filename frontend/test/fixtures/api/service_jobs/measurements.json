@@ -1,7 +1,7 @@
 [
   {
-    "id": "76382ab8-7029-485c-9f71-5151bdd82a38",
-    "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+    "id": "f07e2072-8209-4b21-8c5b-bcbc84da940f",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
     "dimension": "hose_internal_diameter",
     "component": "Pump outlet hose",
     "value_text": "25",
@@ -16,31 +16,32 @@
     "tool": null,
     "reference": null,
     "thread": null,
-    "source_asset_id": "da35ae6e-9899-4c77-a124-ea3241a27ebc",
+    "source_asset_id": "c52df3b5-b660-42bf-9801-7d42d03f9595",
     "source_region": null,
     "source_observation_id": null,
     "state": "owner_declared",
     "provenance": {
       "badge": "owner_declared",
       "label": "Owner declared (read from a marking)",
-      "recorded_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
+      "recorded_by": "5cfee740-8410-4f69-9f23-78bde6dd70b7",
       "recorded_by_role": "owner",
       "method": "marking_read",
       "other_organization": false
     },
-    "recorded_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
+    "recorded_by": "5cfee740-8410-4f69-9f23-78bde6dd70b7",
     "recorded_by_other_organization": false,
+    "confirmed_by_other_organization": false,
     "confirmation": null,
     "supersedes_id": null,
     "superseded_by_id": null,
     "is_current": true,
     "job_revision": 7,
     "notes": "Printed on the hose",
-    "created_at": "2026-11-06T06:25:05.721270Z"
+    "created_at": "2026-11-06T07:32:19.110936Z"
   },
   {
-    "id": "30cbc283-1aa5-42be-abce-fb467e5987ee",
-    "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+    "id": "37b58527-b0d1-4192-8261-ad5e6d8168d3",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
     "dimension": "hose_external_diameter",
     "component": "Pump outlet hose",
     "value_text": "32",
@@ -62,24 +63,25 @@
     "provenance": {
       "badge": "superseded",
       "label": "Superseded (caliper)",
-      "recorded_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
+      "recorded_by": "5cfee740-8410-4f69-9f23-78bde6dd70b7",
       "recorded_by_role": "owner",
       "method": "owner_caliper",
       "other_organization": false
     },
-    "recorded_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
+    "recorded_by": "5cfee740-8410-4f69-9f23-78bde6dd70b7",
     "recorded_by_other_organization": false,
+    "confirmed_by_other_organization": false,
     "confirmation": null,
     "supersedes_id": null,
-    "superseded_by_id": "02043a96-eeca-4eb3-a5ef-fcf878e11a11",
+    "superseded_by_id": "4ca0b05a-8618-4ac4-b59d-850a62bc2901",
     "is_current": false,
     "job_revision": 8,
     "notes": null,
-    "created_at": "2026-11-06T06:25:05.734859Z"
+    "created_at": "2026-11-06T07:32:19.128791Z"
   },
   {
-    "id": "02043a96-eeca-4eb3-a5ef-fcf878e11a11",
-    "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+    "id": "4ca0b05a-8618-4ac4-b59d-850a62bc2901",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
     "dimension": "hose_external_diameter",
     "component": "Pump outlet hose",
     "value_text": "32.5",
@@ -101,24 +103,25 @@
     "provenance": {
       "badge": "owner_measured",
       "label": "Owner measured (caliper)",
-      "recorded_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
+      "recorded_by": "5cfee740-8410-4f69-9f23-78bde6dd70b7",
       "recorded_by_role": "owner",
       "method": "owner_caliper",
       "other_organization": false
     },
-    "recorded_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
+    "recorded_by": "5cfee740-8410-4f69-9f23-78bde6dd70b7",
     "recorded_by_other_organization": false,
+    "confirmed_by_other_organization": false,
     "confirmation": null,
-    "supersedes_id": "30cbc283-1aa5-42be-abce-fb467e5987ee",
+    "supersedes_id": "37b58527-b0d1-4192-8261-ad5e6d8168d3",
     "superseded_by_id": null,
     "is_current": true,
     "job_revision": 9,
     "notes": null,
-    "created_at": "2026-11-06T06:25:05.748352Z"
+    "created_at": "2026-11-06T07:32:19.149766Z"
   },
   {
-    "id": "604ddb21-eb18-4377-afe8-aeab5888f29f",
-    "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+    "id": "9e380e00-2587-44c2-9f39-a530ebd3ffbd",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
     "dimension": "clamp_range",
     "component": "Outlet clamp",
     "value_text": "20-32",
@@ -140,19 +143,20 @@
     "provenance": {
       "badge": "owner_measured",
       "label": "Owner measured (tape measure)",
-      "recorded_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
+      "recorded_by": "5cfee740-8410-4f69-9f23-78bde6dd70b7",
       "recorded_by_role": "owner",
       "method": "owner_tape",
       "other_organization": false
     },
-    "recorded_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
+    "recorded_by": "5cfee740-8410-4f69-9f23-78bde6dd70b7",
     "recorded_by_other_organization": false,
+    "confirmed_by_other_organization": false,
     "confirmation": null,
     "supersedes_id": null,
     "superseded_by_id": null,
     "is_current": true,
     "job_revision": 10,
     "notes": null,
-    "created_at": "2026-11-06T06:25:05.762881Z"
+    "created_at": "2026-11-06T07:32:19.170897Z"
   }
 ]

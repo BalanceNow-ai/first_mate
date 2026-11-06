@@ -1,9 +1,9 @@
 {
   "request": {
-    "id": "3713a226-481c-4e1a-8ba0-e22897f3bcc6",
-    "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+    "id": "d84215f9-95ce-48e7-865e-1f709a686d1d",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
     "requester_role": "contractor",
-    "organization_id": "6b227433-4c77-44a5-aec1-11fffde39628",
+    "organization_id": "f3af1153-00e5-444d-b892-8b8dbe1478dc",
     "category": "label",
     "component": "Freshwater pump",
     "prompt": "Photograph the pump label without moving the pump",
@@ -16,8 +16,8 @@
     "answer_note": null,
     "answered_at": null,
     "version": 1,
-    "created_at": "2026-11-06T06:25:06.347360Z",
-    "updated_at": "2026-11-06T06:25:06.347364Z",
+    "created_at": "2026-11-06T07:32:19.782496Z",
+    "updated_at": "2026-11-06T07:32:19.782500Z",
     "options": [
       "take_photo",
       "upload_file",
@@ -30,7 +30,7 @@
   "message": "Answer this request with a photo, a note, or “I cannot safely get this”.",
   "gaps": [
     {
-      "request_id": "f39f3fbb-6868-4be5-92fd-d64100b01b58",
+      "request_id": "8f476298-8fa0-4387-9468-8e9e70e038c6",
       "category": "access_route",
       "component": "Freshwater pump",
       "prompt": "Show the way in to the Freshwater pump: the locker opening, hatch or panel you look through, photographed from a step back. Leave it as it is.",

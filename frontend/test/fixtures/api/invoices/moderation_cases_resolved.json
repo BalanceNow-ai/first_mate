@@ -148,5 +148,50 @@
     "retention_hold": false,
     "created_at": "2026-11-06T06:27:25.313578Z",
     "resolved_at": "2026-11-06T06:27:25.413111Z"
+  },
+  {
+    "id": "75f3516b-8525-44d9-9ae7-14ebdeb8af80",
+    "job_id": "002a84c3-5921-4c23-b86e-86173dcc7154",
+    "feedback_id": "6f5c2086-b323-4fac-a67b-1d0100b8e031",
+    "visit_event_id": null,
+    "category": "personal_or_security_information",
+    "status": "resolved",
+    "restrict_content": true,
+    "assigned_moderator_id": null,
+    "content_version": 1,
+    "disposition": "content_removed_for_personal_information",
+    "retention_hold": false,
+    "created_at": "2026-11-06T06:58:05.077126Z",
+    "resolved_at": "2026-11-06T06:58:11.362466Z"
+  },
+  {
+    "id": "ee1da11c-e4bc-4659-8207-3140022b5353",
+    "job_id": "0d691106-7aa8-487c-84ee-eea742b5778a",
+    "feedback_id": "a4329e3b-36be-49de-8b77-8ad397c21c10",
+    "visit_event_id": null,
+    "category": "personal_or_security_information",
+    "status": "resolved",
+    "restrict_content": true,
+    "assigned_moderator_id": null,
+    "content_version": 1,
+    "disposition": "content_removed_for_personal_information",
+    "retention_hold": false,
+    "created_at": "2026-11-06T07:00:43.035085Z",
+    "resolved_at": "2026-11-06T07:00:49.319520Z"
+  },
+  {
+    "id": "642ac23d-1c17-41d6-b828-05019023e38a",
+    "job_id": "b2ae3232-4337-4a54-bbd2-498316044265",
+    "feedback_id": "2513c90c-cdd0-4b39-a845-2709c205c2a4",
+    "visit_event_id": null,
+    "category": "personal_or_security_information",
+    "status": "resolved",
+    "restrict_content": true,
+    "assigned_moderator_id": "83875713-4e28-49f0-a404-babbf7dbebab",
+    "content_version": 1,
+    "disposition": "content_removed_for_personal_information",
+    "retention_hold": false,
+    "created_at": "2026-11-06T07:32:44.923151Z",
+    "resolved_at": "2026-11-06T07:32:45.009184Z"
   }
 ]
