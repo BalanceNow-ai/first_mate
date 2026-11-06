@@ -387,7 +387,7 @@ def test_doc_builder_shapes():
     assert doc.pages()[0][0].text == "Supplier: X"
 
 
-def _compare_one(line_values: dict, scope_line: dict) -> dict:
+def _compare_one(line_values: dict, scope_line: dict, currency: str | None = "NZD") -> dict:
     from app.services.service_jobs import invoice_explain as iex
     from app.services.service_jobs.invoices import checks_for
 
@@ -399,7 +399,7 @@ def _compare_one(line_values: dict, scope_line: dict) -> dict:
         for n in ("supplier_name", "invoice_number", "invoice_date", "subtotal", "tax_printed", "total", "warranty")
     }
     fields["follow_up"] = f(None)
-    fields["currency"] = f("NZD")
+    fields["currency"] = f(currency)
     base_line = {
         "id": "L1",
         "line_number": 1,
@@ -468,3 +468,11 @@ def test_scope_comparison_still_matches_and_differs_on_readable_values():
     assert ok["status"] == "matches" and ok["unavailable_reasons"] == []
     diff = _compare_one({"quantity": "1", "unit_price": "150.00", "line_total": "150.00"}, {"amount_minor": 12000})
     assert diff["status"] == "differs" and [d["field"] for d in diff["differences"]] == ["amount"]
+
+
+def test_missing_invoice_currency_is_unavailable_not_a_currency_difference():
+    """Review F3-3: no stated currency must not be reported as a difference from the NZD scope."""
+    item = _compare_one({"quantity": "1", "line_total": "120.00"}, {"quantity": "1", "amount_minor": 12000}, None)
+    assert item["status"] == "comparison_unavailable", item
+    assert "invoice_currency_unknown" in item["unavailable_reasons"]
+    assert all(d["field"] != "currency" for d in item.get("differences", []))

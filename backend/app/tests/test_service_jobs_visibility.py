@@ -367,3 +367,32 @@ async def test_job_title_is_neutral_without_the_summary_section(client, world): 
     assert r.status_code == 200 and r.json()["title"] == "Service job"
     owner = await client.get(f"/api/v1/service-jobs/{world.job.id}", headers=world.owner.headers)
     assert owner.json()["title"] == world.job.title
+
+
+async def test_owner_recorded_measurement_confirmed_by_another_organization(client, world, store):  # noqa: F811
+    """Recorder and confirmer are judged separately (review F3-1): the owner stays visible."""
+    m = await measure(client, world.owner, world.job.id, **OWNER_TAPE, method="owner_caliper")
+    r = await client.post(
+        job_url(world.job.id, f"/measurements/{m['id']}/confirm"),
+        json={"method": "contractor_site"},
+        headers=world.tech.headers,
+    )
+    assert r.status_code == 200, r.text
+    r = await client.post(
+        f"{API}/service-jobs/{world.job.id}/assignments/{world.assignment_id}/reassign",
+        json={"organization_id": str(world.org_b), "sections": DEFAULT_SECTIONS, "live_updates": True},
+        headers={**world.owner.headers, "Idempotency-Key": key()},
+    )
+    assert r.status_code == 201, r.text
+    r = await client.post(
+        f"{API}/contractors/assignments/{r.json()['id']}/accept",
+        json={"member_user_ids": [str(world.other_tech.id)]},
+        headers=world.other_tech.headers,
+    )
+    assert r.status_code == 200, r.text
+    r = await client.get(job_url(world.job.id, "/measurements"), headers=world.other_tech.headers)
+    [seen] = [x for x in r.json() if x["id"] == m["id"]]
+    assert seen["recorded_by"] == str(world.owner.id) and seen["recorded_by_other_organization"] is False
+    assert seen["provenance"]["other_organization"] is False
+    assert seen["confirmed_by_other_organization"] is True and seen["confirmation"]["confirmed_by"] is None
+    assert str(world.tech.id) not in r.text

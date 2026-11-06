@@ -497,6 +497,7 @@ def view(m: Measurement, job: ServiceJob, successor: uuid.UUID | None = None) ->
         },
         "recorded_by": m.recorded_by,
         "recorded_by_other_organization": False,
+        "confirmed_by_other_organization": False,
         "confirmation": (
             {"confirmed_by": m.confirmed_by, "confirmed_at": m.confirmed_at, "method": m.confirmation_method}
             if m.confirmed_by
@@ -511,12 +512,15 @@ def view(m: Measurement, job: ServiceJob, successor: uuid.UUID | None = None) ->
     }
 
 
-def _without_people(v: dict) -> dict:
-    """Another organization's measurement: kept as evidence, its people's identities withheld."""
-    v = {**v, "recorded_by": None, "notes": None, "recorded_by_other_organization": True}
-    v["provenance"] = {**v["provenance"], "recorded_by": None, "other_organization": True}
-    if v["confirmation"] is not None:
-        v["confirmation"] = {**v["confirmation"], "confirmed_by": None}
+def _without_people(v: dict, *, recorder: bool, confirmer: bool) -> dict:
+    """Another organization's people: the record stays as evidence, their identities (and a
+    foreign recorder's notes) are withheld. Recorder and confirmer are judged separately, so an
+    owner-recorded measurement confirmed by another organization still shows the owner."""
+    if recorder:
+        v = {**v, "recorded_by": None, "notes": None, "recorded_by_other_organization": True}
+        v["provenance"] = {**v["provenance"], "recorded_by": None, "other_organization": True}
+    if confirmer and v["confirmation"] is not None:
+        v = {**v, "confirmation": {**v["confirmation"], "confirmed_by": None}, "confirmed_by_other_organization": True}
     return v
 
 
@@ -528,7 +532,9 @@ def views(rows: list[Measurement], job: ServiceJob, vis: Visibility | None = Non
         if vis is not None and not vis.measurement(m):
             continue
         v = view(m, job, successor.get(m.id))
-        if vis is not None and vis.foreign_people(m.recorded_by, m.confirmed_by):
-            v = _without_people(v)
+        if vis is not None:
+            recorder, confirmer = vis.foreign_people(m.recorded_by), vis.foreign_people(m.confirmed_by)
+            if recorder or confirmer:
+                v = _without_people(v, recorder=recorder, confirmer=confirmer)
         out.append(v)
     return out

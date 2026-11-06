@@ -12754,6 +12754,11 @@
        }
       ]
      },
+     "confirmed_by_other_organization": {
+      "default": false,
+      "title": "Confirmed By Other Organization",
+      "type": "boolean"
+     },
      "created_at": {
       "format": "date-time",
       "title": "Created At",
@@ -15928,6 +15933,11 @@
        }
       ],
       "title": "Confirmed By"
+     },
+     "confirmed_by_other_organization": {
+      "default": false,
+      "title": "Confirmed By Other Organization",
+      "type": "boolean"
      },
      "confirmed_job_revision": {
       "anyOf": [

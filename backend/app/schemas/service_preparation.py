@@ -186,6 +186,7 @@ class MeasurementResponse(APIModel):
     provenance: Provenance
     recorded_by: uuid.UUID | None
     recorded_by_other_organization: bool = False
+    confirmed_by_other_organization: bool = False
     confirmation: Confirmation | None
     supersedes_id: uuid.UUID | None
     superseded_by_id: uuid.UUID | None
@@ -246,6 +247,7 @@ class PreparationItemResponse(APIModel):
     candidates: list[CatalogueCandidate]
     confirmed_product: CatalogueCandidate | None
     confirmed_by: uuid.UUID | None
+    confirmed_by_other_organization: bool = False
     confirmed_at: datetime | None
     confirmed_job_revision: int | None
     evidence_changed_since_confirmation: bool

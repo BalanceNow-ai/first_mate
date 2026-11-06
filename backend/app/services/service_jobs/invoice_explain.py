@@ -294,7 +294,11 @@ def _compare(ctx: ExplainContext, checks: dict, questions: list[dict]) -> dict:
         illegible = set(line.get("illegible") or [])
         if line_check["status"] == "cannot_compute":
             unavailable.append("line_arithmetic_cannot_compute")
-        if sl["currency"] != currency:
+        if currency is None or sl["currency"] is None:
+            # A missing (or mixed) currency on either side makes the amounts incomparable —
+            # never a "difference" and never a match.
+            unavailable.append("invoice_currency_unknown" if currency is None else "approved_currency_unknown")
+        elif sl["currency"] != currency:
             diffs.append({"field": "currency", "invoice": currency, "approved": sl["currency"]})
         else:
             amount = _d(line_check["amount_used"])

@@ -260,6 +260,7 @@ def view(
         "candidates": candidates,
         "confirmed_product": confirmed,
         "confirmed_by": item.confirmed_by,
+        "confirmed_by_other_organization": False,
         "confirmed_at": item.confirmed_at,
         "confirmed_job_revision": item.confirmed_job_revision,
         "evidence_changed_since_confirmation": bool(
@@ -295,6 +296,7 @@ async def views(
         v = view(i, job, products, ms)
         if vis is not None and vis.foreign_people(i.confirmed_by):
             v["confirmed_by"] = None  # another organization's confirmation: identity withheld
+            v["confirmed_by_other_organization"] = True
         out.append(v)
     return out
 
