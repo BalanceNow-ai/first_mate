@@ -1,0 +1,11 @@
+{
+  "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+  "restricted": {
+    "berth": "Pier F 12",
+    "gate_code": "4321",
+    "contact_name": "Fixture Owner",
+    "contact_phone": "021 000 000"
+  },
+  "version": 3,
+  "updated_at": "2026-11-06T04:39:00.051364Z"
+}

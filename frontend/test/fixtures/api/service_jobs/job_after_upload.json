@@ -1,0 +1,98 @@
+{
+  "id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+  "vessel_id": "355c6500-8f19-4490-a582-cfdd14ba369d",
+  "entry_point": "vessel",
+  "title": "Water under the sink when the pump runs",
+  "status": "evidence_collection",
+  "version": 4,
+  "evidence_revision": 3,
+  "disputed": false,
+  "archived_at": null,
+  "created_at": "2026-11-06T04:38:55.353011Z",
+  "updated_at": "2026-11-06T04:38:56.639185Z",
+  "viewer": {
+    "role": "owner",
+    "sections": [
+      "summary",
+      "evidence",
+      "measurements",
+      "preparation",
+      "access_general",
+      "access_restricted",
+      "scope",
+      "invoices"
+    ],
+    "organization_id": null,
+    "assignment_id": null,
+    "restricted_access": true
+  },
+  "issue_description": "There is water under the galley sink whenever the freshwater pump runs.",
+  "affected_system": "Freshwater",
+  "affected_equipment": "Freshwater pump",
+  "occurs_when": "When the pump runs",
+  "already_tried": "Tightened the visible hose clamp",
+  "urgency": "routine",
+  "vessel_context": {
+    "engine": {
+      "make": "Yamaha",
+      "year": 2020,
+      "model": "F150"
+    },
+    "source": "vessel_record",
+    "vessel": {
+      "make": "Stabicraft",
+      "year": 2021,
+      "model": "2050 Supercab",
+      "nickname": "Kahawai",
+      "hull_type": null,
+      "length_ft": null,
+      "propulsion_type": "outboard"
+    },
+    "equipment": [],
+    "captured_at": "2026-11-06T04:38:55.352546+00:00",
+    "corrections": [
+      {
+        "at": "2026-11-06T04:38:55.396617+00:00",
+        "by": "owner",
+        "note": "Engine is the 2020 model",
+        "fields": [
+          "engine.year"
+        ]
+      }
+    ],
+    "owner_confirmed": true,
+    "uncertain_categories": []
+  },
+  "evidence": {
+    "outstanding": [],
+    "answered": [
+      {
+        "id": "9548f761-ac8f-4812-94b6-3a749c62cf94",
+        "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+        "requester_role": "assistant",
+        "organization_id": null,
+        "category": "overview",
+        "component": "Freshwater pump",
+        "prompt": "Can you take a wide photo that shows where the Freshwater pump is on the boat? Step back far enough to see the locker or compartment around it.",
+        "reason": "A wide view tells the contractor where to go and what they will be working around, before they arrive.",
+        "measurement_dimension": null,
+        "priority": "high",
+        "status": "answered",
+        "unavailable_reason": null,
+        "technician_inspection_required": false,
+        "answer_note": null,
+        "answered_at": "2026-11-06T04:38:55.571401Z",
+        "version": 2,
+        "created_at": "2026-11-06T04:38:55.443457Z",
+        "updated_at": "2026-11-06T04:38:55.587681Z",
+        "options": []
+      }
+    ],
+    "unavailable": [],
+    "waived": [],
+    "available_asset_count": 2
+  },
+  "gaps": [],
+  "technician_inspection_required": false,
+  "assignment": null
+}

@@ -1,0 +1,21 @@
+{
+  "event": {
+    "id": "0a91a0f6-2d6e-4870-84df-11c1687b1696",
+    "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+    "assignment_id": "37c0de48-2eca-4fa4-8d11-8950f6dce0dd",
+    "kind": "completed",
+    "actor_id": "662931a0-32ad-4560-a367-67378e4e539d",
+    "actor_name": "Fixture Technician",
+    "actor_role": "contractor",
+    "occurred_at": "2026-11-06T03:39:01.959662Z",
+    "recorded_at": "2026-11-06T04:39:02.001277Z",
+    "note": "Hose replaced",
+    "contests_event_id": null,
+    "contested": false
+  },
+  "job_status": "completed",
+  "job_version": 7,
+  "job_disputed": false,
+  "feedback_window_opened": false,
+  "created": true
+}

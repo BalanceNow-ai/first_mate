@@ -1,0 +1,25 @@
+{
+  "id": "37c0de48-2eca-4fa4-8d11-8950f6dce0dd",
+  "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+  "organization": {
+    "id": "0f168314-a4b1-485f-88d7-5afa5a8cfd41",
+    "name": "Fixture Marine 6555556b",
+    "trading_name": "Fixture Marine Services"
+  },
+  "status": "invited",
+  "sections": [
+    "summary",
+    "evidence",
+    "measurements",
+    "preparation",
+    "access_general",
+    "access_restricted",
+    "scope"
+  ],
+  "live_updates": true,
+  "invited_at": "2026-11-06T04:39:00.265912Z",
+  "accepted_at": null,
+  "revoked_at": null,
+  "version": 1,
+  "members": []
+}

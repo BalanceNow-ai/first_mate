@@ -1,0 +1,116 @@
+{
+  "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+  "my_side": "owner",
+  "my_direction": "owner_to_contractor",
+  "eligible": true,
+  "ineligible_reason": null,
+  "window": {
+    "basis": "completed",
+    "opens_at": "2026-11-06T04:39:01.966142Z",
+    "closes_at": "2026-11-20T04:39:01.966142Z",
+    "is_open": false,
+    "revealed": true,
+    "revealed_at": "2026-11-06T04:39:02.139639Z"
+  },
+  "reveal_rule": "Reviews are revealed when both sides submit, or on 2026-11-20T04:39:01.966142Z. Until then neither side can see the other's review.",
+  "dimensions": [
+    {
+      "key": "communication_clarity",
+      "label": "Communication and clarity"
+    },
+    {
+      "key": "arrival_access_coordination",
+      "label": "Arrival and access coordination"
+    },
+    {
+      "key": "explanation_of_work_and_changes",
+      "label": "Explanation of work and changes"
+    },
+    {
+      "key": "care_and_agreed_work_delivery",
+      "label": "Care and agreed work delivery"
+    },
+    {
+      "key": "invoice_clarity_and_scope_relationship",
+      "label": "Invoice clarity and relationship to scope"
+    }
+  ],
+  "can_edit": false,
+  "mine": {
+    "id": "28160c25-aea8-4011-b4ed-a3bba51051c8",
+    "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+    "direction": "owner_to_contractor",
+    "status": "revealed",
+    "version": 1,
+    "author": {
+      "id": "12366c46-66eb-4676-88d0-85af20e48ee2",
+      "name": "Fixture Owner",
+      "role": "owner"
+    },
+    "organization": {
+      "id": "0f168314-a4b1-485f-88d7-5afa5a8cfd41",
+      "name": "Fixture Marine 6555556b"
+    },
+    "basis": "completed",
+    "visit_date": "2026-11-06T01:39:01.959662Z",
+    "ratings": {
+      "communication_clarity": 5,
+      "arrival_access_coordination": 4,
+      "care_and_agreed_work_delivery": 5,
+      "explanation_of_work_and_changes": 4,
+      "invoice_clarity_and_scope_relationship": "not_applicable"
+    },
+    "narrative": "Arrived on time and explained the change to the fitting clearly.",
+    "content_state": "visible",
+    "submitted_at": "2026-11-06T04:39:02.079446Z",
+    "revealed_at": "2026-11-06T04:39:02.139639Z",
+    "created_at": "2026-11-06T04:39:02.052041Z",
+    "updated_at": "2026-11-06T04:39:02.146654Z",
+    "responses": []
+  },
+  "theirs": {
+    "id": "3175b1d3-d0ee-4b8f-8351-afd58c9b3219",
+    "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+    "direction": "contractor_to_owner",
+    "status": "revealed",
+    "version": 1,
+    "author": {
+      "id": "662931a0-32ad-4560-a367-67378e4e539d",
+      "name": "Fixture Technician",
+      "role": "contractor"
+    },
+    "organization": {
+      "id": "0f168314-a4b1-485f-88d7-5afa5a8cfd41",
+      "name": "Fixture Marine 6555556b"
+    },
+    "basis": "completed",
+    "visit_date": "2026-11-06T01:39:01.959662Z",
+    "ratings": {
+      "access_arrival_accuracy": 4,
+      "equipment_site_prepared": 4,
+      "availability_for_decisions": 5,
+      "problem_description_accuracy": 5,
+      "communication_and_scope_changes": 5
+    },
+    "narrative": "Photos and measurements made preparation easy.",
+    "content_state": "visible",
+    "submitted_at": "2026-11-06T04:39:02.139639Z",
+    "revealed_at": "2026-11-06T04:39:02.139639Z",
+    "created_at": "2026-11-06T04:39:02.124463Z",
+    "updated_at": "2026-11-06T04:39:02.146658Z",
+    "responses": [
+      {
+        "id": "3cce6101-7908-4e1f-8d8d-81ec6c9a53e9",
+        "kind": "response",
+        "author": {
+          "id": "12366c46-66eb-4676-88d0-85af20e48ee2",
+          "name": "Fixture Owner",
+          "role": "owner"
+        },
+        "text": "Thanks — the boat was ready as agreed.",
+        "content_state": "visible",
+        "created_at": "2026-11-06T04:39:02.195669Z"
+      }
+    ]
+  }
+}

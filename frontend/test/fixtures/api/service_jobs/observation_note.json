@@ -1,0 +1,27 @@
+{
+  "id": "5f114f19-700b-4374-89cc-2d4faee85e57",
+  "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+  "asset_id": "b7db34c3-cebc-460b-a93b-7533ed49a1f3",
+  "page": null,
+  "region": {
+    "x": 0.1,
+    "y": 0.2,
+    "w": 0.3,
+    "h": 0.2
+  },
+  "kind": "owner_note",
+  "assertion": "Drip forms at the lower hose connection",
+  "extracted_text": null,
+  "state": "owner_declared",
+  "confidence": null,
+  "uncertainty": null,
+  "origin": "owner",
+  "analysis_run_id": null,
+  "model_version": null,
+  "recorded_by": "12366c46-66eb-4676-88d0-85af20e48ee2",
+  "supersedes_id": null,
+  "superseded_by_id": null,
+  "job_revision": 5,
+  "is_measurement": false,
+  "created_at": "2026-11-06T04:38:59.861653Z"
+}

@@ -1,0 +1,39 @@
+[
+  {
+    "id": "cdb56db0-83ff-401b-b6a6-d1aa0c57938e",
+    "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+    "revision_number": 1,
+    "status": "published",
+    "sections": [
+      "summary",
+      "evidence",
+      "access_general",
+      "measurements",
+      "preparation",
+      "scope"
+    ],
+    "recipient": {
+      "members": [
+        {
+          "name": "Fixture Technician",
+          "user_id": "662931a0-32ad-4560-a367-67378e4e539d"
+        }
+      ],
+      "assignment_id": "37c0de48-2eca-4fa4-8d11-8950f6dce0dd",
+      "organization_id": "0f168314-a4b1-485f-88d7-5afa5a8cfd41",
+      "assignment_status": "accepted",
+      "organization_name": "Fixture Marine 6555556b"
+    },
+    "content": null,
+    "job_revision": 9,
+    "current_job_revision": 9,
+    "content_digest": "969a6e2855e1ad51016956530a1428b9494c2e3d7dfedff555eca7376c951021",
+    "created_by": "12366c46-66eb-4676-88d0-85af20e48ee2",
+    "created_at": "2026-11-06T04:39:00.497661Z",
+    "published_at": "2026-11-06T04:39:00.514947Z",
+    "is_current": true,
+    "outdated": false,
+    "outdated_reasons": [],
+    "acknowledgements": []
+  }
+]

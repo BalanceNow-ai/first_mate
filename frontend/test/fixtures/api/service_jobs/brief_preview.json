@@ -1,0 +1,804 @@
+{
+  "id": "cdb56db0-83ff-401b-b6a6-d1aa0c57938e",
+  "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+  "revision_number": 1,
+  "status": "preview",
+  "sections": [
+    "summary",
+    "evidence",
+    "access_general",
+    "measurements",
+    "preparation",
+    "scope"
+  ],
+  "recipient": {
+    "assignment_id": "37c0de48-2eca-4fa4-8d11-8950f6dce0dd",
+    "assignment_status": "accepted",
+    "organization_id": "0f168314-a4b1-485f-88d7-5afa5a8cfd41",
+    "organization_name": "Fixture Marine 6555556b",
+    "members": [
+      {
+        "user_id": "662931a0-32ad-4560-a367-67378e4e539d",
+        "name": "Fixture Technician"
+      }
+    ]
+  },
+  "content": {
+    "brief_format": 1,
+    "job": {
+      "id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+      "title": "Water under the sink when the pump runs",
+      "status": "contractor_review",
+      "evidence_revision": 9
+    },
+    "recipient": {
+      "assignment_id": "37c0de48-2eca-4fa4-8d11-8950f6dce0dd",
+      "assignment_status": "accepted",
+      "organization_id": "0f168314-a4b1-485f-88d7-5afa5a8cfd41",
+      "organization_name": "Fixture Marine 6555556b",
+      "members": [
+        {
+          "user_id": "662931a0-32ad-4560-a367-67378e4e539d",
+          "name": "Fixture Technician"
+        }
+      ]
+    },
+    "sections": [
+      "summary",
+      "evidence",
+      "access_general",
+      "measurements",
+      "preparation",
+      "scope"
+    ],
+    "limitations": [
+      "Ready for contractor review means there is enough information to review — not that the diagnosis, dimensions or parts are correct.",
+      "Photos show only what is visible. They do not prove a diagnosis, material grade, dimension, hidden condition or suitability, and they do not show that the boat is safe.",
+      "Suggested items are provisional. A preparation item is not a purchase, quote, work instruction or approval.",
+      "Text read from photos or documents is reported as it appears; it is not a measurement."
+    ],
+    "summary": {
+      "attribution": "owner_declared",
+      "issue_description": "There is water under the galley sink whenever the freshwater pump runs.",
+      "occurs_when": "When the pump runs",
+      "already_tried": "Tightened the visible hose clamp",
+      "urgency": "routine",
+      "affected_system": "Freshwater",
+      "affected_equipment": "Freshwater pump",
+      "vessel": {
+        "make": "Stabicraft",
+        "model": "2050 Supercab",
+        "year": 2021,
+        "engine_make": "Yamaha",
+        "engine_model": "F150",
+        "engine_year": 2021,
+        "attribution": "vessel_record"
+      },
+      "vessel_context": {
+        "engine": {
+          "make": "Yamaha",
+          "year": 2020,
+          "model": "F150"
+        },
+        "source": "vessel_record",
+        "vessel": {
+          "make": "Stabicraft",
+          "year": 2021,
+          "model": "2050 Supercab",
+          "nickname": "Kahawai",
+          "hull_type": null,
+          "length_ft": null,
+          "propulsion_type": "outboard"
+        },
+        "equipment": [],
+        "captured_at": "2026-11-06T04:38:55.352546+00:00",
+        "corrections": [
+          {
+            "at": "2026-11-06T04:38:55.396617+00:00",
+            "by": "owner",
+            "note": "Engine is the 2020 model",
+            "fields": [
+              "engine.year"
+            ]
+          }
+        ],
+        "owner_confirmed": true,
+        "uncertain_categories": []
+      },
+      "vessel_context_attribution": "owner_declared"
+    },
+    "evidence": {
+      "assets": [
+        {
+          "id": "b7db34c3-cebc-460b-a93b-7533ed49a1f3",
+          "purpose": "job_photo",
+          "caption": "Locker under the galley sink",
+          "detected_type": "image/png",
+          "status": "available",
+          "captured_at": null,
+          "evidence_request_id": "9548f761-ac8f-4812-94b6-3a749c62cf94",
+          "duplicate_of_id": null
+        },
+        {
+          "id": "e5f56635-551a-46cb-8ebd-92ecebb8cf7b",
+          "purpose": "job_photo",
+          "caption": "Pump label",
+          "detected_type": "image/jpeg",
+          "status": "available",
+          "captured_at": null,
+          "evidence_request_id": null,
+          "duplicate_of_id": "b7db34c3-cebc-460b-a93b-7533ed49a1f3"
+        },
+        {
+          "id": "dca580d5-e5db-4735-82bd-4c081b39fc18",
+          "purpose": "job_photo",
+          "caption": null,
+          "detected_type": null,
+          "status": "rejected",
+          "captured_at": null,
+          "evidence_request_id": null,
+          "duplicate_of_id": null
+        }
+      ],
+      "observations": [
+        {
+          "id": "bcddeed3-4156-4d6c-a041-8b1bf581a668",
+          "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+          "asset_id": "b7db34c3-cebc-460b-a93b-7533ed49a1f3",
+          "page": null,
+          "region": null,
+          "kind": "quality",
+          "assertion": "Image is unclear — retake a sharper, well-lit, closer view",
+          "extracted_text": null,
+          "state": "model_suggested",
+          "confidence": null,
+          "uncertainty": "No text or feature could be read reliably; nothing has been inferred",
+          "origin": "model",
+          "analysis_run_id": "24406c3a-f12f-4bbd-913c-5cd21ea70424",
+          "model_version": "local_fixture:fixture-registry",
+          "recorded_by": null,
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "job_revision": 4,
+          "is_measurement": false,
+          "created_at": "2026-11-06T04:38:58.900323+00:00"
+        },
+        {
+          "id": "3e00e6db-a82c-460a-a64a-a5bb503d8cf5",
+          "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+          "asset_id": "e5f56635-551a-46cb-8ebd-92ecebb8cf7b",
+          "page": null,
+          "region": null,
+          "kind": "quality",
+          "assertion": "Image is unclear — retake a sharper, well-lit, closer view",
+          "extracted_text": null,
+          "state": "model_suggested",
+          "confidence": null,
+          "uncertainty": "No text or feature could be read reliably; nothing has been inferred",
+          "origin": "model",
+          "analysis_run_id": "24406c3a-f12f-4bbd-913c-5cd21ea70424",
+          "model_version": "local_fixture:fixture-registry",
+          "recorded_by": null,
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "job_revision": 4,
+          "is_measurement": false,
+          "created_at": "2026-11-06T04:38:58.902179+00:00"
+        },
+        {
+          "id": "5f114f19-700b-4374-89cc-2d4faee85e57",
+          "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+          "asset_id": "b7db34c3-cebc-460b-a93b-7533ed49a1f3",
+          "page": null,
+          "region": {
+            "h": 0.2,
+            "w": 0.3,
+            "x": 0.1,
+            "y": 0.2
+          },
+          "kind": "owner_note",
+          "assertion": "Drip forms at the lower hose connection",
+          "extracted_text": null,
+          "state": "owner_declared",
+          "confidence": null,
+          "uncertainty": null,
+          "origin": "owner",
+          "analysis_run_id": null,
+          "model_version": null,
+          "recorded_by": "12366c46-66eb-4676-88d0-85af20e48ee2",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "job_revision": 5,
+          "is_measurement": false,
+          "created_at": "2026-11-06T04:38:59.861653+00:00"
+        }
+      ],
+      "requests": [
+        {
+          "id": "9548f761-ac8f-4812-94b6-3a749c62cf94",
+          "category": "overview",
+          "component": "Freshwater pump",
+          "prompt": "Can you take a wide photo that shows where the Freshwater pump is on the boat? Step back far enough to see the locker or compartment around it.",
+          "reason": "A wide view tells the contractor where to go and what they will be working around, before they arrive.",
+          "requester_role": "assistant",
+          "priority": "high",
+          "status": "answered",
+          "unavailable_reason": null,
+          "technician_inspection_required": false,
+          "answer_note": null
+        },
+        {
+          "id": "5fa88d6d-aecc-4a7b-ad6e-f39ebbc1465a",
+          "category": "access_route",
+          "component": "Freshwater pump",
+          "prompt": "Show the way in to the Freshwater pump: the locker opening, hatch or panel you look through, photographed from a step back. Leave it as it is.",
+          "reason": "Working space and obstructions decide which tools and how much time the job needs.",
+          "requester_role": "assistant",
+          "priority": "normal",
+          "status": "unavailable",
+          "unavailable_reason": "cannot_safely_access",
+          "technician_inspection_required": true,
+          "answer_note": "The far end is behind the hot water cylinder"
+        },
+        {
+          "id": "702c23e7-0495-4e65-80b7-f8b6610741de",
+          "category": "document",
+          "component": "Freshwater pump",
+          "prompt": "Do you have a manual, a previous service record or a quote for the Freshwater pump? Upload it, or note what you know.",
+          "reason": "Earlier work and the manufacturer's details save diagnosis time and avoid ordering the wrong part.",
+          "requester_role": "assistant",
+          "priority": "low",
+          "status": "answered",
+          "unavailable_reason": null,
+          "technician_inspection_required": false,
+          "answer_note": "The hose is marked 25 mm ID"
+        },
+        {
+          "id": "cb5d72e4-2bec-4b59-afa4-416d0ad3aba5",
+          "category": "document",
+          "component": null,
+          "prompt": "Previous service invoice for the pump",
+          "reason": "Shows what was replaced last time",
+          "requester_role": "owner",
+          "priority": "low",
+          "status": "waived",
+          "unavailable_reason": null,
+          "technician_inspection_required": false,
+          "answer_note": "Not available"
+        }
+      ],
+      "gaps": [
+        {
+          "id": "5fa88d6d-aecc-4a7b-ad6e-f39ebbc1465a",
+          "category": "access_route",
+          "component": "Freshwater pump",
+          "prompt": "Show the way in to the Freshwater pump: the locker opening, hatch or panel you look through, photographed from a step back. Leave it as it is.",
+          "reason": "Working space and obstructions decide which tools and how much time the job needs.",
+          "requester_role": "assistant",
+          "priority": "normal",
+          "status": "unavailable",
+          "unavailable_reason": "cannot_safely_access",
+          "technician_inspection_required": true,
+          "answer_note": "The far end is behind the hot water cylinder"
+        }
+      ]
+    },
+    "access_general": {
+      "marina": "Westhaven Marina",
+      "access_hours": "8am-5pm weekdays",
+      "known_hazards": "Low deckhead",
+      "owner_attendance": "Owner on board"
+    },
+    "measurements": {
+      "current": [
+        {
+          "id": "94119ac7-4d8e-48b6-9098-889de5ecd157",
+          "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+          "dimension": "hose_internal_diameter",
+          "component": "Pump outlet hose",
+          "value_text": "25",
+          "value_min": "25",
+          "value_max": "25",
+          "unit": "mm",
+          "normalized_min_mm": "25",
+          "normalized_max_mm": "25",
+          "resolution_mm": "1",
+          "precision": "as written: nearest 1 mm",
+          "method": "marking_read",
+          "tool": null,
+          "reference": null,
+          "thread": null,
+          "source_asset_id": "b7db34c3-cebc-460b-a93b-7533ed49a1f3",
+          "source_region": null,
+          "source_observation_id": null,
+          "state": "owner_declared",
+          "provenance": {
+            "badge": "owner_declared",
+            "label": "Owner declared (read from a marking)",
+            "recorded_by": "12366c46-66eb-4676-88d0-85af20e48ee2",
+            "recorded_by_role": "owner",
+            "method": "marking_read"
+          },
+          "recorded_by": "12366c46-66eb-4676-88d0-85af20e48ee2",
+          "confirmation": null,
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "is_current": true,
+          "job_revision": 6,
+          "notes": "Printed on the hose",
+          "created_at": "2026-11-06T04:38:59.881486+00:00"
+        },
+        {
+          "id": "9e6ecd2d-90f2-4a15-9b2e-f4a019815c3a",
+          "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+          "dimension": "hose_external_diameter",
+          "component": "Pump outlet hose",
+          "value_text": "32.5",
+          "value_min": "32.5",
+          "value_max": "32.5",
+          "unit": "mm",
+          "normalized_min_mm": "32.5",
+          "normalized_max_mm": "32.5",
+          "resolution_mm": "0.1",
+          "precision": "±0.5 mm",
+          "method": "owner_caliper",
+          "tool": "Vernier caliper",
+          "reference": null,
+          "thread": null,
+          "source_asset_id": null,
+          "source_region": null,
+          "source_observation_id": null,
+          "state": "owner_measured",
+          "provenance": {
+            "badge": "owner_measured",
+            "label": "Owner measured (caliper)",
+            "recorded_by": "12366c46-66eb-4676-88d0-85af20e48ee2",
+            "recorded_by_role": "owner",
+            "method": "owner_caliper"
+          },
+          "recorded_by": "12366c46-66eb-4676-88d0-85af20e48ee2",
+          "confirmation": null,
+          "supersedes_id": "ac420e6d-7c8d-4195-bc71-bedc85e6df78",
+          "superseded_by_id": null,
+          "is_current": true,
+          "job_revision": 8,
+          "notes": null,
+          "created_at": "2026-11-06T04:38:59.909581+00:00"
+        },
+        {
+          "id": "b4b3e16b-baf6-45d9-a50a-7c26fcc8606c",
+          "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+          "dimension": "clamp_range",
+          "component": "Outlet clamp",
+          "value_text": "20-32",
+          "value_min": "20",
+          "value_max": "32",
+          "unit": "mm",
+          "normalized_min_mm": "20",
+          "normalized_max_mm": "32",
+          "resolution_mm": "1",
+          "precision": "as written: nearest 1 mm",
+          "method": "owner_tape",
+          "tool": null,
+          "reference": null,
+          "thread": null,
+          "source_asset_id": null,
+          "source_region": null,
+          "source_observation_id": null,
+          "state": "owner_measured",
+          "provenance": {
+            "badge": "owner_measured",
+            "label": "Owner measured (tape measure)",
+            "recorded_by": "12366c46-66eb-4676-88d0-85af20e48ee2",
+            "recorded_by_role": "owner",
+            "method": "owner_tape"
+          },
+          "recorded_by": "12366c46-66eb-4676-88d0-85af20e48ee2",
+          "confirmation": null,
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "is_current": true,
+          "job_revision": 9,
+          "notes": null,
+          "created_at": "2026-11-06T04:38:59.927307+00:00"
+        }
+      ],
+      "superseded_count": 1
+    },
+    "preparation": {
+      "items": [
+        {
+          "id": "c8846ba2-66f3-4056-8721-5461b3d4104f",
+          "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+          "category": "part",
+          "name": "Replacement hose",
+          "purpose": "Replace the leaking or damaged hose section",
+          "quantity": null,
+          "unit": "m",
+          "quantity_basis": null,
+          "open_requirements": [
+            "Application not confirmed (e.g. potable water, sanitation, fuel, exhaust) — not inferred from photos",
+            "Length needed not known",
+            "Both hose ends not yet confirmed"
+          ],
+          "specification": {
+            "template": "hose",
+            "application": null,
+            "internal_diameter": "25 mm",
+            "internal_diameter_state": "owner_declared"
+          },
+          "depends_on": [
+            {
+              "measurement_id": "94119ac7-4d8e-48b6-9098-889de5ecd157",
+              "dimension": "hose_internal_diameter",
+              "value_text": "25",
+              "unit": "mm",
+              "state": "owner_declared"
+            }
+          ],
+          "supporting_asset_ids": [
+            "b7db34c3-cebc-460b-a93b-7533ed49a1f3"
+          ],
+          "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
+          "origin": "assistant",
+          "created_by_role": "assistant",
+          "status": "suggested",
+          "requirement_state": "possible",
+          "catalogue_match": "candidates",
+          "candidates": [
+            {
+              "product_id": "5e2fd0a1-ef6d-4605-befe-60b639a0dc54",
+              "sku": "SYN-HOSE-FIT",
+              "name": "Assorted hose & fittings kit (synthetic)",
+              "brand": "FixtureGeneral",
+              "price_cents": 5490,
+              "sale_price_cents": null,
+              "currency": "NZD",
+              "is_active": true,
+              "in_stock": true,
+              "fitment_status": "universal",
+              "fitment_message": "Suitable for any vessel, including Kahawai (2021 Stabicraft 2050 Supercab)",
+              "dimension_check": {
+                "status": "not_applicable",
+                "reason": null
+              }
+            }
+          ],
+          "confirmed_product": null,
+          "confirmed_by": null,
+          "confirmed_at": null,
+          "confirmed_job_revision": null,
+          "evidence_changed_since_confirmation": false,
+          "replaced_by_id": null,
+          "evidence_request_ids": [],
+          "job_revision": 9,
+          "version": 1,
+          "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
+          "created_at": "2026-11-06T04:38:59.970388+00:00",
+          "updated_at": "2026-11-06T04:38:59.970391+00:00"
+        },
+        {
+          "id": "a2eacf80-91f3-465c-a5a5-c3e5a49283ed",
+          "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+          "category": "part",
+          "name": "Hose clamps",
+          "purpose": "Secure each hose end on its fitting",
+          "quantity": null,
+          "unit": "each",
+          "quantity_basis": null,
+          "open_requirements": [
+            "Clamp range must include the recorded 32.5 mm hose OD",
+            "Quantity depends on the number of connections — not confirmed",
+            "Clamp material/grade not confirmed from photos"
+          ],
+          "specification": {
+            "template": "clamps",
+            "required_od": "32.5 mm",
+            "required_od_state": "owner_measured"
+          },
+          "depends_on": [
+            {
+              "measurement_id": "9e6ecd2d-90f2-4a15-9b2e-f4a019815c3a",
+              "dimension": "hose_external_diameter",
+              "value_text": "32.5",
+              "unit": "mm",
+              "state": "owner_measured"
+            },
+            {
+              "measurement_id": "94119ac7-4d8e-48b6-9098-889de5ecd157",
+              "dimension": "hose_internal_diameter",
+              "value_text": "25",
+              "unit": "mm",
+              "state": "owner_declared"
+            }
+          ],
+          "supporting_asset_ids": [
+            "b7db34c3-cebc-460b-a93b-7533ed49a1f3"
+          ],
+          "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
+          "origin": "assistant",
+          "created_by_role": "assistant",
+          "status": "suggested",
+          "requirement_state": "possible",
+          "catalogue_match": "candidates",
+          "candidates": [
+            {
+              "product_id": "67d0765d-201d-4fa8-8ee5-7fb0356f50ca",
+              "sku": "SYN-HOSE-CLAMP",
+              "name": "316 stainless hose clamp assortment (synthetic)",
+              "brand": "FixtureGeneral",
+              "price_cents": 2490,
+              "sale_price_cents": null,
+              "currency": "NZD",
+              "is_active": true,
+              "in_stock": true,
+              "fitment_status": "universal",
+              "fitment_message": "Suitable for any vessel, including Kahawai (2021 Stabicraft 2050 Supercab)",
+              "dimension_check": {
+                "status": "unknown",
+                "reason": "The product has no stated clamp range"
+              }
+            }
+          ],
+          "confirmed_product": null,
+          "confirmed_by": null,
+          "confirmed_at": null,
+          "confirmed_job_revision": null,
+          "evidence_changed_since_confirmation": false,
+          "replaced_by_id": null,
+          "evidence_request_ids": [],
+          "job_revision": 9,
+          "version": 1,
+          "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
+          "created_at": "2026-11-06T04:38:59.976463+00:00",
+          "updated_at": "2026-11-06T04:38:59.976467+00:00"
+        },
+        {
+          "id": "4af7f4bb-7fa6-43a7-b516-f395692cd896",
+          "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+          "category": "part",
+          "name": "Hose fitting / adaptor (if the existing one is damaged)",
+          "purpose": "Connect the hose to the equipment if the existing fitting cannot be reused",
+          "quantity": null,
+          "unit": "each",
+          "quantity_basis": null,
+          "open_requirements": [
+            "Fitting thread not confirmed",
+            "Whether the existing fitting can be reused needs site inspection"
+          ],
+          "specification": {
+            "thread": null,
+            "template": "fitting"
+          },
+          "depends_on": [],
+          "supporting_asset_ids": [
+            "b7db34c3-cebc-460b-a93b-7533ed49a1f3"
+          ],
+          "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
+          "origin": "assistant",
+          "created_by_role": "assistant",
+          "status": "suggested",
+          "requirement_state": "possible",
+          "catalogue_match": "candidates",
+          "candidates": [
+            {
+              "product_id": "5e2fd0a1-ef6d-4605-befe-60b639a0dc54",
+              "sku": "SYN-HOSE-FIT",
+              "name": "Assorted hose & fittings kit (synthetic)",
+              "brand": "FixtureGeneral",
+              "price_cents": 5490,
+              "sale_price_cents": null,
+              "currency": "NZD",
+              "is_active": true,
+              "in_stock": true,
+              "fitment_status": "universal",
+              "fitment_message": "Suitable for any vessel, including Kahawai (2021 Stabicraft 2050 Supercab)",
+              "dimension_check": {
+                "status": "not_applicable",
+                "reason": null
+              }
+            }
+          ],
+          "confirmed_product": null,
+          "confirmed_by": null,
+          "confirmed_at": null,
+          "confirmed_job_revision": null,
+          "evidence_changed_since_confirmation": false,
+          "replaced_by_id": null,
+          "evidence_request_ids": [],
+          "job_revision": 9,
+          "version": 1,
+          "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
+          "created_at": "2026-11-06T04:38:59.981742+00:00",
+          "updated_at": "2026-11-06T04:38:59.981745+00:00"
+        },
+        {
+          "id": "910d70d6-c972-4b9c-9762-79da30b99e77",
+          "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+          "category": "tool",
+          "name": "Access and hand tools",
+          "purpose": "Reach and work on the affected equipment (e.g. nut driver for clamps, hose cutter, torch, absorbent pads)",
+          "quantity": null,
+          "unit": null,
+          "quantity_basis": null,
+          "open_requirements": [
+            "Access route and working space not confirmed",
+            "Tool list to be confirmed by the contractor"
+          ],
+          "specification": {
+            "template": "tools"
+          },
+          "depends_on": [],
+          "supporting_asset_ids": [
+            "b7db34c3-cebc-460b-a93b-7533ed49a1f3"
+          ],
+          "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
+          "origin": "assistant",
+          "created_by_role": "assistant",
+          "status": "suggested",
+          "requirement_state": "possible",
+          "catalogue_match": "candidates",
+          "candidates": [
+            {
+              "product_id": "3a00cdf9-365f-4627-9235-092cac1f8b33",
+              "sku": "SYN-TOOLKIT-COASTAL",
+              "name": "Coastal tool kit: sockets, multimeter, strap wrench (synthetic)",
+              "brand": "FixtureTools",
+              "price_cents": 18990,
+              "sale_price_cents": 15990,
+              "currency": "NZD",
+              "is_active": true,
+              "in_stock": true,
+              "fitment_status": "universal",
+              "fitment_message": "Suitable for any vessel, including Kahawai (2021 Stabicraft 2050 Supercab)",
+              "dimension_check": {
+                "status": "not_applicable",
+                "reason": null
+              }
+            },
+            {
+              "product_id": "e6e37a31-a043-4916-b9eb-46e3ab1099bc",
+              "sku": "SYN-TOOLKIT-BASIC",
+              "name": "Grab-bag basic tool kit (synthetic)",
+              "brand": "FixtureTools",
+              "price_cents": 8990,
+              "sale_price_cents": null,
+              "currency": "NZD",
+              "is_active": true,
+              "in_stock": true,
+              "fitment_status": "universal",
+              "fitment_message": "Suitable for any vessel, including Kahawai (2021 Stabicraft 2050 Supercab)",
+              "dimension_check": {
+                "status": "not_applicable",
+                "reason": null
+              }
+            },
+            {
+              "product_id": "32084605-dcaf-458e-99df-3a5ea93ff724",
+              "sku": "SYN-CRIMP-KIT",
+              "name": "Heat-shrink butt connector & crimper kit (synthetic)",
+              "brand": "FixtureTools",
+              "price_cents": 4990,
+              "sale_price_cents": null,
+              "currency": "NZD",
+              "is_active": true,
+              "in_stock": false,
+              "fitment_status": "universal",
+              "fitment_message": "Suitable for any vessel, including Kahawai (2021 Stabicraft 2050 Supercab)",
+              "dimension_check": {
+                "status": "not_applicable",
+                "reason": null
+              }
+            }
+          ],
+          "confirmed_product": null,
+          "confirmed_by": null,
+          "confirmed_at": null,
+          "confirmed_job_revision": null,
+          "evidence_changed_since_confirmation": false,
+          "replaced_by_id": null,
+          "evidence_request_ids": [],
+          "job_revision": 9,
+          "version": 1,
+          "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
+          "created_at": "2026-11-06T04:38:59.986923+00:00",
+          "updated_at": "2026-11-06T04:38:59.986926+00:00"
+        },
+        {
+          "id": "9c1f7228-600d-4379-9a02-966175610e37",
+          "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+          "category": "consumable",
+          "name": "Thread seal tape",
+          "purpose": "Re-seal the pump outlet fitting",
+          "quantity": null,
+          "unit": null,
+          "quantity_basis": null,
+          "open_requirements": [
+            "Fitting thread not confirmed"
+          ],
+          "specification": {},
+          "depends_on": [],
+          "supporting_asset_ids": [],
+          "source_note": "Owner suggestion",
+          "origin": "owner",
+          "created_by_role": "owner",
+          "status": "suggested",
+          "requirement_state": "possible",
+          "catalogue_match": "none",
+          "candidates": [],
+          "confirmed_product": null,
+          "confirmed_by": null,
+          "confirmed_at": null,
+          "confirmed_job_revision": null,
+          "evidence_changed_since_confirmation": false,
+          "replaced_by_id": null,
+          "evidence_request_ids": [],
+          "job_revision": 9,
+          "version": 1,
+          "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
+          "created_at": "2026-11-06T04:39:00.007106+00:00",
+          "updated_at": "2026-11-06T04:39:00.007109+00:00"
+        }
+      ],
+      "assumptions": [],
+      "needs_site_inspection": [
+        {
+          "item_id": "c8846ba2-66f3-4056-8721-5461b3d4104f",
+          "item": "Replacement hose",
+          "requirement": "Application not confirmed (e.g. potable water, sanitation, fuel, exhaust) — not inferred from photos"
+        },
+        {
+          "item_id": "a2eacf80-91f3-465c-a5a5-c3e5a49283ed",
+          "item": "Hose clamps",
+          "requirement": "Quantity depends on the number of connections — not confirmed"
+        },
+        {
+          "item_id": "a2eacf80-91f3-465c-a5a5-c3e5a49283ed",
+          "item": "Hose clamps",
+          "requirement": "Clamp material/grade not confirmed from photos"
+        },
+        {
+          "item_id": "4af7f4bb-7fa6-43a7-b516-f395692cd896",
+          "item": "Hose fitting / adaptor (if the existing one is damaged)",
+          "requirement": "Fitting thread not confirmed"
+        },
+        {
+          "item_id": "4af7f4bb-7fa6-43a7-b516-f395692cd896",
+          "item": "Hose fitting / adaptor (if the existing one is damaged)",
+          "requirement": "Whether the existing fitting can be reused needs site inspection"
+        },
+        {
+          "item_id": "910d70d6-c972-4b9c-9762-79da30b99e77",
+          "item": "Access and hand tools",
+          "requirement": "Access route and working space not confirmed"
+        },
+        {
+          "item_id": "9c1f7228-600d-4379-9a02-966175610e37",
+          "item": "Thread seal tape",
+          "requirement": "Fitting thread not confirmed"
+        },
+        {
+          "evidence_request_id": "5fa88d6d-aecc-4a7b-ad6e-f39ebbc1465a",
+          "item": "Freshwater pump",
+          "requirement": "Show the way in to the Freshwater pump: the locker opening, hatch or panel you look through, photographed from a step back. Leave it as it is."
+        }
+      ]
+    },
+    "scope": {
+      "current": null,
+      "latest_accepted": null,
+      "history": [],
+      "exclusions": null
+    }
+  },
+  "job_revision": 9,
+  "current_job_revision": 9,
+  "content_digest": "969a6e2855e1ad51016956530a1428b9494c2e3d7dfedff555eca7376c951021",
+  "created_by": "12366c46-66eb-4676-88d0-85af20e48ee2",
+  "created_at": "2026-11-06T04:39:00.497661Z",
+  "published_at": null,
+  "is_current": false,
+  "outdated": false,
+  "outdated_reasons": [],
+  "acknowledgements": []
+}
