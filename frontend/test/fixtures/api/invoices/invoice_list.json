@@ -1,0 +1,47 @@
+[
+  {
+    "id": "ae98cf58-5ca8-43f1-b5aa-ee47b74c4a1d",
+    "title": "Sink repair",
+    "job_id": "cca9ac0a-92b4-4c45-b5ab-db2c9da287d2",
+    "standalone": false,
+    "status": "owner_reviewed",
+    "version": 3,
+    "current_revision_id": "4cb9ad8a-e89d-4111-ab9d-cfe717b50a80",
+    "revision_number": 1,
+    "supplier_name": "Fixture Harbour Marine",
+    "total": "458.82",
+    "currency": "NZD",
+    "created_at": "2026-11-06T04:58:28.351404Z",
+    "updated_at": "2026-11-06T04:58:29.437278Z"
+  },
+  {
+    "id": "4cc39558-54d1-4bd6-b249-189396345569",
+    "title": "Photo of invoice",
+    "job_id": null,
+    "standalone": true,
+    "status": "extraction_draft",
+    "version": 2,
+    "current_revision_id": "fa6816e5-d20b-4251-ac7a-1ff4eaad876d",
+    "revision_number": 1,
+    "supplier_name": null,
+    "total": null,
+    "currency": null,
+    "created_at": "2026-11-06T04:58:26.046366Z",
+    "updated_at": "2026-11-06T04:58:26.148271Z"
+  },
+  {
+    "id": "109d0375-63f3-4c12-a863-00570df18d19",
+    "title": "Harbour Marine invoice",
+    "job_id": null,
+    "standalone": true,
+    "status": "owner_reviewed",
+    "version": 5,
+    "current_revision_id": "c2e15894-535a-4fc7-9d80-e8710683bd25",
+    "revision_number": 1,
+    "supplier_name": "Fixture Harbour Marine",
+    "total": "458.82",
+    "currency": "NZD",
+    "created_at": "2026-11-06T04:58:23.698149Z",
+    "updated_at": "2026-11-06T04:58:24.906185Z"
+  }
+]

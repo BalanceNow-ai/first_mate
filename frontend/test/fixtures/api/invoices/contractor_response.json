@@ -1,0 +1,45 @@
+{
+  "id": "983707a3-cdb7-4ae0-b7d6-2d87b449362d",
+  "job_id": "cca9ac0a-92b4-4c45-b5ab-db2c9da287d2",
+  "invoice_id": "ae98cf58-5ca8-43f1-b5aa-ee47b74c4a1d",
+  "invoice_title": "Sink repair",
+  "invoice_revision_id": "4cb9ad8a-e89d-4111-ab9d-cfe717b50a80",
+  "invoice_revision_number": 1,
+  "text": "Line 5 (Consumables / sundries) isn't in the accepted scope we have on record. Could you let us know when and how this was agreed? Thanks.",
+  "status": "answered",
+  "shared_at": "2026-11-06T04:58:29.539676Z",
+  "version": 4,
+  "line": {
+    "line_number": 5,
+    "kind": "consumable",
+    "description": "Consumables / sundries",
+    "part_number": null,
+    "quantity": null,
+    "unit": null,
+    "unit_price": null,
+    "line_total": "12.00",
+    "currency": null,
+    "page": 1
+  },
+  "shared_assets": [
+    {
+      "id": "e1887907-2dd1-4772-9082-51a048f67975",
+      "purpose": "invoice",
+      "detected_type": "application/pdf",
+      "pages": 1,
+      "size_bytes": 2543
+    }
+  ],
+  "responses": [
+    {
+      "id": "a445ba36-07f2-430d-84a8-25220513ec74",
+      "question_id": "983707a3-cdb7-4ae0-b7d6-2d87b449362d",
+      "author_id": "df6a115b-127e-4f73-b8e3-471f23e8b224",
+      "author_role": "contractor",
+      "organization_id": "65bc78ca-8204-411b-b8fd-966f75520fd4",
+      "text": "Sorry — the sundries were not agreed and the call-out should be the quoted rate. A corrected invoice is attached.",
+      "corrected_revision_id": "e406e43b-62ff-4614-8799-ceb4efff2992",
+      "created_at": "2026-11-06T04:58:30.699501Z"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "077d9132-19dd-4ccf-b660-86f217eae021",
+  "status": "draft_ready",
+  "invoice_revision_id": "c2e15894-535a-4fc7-9d80-e8710683bd25",
+  "provider": "local_fixture",
+  "model": "local-fixture-v1",
+  "attempts": 1,
+  "error": null,
+  "stale_reason": null,
+  "created_at": "2026-11-06T04:58:23.747579Z",
+  "updated_at": "2026-11-06T04:58:23.836743Z"
+}

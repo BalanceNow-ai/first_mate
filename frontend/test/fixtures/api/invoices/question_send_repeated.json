@@ -1,0 +1,19 @@
+{
+  "id": "983707a3-cdb7-4ae0-b7d6-2d87b449362d",
+  "invoice_id": "ae98cf58-5ca8-43f1-b5aa-ee47b74c4a1d",
+  "invoice_revision_id": "4cb9ad8a-e89d-4111-ab9d-cfe717b50a80",
+  "line_id": "b5a8f6ad-a985-4249-951d-c8cb99d39a06",
+  "origin": "assistant_suggestion",
+  "text": "Line 5 (Consumables / sundries) isn't in the accepted scope we have on record. Could you let us know when and how this was agreed? Thanks.",
+  "status": "shared",
+  "shared_assignment_id": "50af0fc7-1738-4a24-9101-bec87f245be1",
+  "shared_asset_ids": [
+    "e1887907-2dd1-4772-9082-51a048f67975"
+  ],
+  "shared_at": "2026-11-06T04:58:29.539676Z",
+  "created_by": "fca3fbaf-0b44-4e70-b288-ba143ace7389",
+  "version": 3,
+  "created_at": "2026-11-06T04:58:29.491834Z",
+  "updated_at": "2026-11-06T04:58:29.539681Z",
+  "responses": []
+}

@@ -1,0 +1,75 @@
+{
+  "id": "bbbbef16-9a19-46b0-a28e-6e0614f07f5f",
+  "job_id": "cca9ac0a-92b4-4c45-b5ab-db2c9da287d2",
+  "feedback_id": "31ed9d47-34d7-4aa0-b649-a284c84bef88",
+  "visit_event_id": null,
+  "category": "personal_or_security_information",
+  "status": "open",
+  "restrict_content": true,
+  "assigned_moderator_id": null,
+  "content_version": 1,
+  "disposition": null,
+  "retention_hold": true,
+  "created_at": "2026-11-06T04:58:30.857715Z",
+  "resolved_at": null,
+  "reason": "The review includes my marina gate code.",
+  "disposition_note": null,
+  "reporter": {
+    "id": "fca3fbaf-0b44-4e70-b288-ba143ace7389",
+    "name": "Fixture Owner"
+  },
+  "job": {
+    "id": "cca9ac0a-92b4-4c45-b5ab-db2c9da287d2",
+    "title": "Water under the sink when the pump runs",
+    "status": "attended",
+    "disputed": false,
+    "organization_name": "Fixture Harbour Marine 564434b8"
+  },
+  "feedback": {
+    "id": "31ed9d47-34d7-4aa0-b649-a284c84bef88",
+    "job_id": "cca9ac0a-92b4-4c45-b5ab-db2c9da287d2",
+    "direction": "contractor_to_owner",
+    "status": "revealed",
+    "version": 1,
+    "author": {
+      "id": "df6a115b-127e-4f73-b8e3-471f23e8b224",
+      "name": "Fixture Technician",
+      "role": "contractor"
+    },
+    "organization": {
+      "id": "65bc78ca-8204-411b-b8fd-966f75520fd4",
+      "name": "Fixture Harbour Marine 564434b8"
+    },
+    "basis": "attended",
+    "visit_date": "2026-11-06T04:53:30.736226Z",
+    "ratings": {
+      "problem_description_accuracy": 2
+    },
+    "narrative": "Owner's description was vague; gate code 4512# did not work.",
+    "content_state": "under_review",
+    "submitted_at": "2026-11-06T04:58:30.814764Z",
+    "revealed_at": "2026-11-06T04:58:30.814764Z",
+    "created_at": "2026-11-06T04:58:30.800284Z",
+    "updated_at": "2026-11-06T04:58:30.859952Z",
+    "responses": []
+  },
+  "reported_content": {
+    "version": 1,
+    "ratings": {
+      "problem_description_accuracy": 2
+    },
+    "narrative": "Owner's description was vague; gate code 4512# did not work."
+  },
+  "visit_event": null,
+  "contest_event": null,
+  "actions": [
+    {
+      "id": "00cfb20c-c672-4042-94c4-fbbd3f0fb959",
+      "action": "reported",
+      "actor_id": "fca3fbaf-0b44-4e70-b288-ba143ace7389",
+      "reason": "The review includes my marina gate code.",
+      "content_version": 1,
+      "created_at": "2026-11-06T04:58:30.860730Z"
+    }
+  ]
+}

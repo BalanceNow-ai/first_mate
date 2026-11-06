@@ -1,0 +1,4 @@
+{
+  "detail": "This invoice isn't linked to a service job, so there is no assigned contractor to ask.",
+  "code": "standalone_invoice"
+}
