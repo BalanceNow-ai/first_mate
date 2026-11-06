@@ -423,6 +423,108 @@ async def test_scope_comparison_distinguishes_approval_difference_and_no_record(
         assert word not in text
 
 
+async def test_scope_comparison_uses_the_scope_apis_plural_kinds(client, world):  # noqa: F811
+    """Scope proposals use parts/consumables; invoice lines use part/consumable (review F2-2)."""
+    await accepted_scope(
+        world.job.id,
+        world.owner.id,
+        [
+            {
+                "description": "Labour - replace hose and clamps",
+                "kind": "labour",
+                "quantity": 2.5,
+                "unit": "hr",
+                "unit_price_minor": 9500,
+                "amount_minor": 23750,
+            },
+            {
+                "description": "Stainless worm-drive clamp",
+                "kind": "parts",
+                "quantity": "4",
+                "unit": "ea",
+                "unit_price_minor": 650,
+                "amount_minor": 2600,
+            },
+            {"description": "Call-out fee", "kind": "call_out", "quantity": "1", "amount_minor": 7500},
+        ],
+    )
+    change = await accepted_scope(
+        world.job.id,
+        world.owner.id,
+        [
+            {
+                "description": "Sanitation hose 25mm",
+                "kind": "parts",
+                "quantity": "1.5",
+                "unit": "m",
+                "amount_minor": 2760,
+            }
+        ],
+        number=2,
+        is_change=True,
+    )
+    # A proposed (undecided) and a rejected revision are not approvals.
+    await accepted_scope(
+        world.job.id,
+        world.owner.id,
+        [{"description": "Consumables sundries", "amount_minor": 1200}],
+        number=3,
+        decision=None,
+    )
+    await accepted_scope(
+        world.job.id,
+        world.owner.id,
+        [{"description": "Consumables sundries", "amount_minor": 1200}],
+        number=4,
+        decision="rejected",
+    )
+    async with async_session() as s:
+        s.add(
+            PreparationItem(
+                job_id=world.job.id,
+                category="part",
+                name="sanitation hose",
+                purpose="supply line",
+                origin="contractor",
+                job_revision=0,
+            )
+        )
+        await s.commit()
+    inv = await extracted_invoice(client, world)
+    c = (await client.post(f"{API}/invoices/{inv['id']}/explain", headers=world.owner.headers)).json()["content"]
+    comp = c["comparison"]
+    assert comp["status"] == "available" and comp["provisional"] is True
+    assert [s["revision_number"] for s in comp["scope_revisions"]] == [1, 2]
+    by_line = {i["line_number"]: i for i in comp["items"]}
+    assert by_line[1]["status"] == "matches" and by_line[1]["approval"]["scope_revision_number"] == 1
+    assert by_line[3]["status"] == "matches"
+    assert by_line[2]["status"] == "matches" and by_line[2]["additional_work"] is True
+    assert by_line[2]["approval"]["scope_revision_id"] == str(change) and by_line[2]["approval"]["is_change"] is True
+    assert "accepted change" in by_line[2]["approval_text"]
+    assert by_line[4]["status"] == "differs"
+    assert by_line[4]["differences"] == [{"field": "amount", "invoice": "85.00", "approved": "75.00"}]
+    assert by_line[5]["status"] == "not_in_accepted_scope" and by_line[5]["approval"] is None
+    assert by_line[5]["approval_text"].startswith("No approval record available")
+    assert "not a finding" in by_line[5]["approval_text"]
+    keys = {q["key"] for q in c["suggested_questions"]}
+    assert f"scope:additional:{inv['lines'][4]['id']}" in keys
+    assert f"scope:differs:{inv['lines'][3]['id']}:amount" in keys
+    related = c["lines"][1]["related_to_job"]
+    assert related and related[0]["type"] == "preparation_item" and related[0]["name"] == "sanitation hose"
+    # Glossary and plain language.
+    clamp = c["lines"][2]
+    assert {"s/s", "316", "ea"} <= {g["term"] for g in clamp["glossary"]}
+    assert clamp["plain_language"].startswith("A part or material supplied: S/S hose clamp 316")
+    assert "not assumed to be hours" not in c["lines"][0]["plain_language"]  # unit "hr" is printed
+    # Warranty obligation linked to its source.
+    ob = c["obligations"][0]
+    assert ob["kind"] == "warranty" and ob["source"]["field"] == "warranty" and ob["source"]["page"] == 1
+    # No conclusions about fairness, fraud or tax compliance.
+    text = str(c).lower()
+    for word in ("fraud", "overcharg", "unfair", "dishonest", "rip-off", "expensive"):
+        assert word not in text
+
+
 async def test_comparison_unavailable_without_accepted_scope_or_job(client, world):  # noqa: F811
     inv = await extracted_invoice(client, world)
     c = (await client.post(f"{API}/invoices/{inv['id']}/explain", headers=world.owner.headers)).json()["content"]

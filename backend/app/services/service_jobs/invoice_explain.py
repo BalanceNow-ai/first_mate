@@ -209,6 +209,10 @@ def _approval_text(sl: dict) -> str:
     return f"In {what} (scope revision {number}), accepted by the owner on {day}."
 
 
+# Scope estimate lines and invoice lines use different (plural/singular) kind vocabularies.
+SCOPE_KIND_TO_LINE_KIND = {"parts": "part", "consumables": "consumable"}
+
+
 def _compare(ctx: ExplainContext, checks: dict, questions: list[dict]) -> dict:
     if ctx.job is None:
         return {
@@ -243,7 +247,8 @@ def _compare(ctx: ExplainContext, checks: dict, questions: list[dict]) -> dict:
         lt = tokens(line.get("description"))
         for j, sl in enumerate(scope_lines):
             score = _overlap(lt, tokens(sl["description"]))
-            if sl.get("kind") and line["kind"] not in ("unknown", sl["kind"]) and score < 0.8:
+            scope_kind = SCOPE_KIND_TO_LINE_KIND.get(sl.get("kind") or "", sl.get("kind"))
+            if scope_kind and scope_kind != "other" and line["kind"] not in ("unknown", scope_kind) and score < 0.8:
                 continue
             if score >= 0.6:
                 candidates.append((score, line["id"], j))
