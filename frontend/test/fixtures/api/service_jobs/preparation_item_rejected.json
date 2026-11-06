@@ -1,0 +1,59 @@
+{
+  "id": "4af7f4bb-7fa6-43a7-b516-f395692cd896",
+  "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+  "category": "part",
+  "name": "Hose fitting / adaptor (if the existing one is damaged)",
+  "purpose": "Connect the hose to the equipment if the existing fitting cannot be reused",
+  "quantity": null,
+  "unit": "each",
+  "quantity_basis": null,
+  "open_requirements": [
+    "Fitting thread not confirmed",
+    "Whether the existing fitting can be reused needs site inspection"
+  ],
+  "specification": {
+    "thread": null,
+    "template": "fitting"
+  },
+  "depends_on": [],
+  "supporting_asset_ids": [
+    "b7db34c3-cebc-460b-a93b-7533ed49a1f3"
+  ],
+  "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
+  "origin": "assistant",
+  "created_by_role": "assistant",
+  "status": "rejected",
+  "requirement_state": "rejected",
+  "catalogue_match": "candidates",
+  "candidates": [
+    {
+      "product_id": "5e2fd0a1-ef6d-4605-befe-60b639a0dc54",
+      "sku": "SYN-HOSE-FIT",
+      "name": "Assorted hose & fittings kit (synthetic)",
+      "brand": "FixtureGeneral",
+      "price_cents": 5490,
+      "sale_price_cents": null,
+      "currency": "NZD",
+      "is_active": true,
+      "in_stock": true,
+      "fitment_status": "universal",
+      "fitment_message": "Suitable for any vessel, including Kahawai (2021 Stabicraft 2050 Supercab)",
+      "dimension_check": {
+        "status": "not_applicable",
+        "reason": null
+      }
+    }
+  ],
+  "confirmed_product": null,
+  "confirmed_by": null,
+  "confirmed_at": null,
+  "confirmed_job_revision": null,
+  "evidence_changed_since_confirmation": false,
+  "replaced_by_id": null,
+  "evidence_request_ids": [],
+  "job_revision": 9,
+  "version": 2,
+  "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
+  "created_at": "2026-11-06T04:38:59.981742Z",
+  "updated_at": "2026-11-06T04:39:01.815315Z"
+}

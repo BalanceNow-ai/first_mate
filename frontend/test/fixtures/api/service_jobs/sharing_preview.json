@@ -1,0 +1,106 @@
+{
+  "organization": {
+    "id": "0f168314-a4b1-485f-88d7-5afa5a8cfd41",
+    "name": "Fixture Marine 6555556b",
+    "trading_name": "Fixture Marine Services"
+  },
+  "sections": [
+    {
+      "section": "summary",
+      "label": "Problem summary and vessel details",
+      "exposes": [
+        "title",
+        "issue_description",
+        "affected_system",
+        "affected_equipment",
+        "occurs_when",
+        "already_tried",
+        "urgency",
+        "vessel_context"
+      ],
+      "counts": {},
+      "note": null
+    },
+    {
+      "section": "evidence",
+      "label": "Photos, documents and evidence requests",
+      "exposes": [
+        "evidence requests and answers",
+        "photos and documents (metadata-stripped copies)"
+      ],
+      "counts": {
+        "evidence_requests": 4,
+        "available_assets": 2
+      },
+      "note": null
+    },
+    {
+      "section": "measurements",
+      "label": "Measurements",
+      "exposes": [
+        "measurements with their method and source"
+      ],
+      "counts": {
+        "measurements": 4
+      },
+      "note": null
+    },
+    {
+      "section": "preparation",
+      "label": "Preparation list and briefs",
+      "exposes": [
+        "preparation items",
+        "published briefs"
+      ],
+      "counts": {
+        "preparation_items": 5,
+        "published_briefs": 0
+      },
+      "note": null
+    },
+    {
+      "section": "access_general",
+      "label": "General access and logistics",
+      "exposes": [
+        "access_hours",
+        "known_hazards",
+        "marina",
+        "owner_attendance"
+      ],
+      "counts": {
+        "fields": 4
+      },
+      "note": null
+    },
+    {
+      "section": "access_restricted",
+      "label": "Access credentials and exact location",
+      "exposes": [
+        "berth",
+        "contact_name",
+        "contact_phone",
+        "gate_code"
+      ],
+      "counts": {
+        "fields": 4
+      },
+      "note": "Shown only to the assigned members you individually authorise, on a separate audited screen."
+    },
+    {
+      "section": "scope",
+      "label": "Scope of work and decisions",
+      "exposes": [
+        "scope revisions and your decisions"
+      ],
+      "counts": {
+        "scope_revisions": 0
+      },
+      "note": null
+    }
+  ],
+  "withheld": [
+    "invoices"
+  ],
+  "live_updates": true,
+  "live_updates_note": "They will see changes you make after sharing."
+}

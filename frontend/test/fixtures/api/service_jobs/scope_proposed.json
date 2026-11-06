@@ -1,0 +1,47 @@
+{
+  "id": "3a4b9e7b-28db-4ba1-b58a-c3e853762566",
+  "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+  "revision_number": 1,
+  "is_change": false,
+  "supersedes_id": null,
+  "proposed_by": "662931a0-32ad-4560-a367-67378e4e539d",
+  "organization_id": "0f168314-a4b1-485f-88d7-5afa5a8cfd41",
+  "summary": "Replace the pump outlet hose and both clamps",
+  "tasks": [
+    {
+      "description": "Replace outlet hose (approx. 0.8 m)",
+      "needs_site_inspection": false
+    },
+    {
+      "description": "Inspect far-end fitting",
+      "needs_site_inspection": true
+    }
+  ],
+  "estimate_lines": [
+    {
+      "description": "Labour",
+      "kind": "labour",
+      "quantity": "1.5",
+      "unit": "hour",
+      "unit_price_minor": 9500,
+      "amount_minor": 14250
+    },
+    {
+      "description": "Hose and clamps",
+      "kind": "parts",
+      "quantity": null,
+      "unit": null,
+      "unit_price_minor": null,
+      "amount_minor": 4250
+    }
+  ],
+  "estimate_total_minor": 18500,
+  "currency": "NZD",
+  "exclusions": "Pump replacement",
+  "assumptions": "Far-end fitting is serviceable",
+  "status": "proposed",
+  "content_digest": "5e8b944772013684775b4ee5370214ba4dddc49f0f204edb079e75e601395282",
+  "is_current": true,
+  "decision": null,
+  "created_at": "2026-11-06T04:39:01.853445Z"
+}

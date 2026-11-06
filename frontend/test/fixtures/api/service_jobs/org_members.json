@@ -1,0 +1,20 @@
+[
+  {
+    "user_id": "67cff377-80b9-4b39-8986-58e934adfe8c",
+    "name": "Fixture Contractor Admin",
+    "email": "sj-cadmin-6555556b@example.test",
+    "role": "admin",
+    "status": "active",
+    "verified_at": "2026-11-06T04:38:50.087280Z",
+    "removed_at": null
+  },
+  {
+    "user_id": "662931a0-32ad-4560-a367-67378e4e539d",
+    "name": "Fixture Technician",
+    "email": "sj-cmember-6555556b@example.test",
+    "role": "member",
+    "status": "active",
+    "verified_at": "2026-11-06T04:38:52.493267Z",
+    "removed_at": null
+  }
+]

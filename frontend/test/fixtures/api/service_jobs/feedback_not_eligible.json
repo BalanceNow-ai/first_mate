@@ -1,0 +1,34 @@
+{
+  "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+  "my_side": "owner",
+  "my_direction": "owner_to_contractor",
+  "eligible": false,
+  "ineligible_reason": "no_attended_visit",
+  "window": null,
+  "reveal_rule": "Feedback opens after a visit is recorded as attended or completed.",
+  "dimensions": [
+    {
+      "key": "communication_clarity",
+      "label": "Communication and clarity"
+    },
+    {
+      "key": "arrival_access_coordination",
+      "label": "Arrival and access coordination"
+    },
+    {
+      "key": "explanation_of_work_and_changes",
+      "label": "Explanation of work and changes"
+    },
+    {
+      "key": "care_and_agreed_work_delivery",
+      "label": "Care and agreed work delivery"
+    },
+    {
+      "key": "invoice_clarity_and_scope_relationship",
+      "label": "Invoice clarity and relationship to scope"
+    }
+  ],
+  "can_edit": false,
+  "mine": null,
+  "theirs": null
+}

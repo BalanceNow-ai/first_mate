@@ -1,0 +1,20 @@
+{
+  "id": "08bed503-026c-44e1-ab7c-3f8074aa3850",
+  "job_id": "4b52dd52-f982-43a1-b948-72d71ae987c2",
+  "organization": {
+    "id": "0f168314-a4b1-485f-88d7-5afa5a8cfd41",
+    "name": "Fixture Marine 6555556b",
+    "trading_name": "Fixture Marine Services"
+  },
+  "status": "revoked",
+  "sections": [
+    "summary",
+    "evidence"
+  ],
+  "live_updates": false,
+  "invited_at": "2026-11-06T04:39:02.342771Z",
+  "accepted_at": null,
+  "revoked_at": "2026-11-06T04:39:02.360645Z",
+  "version": 2,
+  "members": []
+}

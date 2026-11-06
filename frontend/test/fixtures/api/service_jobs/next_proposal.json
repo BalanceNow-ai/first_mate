@@ -1,0 +1,22 @@
+{
+  "request": null,
+  "proposal": {
+    "key": "overview:freshwater pump",
+    "category": "overview",
+    "component": "Freshwater pump",
+    "prompt": "Can you take a wide photo that shows where the Freshwater pump is on the boat? Step back far enough to see the locker or compartment around it.",
+    "reason": "A wide view tells the contractor where to go and what they will be working around, before they arrive.",
+    "priority": "high",
+    "measurement_dimension": null,
+    "safety_note": "Only do this from where you can comfortably stand or kneel, and leave everything as it is. If getting it would mean going near anything hot, electrical, fuel, gas or moving, choose “I cannot safely get this” — your contractor will look at it on site.",
+    "options": [
+      "take_photo",
+      "upload_file",
+      "answer_with_note",
+      "cannot_safely_get"
+    ]
+  },
+  "complete": false,
+  "message": "A wide view tells the contractor where to go and what they will be working around, before they arrive.",
+  "gaps": []
+}

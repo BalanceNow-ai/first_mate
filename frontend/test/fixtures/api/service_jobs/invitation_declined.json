@@ -1,0 +1,18 @@
+{
+  "assignment_id": "592b2554-c74e-46cb-a76b-3d90e4001117",
+  "job_id": "4b52dd52-f982-43a1-b948-72d71ae987c2",
+  "organization_id": "16c1eb31-48a0-49e9-b0df-bbd18938cf22",
+  "status": "declined",
+  "job_title": "Bilge pump cycling",
+  "vessel_make": "Stabicraft",
+  "vessel_model": "2050 Supercab",
+  "sections": [
+    "summary"
+  ],
+  "live_updates": false,
+  "inviter_first_name": "Fixture",
+  "invited_at": "2026-11-06T04:39:02.301210Z",
+  "accepted_at": null,
+  "version": 2,
+  "members": []
+}

@@ -1,0 +1,22 @@
+{
+  "request": null,
+  "proposal": {
+    "key": "access_route:freshwater pump",
+    "category": "access_route",
+    "component": "Freshwater pump",
+    "prompt": "Show the way in to the Freshwater pump: the locker opening, hatch or panel you look through, photographed from a step back. Leave it as it is.",
+    "reason": "Working space and obstructions decide which tools and how much time the job needs.",
+    "priority": "normal",
+    "measurement_dimension": null,
+    "safety_note": "Only do this from where you can comfortably stand or kneel, and leave everything as it is. If getting it would mean going near anything hot, electrical, fuel, gas or moving, choose “I cannot safely get this” — your contractor will look at it on site.",
+    "options": [
+      "take_photo",
+      "upload_file",
+      "answer_with_note",
+      "cannot_safely_get"
+    ]
+  },
+  "complete": false,
+  "message": "Working space and obstructions decide which tools and how much time the job needs.",
+  "gaps": []
+}

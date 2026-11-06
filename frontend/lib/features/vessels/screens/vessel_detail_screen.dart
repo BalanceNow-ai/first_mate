@@ -5,6 +5,7 @@ import 'package:helm_marine/core/models/boat_db.dart';
 import 'package:helm_marine/core/models/vessel.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
 import 'package:helm_marine/core/widgets/state_views.dart';
+import 'package:helm_marine/features/service_jobs/widgets/service_menu_entries.dart';
 import 'package:helm_marine/features/vessels/providers/vessel_provider.dart';
 import 'package:helm_marine/features/vessels/widgets/equipment_section.dart';
 import 'package:helm_marine/features/vessels/widgets/hin_suggestion.dart';
@@ -192,6 +193,8 @@ class _VesselDetails extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: 12),
+        VesselServiceActions(vesselId: vessel.id),
       ],
     );
   }

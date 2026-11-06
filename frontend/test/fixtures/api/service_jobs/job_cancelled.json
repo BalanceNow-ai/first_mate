@@ -1,0 +1,67 @@
+{
+  "id": "4b52dd52-f982-43a1-b948-72d71ae987c2",
+  "vessel_id": "355c6500-8f19-4490-a582-cfdd14ba369d",
+  "entry_point": "first_mate",
+  "title": "Bilge pump cycling",
+  "status": "cancelled",
+  "version": 2,
+  "evidence_revision": 0,
+  "disputed": false,
+  "archived_at": null,
+  "created_at": "2026-11-06T04:39:02.285192Z",
+  "updated_at": "2026-11-06T04:39:02.379855Z",
+  "viewer": {
+    "role": "owner",
+    "sections": [
+      "summary",
+      "evidence",
+      "measurements",
+      "preparation",
+      "access_general",
+      "access_restricted",
+      "scope",
+      "invoices"
+    ],
+    "organization_id": null,
+    "assignment_id": null,
+    "restricted_access": true
+  },
+  "issue_description": "",
+  "affected_system": null,
+  "affected_equipment": null,
+  "occurs_when": null,
+  "already_tried": null,
+  "urgency": "unknown",
+  "vessel_context": {
+    "engine": {
+      "make": "Yamaha",
+      "year": 2021,
+      "model": "F150"
+    },
+    "source": "vessel_record",
+    "vessel": {
+      "make": "Stabicraft",
+      "year": 2021,
+      "model": "2050 Supercab",
+      "nickname": "Kahawai",
+      "hull_type": null,
+      "length_ft": null,
+      "propulsion_type": "outboard"
+    },
+    "equipment": [],
+    "captured_at": "2026-11-06T04:39:02.284838+00:00",
+    "corrections": [],
+    "owner_confirmed": false,
+    "uncertain_categories": []
+  },
+  "evidence": {
+    "outstanding": [],
+    "answered": [],
+    "unavailable": [],
+    "waived": [],
+    "available_asset_count": 0
+  },
+  "gaps": [],
+  "technician_inspection_required": false,
+  "assignment": null
+}

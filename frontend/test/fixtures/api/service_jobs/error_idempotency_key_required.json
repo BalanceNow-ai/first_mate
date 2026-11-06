@@ -1,0 +1,4 @@
+{
+  "detail": "An Idempotency-Key header of 8-100 characters (letters, digits, _ - : .) is required",
+  "code": "idempotency_key_required"
+}

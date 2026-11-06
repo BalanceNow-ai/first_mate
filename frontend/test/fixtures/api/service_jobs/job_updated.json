@@ -1,0 +1,67 @@
+{
+  "id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+  "vessel_id": "355c6500-8f19-4490-a582-cfdd14ba369d",
+  "entry_point": "vessel",
+  "title": "Water under the sink when the pump runs",
+  "status": "draft",
+  "version": 2,
+  "evidence_revision": 0,
+  "disputed": false,
+  "archived_at": null,
+  "created_at": "2026-11-06T04:38:55.353011Z",
+  "updated_at": "2026-11-06T04:38:55.375236Z",
+  "viewer": {
+    "role": "owner",
+    "sections": [
+      "summary",
+      "evidence",
+      "measurements",
+      "preparation",
+      "access_general",
+      "access_restricted",
+      "scope",
+      "invoices"
+    ],
+    "organization_id": null,
+    "assignment_id": null,
+    "restricted_access": true
+  },
+  "issue_description": "There is water under the galley sink whenever the freshwater pump runs.",
+  "affected_system": "Freshwater",
+  "affected_equipment": "Freshwater pump",
+  "occurs_when": "When the pump runs",
+  "already_tried": "Tightened the visible hose clamp",
+  "urgency": "routine",
+  "vessel_context": {
+    "engine": {
+      "make": "Yamaha",
+      "year": 2021,
+      "model": "F150"
+    },
+    "source": "vessel_record",
+    "vessel": {
+      "make": "Stabicraft",
+      "year": 2021,
+      "model": "2050 Supercab",
+      "nickname": "Kahawai",
+      "hull_type": null,
+      "length_ft": null,
+      "propulsion_type": "outboard"
+    },
+    "equipment": [],
+    "captured_at": "2026-11-06T04:38:55.352546+00:00",
+    "corrections": [],
+    "owner_confirmed": false,
+    "uncertain_categories": []
+  },
+  "evidence": {
+    "outstanding": [],
+    "answered": [],
+    "unavailable": [],
+    "waived": [],
+    "available_asset_count": 0
+  },
+  "gaps": [],
+  "technician_inspection_required": false,
+  "assignment": null
+}
