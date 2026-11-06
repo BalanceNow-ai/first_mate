@@ -1,0 +1,134 @@
+{
+  "description": "Synthetic image invoices for the local_fixture extractor, keyed by the derivative sha256. Development/test only; proves contracts, not visual accuracy.",
+  "images": {
+    "da0338fa7e21b2635d04fc7a536817686b96f8ff55a767a0027ff99fa6cebf6f": {
+      "name": "handwritten_receipt.png",
+      "fields": {
+        "supplier_name": {
+          "value": "Pier F Mobile Marine",
+          "page": 1,
+          "region": {
+            "x": 0.05,
+            "y": 0.04,
+            "w": 0.5,
+            "h": 0.05
+          },
+          "certainty": "high"
+        },
+        "invoice_number": {
+          "value": "PF-77",
+          "page": 1,
+          "region": {
+            "x": 0.6,
+            "y": 0.04,
+            "w": 0.3,
+            "h": 0.05
+          },
+          "certainty": "medium"
+        },
+        "invoice_date": {
+          "value": "2026-11-01",
+          "page": 1,
+          "region": {
+            "x": 0.6,
+            "y": 0.1,
+            "w": 0.3,
+            "h": 0.05
+          },
+          "certainty": "high"
+        },
+        "currency": {
+          "value": "NZD",
+          "page": 1,
+          "region": {
+            "x": 0.6,
+            "y": 0.16,
+            "w": 0.1,
+            "h": 0.04
+          },
+          "certainty": "high"
+        },
+        "subtotal": {
+          "value": null,
+          "page": null,
+          "region": null,
+          "certainty": "unknown"
+        },
+        "tax_printed": {
+          "value": null,
+          "page": null,
+          "region": null,
+          "certainty": "unknown"
+        },
+        "total": {
+          "value": "165.00",
+          "page": 1,
+          "region": {
+            "x": 0.6,
+            "y": 0.8,
+            "w": 0.3,
+            "h": 0.06
+          },
+          "certainty": "low"
+        },
+        "warranty": {
+          "value": null,
+          "page": null,
+          "region": null,
+          "certainty": "unknown"
+        },
+        "follow_up": {
+          "value": "Re-check impeller in 3 months",
+          "page": 1,
+          "region": {
+            "x": 0.05,
+            "y": 0.88,
+            "w": 0.8,
+            "h": 0.05
+          },
+          "certainty": "medium"
+        }
+      },
+      "lines": [
+        {
+          "kind": "labour",
+          "description": "Labour",
+          "part_number": null,
+          "quantity": "1",
+          "unit": null,
+          "unit_price": "90.00",
+          "line_total": "90.00",
+          "tax_printed": null,
+          "currency": null,
+          "page": 1,
+          "region": {
+            "x": 0.05,
+            "y": 0.3,
+            "w": 0.9,
+            "h": 0.06
+          },
+          "certainty": "medium"
+        },
+        {
+          "kind": "part",
+          "description": "Impeller kit",
+          "part_number": "6CE-W0078-00",
+          "quantity": "1",
+          "unit": "ea",
+          "unit_price": "75.00",
+          "line_total": "75.00",
+          "tax_printed": null,
+          "currency": null,
+          "page": 1,
+          "region": {
+            "x": 0.05,
+            "y": 0.38,
+            "w": 0.9,
+            "h": 0.06
+          },
+          "certainty": "low"
+        }
+      ]
+    }
+  }
+}
