@@ -26,6 +26,10 @@ celery = Celery(
         "app.tasks.loyalty",
         "app.tasks.notifications",
         "app.tasks.reminders",
+        "app.tasks.service_media",
+        "app.tasks.service_analysis",
+        "app.tasks.service_invoices",
+        "app.tasks.service_feedback",
     ],
 )
 

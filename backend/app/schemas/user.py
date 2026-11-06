@@ -34,4 +34,4 @@ class ProvisionResponse(UserResponse):
 
 
 class RoleUpdate(StrictInput):
-    role: str = Field(pattern="^(customer|operator|dispatcher|admin)$")
+    role: str = Field(pattern="^(customer|operator|dispatcher|admin|moderator)$")

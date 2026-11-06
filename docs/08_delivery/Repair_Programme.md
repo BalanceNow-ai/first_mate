@@ -403,6 +403,29 @@ The owner requested guided problem photos and access information, likely parts a
 
 The implementer must split these grouped rows into individual requirement dispositions where outcomes differ, cite executed checks, and distinguish code not implemented from code implemented with live validation pending. No new hosted CI is required by this extension.
 
+### Implementation record (started 2026-11-06 from `main@2566107`)
+
+Preflight: repository `BalanceNow-ai/first_mate`, branch `claude/new-session-bkkwp6`
+restarted from `main@2566107` (the specification commit after `1ba3244`). The correction
+increment (FM-01…FM-05, D21–D23) is preserved. Gaps found: no object storage, media
+decoding, PDF handling, contractor identity, job/grant model, invoice or feedback model
+existed; the reusable parts are auth/roles, the audit log, notification outbox, Celery
+with leases, central fitment/catalogue, the AI provider pattern and the Flutter shell.
+Dependency order: data model + authorization + run fencing → private media → jobs/grants/
+requests → measurements/preparation/brief/scope ∥ invoices ∥ feedback/moderation →
+Flutter journeys → integrated acceptance.
+
+| ID | Decision |
+|---|---|
+| SJ-D1 | One migration (0006) creates every service-jobs table up front (`app/models/service_jobs.py`); composite foreign keys keep child rows on their parent's job (asset↔request, observation/measurement↔asset, visit↔assignment, invoice↔owner's own job). |
+| SJ-D2 | Contractor organizations and memberships are separate from Helm Dash roles. Memberships are provisioned by an audited admin/CLI action; org admins manage which members work an assignment; a platform admin has no implicit job-content access; the new `moderator` role is case-scoped. |
+| SJ-D3 | Authorization is evaluated per request (`services/service_jobs/access.py`, D23): owner, or an *assigned* member of the organization holding the job's one live **accepted** assignment, limited to owner-granted sections; `access_restricted` additionally needs a per-member flag. Anyone else gets 404; an assigned member asking for an unshared section gets 403. |
+| SJ-D4 | Background work is bound to the job `evidence_revision`, asset versions, invoice revision and assignment, claimed with a lease + fencing token and published only after re-checking authority and versions (`services/service_jobs/runs.py`); stale output is kept only as a `superseded` diagnostic. No DB lock is held during provider/scanner/storage calls. |
+| SJ-D5 | Local acceptance object store: VersityGW (S3 API over a private volume) — MinIO images are not obtainable from this environment. Production uses any private S3-compatible bucket (`OBJECT_STORE_BACKEND=s3`); `local_fs` is test-only and refused outside development/test. |
+| SJ-D6 | Scanning: `clamd` in production; `local_signature` (EICAR + structural checks — **not** a malware scanner) only in development/test; any scanner failure keeps the upload quarantined. |
+| SJ-D7 | Vision/OCR/extraction providers: `local_fixture` (development/test substitute: proves orchestration and contracts, not visual accuracy), `openai` (configured path; live evaluation pending separate spend authority) and `disabled` (manual capture/measurement/correction paths stay fully usable). |
+| SJ-D8 | Money: invoice amounts are exact decimals in the invoice's stated currency (Numeric(14,4) + ISO code, nulls kept); estimates are integer minor units with a currency. No arithmetic is delegated to a model. |
+
 ### Extension decisions and limits
 
 1. Feedback is reciprocal, private and job-specific by default; blind until both submit or 14 days. Public contractor reviews are future opt-in scope; public owner scores/blacklists and automated penalties are excluded.

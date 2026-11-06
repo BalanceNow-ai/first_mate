@@ -229,6 +229,45 @@ class Settings(BaseSettings):
     notification_http_timeout_seconds: float = 10.0
     service_reminder_renotify_days: int = 7
 
+    # --- service jobs (docs/04_technical_spec/Service_Jobs_…_Specification.md) -------
+    service_jobs_enabled: bool = True
+    # Private object storage: "s3" (any S3-compatible endpoint; production) or
+    # "local_fs" (development/test only, refused elsewhere).
+    object_store_backend: str = "local_fs"
+    object_store_local_path: str = "/tmp/helm-object-store"
+    object_store_endpoint_url: str = ""  # e.g. http://objectstore:7070 locally; empty = AWS
+    object_store_public_endpoint_url: str = ""  # host the browser uses for signed URLs
+    object_store_bucket: str = "helm-private"
+    object_store_region: str = "us-east-1"
+    object_store_access_key: str = ""
+    object_store_secret_key: str = ""
+    signed_url_seconds: int = 300  # spec §12: at most 5 minutes
+    # Malware scanning: "clamd" (production) or "local_signature" (development/test only:
+    # EICAR + structural checks — not a malware scanner). "disabled" keeps uploads quarantined.
+    upload_scanner: str = "local_signature"
+    clamd_host: str = "clamd"
+    clamd_port: int = 3310
+    clamd_timeout_seconds: float = 30.0
+    # Vision/OCR/extraction: "openai" (configured path; live evaluation pending),
+    # "local_fixture" (development/test substitute) or "disabled" (manual paths only).
+    service_vision_provider: str = "local_fixture"
+    service_vision_model: str = "gpt-4.1-mini"
+    # Limits (spec §5.3) — all configurable.
+    service_job_max_assets: int = 40
+    service_image_max_bytes: int = 10 * 1024 * 1024
+    service_pdf_max_bytes: int = 20 * 1024 * 1024
+    service_pdf_max_pages: int = 50
+    service_job_max_total_bytes: int = 250 * 1024 * 1024
+    service_image_max_pixels: int = 40_000_000
+    service_owner_storage_bytes: int = 2 * 1024 * 1024 * 1024
+    service_analysis_runs_per_day: int = 200
+    service_upload_intent_hours: int = 24
+    service_processing_lease_seconds: int = 300
+    service_processing_max_attempts: int = 3
+    service_draft_retention_days: int = 90
+    service_archive_after_months: int = 24
+    feedback_window_days: int = 14
+
     # --- end of workstream settings ---------------------------------------------
 
     # ----------------------------------------------------------------------------
@@ -352,6 +391,19 @@ class Settings(BaseSettings):
             problems.append("Live Helm Dash payouts are not implemented; keep them disabled")
         if self.courier_booking_enabled:
             problems.append("Live courier booking is not implemented; keep it disabled")
+        if self.service_jobs_enabled:
+            if self.object_store_backend != "s3":
+                problems.append("OBJECT_STORE_BACKEND must be s3 (private bucket) outside development/test")
+            elif not (self.object_store_access_key and self.object_store_secret_key):
+                problems.append("OBJECT_STORE_BACKEND=s3 requires OBJECT_STORE_ACCESS_KEY and OBJECT_STORE_SECRET_KEY")
+            if self.upload_scanner == "local_signature":
+                problems.append("UPLOAD_SCANNER=local_signature is a test-only substitute; use clamd")
+            if self.service_vision_provider == "local_fixture":
+                problems.append("SERVICE_VISION_PROVIDER=local_fixture is test-only; use openai or disabled")
+            if self.service_vision_provider == "openai" and not self.openai_api_key:
+                problems.append("SERVICE_VISION_PROVIDER=openai requires OPENAI_API_KEY")
+            if self.signed_url_seconds > 300:
+                problems.append("SIGNED_URL_SECONDS must be at most 300")
         return problems
 
     def validate_runtime(self) -> None:
