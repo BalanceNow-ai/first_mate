@@ -1,10 +1,10 @@
 {
-  "id": "afd3473e-b1c9-46bf-be96-89d4bea41d94",
-  "invoice_revision_id": "488ab77d-3f39-447b-9d9b-89f7de3c64e1",
+  "id": "34a453ea-35f4-41f7-84ff-15e4b219e7d1",
+  "invoice_revision_id": "f698f8ad-dc81-4015-8a62-062e287176e1",
   "status": "current",
-  "basis_digest": "f95a39cb2250167e817fcc0717e785fd4037421c45a3f0f9f671fb7cf3f09bea",
+  "basis_digest": "20e109d25b9ea1efe945f279d6d5df76f98f650d7b8b5c0b81e4b8968f9c65c0",
   "stale": false,
-  "created_at": "2026-11-06T06:27:18.949428Z",
+  "created_at": "2026-11-06T07:32:38.402727Z",
   "content": {
     "lines": [
       {
@@ -18,7 +18,7 @@
             "y": 0.1496
           }
         },
-        "line_id": "0635d154-bb7e-48df-afb9-9e27aa108143",
+        "line_id": "67bf8568-27a4-479d-945c-cdee07b21179",
         "glossary": [
           {
             "term": "hr",
@@ -29,7 +29,7 @@
         "arithmetic": {
           "notes": [],
           "status": "matches",
-          "line_id": "0635d154-bb7e-48df-afb9-9e27aa108143",
+          "line_id": "67bf8568-27a4-479d-945c-cdee07b21179",
           "printed": "237.50",
           "reasons": [],
           "computed": "237.50",
@@ -53,7 +53,7 @@
             "y": 0.1686
           }
         },
-        "line_id": "813cab08-43be-4187-a117-efb7a134a4e4",
+        "line_id": "1992ec2f-7e0a-4594-9276-14abc0cc7ee7",
         "glossary": [
           {
             "term": "id",
@@ -64,7 +64,7 @@
         "arithmetic": {
           "notes": [],
           "status": "matches",
-          "line_id": "813cab08-43be-4187-a117-efb7a134a4e4",
+          "line_id": "1992ec2f-7e0a-4594-9276-14abc0cc7ee7",
           "printed": "27.60",
           "reasons": [],
           "computed": "27.60",
@@ -88,7 +88,7 @@
             "y": 0.1876
           }
         },
-        "line_id": "c1f26456-bc78-4fcb-8820-aba1bccaea08",
+        "line_id": "e297946a-6b01-475c-be0d-0142f1571274",
         "glossary": [
           {
             "term": "ea",
@@ -107,7 +107,7 @@
         "arithmetic": {
           "notes": [],
           "status": "matches",
-          "line_id": "c1f26456-bc78-4fcb-8820-aba1bccaea08",
+          "line_id": "e297946a-6b01-475c-be0d-0142f1571274",
           "printed": "26.00",
           "reasons": [],
           "computed": "26.00",
@@ -131,7 +131,7 @@
             "y": 0.2067
           }
         },
-        "line_id": "e42268b1-a604-41a9-ac9a-d9e00651e100",
+        "line_id": "896ece06-8691-4bb4-9c19-5bd616134ebc",
         "glossary": [
           {
             "term": "call-out",
@@ -142,7 +142,7 @@
         "arithmetic": {
           "notes": [],
           "status": "matches",
-          "line_id": "e42268b1-a604-41a9-ac9a-d9e00651e100",
+          "line_id": "896ece06-8691-4bb4-9c19-5bd616134ebc",
           "printed": "95.00",
           "reasons": [],
           "computed": "95.00",
@@ -166,7 +166,7 @@
             "y": 0.2257
           }
         },
-        "line_id": "be9d6d4e-5f27-478a-b73f-28557da62141",
+        "line_id": "0e33ad31-8739-4b0a-8c9f-419d5932635e",
         "glossary": [
           {
             "term": "sundries",
@@ -181,7 +181,7 @@
         "arithmetic": {
           "notes": [],
           "status": "printed_only",
-          "line_id": "be9d6d4e-5f27-478a-b73f-28557da62141",
+          "line_id": "0e33ad31-8739-4b0a-8c9f-419d5932635e",
           "printed": "12.00",
           "reasons": [
             "missing_quantity",
@@ -215,7 +215,7 @@
         {
           "notes": [],
           "status": "matches",
-          "line_id": "0635d154-bb7e-48df-afb9-9e27aa108143",
+          "line_id": "67bf8568-27a4-479d-945c-cdee07b21179",
           "printed": "237.50",
           "reasons": [],
           "computed": "237.50",
@@ -226,7 +226,7 @@
         {
           "notes": [],
           "status": "matches",
-          "line_id": "813cab08-43be-4187-a117-efb7a134a4e4",
+          "line_id": "1992ec2f-7e0a-4594-9276-14abc0cc7ee7",
           "printed": "27.60",
           "reasons": [],
           "computed": "27.60",
@@ -237,7 +237,7 @@
         {
           "notes": [],
           "status": "matches",
-          "line_id": "c1f26456-bc78-4fcb-8820-aba1bccaea08",
+          "line_id": "e297946a-6b01-475c-be0d-0142f1571274",
           "printed": "26.00",
           "reasons": [],
           "computed": "26.00",
@@ -248,7 +248,7 @@
         {
           "notes": [],
           "status": "matches",
-          "line_id": "e42268b1-a604-41a9-ac9a-d9e00651e100",
+          "line_id": "896ece06-8691-4bb4-9c19-5bd616134ebc",
           "printed": "95.00",
           "reasons": [],
           "computed": "95.00",
@@ -259,7 +259,7 @@
         {
           "notes": [],
           "status": "printed_only",
-          "line_id": "be9d6d4e-5f27-478a-b73f-28557da62141",
+          "line_id": "0e33ad31-8739-4b0a-8c9f-419d5932635e",
           "printed": "12.00",
           "reasons": [
             "missing_quantity",
@@ -304,7 +304,7 @@
       "message": "This invoice is not linked to a service job, so there is no accepted scope to compare with."
     },
     "duplicates": [],
-    "invoice_id": "64b75be0-f63a-4233-8a3d-a1ab878f3529",
+    "invoice_id": "ad7a3928-fa46-44a8-b477-fc8174cf131a",
     "limitations": [
       "This explanation translates and checks the invoice's own figures. It does not judge whether prices are fair, whether anyone acted improperly, or give legal or tax advice.",
       "Tax is shown only as printed. No tax rate is assumed and tax compliance is not checked.",
@@ -329,7 +329,7 @@
       }
     ],
     "provisional": false,
-    "revision_id": "488ab77d-3f39-447b-9d9b-89f7de3c64e1",
+    "revision_id": "f698f8ad-dc81-4015-8a62-062e287176e1",
     "attributed_text": [],
     "revision_number": 1,
     "rounding_policy": "Rounding half-up to 2 decimal places (NZD minor unit).",

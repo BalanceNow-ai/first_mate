@@ -1,6 +1,6 @@
 {
-  "url": "http://localhost:18080/helm-private/derived/8D0rJei_otNkYdJ58TijtE7ut2aN8JXM?response-content-disposition=attachment%3B%20filename%3D%22invoice-81c32f53.pdf%22&response-content-type=application%2Fpdf&response-cache-control=no-store&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=localobjectstorekey%2F20261106%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20261106T062718Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=a2285fb82d7e6381b9387684f1c9f6c902db1d9a4192b3fb972645014744ac2f",
-  "expires_at": "2026-11-06T06:32:18.824515Z",
+  "url": "http://localhost:18080/helm-private/derived/bFFmICvaetXHjeQH0dAs-wLdHKImzx2H?response-content-disposition=attachment%3B%20filename%3D%22invoice-6c0511b8.pdf%22&response-content-type=application%2Fpdf&response-cache-control=no-store&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=localobjectstorekey%2F20261106%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20261106T073238Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=304880813cb22968cc2da1da401337ba8cdae845f13d477ce38d98aa90248199",
+  "expires_at": "2026-11-06T07:37:38.286934Z",
   "variant": "derivative",
   "disposition": "attachment"
 }

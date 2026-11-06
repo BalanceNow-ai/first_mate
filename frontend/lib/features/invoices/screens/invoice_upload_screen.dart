@@ -24,6 +24,9 @@ class InvoiceUploadScreen extends ConsumerStatefulWidget {
 class _InvoiceUploadScreenState extends ConsumerState<InvoiceUploadScreen> {
   final _title = TextEditingController(text: 'Invoice');
   PickedDocument? _doc;
+
+  /// One Idempotency-Key per chosen file: a retry reuses it (no second upload).
+  String? _uploadKey;
   String? _status;
   Object? _error;
   bool _busy = false;
@@ -42,6 +45,7 @@ class _InvoiceUploadScreenState extends ConsumerState<InvoiceUploadScreen> {
       if (doc != null && mounted) {
         setState(() {
           _doc = doc;
+          _uploadKey = null;
           _error = null;
         });
       }
@@ -59,7 +63,7 @@ class _InvoiceUploadScreenState extends ConsumerState<InvoiceUploadScreen> {
       _error = null;
     });
     try {
-      final key = newIdempotencyKey('invoice-upload');
+      final key = _uploadKey ??= newIdempotencyKey('invoice-upload');
       final asset = await uploadDocument(
         api: api,
         document: doc,
@@ -85,6 +89,7 @@ class _InvoiceUploadScreenState extends ConsumerState<InvoiceUploadScreen> {
           if (ApiError.from(e)?.code != 'extraction_unavailable') rethrow;
         }
       }
+      _uploadKey = null;
       ref.invalidate(invoiceListProvider);
       if (mounted) context.go('/invoices/${invoice.id}');
     } catch (e) {

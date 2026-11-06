@@ -427,7 +427,7 @@ class _OpenRevisionDocument extends ConsumerWidget {
     return IconButton(
       tooltip: 'Open the revision $revisionNumber document',
       icon: const Icon(Icons.open_in_new),
-      onPressed: () => openDocumentLink(context, () => ref.read(invoicesApiProvider).downloadUrl(assetId)),
+      onPressed: () => openDocumentLink(context, ref, (api) => api.downloadUrl(assetId)),
     );
   }
 }

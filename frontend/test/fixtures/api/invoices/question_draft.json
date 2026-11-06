@@ -1,7 +1,7 @@
 {
-  "id": "aa88320e-4d88-42bd-bae5-a0a60d4a9453",
-  "invoice_id": "64b75be0-f63a-4233-8a3d-a1ab878f3529",
-  "invoice_revision_id": "488ab77d-3f39-447b-9d9b-89f7de3c64e1",
+  "id": "c45d2582-ecd7-4d04-8add-be640816e73e",
+  "invoice_id": "ad7a3928-fa46-44a8-b477-fc8174cf131a",
+  "invoice_revision_id": "f698f8ad-dc81-4015-8a62-062e287176e1",
   "line_id": null,
   "origin": "assistant_suggestion",
   "text": "The subtotal plus the printed tax comes to 457.82, and the printed total is 458.82. Could you explain the difference of 1.00?",
@@ -9,9 +9,9 @@
   "shared_assignment_id": null,
   "shared_asset_ids": [],
   "shared_at": null,
-  "created_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
+  "created_by": "7ee281cf-7f47-46eb-97ad-e6edd9c5fa8d",
   "version": 1,
-  "created_at": "2026-11-06T06:27:18.993766Z",
-  "updated_at": "2026-11-06T06:27:18.993770Z",
+  "created_at": "2026-11-06T07:32:38.436752Z",
+  "updated_at": "2026-11-06T07:32:38.436755Z",
   "responses": []
 }

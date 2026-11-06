@@ -1,6 +1,6 @@
 {
-  "id": "41e75942-c01e-41dc-b04f-c53a2d324b07",
-  "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+  "id": "69a11d92-31be-4bf5-9c94-6dd10304e73c",
+  "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
   "category": "consumable",
   "name": "Thread seal tape",
   "purpose": "Re-seal the pump outlet fitting",
@@ -22,6 +22,7 @@
   "candidates": [],
   "confirmed_product": null,
   "confirmed_by": null,
+  "confirmed_by_other_organization": false,
   "confirmed_at": null,
   "confirmed_job_revision": null,
   "evidence_changed_since_confirmation": false,
@@ -30,6 +31,6 @@
   "job_revision": 10,
   "version": 1,
   "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
-  "created_at": "2026-11-06T06:25:05.827612Z",
-  "updated_at": "2026-11-06T06:25:05.827615Z"
+  "created_at": "2026-11-06T07:32:19.268593Z",
+  "updated_at": "2026-11-06T07:32:19.268596Z"
 }

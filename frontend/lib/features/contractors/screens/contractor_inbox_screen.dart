@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:helm_marine/core/api/paged.dart';
 import 'package:go_router/go_router.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
 import 'package:helm_marine/core/widgets/state_views.dart';
@@ -55,21 +56,21 @@ class ContractorInboxScreen extends ConsumerWidget {
                         ),
                     ]),
             ),
-            AsyncSection<ContractorInbox>(
+            AsyncSection<PagedInbox>(
               value: inbox,
               onRetry: () => ref.invalidate(contractorInboxProvider),
-              builder: (box) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                if (box.invitations.isNotEmpty)
+              builder: (paged) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                if (paged.inbox.invitations.isNotEmpty)
                   SectionCard(
                     title: 'Invitations to review',
                     subtitle: 'You see only a summary until your organisation accepts and assigns people.',
-                    children: [for (final i in box.invitations) _InvitationTile(invitation: i)],
+                    children: [for (final i in paged.inbox.invitations) _InvitationTile(invitation: i)],
                   ),
                 SectionCard(
                   title: 'Jobs assigned to you',
                   children: [
-                    if (box.assigned.isEmpty) const Text('No jobs assigned to you yet.'),
-                    for (final j in box.assigned)
+                    if (paged.inbox.assigned.isEmpty) const Text('No jobs assigned to you yet.'),
+                    for (final j in paged.inbox.assigned)
                       Card(
                         color: HelmTheme.surface,
                         margin: const EdgeInsets.only(bottom: 8),
@@ -81,6 +82,12 @@ class ContractorInboxScreen extends ConsumerWidget {
                         ),
                       ),
                   ],
+                ),
+                LoadMoreButton(
+                  hasMore: paged.hasMore,
+                  loadingMore: paged.loadingMore,
+                  error: paged.moreError,
+                  onLoadMore: () => ref.read(contractorInboxProvider.notifier).loadMore(),
                 ),
               ]),
             ),

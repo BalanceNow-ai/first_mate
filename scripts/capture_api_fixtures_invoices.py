@@ -754,6 +754,25 @@ def main() -> int:
     if not any(q["key"].startswith("scope:unreadable:") for q in uexp["content"]["suggested_questions"]):
         raise SystemExit("expected a scope:unreadable suggested question")
 
+    # A job-linked manual invoice that states no currency: its call-out line matches the
+    # accepted scope but the amounts are incomparable (invoice_currency_unknown) - never a
+    # currency "difference" and never a match.
+    nocur = s.ok(s.api("POST", "/invoices", tok_owner, json={"job_id": job_id, "title": "Call-out receipt"}), 201)
+    nocur = s.ok(
+        s.api(
+            "POST",
+            f"/invoices/{nocur['id']}/lines",
+            tok_owner,
+            json={"expected_version": nocur["revision"]["version"], "kind": "call_out", "description": "Call-out fee",
+                  "quantity": "1", "unit_price": "85.00", "line_total": "85.00"},
+        ),
+        201,
+    )  # fmt: skip
+    cexp = s.save("explanation_currency_unknown", s.api("POST", f"/invoices/{nocur['id']}/explain", tok_owner), 201)
+    reasons = [r for i in cexp["content"]["comparison"]["items"] for r in i.get("unavailable_reasons") or []]
+    if "invoice_currency_unknown" not in reasons:
+        raise SystemExit(f"expected invoice_currency_unknown, got {reasons}")
+
     # ------------------------------------------------------ invoices section not shared
     job2 = s.ok(
         s.api("POST", "/service-jobs/", tok_owner, json={"vessel_id": vessel["id"], "title": "Bilge pump cycling"}), 201

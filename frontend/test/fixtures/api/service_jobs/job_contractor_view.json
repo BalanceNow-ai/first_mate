@@ -1,6 +1,6 @@
 {
-  "id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
-  "vessel_id": "2e9b721c-6e85-48b0-8527-1f2384407263",
+  "id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+  "vessel_id": "391062c8-7c60-4c24-bbcc-202b68ea01c9",
   "entry_point": "vessel",
   "title": "Water under the sink when the pump runs",
   "status": "contractor_review",
@@ -8,8 +8,8 @@
   "evidence_revision": 10,
   "disputed": false,
   "archived_at": null,
-  "created_at": "2026-11-06T06:24:58.973884Z",
-  "updated_at": "2026-11-06T06:25:06.169983Z",
+  "created_at": "2026-11-06T07:32:11.959391Z",
+  "updated_at": "2026-11-06T07:32:19.608754Z",
   "viewer": {
     "role": "contractor",
     "sections": [
@@ -21,8 +21,8 @@
       "access_restricted",
       "scope"
     ],
-    "organization_id": "6b227433-4c77-44a5-aec1-11fffde39628",
-    "assignment_id": "9155337d-e13d-4c63-bb6c-d4a6d05e8b18",
+    "organization_id": "f3af1153-00e5-444d-b892-8b8dbe1478dc",
+    "assignment_id": "3c4a832b-e0a8-4663-81d7-2da9395ab846",
     "restricted_access": true
   },
   "snapshot_state": "live",
@@ -51,10 +51,10 @@
       "propulsion_type": "outboard"
     },
     "equipment": [],
-    "captured_at": "2026-11-06T06:24:58.972809+00:00",
+    "captured_at": "2026-11-06T07:32:11.958148+00:00",
     "corrections": [
       {
-        "at": "2026-11-06T06:24:59.040458+00:00",
+        "at": "2026-11-06T07:32:12.016221+00:00",
         "by": "owner",
         "note": "Engine is the 2020 model",
         "fields": [
@@ -69,8 +69,8 @@
     "outstanding": [],
     "answered": [
       {
-        "id": "995b0d83-8d2b-4729-a120-2ac71e3b6d50",
-        "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+        "id": "43e88575-def4-47a0-a1a9-9c3d8c9497cb",
+        "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
         "requester_role": "assistant",
         "organization_id": null,
         "category": "overview",
@@ -83,15 +83,15 @@
         "unavailable_reason": null,
         "technician_inspection_required": false,
         "answer_note": null,
-        "answered_at": "2026-11-06T06:24:59.258757Z",
+        "answered_at": "2026-11-06T07:32:12.260572Z",
         "version": 2,
-        "created_at": "2026-11-06T06:24:59.098388Z",
-        "updated_at": "2026-11-06T06:24:59.281679Z",
+        "created_at": "2026-11-06T07:32:12.079132Z",
+        "updated_at": "2026-11-06T07:32:12.281898Z",
         "options": []
       },
       {
-        "id": "2db69262-0e48-4f83-8a3e-5b238398f470",
-        "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+        "id": "e7e2b9e5-f95b-4bda-85e1-edd6ba961679",
+        "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
         "requester_role": "assistant",
         "organization_id": null,
         "category": "close_up",
@@ -104,17 +104,17 @@
         "unavailable_reason": null,
         "technician_inspection_required": false,
         "answer_note": "The hose is marked 25 mm ID",
-        "answered_at": "2026-11-06T06:25:04.591192Z",
+        "answered_at": "2026-11-06T07:32:17.968574Z",
         "version": 2,
-        "created_at": "2026-11-06T06:25:04.580854Z",
-        "updated_at": "2026-11-06T06:25:04.593431Z",
+        "created_at": "2026-11-06T07:32:17.955547Z",
+        "updated_at": "2026-11-06T07:32:17.969303Z",
         "options": []
       }
     ],
     "unavailable": [
       {
-        "id": "f39f3fbb-6868-4be5-92fd-d64100b01b58",
-        "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+        "id": "8f476298-8fa0-4387-9468-8e9e70e038c6",
+        "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
         "requester_role": "assistant",
         "organization_id": null,
         "category": "access_route",
@@ -127,17 +127,17 @@
         "unavailable_reason": "cannot_safely_access",
         "technician_inspection_required": true,
         "answer_note": "The far end is behind the hot water cylinder",
-        "answered_at": "2026-11-06T06:25:04.566054Z",
+        "answered_at": "2026-11-06T07:32:17.939461Z",
         "version": 2,
-        "created_at": "2026-11-06T06:25:04.551424Z",
-        "updated_at": "2026-11-06T06:25:04.566373Z",
+        "created_at": "2026-11-06T07:32:17.927898Z",
+        "updated_at": "2026-11-06T07:32:17.939749Z",
         "options": []
       }
     ],
     "waived": [
       {
-        "id": "0073e17b-1a8a-4ccf-9d49-67e6117e014a",
-        "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+        "id": "1821e385-08f3-4f22-bafa-f353c3f9dd28",
+        "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
         "requester_role": "owner",
         "organization_id": null,
         "category": "document",
@@ -150,10 +150,10 @@
         "unavailable_reason": null,
         "technician_inspection_required": false,
         "answer_note": "Not available",
-        "answered_at": "2026-11-06T06:25:04.616350Z",
+        "answered_at": "2026-11-06T07:32:17.998078Z",
         "version": 2,
-        "created_at": "2026-11-06T06:25:04.605795Z",
-        "updated_at": "2026-11-06T06:25:04.616565Z",
+        "created_at": "2026-11-06T07:32:17.984362Z",
+        "updated_at": "2026-11-06T07:32:17.998341Z",
         "options": []
       }
     ],
@@ -161,7 +161,7 @@
   },
   "gaps": [
     {
-      "request_id": "f39f3fbb-6868-4be5-92fd-d64100b01b58",
+      "request_id": "8f476298-8fa0-4387-9468-8e9e70e038c6",
       "category": "access_route",
       "component": "Freshwater pump",
       "prompt": "Show the way in to the Freshwater pump: the locker opening, hatch or panel you look through, photographed from a step back. Leave it as it is.",
@@ -172,11 +172,11 @@
   ],
   "technician_inspection_required": true,
   "assignment": {
-    "id": "9155337d-e13d-4c63-bb6c-d4a6d05e8b18",
-    "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+    "id": "3c4a832b-e0a8-4663-81d7-2da9395ab846",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
     "organization": {
-      "id": "6b227433-4c77-44a5-aec1-11fffde39628",
-      "name": "Fixture Marine ecaf6296",
+      "id": "f3af1153-00e5-444d-b892-8b8dbe1478dc",
+      "name": "Fixture Marine cda525ff",
       "trading_name": "Fixture Marine Services"
     },
     "status": "accepted",
@@ -190,16 +190,16 @@
       "scope"
     ],
     "live_updates": true,
-    "invited_at": "2026-11-06T06:25:05.927755Z",
-    "accepted_at": "2026-11-06T06:25:06.047819Z",
+    "invited_at": "2026-11-06T07:32:19.374532Z",
+    "accepted_at": "2026-11-06T07:32:19.504877Z",
     "revoked_at": null,
     "version": 4,
     "members": [
       {
-        "user_id": "70cc3540-4da9-4f13-8e08-b2845ea240db",
+        "user_id": "60d99bf1-bead-4f28-96b8-1649c76ec4e5",
         "name": "Fixture Technician",
         "restricted_access": true,
-        "added_at": "2026-11-06T06:25:06.053358Z"
+        "added_at": "2026-11-06T07:32:19.509917Z"
       }
     ]
   }

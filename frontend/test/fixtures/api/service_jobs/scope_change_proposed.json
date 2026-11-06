@@ -1,11 +1,11 @@
 {
-  "id": "497c9cd3-38e8-4b1f-87d6-48353f84d7a9",
-  "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+  "id": "531e55bb-a472-4aab-8f45-d36b6da7eb5e",
+  "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
   "revision_number": 2,
   "is_change": true,
-  "supersedes_id": "9584b253-6a70-495a-a3c0-485916a2e9e5",
-  "proposed_by": "70cc3540-4da9-4f13-8e08-b2845ea240db",
-  "organization_id": "6b227433-4c77-44a5-aec1-11fffde39628",
+  "supersedes_id": "d37f7b16-0321-4208-a9a5-4eec21c8acbf",
+  "proposed_by": "60d99bf1-bead-4f28-96b8-1649c76ec4e5",
+  "organization_id": "f3af1153-00e5-444d-b892-8b8dbe1478dc",
   "summary": "Also replace the outlet fitting",
   "tasks": [
     {
@@ -40,8 +40,8 @@
   "exclusions": null,
   "assumptions": null,
   "status": "proposed",
-  "content_digest": "6e56ff0c80ce093673da4372d415d2bea4771a3f8dd82c610a7b38ede362e28b",
+  "content_digest": "f552bd141f5e6f8a5abad5721cb48a6e6f3081a2d3372d6f39e120b098557685",
   "is_current": true,
   "decision": null,
-  "created_at": "2026-11-06T06:25:07.760197Z"
+  "created_at": "2026-11-06T07:32:21.215280Z"
 }

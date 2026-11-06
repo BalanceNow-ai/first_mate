@@ -155,7 +155,7 @@ void main() {
     await app.enter('Line 1 description', 'Labour');
     await app.enter('Qty', '1.5');
     await app.enter('Unit', 'hour');
-    await app.enter(r'Unit price $', '95');
+    await app.enter('Unit price (NZD)', '95');
     await app.tap(inDialog('Send to the owner'));
     final body = backend.calls('POST $p/scopes').single.body as Map;
     expect(body['estimate_lines'], [

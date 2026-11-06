@@ -1309,6 +1309,10 @@ String comparisonUnavailableReasonText(String reason) => switch (reason) {
       'approved_amount_unknown' => 'The accepted scope has no amount for this line.',
       'invoice_unit_price_unreadable' => 'The unit price on the invoice line can’t be read.',
       'invoice_quantity_unreadable' => 'The quantity on the invoice line can’t be read.',
+      'invoice_currency_unknown' =>
+        'The invoice doesn’t state a single currency, so its amounts can’t be compared with the accepted scope.',
+      'approved_currency_unknown' =>
+        'The accepted scope doesn’t state a currency for this line, so the amounts can’t be compared.',
       _ => 'A value needed for the comparison is missing or unreadable.',
     };
 

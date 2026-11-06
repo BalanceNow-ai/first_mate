@@ -1,7 +1,7 @@
 [
   {
-    "id": "de076f70-28c2-4fd7-aee1-96ad1bd82c33",
-    "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+    "id": "674800af-9d98-405d-9ae8-9357a5a02c82",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
     "category": "part",
     "name": "Replacement hose",
     "purpose": "Replace the leaking or damaged hose section",
@@ -21,7 +21,7 @@
     },
     "depends_on": [
       {
-        "measurement_id": "76382ab8-7029-485c-9f71-5151bdd82a38",
+        "measurement_id": "f07e2072-8209-4b21-8c5b-bcbc84da940f",
         "dimension": "hose_internal_diameter",
         "value_text": "25",
         "unit": "mm",
@@ -29,7 +29,7 @@
       }
     ],
     "supporting_asset_ids": [
-      "da35ae6e-9899-4c77-a124-ea3241a27ebc"
+      "c52df3b5-b660-42bf-9801-7d42d03f9595"
     ],
     "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
     "origin": "assistant",
@@ -57,8 +57,9 @@
       }
     ],
     "confirmed_product": null,
-    "confirmed_by": "70cc3540-4da9-4f13-8e08-b2845ea240db",
-    "confirmed_at": "2026-11-06T06:25:07.580626Z",
+    "confirmed_by": "60d99bf1-bead-4f28-96b8-1649c76ec4e5",
+    "confirmed_by_other_organization": false,
+    "confirmed_at": "2026-11-06T07:32:21.024463Z",
     "confirmed_job_revision": 12,
     "evidence_changed_since_confirmation": false,
     "replaced_by_id": null,
@@ -66,12 +67,12 @@
     "job_revision": 10,
     "version": 2,
     "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
-    "created_at": "2026-11-06T06:25:05.792795Z",
-    "updated_at": "2026-11-06T06:25:07.582442Z"
+    "created_at": "2026-11-06T07:32:19.227524Z",
+    "updated_at": "2026-11-06T07:32:21.026104Z"
   },
   {
-    "id": "ca663815-a2b8-43e3-8454-fdc32a88898f",
-    "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+    "id": "a7a1e9e6-1320-45d8-a650-f1bc0659cd72",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
     "category": "part",
     "name": "Hose clamps",
     "purpose": "Secure each hose end on its fitting",
@@ -88,19 +89,19 @@
       "required_od": "32.5 mm",
       "required_od_state": "owner_measured",
       "evidence_request_ids": [
-        "6269d1a2-17fe-46ad-9083-51cb910fa322"
+        "78dfcb7a-e283-4687-88ad-616ec348b100"
       ]
     },
     "depends_on": [
       {
-        "measurement_id": "02043a96-eeca-4eb3-a5ef-fcf878e11a11",
+        "measurement_id": "4ca0b05a-8618-4ac4-b59d-850a62bc2901",
         "dimension": "hose_external_diameter",
         "value_text": "32.5",
         "unit": "mm",
         "state": "owner_measured"
       },
       {
-        "measurement_id": "76382ab8-7029-485c-9f71-5151bdd82a38",
+        "measurement_id": "f07e2072-8209-4b21-8c5b-bcbc84da940f",
         "dimension": "hose_internal_diameter",
         "value_text": "25",
         "unit": "mm",
@@ -108,7 +109,7 @@
       }
     ],
     "supporting_asset_ids": [
-      "da35ae6e-9899-4c77-a124-ea3241a27ebc"
+      "c52df3b5-b660-42bf-9801-7d42d03f9595"
     ],
     "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
     "origin": "assistant",
@@ -137,22 +138,23 @@
     ],
     "confirmed_product": null,
     "confirmed_by": null,
+    "confirmed_by_other_organization": false,
     "confirmed_at": null,
     "confirmed_job_revision": null,
     "evidence_changed_since_confirmation": false,
     "replaced_by_id": null,
     "evidence_request_ids": [
-      "6269d1a2-17fe-46ad-9083-51cb910fa322"
+      "78dfcb7a-e283-4687-88ad-616ec348b100"
     ],
     "job_revision": 10,
     "version": 2,
     "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
-    "created_at": "2026-11-06T06:25:05.796403Z",
-    "updated_at": "2026-11-06T06:25:07.611225Z"
+    "created_at": "2026-11-06T07:32:19.234565Z",
+    "updated_at": "2026-11-06T07:32:21.057956Z"
   },
   {
-    "id": "20c3761f-90c6-4039-8531-4ba561664350",
-    "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+    "id": "7848bf1a-4955-42fb-a994-7b8debaa810d",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
     "category": "part",
     "name": "Hose fitting / adaptor (if the existing one is damaged)",
     "purpose": "Connect the hose to the equipment if the existing fitting cannot be reused",
@@ -169,7 +171,7 @@
     },
     "depends_on": [],
     "supporting_asset_ids": [
-      "da35ae6e-9899-4c77-a124-ea3241a27ebc"
+      "c52df3b5-b660-42bf-9801-7d42d03f9595"
     ],
     "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
     "origin": "assistant",
@@ -198,6 +200,7 @@
     ],
     "confirmed_product": null,
     "confirmed_by": null,
+    "confirmed_by_other_organization": false,
     "confirmed_at": null,
     "confirmed_job_revision": null,
     "evidence_changed_since_confirmation": false,
@@ -206,12 +209,12 @@
     "job_revision": 10,
     "version": 2,
     "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
-    "created_at": "2026-11-06T06:25:05.799899Z",
-    "updated_at": "2026-11-06T06:25:07.632593Z"
+    "created_at": "2026-11-06T07:32:19.240354Z",
+    "updated_at": "2026-11-06T07:32:21.088793Z"
   },
   {
-    "id": "4d8f2361-77f3-4682-a12b-7f148b17c267",
-    "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+    "id": "3de6d8ba-0f08-4db0-b656-480bddfaa4af",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
     "category": "tool",
     "name": "Access and hand tools",
     "purpose": "Reach and work on the affected equipment (e.g. nut driver for clamps, hose cutter, torch, absorbent pads)",
@@ -227,7 +230,7 @@
     },
     "depends_on": [],
     "supporting_asset_ids": [
-      "da35ae6e-9899-4c77-a124-ea3241a27ebc"
+      "c52df3b5-b660-42bf-9801-7d42d03f9595"
     ],
     "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
     "origin": "assistant",
@@ -290,6 +293,7 @@
     ],
     "confirmed_product": null,
     "confirmed_by": null,
+    "confirmed_by_other_organization": false,
     "confirmed_at": null,
     "confirmed_job_revision": null,
     "evidence_changed_since_confirmation": false,
@@ -298,12 +302,12 @@
     "job_revision": 10,
     "version": 1,
     "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
-    "created_at": "2026-11-06T06:25:05.803337Z",
-    "updated_at": "2026-11-06T06:25:05.803339Z"
+    "created_at": "2026-11-06T07:32:19.245663Z",
+    "updated_at": "2026-11-06T07:32:19.245665Z"
   },
   {
-    "id": "41e75942-c01e-41dc-b04f-c53a2d324b07",
-    "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+    "id": "69a11d92-31be-4bf5-9c94-6dd10304e73c",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
     "category": "consumable",
     "name": "Thread seal tape",
     "purpose": "Re-seal the pump outlet fitting",
@@ -325,6 +329,7 @@
     "candidates": [],
     "confirmed_product": null,
     "confirmed_by": null,
+    "confirmed_by_other_organization": false,
     "confirmed_at": null,
     "confirmed_job_revision": null,
     "evidence_changed_since_confirmation": false,
@@ -333,7 +338,7 @@
     "job_revision": 10,
     "version": 1,
     "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
-    "created_at": "2026-11-06T06:25:05.827612Z",
-    "updated_at": "2026-11-06T06:25:05.827615Z"
+    "created_at": "2026-11-06T07:32:19.268593Z",
+    "updated_at": "2026-11-06T07:32:19.268596Z"
   }
 ]

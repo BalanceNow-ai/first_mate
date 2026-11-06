@@ -97,6 +97,9 @@ class _SharedQuestionCardState extends ConsumerState<_SharedQuestionCard> {
   final _form = GlobalKey<FormState>();
   final _reply = TextEditingController();
   PickedDocument? _correction;
+
+  /// One Idempotency-Key per chosen correction: a retried reply reuses it.
+  String? _correctionKey;
   String? _status;
   bool _busy = false;
 
@@ -109,7 +112,12 @@ class _SharedQuestionCardState extends ConsumerState<_SharedQuestionCard> {
   Future<void> _pick() async {
     try {
       final doc = await ref.read(documentPickerProvider)();
-      if (doc != null && mounted) setState(() => _correction = doc);
+      if (doc != null && mounted) {
+        setState(() {
+          _correction = doc;
+          _correctionKey = null;
+        });
+      }
     } catch (e) {
       if (mounted) showErrorSnackBar(context, e);
     }
@@ -123,7 +131,7 @@ class _SharedQuestionCardState extends ConsumerState<_SharedQuestionCard> {
       String? correctedAssetId;
       final doc = _correction;
       if (doc != null) {
-        final key = newIdempotencyKey('correction');
+        final key = _correctionKey ??= newIdempotencyKey('correction');
         final asset = await uploadDocument(
           api: api,
           document: doc,
@@ -144,7 +152,10 @@ class _SharedQuestionCardState extends ConsumerState<_SharedQuestionCard> {
       setState(() => _status = 'Sending your reply');
       await api.respond(widget.jobId, widget.question.id, text: _reply.text.trim(), correctedAssetId: correctedAssetId);
       _reply.clear();
-      setState(() => _correction = null);
+      setState(() {
+        _correction = null;
+        _correctionKey = null;
+      });
       ref.invalidate(contractorInvoiceQuestionsProvider(widget.jobId));
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reply sent to the owner.')));
     } catch (e) {
@@ -163,7 +174,6 @@ class _SharedQuestionCardState extends ConsumerState<_SharedQuestionCard> {
   Widget build(BuildContext context) {
     final q = widget.question;
     final line = q.line;
-    final api = ref.read(invoicesApiProvider);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -215,7 +225,7 @@ class _SharedQuestionCardState extends ConsumerState<_SharedQuestionCard> {
                   leading: Icon(a.isPdf ? Icons.picture_as_pdf_outlined : Icons.image_outlined),
                   title: Text(a.label),
                   trailing: TextButton.icon(
-                    onPressed: () => openDocumentLink(context, () => api.sharedAssetUrl(widget.jobId, q.id, a.id)),
+                    onPressed: () => openDocumentLink(context, ref, (api) => api.sharedAssetUrl(widget.jobId, q.id, a.id)),
                     icon: const Icon(Icons.open_in_new, size: 18),
                     label: const Text('Open'),
                   ),

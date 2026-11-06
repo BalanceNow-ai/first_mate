@@ -193,6 +193,21 @@ class _ItemCard extends ConsumerWidget {
   }
 }
 
+/// Why a catalogue candidate is not offered for purchase, or null when the owner may
+/// add it to the cart (stock and sale status are shown separately on the tile).
+String? candidateNotBuyableReason(ServiceJob job, PreparationItem item, CatalogueCandidate c) {
+  if (job.status == 'cancelled' || job.status == 'archived') {
+    return 'Not offered for purchase — this job is ${jobStatusLabel(job.status).toLowerCase()}.';
+  }
+  if (!item.isLive) {
+    return 'Not offered for purchase — this item is ${itemStatusLabel(item.status).toLowerCase()}.';
+  }
+  if (c.dimensionCheck.status == 'range_excludes_recorded_od') {
+    return 'Not offered for purchase — its stated size does not include the recorded measurement.';
+  }
+  return null;
+}
+
 class _CandidateTile extends ConsumerWidget {
   const _CandidateTile({required this.job, required this.item, required this.c, this.confirmed = false});
 
@@ -205,6 +220,7 @@ class _CandidateTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final owner = job.viewer.isOwner;
     final price = formatCents(c.effectivePriceCents, currency: c.currency);
+    final notBuyable = candidateNotBuyableReason(job, item, c);
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6),
       padding: const EdgeInsets.all(10),
@@ -229,9 +245,14 @@ class _CandidateTile extends ConsumerWidget {
               tone: c.dimensionCheck.status == 'range_excludes_recorded_od' ? Tone.bad : Tone.neutral),
         ]),
         if (c.dimensionCheck.reason != null) Text(c.dimensionCheck.reason!, style: const TextStyle(fontSize: 13)),
+        if (owner && notBuyable != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(notBuyable, style: const TextStyle(fontSize: 13, color: HelmTheme.mutedText)),
+          ),
         const SizedBox(height: 6),
         Wrap(spacing: 8, runSpacing: 8, children: [
-          if (owner && c.isActive && c.inStock)
+          if (owner && notBuyable == null && c.isActive && c.inStock)
             ActionButton(
               label: 'Add to cart',
               icon: Icons.add_shopping_cart,

@@ -595,7 +595,7 @@ async function main() {
     await fill(pageC, 'Line 1 description', 'Labour');
     await fill(pageC, 'Qty', '1.5');
     await fill(pageC, 'Unit', 'hour');
-    await fill(pageC, 'Unit price $', '95');
+    await fill(pageC, 'Unit price (NZD)', '95');
     const scResp = responseOf(pageC, isCall('POST', /\/scopes$/));
     await tap(pageC, dialog(pageC).getByRole('button', { name: 'Send to the owner', exact: true }));
     const scope = await (await scResp).json();

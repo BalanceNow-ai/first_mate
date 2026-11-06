@@ -24,19 +24,31 @@ final serviceAssetProvider = FutureProvider.autoDispose.family<ServiceAsset, Str
   return ref.watch(invoicesApiProvider).asset(assetId);
 });
 
-/// The metadata-stripped image bytes behind a short-lived signed link.
+/// The metadata-stripped image bytes behind a short-lived signed link (a
+/// server-relative link — local storage — is resolved against the API origin).
 final documentImageBytesProvider = FutureProvider.autoDispose.family<Uint8List, String>((ref, assetId) async {
-  final link = await ref.watch(invoicesApiProvider).downloadUrl(assetId);
-  return ref.watch(documentBytesFetcherProvider)(link.url);
+  final api = ref.watch(invoicesApiProvider);
+  final fetch = ref.watch(documentBytesFetcherProvider);
+  final link = await api.downloadUrl(assetId);
+  return fetch(api.resolve(link.url).toString());
 });
 
+/// Opens a document link in a new tab/app; false when nothing could open it.
+typedef DocumentLinkOpener = Future<bool> Function(Uri uri);
+
+final documentLinkOpenerProvider = Provider<DocumentLinkOpener>(
+    (ref) => (uri) => launchUrl(uri, mode: LaunchMode.externalApplication, webOnlyWindowName: '_blank'));
+
 /// Opens a freshly signed link in a new tab/app (links expire within minutes,
-/// so one is requested on every tap).
-Future<void> openDocumentLink(BuildContext context, Future<DownloadLink> Function() getLink) async {
+/// so one is requested on every tap). A server-relative link is resolved
+/// against the API origin first.
+Future<void> openDocumentLink(BuildContext context, WidgetRef ref, Future<DownloadLink> Function(InvoicesApi api) getLink) async {
   final messenger = ScaffoldMessenger.of(context);
+  final api = ref.read(invoicesApiProvider);
+  final open = ref.read(documentLinkOpenerProvider);
   try {
-    final link = await getLink();
-    final ok = await launchUrl(Uri.parse(link.url), mode: LaunchMode.externalApplication, webOnlyWindowName: '_blank');
+    final link = await getLink(api);
+    final ok = await open(api.resolve(link.url));
     if (!ok) throw const ApiError(statusCode: null, code: 'open_failed', detail: 'The document could not be opened.');
   } catch (e) {
     messenger.showSnackBar(SnackBar(content: Text(describeError(e)), backgroundColor: HelmTheme.error));
@@ -80,7 +92,7 @@ class InvoiceDocumentViewer extends ConsumerWidget {
           data: (a) => Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _DocumentHeader(asset: a, onOpen: () => openDocumentLink(context, () => ref.read(invoicesApiProvider).downloadUrl(assetId))),
+              _DocumentHeader(asset: a, onOpen: () => openDocumentLink(context, ref, (api) => api.downloadUrl(assetId))),
               const SizedBox(height: 8),
               if (_selected != null)
                 Semantics(

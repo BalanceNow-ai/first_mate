@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:helm_marine/core/api/paged.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
 import 'package:helm_marine/core/widgets/state_views.dart';
 import 'package:helm_marine/features/contractors/data/contractor_models.dart';
@@ -271,17 +272,24 @@ class _InviteCardState extends ConsumerState<_InviteCard> {
         results.when(
           loading: () => const LinearProgressIndicator(),
           error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(directoryProvider(_query))),
-          data: (orgs) => orgs.isEmpty
+          data: (page) => page.items.isEmpty
               ? const Text('No organisations match.')
               : RadioGroup<String>(
                   groupValue: _org?.id,
                   onChanged: (id) {
-                    _org = orgs.firstWhere((o) => o.id == id);
+                    _org = page.items.firstWhere((o) => o.id == id);
                     _changed();
                   },
                   child: Column(children: [
-                    for (final o in orgs)
+                    for (final o in page.items)
                       RadioListTile<String>(value: o.id, title: Text(o.displayName), contentPadding: EdgeInsets.zero),
+                    LoadMoreButton(
+                      hasMore: page.hasMore,
+                      loadingMore: page.loadingMore,
+                      error: page.moreError,
+                      label: 'More organisations',
+                      onLoadMore: () => ref.read(directoryProvider(_query).notifier).loadMore(),
+                    ),
                   ]),
                 ),
         ),
@@ -456,9 +464,16 @@ class _DirectoryDialogState extends ConsumerState<_DirectoryDialog> {
             child: results.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Text(describeErrorText(e)),
-              data: (orgs) => ListView(children: [
-                for (final o in orgs)
+              data: (page) => ListView(children: [
+                for (final o in page.items)
                   ListTile(title: Text(o.displayName), onTap: () => Navigator.pop(context, o)),
+                LoadMoreButton(
+                  hasMore: page.hasMore,
+                  loadingMore: page.loadingMore,
+                  error: page.moreError,
+                  label: 'More organisations',
+                  onLoadMore: () => ref.read(directoryProvider(_query).notifier).loadMore(),
+                ),
               ]),
             ),
           ),
@@ -603,7 +618,11 @@ class _FieldsDialogState extends State<_FieldsDialog> {
         child: SingleChildScrollView(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             for (final e in widget.fields.entries)
-              TextField(controller: _c[e.key], maxLength: 500, decoration: InputDecoration(labelText: e.value)),
+              TextField(
+                controller: _c[e.key],
+                maxLength: accessFieldMaxLengths[e.key] ?? 100,
+                decoration: InputDecoration(labelText: e.value),
+              ),
           ]),
         ),
       ),

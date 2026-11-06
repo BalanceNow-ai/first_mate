@@ -1,20 +1,20 @@
 {
-  "id": "9373db51-f23f-49c2-b0bf-f50339a38af3",
-  "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+  "id": "658795bc-0222-4442-a7d5-72a0b85f494e",
+  "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
   "kind": "evidence_observations",
   "status": "pending",
   "provider": "local_fixture",
   "model": "fixture-registry",
   "job_revision": 5,
   "asset_ids": [
-    "023fe36c-7c25-4c32-a81b-7f9e3fdd1a73",
-    "b752afa1-7be5-4020-b90b-817437fa2acb",
-    "da35ae6e-9899-4c77-a124-ea3241a27ebc"
+    "138848e1-7a87-4a4c-933a-2d07c33615ac",
+    "7f3b0446-bffa-48c9-845e-12e9cc34e0b2",
+    "c52df3b5-b660-42bf-9801-7d42d03f9595"
   ],
   "observation_count": 0,
   "superseded_reason": null,
   "error": null,
   "attempts": 0,
-  "created_at": "2026-11-06T06:25:04.646532Z",
-  "updated_at": "2026-11-06T06:25:04.646535Z"
+  "created_at": "2026-11-06T07:32:18.031683Z",
+  "updated_at": "2026-11-06T07:32:18.031687Z"
 }

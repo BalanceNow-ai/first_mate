@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:helm_marine/core/api/paged.dart';
 import 'package:go_router/go_router.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
 import 'package:helm_marine/core/widgets/state_views.dart';
@@ -32,7 +33,8 @@ class InvoiceListScreen extends ConsumerWidget {
               title: 'Could not load your invoices',
               onRetry: () => ref.invalidate(invoiceListProvider(null)),
             ),
-            data: (items) {
+            data: (page) {
+              final items = page.items;
               if (items.isEmpty) {
                 return ListView(
                   padding: const EdgeInsets.all(24),
@@ -69,6 +71,13 @@ class InvoiceListScreen extends ConsumerWidget {
                         onTap: () => context.go('/invoices/${inv.id}'),
                       ),
                     ),
+                  LoadMoreButton(
+                    hasMore: page.hasMore,
+                    loadingMore: page.loadingMore,
+                    error: page.moreError,
+                    label: 'Load more invoices',
+                    onLoadMore: () => ref.read(invoiceListProvider(null).notifier).loadMore(),
+                  ),
                 ],
               );
             },

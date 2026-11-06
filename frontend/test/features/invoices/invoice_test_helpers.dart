@@ -56,13 +56,14 @@ final pickedPdf = PickedDocument(
 /// The real app (router, shell, auth redirects) wired to fakes, pumped without
 /// `pumpAndSettle` (progress indicators animate while polling).
 class InvoiceHarness {
-  InvoiceHarness(this.tester, {required this.backend, required this.gateway, List<Override> overrides = const []}) {
+  InvoiceHarness(this.tester,
+      {required this.backend, required this.gateway, List<Override> overrides = const [], DocumentBytesFetcher? fetcher}) {
     container = ProviderContainer(
       overrides: [
         ...testOverrides(gateway: gateway, backend: backend),
         invoicePollIntervalProvider.overrideWithValue(Duration.zero),
         invoicePollAttemptsProvider.overrideWithValue(5),
-        documentBytesFetcherProvider.overrideWithValue((url) async => Uint8List(0)),
+        documentBytesFetcherProvider.overrideWithValue(fetcher ?? (url) async => Uint8List(0)),
         ...overrides,
       ],
       retry: (_, _) => null,

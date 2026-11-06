@@ -1,15 +1,15 @@
 {
-  "id": "afd3473e-b1c9-46bf-be96-89d4bea41d94",
-  "invoice_revision_id": "488ab77d-3f39-447b-9d9b-89f7de3c64e1",
+  "id": "34a453ea-35f4-41f7-84ff-15e4b219e7d1",
+  "invoice_revision_id": "f698f8ad-dc81-4015-8a62-062e287176e1",
   "status": "current",
-  "basis_digest": "f95a39cb2250167e817fcc0717e785fd4037421c45a3f0f9f671fb7cf3f09bea",
+  "basis_digest": "20e109d25b9ea1efe945f279d6d5df76f98f650d7b8b5c0b81e4b8968f9c65c0",
   "stale": false,
-  "created_at": "2026-11-06T06:27:18.949428Z",
+  "created_at": "2026-11-06T07:32:38.402727Z",
   "content": {
     "version": "invoice-explanation-v1",
     "phrasing": "deterministic_template",
-    "invoice_id": "64b75be0-f63a-4233-8a3d-a1ab878f3529",
-    "revision_id": "488ab77d-3f39-447b-9d9b-89f7de3c64e1",
+    "invoice_id": "ad7a3928-fa46-44a8-b477-fc8174cf131a",
+    "revision_id": "f698f8ad-dc81-4015-8a62-062e287176e1",
     "revision_number": 1,
     "provisional": false,
     "needs_confirmation": [],
@@ -21,7 +21,7 @@
     "rounding_policy": "Rounding half-up to 2 decimal places (NZD minor unit).",
     "lines": [
       {
-        "line_id": "0635d154-bb7e-48df-afb9-9e27aa108143",
+        "line_id": "67bf8568-27a4-479d-945c-cdee07b21179",
         "line_number": 1,
         "kind": "labour",
         "plain_language": "Labour — time charged for the work: Labour - replace hose and clamps. Quantity 2.5 (hr) at 95.00 each. Amount shown: 237.50.",
@@ -32,7 +32,7 @@
           }
         ],
         "arithmetic": {
-          "line_id": "0635d154-bb7e-48df-afb9-9e27aa108143",
+          "line_id": "67bf8568-27a4-479d-945c-cdee07b21179",
           "line_number": 1,
           "computed": "237.50",
           "printed": "237.50",
@@ -56,7 +56,7 @@
         "needs_confirmation": false
       },
       {
-        "line_id": "813cab08-43be-4187-a117-efb7a134a4e4",
+        "line_id": "1992ec2f-7e0a-4594-9276-14abc0cc7ee7",
         "line_number": 2,
         "kind": "part",
         "plain_language": "A part or material supplied: Sanitation hose 25mm ID. Part number SH-25 (as printed). Quantity 1.5 (m) at 18.40 each. Amount shown: 27.60.",
@@ -67,7 +67,7 @@
           }
         ],
         "arithmetic": {
-          "line_id": "813cab08-43be-4187-a117-efb7a134a4e4",
+          "line_id": "1992ec2f-7e0a-4594-9276-14abc0cc7ee7",
           "line_number": 2,
           "computed": "27.60",
           "printed": "27.60",
@@ -91,7 +91,7 @@
         "needs_confirmation": false
       },
       {
-        "line_id": "c1f26456-bc78-4fcb-8820-aba1bccaea08",
+        "line_id": "e297946a-6b01-475c-be0d-0142f1571274",
         "line_number": 3,
         "kind": "part",
         "plain_language": "A part or material supplied: S/S hose clamp 316. Part number HC-316-32 (as printed). Quantity 4 (ea) at 6.50 each. Amount shown: 26.00.",
@@ -110,7 +110,7 @@
           }
         ],
         "arithmetic": {
-          "line_id": "c1f26456-bc78-4fcb-8820-aba1bccaea08",
+          "line_id": "e297946a-6b01-475c-be0d-0142f1571274",
           "line_number": 3,
           "computed": "26.00",
           "printed": "26.00",
@@ -134,7 +134,7 @@
         "needs_confirmation": false
       },
       {
-        "line_id": "e42268b1-a604-41a9-ac9a-d9e00651e100",
+        "line_id": "896ece06-8691-4bb4-9c19-5bd616134ebc",
         "line_number": 4,
         "kind": "call_out",
         "plain_language": "A call-out charge — a fee for attending, separate from time worked: Call-out fee. Quantity 1 (unit not stated) at 95.00 each. Amount shown: 95.00.",
@@ -145,7 +145,7 @@
           }
         ],
         "arithmetic": {
-          "line_id": "e42268b1-a604-41a9-ac9a-d9e00651e100",
+          "line_id": "896ece06-8691-4bb4-9c19-5bd616134ebc",
           "line_number": 4,
           "computed": "95.00",
           "printed": "95.00",
@@ -169,7 +169,7 @@
         "needs_confirmation": false
       },
       {
-        "line_id": "be9d6d4e-5f27-478a-b73f-28557da62141",
+        "line_id": "0e33ad31-8739-4b0a-8c9f-419d5932635e",
         "line_number": 5,
         "kind": "consumable",
         "plain_language": "Consumables — small materials used up during the job: Consumables / sundries. Amount shown: 12.00.",
@@ -184,7 +184,7 @@
           }
         ],
         "arithmetic": {
-          "line_id": "be9d6d4e-5f27-478a-b73f-28557da62141",
+          "line_id": "0e33ad31-8739-4b0a-8c9f-419d5932635e",
           "line_number": 5,
           "computed": null,
           "printed": "12.00",
@@ -221,7 +221,7 @@
       "blockers": [],
       "lines": [
         {
-          "line_id": "0635d154-bb7e-48df-afb9-9e27aa108143",
+          "line_id": "67bf8568-27a4-479d-945c-cdee07b21179",
           "line_number": 1,
           "computed": "237.50",
           "printed": "237.50",
@@ -232,7 +232,7 @@
           "notes": []
         },
         {
-          "line_id": "813cab08-43be-4187-a117-efb7a134a4e4",
+          "line_id": "1992ec2f-7e0a-4594-9276-14abc0cc7ee7",
           "line_number": 2,
           "computed": "27.60",
           "printed": "27.60",
@@ -243,7 +243,7 @@
           "notes": []
         },
         {
-          "line_id": "c1f26456-bc78-4fcb-8820-aba1bccaea08",
+          "line_id": "e297946a-6b01-475c-be0d-0142f1571274",
           "line_number": 3,
           "computed": "26.00",
           "printed": "26.00",
@@ -254,7 +254,7 @@
           "notes": []
         },
         {
-          "line_id": "e42268b1-a604-41a9-ac9a-d9e00651e100",
+          "line_id": "896ece06-8691-4bb4-9c19-5bd616134ebc",
           "line_number": 4,
           "computed": "95.00",
           "printed": "95.00",
@@ -265,7 +265,7 @@
           "notes": []
         },
         {
-          "line_id": "be9d6d4e-5f27-478a-b73f-28557da62141",
+          "line_id": "0e33ad31-8739-4b0a-8c9f-419d5932635e",
           "line_number": 5,
           "computed": null,
           "printed": "12.00",

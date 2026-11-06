@@ -365,6 +365,30 @@ const accessRestrictedFields = {
   'security_notes': 'Security notes',
 };
 
+/// Server limits (characters) for each access field — `AccessGeneral` and
+/// `AccessRestricted` in backend/app/schemas/service_jobs.py.
+const accessFieldMaxLengths = {
+  'marina': 200,
+  'mooring_area': 200,
+  'rendezvous': 200,
+  'parking_loading': 500,
+  'access_hours': 200,
+  'owner_attendance': 200,
+  'locker_panel_access': 500,
+  'obstructions': 500,
+  'power_availability': 200,
+  'water_availability': 200,
+  'known_hazards': 1000,
+  'notes': 1000,
+  'gate_code': 100,
+  'key_handover': 500,
+  'contact_name': 120,
+  'contact_phone': 40,
+  'berth': 100,
+  'exact_location': 300,
+  'security_notes': 1000,
+};
+
 final _dateTime = DateFormat('d MMM yyyy, h:mm a');
 final _date = DateFormat('d MMM yyyy');
 

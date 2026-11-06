@@ -1,7 +1,7 @@
 {
-  "id": "43cafd91-4ba5-4add-a89b-20301c9eb719",
-  "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
-  "asset_id": "da35ae6e-9899-4c77-a124-ea3241a27ebc",
+  "id": "d789d403-f53b-4367-af5d-15f550e1d236",
+  "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+  "asset_id": "c52df3b5-b660-42bf-9801-7d42d03f9595",
   "page": null,
   "region": {
     "x": 0.1,
@@ -18,10 +18,10 @@
   "origin": "owner",
   "analysis_run_id": null,
   "model_version": null,
-  "recorded_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
+  "recorded_by": "5cfee740-8410-4f69-9f23-78bde6dd70b7",
   "supersedes_id": null,
   "superseded_by_id": null,
   "job_revision": 6,
   "is_measurement": false,
-  "created_at": "2026-11-06T06:25:05.696171Z"
+  "created_at": "2026-11-06T07:32:19.081474Z"
 }

@@ -1,8 +1,8 @@
 [
   {
-    "id": "3db0cb0a-a198-44ac-912a-12b1eb7b64c7",
-    "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
-    "asset_id": "023fe36c-7c25-4c32-a81b-7f9e3fdd1a73",
+    "id": "c26ae10b-39ba-4610-98c4-fbef5bf450fc",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+    "asset_id": "138848e1-7a87-4a4c-933a-2d07c33615ac",
     "page": null,
     "region": null,
     "kind": "quality",
@@ -12,19 +12,19 @@
     "confidence": null,
     "uncertainty": "No text or feature could be read reliably; nothing has been inferred",
     "origin": "model",
-    "analysis_run_id": "9373db51-f23f-49c2-b0bf-f50339a38af3",
+    "analysis_run_id": "658795bc-0222-4442-a7d5-72a0b85f494e",
     "model_version": "local_fixture:fixture-registry",
     "recorded_by": null,
     "supersedes_id": null,
     "superseded_by_id": null,
     "job_revision": 5,
     "is_measurement": false,
-    "created_at": "2026-11-06T06:25:04.749263Z"
+    "created_at": "2026-11-06T07:32:18.147847Z"
   },
   {
-    "id": "5d05a2aa-73e2-48bf-b5d1-b82f05d2b925",
-    "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
-    "asset_id": "b752afa1-7be5-4020-b90b-817437fa2acb",
+    "id": "478837de-548c-4c56-b9b5-03712dac8295",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+    "asset_id": "7f3b0446-bffa-48c9-845e-12e9cc34e0b2",
     "page": null,
     "region": null,
     "kind": "quality",
@@ -34,19 +34,19 @@
     "confidence": null,
     "uncertainty": "No text or feature could be read reliably; nothing has been inferred",
     "origin": "model",
-    "analysis_run_id": "9373db51-f23f-49c2-b0bf-f50339a38af3",
+    "analysis_run_id": "658795bc-0222-4442-a7d5-72a0b85f494e",
     "model_version": "local_fixture:fixture-registry",
     "recorded_by": null,
     "supersedes_id": null,
     "superseded_by_id": null,
     "job_revision": 5,
     "is_measurement": false,
-    "created_at": "2026-11-06T06:25:04.751407Z"
+    "created_at": "2026-11-06T07:32:18.151003Z"
   },
   {
-    "id": "3696571a-ce32-4688-a931-5b6f78b98b3a",
-    "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
-    "asset_id": "da35ae6e-9899-4c77-a124-ea3241a27ebc",
+    "id": "584b1bfb-e6cc-4dbe-a737-bc772d983d82",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+    "asset_id": "c52df3b5-b660-42bf-9801-7d42d03f9595",
     "page": null,
     "region": null,
     "kind": "quality",
@@ -56,19 +56,19 @@
     "confidence": null,
     "uncertainty": "No text or feature could be read reliably; nothing has been inferred",
     "origin": "model",
-    "analysis_run_id": "9373db51-f23f-49c2-b0bf-f50339a38af3",
+    "analysis_run_id": "658795bc-0222-4442-a7d5-72a0b85f494e",
     "model_version": "local_fixture:fixture-registry",
     "recorded_by": null,
     "supersedes_id": null,
     "superseded_by_id": null,
     "job_revision": 5,
     "is_measurement": false,
-    "created_at": "2026-11-06T06:25:04.752584Z"
+    "created_at": "2026-11-06T07:32:18.152385Z"
   },
   {
-    "id": "43cafd91-4ba5-4add-a89b-20301c9eb719",
-    "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
-    "asset_id": "da35ae6e-9899-4c77-a124-ea3241a27ebc",
+    "id": "d789d403-f53b-4367-af5d-15f550e1d236",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+    "asset_id": "c52df3b5-b660-42bf-9801-7d42d03f9595",
     "page": null,
     "region": {
       "h": 0.2,
@@ -85,11 +85,11 @@
     "origin": "owner",
     "analysis_run_id": null,
     "model_version": null,
-    "recorded_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
+    "recorded_by": "5cfee740-8410-4f69-9f23-78bde6dd70b7",
     "supersedes_id": null,
     "superseded_by_id": null,
     "job_revision": 6,
     "is_measurement": false,
-    "created_at": "2026-11-06T06:25:05.696171Z"
+    "created_at": "2026-11-06T07:32:19.081474Z"
   }
 ]

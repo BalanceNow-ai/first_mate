@@ -18,6 +18,9 @@ int? parseMinorUnits(String text) {
   return int.parse(m.group(1)!) * 100 + int.parse(cents);
 }
 
+/// ISO 4217 codes offered for an estimate (two-decimal currencies; NZD first).
+const scopeCurrencies = ['NZD', 'AUD', 'USD', 'EUR', 'GBP', 'CAD', 'SGD', 'FJD'];
+
 /// Scope revisions and the owner's explicit decision on one exact revision.
 class ScopeTab extends ConsumerWidget {
   const ScopeTab({super.key, required this.job});
@@ -190,9 +193,9 @@ class _ScopeCard extends ConsumerWidget {
       context,
       ref,
       job.id,
-      () => ref
-          .read(serviceJobsApiProvider)
-          .decideScope(job.id, s, decision, note: note, idempotencyKey: newIdempotencyKey('scope')),
+      // One key per decision on this exact revision: a retry replays it, never decides twice.
+      () => ref.read(serviceActionKeysProvider).run('scope', '${s.id}|${s.contentDigest}|$decision|$note',
+          (key) => ref.read(serviceJobsApiProvider).decideScope(job.id, s, decision, note: note, idempotencyKey: key)),
       success: '${decisionLabel(decision)}: revision ${s.revisionNumber}',
     );
   }
@@ -226,7 +229,11 @@ class _ScopeDialogState extends State<ScopeDialog> {
   late final _assumptions = TextEditingController(text: widget.supersedes?.assumptions);
   final List<_LineControllers> _lines = [_LineControllers()];
 
-  String? _money(String? v) => v == null || v.trim().isEmpty || parseMinorUnits(v) != null ? null : 'Enter dollars and cents, e.g. 95.00';
+  /// The estimate's ISO 4217 currency (NZD unless the contractor chooses another).
+  late String _currency = widget.supersedes?.currency ?? 'NZD';
+
+  String? _money(String? v) =>
+      v == null || v.trim().isEmpty || parseMinorUnits(v) != null ? null : 'Enter an amount such as 95.00';
   String? _qty(String? v) =>
       v == null || v.trim().isEmpty || RegExp(r'^\d+(\.\d{1,4})?$').hasMatch(v.trim()) ? null : 'Use a number such as 1.5';
 
@@ -255,7 +262,22 @@ class _ScopeDialogState extends State<ScopeDialog> {
                 ),
               ),
               const SizedBox(height: 12),
-              const Text('Estimate lines (NZD)', style: TextStyle(fontWeight: FontWeight.bold)),
+              Wrap(spacing: 12, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                Text('Estimate lines ($_currency)', style: const TextStyle(fontWeight: FontWeight.bold)),
+                SizedBox(
+                  width: 150,
+                  child: DropdownButtonFormField<String>(
+                    isExpanded: true,
+                    initialValue: _currency,
+                    decoration: const InputDecoration(labelText: 'Currency'),
+                    items: [
+                      for (final c in {...scopeCurrencies, _currency})
+                        DropdownMenuItem(value: c, child: Text(c)),
+                    ],
+                    onChanged: (v) => setState(() => _currency = v ?? _currency),
+                  ),
+                ),
+              ]),
               for (final (i, l) in _lines.indexed) _lineEditor(i, l),
               TextButton.icon(
                 onPressed: () => setState(() => _lines.add(_LineControllers())),
@@ -305,11 +327,13 @@ class _ScopeDialogState extends State<ScopeDialog> {
           SizedBox(width: 100, child: TextFormField(controller: l.unit, decoration: const InputDecoration(labelText: 'Unit'))),
           SizedBox(
             width: 130,
-            child: TextFormField(controller: l.unitPrice, decoration: const InputDecoration(labelText: 'Unit price \$'), validator: _money),
+            child: TextFormField(
+                controller: l.unitPrice, decoration: InputDecoration(labelText: 'Unit price ($_currency)'), validator: _money),
           ),
           SizedBox(
             width: 130,
-            child: TextFormField(controller: l.amount, decoration: const InputDecoration(labelText: 'Or amount \$'), validator: _money),
+            child: TextFormField(
+                controller: l.amount, decoration: InputDecoration(labelText: 'Or amount ($_currency)'), validator: _money),
           ),
         ]),
       ]),
@@ -352,7 +376,7 @@ class _ScopeDialogState extends State<ScopeDialog> {
         summary: _summary.text,
         tasks: tasks,
         estimateLines: lines,
-        currency: lines.isEmpty ? null : 'NZD',
+        currency: lines.isEmpty ? null : _currency,
         exclusions: _exclusions.text,
         assumptions: _assumptions.text,
         supersedesId: widget.supersedes?.id,

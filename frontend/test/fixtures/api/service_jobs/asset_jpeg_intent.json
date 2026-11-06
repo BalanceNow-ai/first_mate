@@ -1,7 +1,7 @@
 {
   "asset": {
-    "id": "b752afa1-7be5-4020-b90b-817437fa2acb",
-    "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+    "id": "7f3b0446-bffa-48c9-845e-12e9cc34e0b2",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
     "purpose": "job_photo",
     "status": "upload_pending",
     "uploaded_by_role": "owner",
@@ -17,15 +17,15 @@
     "quality": {},
     "duplicate_of_id": null,
     "rejection_reason": null,
-    "upload_expires_at": "2026-11-07T06:25:00.242267Z",
+    "upload_expires_at": "2026-11-07T07:32:13.230898Z",
     "version": 1,
-    "created_at": "2026-11-06T06:25:00.242954Z",
-    "updated_at": "2026-11-06T06:25:00.242957Z"
+    "created_at": "2026-11-06T07:32:13.231393Z",
+    "updated_at": "2026-11-06T07:32:13.231395Z"
   },
   "upload": {
     "method": "PUT",
-    "url": "/api/v1/service-assets/b752afa1-7be5-4020-b90b-817437fa2acb/content",
+    "url": "/api/v1/service-assets/7f3b0446-bffa-48c9-845e-12e9cc34e0b2/content",
     "max_bytes": 43793,
-    "expires_at": "2026-11-07T06:25:00.242267Z"
+    "expires_at": "2026-11-07T07:32:13.230898Z"
   }
 }
