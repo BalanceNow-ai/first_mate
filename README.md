@@ -14,7 +14,8 @@ first_mate/
 ├── frontend/                 # Flutter client (web, Android, iOS, macOS, Windows) + e2e journeys
 ├── deploy/                   # nginx, deploy/backup/restore scripts (fail closed)
 ├── scripts/                  # local_stack.sh, build.sh, e2e/ and perf/ tooling, fixture capture
-├── docker-compose.yml        # local acceptance stack (GoTrue, Mailpit, Postgres+pgvector, Redis, Typesense)
+├── docker-compose.yml        # local acceptance stack (GoTrue, Mailpit, Postgres+pgvector, Redis, Typesense,
+│                             #   private S3-compatible object store for service-job media)
 ├── docker-compose.prod.yml   # production topology (external Supabase)
 └── docs/
     ├── 01_research/ … 07_code_reviews/   # research, specs, wireframes, historical phase reviews

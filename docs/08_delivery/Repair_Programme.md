@@ -296,6 +296,32 @@ carriers were exercised only through fakes at the SDK/HTTP boundary or local sub
 | Flutter | not re-run | no client source changed in this increment (the new grounding fields are additive and ignored by the client model) |
 | Second independent review | separate reviewer on `f4f3a97..a95be4a` | 4 confirmed + 1 low + 3 traced findings → all fixed in `42f5b75` (§3.7) |
 
+**Service-jobs increment (2026-11-06, started `main@2566107`).** Same environment; local
+stack with the VersityGW object store, `local_signature` scanner and `local_fixture`
+vision/extraction substitutes (development/test only).
+
+| Check | Command | Result |
+|---|---|---|
+| Backend regression (fresh DB) | `TEST_DATABASE_URL=…/helm_final_sj pytest -q -rs` | **704 passed, 4 skipped** (SMTP sink; three S3 tests needing `OBJECT_STORE_TEST_URL` — run separately below) |
+| S3 integration (real VersityGW) | `OBJECT_STORE_TEST_URL=http://127.0.0.1:17070 … pytest app/tests/test_service_media_s3.py` | 2 passed; proxy-fronted case exercised by J-API through the stack's nginx |
+| Migrations | `test_migrations.py` (Phase-7 data → 0001…0006; no model/schema drift) + clean stack install | pass; empty DB → 0006 |
+| Backend lint/format | `ruff check app alembic && ruff format --check app alembic` | clean |
+| Flutter | `flutter analyze` / `flutter test` | no issues / **465 passed** (incl. contract tests on re-captured real service-jobs and invoice payloads) |
+| Web release build | `scripts/local_stack.sh up` (production-style bundle through nginx) | built and served |
+| J-API service jobs | `python scripts/e2e/service_jobs_api_journey.py` | **88/88** (repeated runs) |
+| J-SJ service jobs (browser, through the real proxy) | `WEB_URL=http://localhost:18080 node frontend/e2e/service_jobs_journey.mjs` | **39/39 ×2** (after the CSP fix below; before it the upload step failed through nginx) |
+| J-INV invoices/moderation (browser) | `STACK_ROOT=… node frontend/e2e/invoice_journey.mjs` | **35/35 ×2** |
+| Existing journeys (SJ-24) | api_journey / catalogue / commerce / engagement | **39/39, 12/12, 15/15, 25/25** on the final backend and again after the CSP change (commerce harness typing fix `10ba3d6`) |
+| Independent backend review | separate reviewer on `2566107..d98e6ff` | 7 confirmed + 3 suspected findings (revoked contractor via visits, `live_updates` unenforced, stale publication race, PDF embedded EXIF, invoice docs in briefs, false "matches", invoices section, deadlock, cross-org visibility, masking) → all fixed with regressions that failed first |
+| Independent client/contract review | separate reviewer on the Flutter client | 2 medium + 9 low findings (other-org confirmer flag, PDF upload resume/expired intents, add-to-cart on rejected items, 320 px overflow, reason wording, polling after dispose, idempotency reuse, field limits, pagination, currency, relative links) → all fixed, tests failed first |
+
+**CSP finding from the integrated browser run.** Served through the real proxy (not a dev
+server), photo upload could not work: the shared security headers had `camera=()` and no
+`blob:` in `connect-src`, so the web picker could not read the chosen file. Fixed in
+`deploy/nginx/snippets/security-headers.conf` (`camera=(self)`, `connect-src 'self' blob:`);
+production must serve signed media from the site origin (bucket routed through the proxy)
+or add the bucket origin to `connect-src`.
+
 Performance (local stack above, 2 API workers, through nginx; 300 requests per
 endpoint; **local evidence only — not production performance**):
 

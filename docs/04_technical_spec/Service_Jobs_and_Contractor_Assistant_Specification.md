@@ -3,7 +3,7 @@
 **Version:** 1.0  
 **Date:** 6 November 2026  
 **Requirement prefix:** SJ  
-**State:** Owner-requested specification; implementation not yet claimed.  
+**State:** Owner-requested specification. Bounded MVP implemented and verified on the local stack (November 2026); per-requirement dispositions, implementation decisions (SJ-D1…SJ-D13) and known limits are in the [Repair Programme](../08_delivery/Repair_Programme.md) §8. Live vision/OCR accuracy and production storage/scanner remain external-validation-pending.  
 **Applies to:** BalanceNow-ai/first_mate (Helm / First Mate).
 
 ## 1. Purpose and governing position
