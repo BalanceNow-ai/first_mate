@@ -352,3 +352,31 @@ async def test_resume_after_interruption_keeps_requests(world):  # noqa: F811
     assert ev["answered"][0]["answer_note"].startswith("Photo later")
     assert job["gaps"][0]["reason"] == "cannot_safely_access" and job["technician_inspection_required"] is True
     assert ev["outstanding"][0]["options"] == ["take_photo", "upload_file", "answer_with_note", "cannot_safely_get"]
+
+
+async def test_deleting_a_draft_deletes_its_private_media(client, world):  # noqa: F811
+    from app.database import async_session
+    from app.models.service_jobs import EvidenceAsset
+
+    job = await _create(client, world.owner, world.vessel_id)
+    async with async_session() as s:
+        asset = EvidenceAsset(
+            owner_id=world.owner.id,
+            job_id=job["id"],
+            uploaded_by=world.owner.id,
+            purpose="job_photo",
+            max_bytes=1000,
+            storage_key="original/test-delete-draft",
+            status="available",
+        )
+        s.add(asset)
+        await s.commit()
+        asset_id = asset.id
+    assert (await client.delete(f"{API}/{job['id']}", headers=world.owner.headers)).status_code == 204
+    async with async_session() as s:
+        stored = await s.get(EvidenceAsset, asset_id)
+    assert stored.status == "deleted" and stored.deleted_at is not None
+    r = await client.post(
+        f"/api/v1/service-assets/{asset_id}/download-url", json={"variant": "derivative"}, headers=world.owner.headers
+    )
+    assert r.status_code in (404, 409)

@@ -236,7 +236,14 @@ async def delete_draft(db: AsyncSession, actor: JobActor) -> None:
         )
     job.deleted_at = utcnow()
     job.version += 1
-    await audit.record(db, actor.user_id, "service_job_delete", "service_job", job.id, {"status": job.status})
+    # Its private media goes with it: assets are marked deleted now (never downloadable
+    # again) and the stored objects are purged by the media retention sweep.
+    from app.services.service_jobs import media
+
+    purged = await media.mark_job_assets_deleted(db, job.id)
+    await audit.record(
+        db, actor.user_id, "service_job_delete", "service_job", job.id, {"status": job.status, "assets": len(purged)}
+    )
     await db.flush()
 
 
