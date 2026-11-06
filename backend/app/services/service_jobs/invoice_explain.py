@@ -283,15 +283,27 @@ def _compare(ctx: ExplainContext, checks: dict, questions: list[dict]) -> dict:
             continue
         sl = scope_lines[matched[line["id"]]]
         diffs = []
+        # A value that cannot be read (or arithmetic that cannot be computed) is never a match.
+        unavailable: list[str] = []
+        line_check = by_line[line["id"]]
+        illegible = set(line.get("illegible") or [])
+        if line_check["status"] == "cannot_compute":
+            unavailable.append("line_arithmetic_cannot_compute")
         if sl["currency"] != currency:
             diffs.append({"field": "currency", "invoice": currency, "approved": sl["currency"]})
         else:
-            amount = _d(by_line[line["id"]]["amount_used"])
+            amount = _d(line_check["amount_used"])
+            if amount is None:
+                unavailable.append("invoice_amount_unreadable" if illegible else "invoice_amount_unknown")
+            if sl["amount"] is None:
+                unavailable.append("approved_amount_unknown")
             if amount is not None and sl["amount"] is not None and amount != sl["amount"]:
                 diffs.append(
                     {"field": "amount", "invoice": im.fmt(amount, currency), "approved": im.fmt(sl["amount"], currency)}
                 )
             price = _d(line.get("unit_price"))
+            if price is None and sl["unit_price"] is not None and "unit_price" in illegible:
+                unavailable.append("invoice_unit_price_unreadable")
             if price is not None and sl["unit_price"] is not None and price != sl["unit_price"]:
                 diffs.append(
                     {
@@ -301,8 +313,11 @@ def _compare(ctx: ExplainContext, checks: dict, questions: list[dict]) -> dict:
                     }
                 )
         q = _d(line.get("quantity"))
+        if q is None and sl["quantity"] is not None and "quantity" in illegible:
+            unavailable.append("invoice_quantity_unreadable")
         if q is not None and sl["quantity"] is not None and q != sl["quantity"]:
             diffs.append({"field": "quantity", "invoice": im.fmt(q), "approved": im.fmt(sl["quantity"])})
+        unavailable = list(dict.fromkeys(unavailable))
         approval = {
             "scope_revision_id": sl["scope_revision_id"],
             "scope_revision_number": sl["scope_revision_number"],
@@ -316,13 +331,24 @@ def _compare(ctx: ExplainContext, checks: dict, questions: list[dict]) -> dict:
         items.append(
             {
                 **base,
-                "status": "differs" if diffs else "matches",
+                "status": "comparison_unavailable" if unavailable else ("differs" if diffs else "matches"),
+                "unavailable_reasons": unavailable,
                 "additional_work": bool(sl["is_change"]),
                 "differences": diffs,
                 "approval": approval,
                 "approval_text": _approval_text(sl),
             }
         )
+        if unavailable:
+            questions.append(
+                {
+                    "key": f"scope:unreadable:{line['id']}",
+                    "line_id": line["id"],
+                    "text": f"Line {line['line_number']} of the invoice can't be compared with scope revision "
+                    f"{sl['scope_revision_number']} because a value is missing or unreadable. Could you confirm "
+                    "the amount for this line?",
+                }
+            )
         for d in diffs:
             questions.append(
                 {

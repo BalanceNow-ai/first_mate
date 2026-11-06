@@ -117,16 +117,26 @@ async def view(db: AsyncSession, a: JobAssignment) -> dict:
     }
 
 
+NEUTRAL_JOB_LABEL = "Service job"
+
+
+def offered_title(a: JobAssignment, job: ServiceJob) -> str:
+    """The job title only when the owner offered the summary section; otherwise a neutral label."""
+    return job.title if "summary" in (a.sections or []) else NEUTRAL_JOB_LABEL
+
+
 async def invitation_view(db: AsyncSession, a: JobAssignment, job: ServiceJob) -> dict:
-    """Minimal summary for an org administrator: no evidence, no access details."""
+    """Minimal summary for an org administrator: no evidence, no access details, and no job
+    details beyond what the offered summary section allows."""
     inviter = await db.get(User, a.invited_by)
-    vessel = (job.vessel_context or {}).get("vessel") or {}
+    summary = "summary" in (a.sections or [])
+    vessel = ((job.vessel_context or {}).get("vessel") or {}) if summary else {}
     return {
         "assignment_id": a.id,
         "job_id": a.job_id,
         "organization_id": a.organization_id,
         "status": a.status,
-        "job_title": job.title,
+        "job_title": offered_title(a, job),
         "vessel_make": vessel.get("make"),
         "vessel_model": vessel.get("model"),
         "sections": ordered_sections(a.sections),
@@ -148,6 +158,25 @@ async def _active_org(db: AsyncSession, org_id: uuid.UUID) -> ContractorOrganiza
 
 async def _count(db: AsyncSession, model, *where) -> int:
     return int((await db.execute(select(func.count()).select_from(model).where(*where))).scalar_one())
+
+
+COLLABORATION_NOTE = (
+    "Evidence requests and your answers, scope proposals and your decisions, visits and any invoice "
+    "question you choose to send stay up to date either way."
+)
+
+
+def live_updates_note(live_updates: bool) -> str:
+    """What the contractor will actually read (enforced by ``access.visibility``)."""
+    if live_updates:
+        return "They will see the sections you share as they are now, including changes you make later. " + (
+            COLLABORATION_NOTE
+        )
+    return (
+        "They will see the job — its summary, photos and documents, observations, measurements and "
+        "preparation items — as of the brief you publish, not later changes, unless you turn on live updates. "
+        "Until you publish a brief they see only the job's title and status. " + COLLABORATION_NOTE
+    )
 
 
 # --- Owner side ------------------------------------------------------------------------
@@ -209,11 +238,7 @@ async def preview(db: AsyncSession, actor: JobActor, org_id: uuid.UUID, sections
         "sections": out,
         "withheld": [s for s in JOB_SECTIONS if s not in set(sections)],
         "live_updates": live_updates,
-        "live_updates_note": (
-            "They will see changes you make after sharing."
-            if live_updates
-            else "They will see the brief revision you publish, not later changes, unless you turn on live updates."
-        ),
+        "live_updates_note": live_updates_note(live_updates),
     }
 
 
@@ -668,7 +693,7 @@ async def inbox(db: AsyncSession, user_id: uuid.UUID, *, limit: int, offset: int
     assigned = [
         {
             "job_id": job.id,
-            "title": job.title,
+            "title": offered_title(a, job),
             "status": job.status,
             "assignment_id": a.id,
             "organization_id": org.id,

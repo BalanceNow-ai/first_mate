@@ -57,7 +57,8 @@ from app.services.service_jobs.access import JobActor
 from app.services.service_jobs.notify import notify
 
 BRIEF_FORMAT = 1
-CONTENT_SECTIONS = ("summary", "evidence", "access_general", "measurements", "preparation", "scope")
+CONTENT_SECTIONS = access.SNAPSHOT_CONTENT_SECTIONS
+BRIEF_ASSET_PURPOSES = ("job_photo", "job_document")
 ACK_KINDS = ("reviewed", "incomplete", "limitations_acknowledged", "confirmed")
 LIMITATIONS = [
     "Ready for contractor review means there is enough information to review — not that the diagnosis, "
@@ -106,7 +107,11 @@ def _request_json(r: EvidenceRequest) -> dict:
 
 
 async def build_content(db: AsyncSession, job: ServiceJob, assignment: JobAssignment) -> dict:
+    """Exactly what this assignment's organization may receive: its granted sections, the
+    owner's job evidence (available photos/documents only — never invoice documents or
+    files still being checked) and only its own organization's contractor records."""
     sections = [s for s in CONTENT_SECTIONS if s in (assignment.sections or [])]
+    vis = await access.organization_visibility(db, job, assignment.organization_id)
     content: dict = {
         "brief_format": BRIEF_FORMAT,
         "job": {"id": job.id, "title": job.title, "status": job.status, "evidence_revision": job.evidence_revision},
@@ -114,13 +119,15 @@ async def build_content(db: AsyncSession, job: ServiceJob, assignment: JobAssign
         "sections": sections,
         "limitations": LIMITATIONS,
     }
-    requests = list(
-        (
+    requests = [
+        r
+        for r in (
             await db.execute(
                 select(EvidenceRequest).where(EvidenceRequest.job_id == job.id).order_by(EvidenceRequest.created_at)
             )
         ).scalars()
-    )
+        if vis.request(r)
+    ]
     if "summary" in sections:
         vessel = await db.get(Vessel, job.vessel_id) if job.vessel_id else None
         content["summary"] = {
@@ -148,24 +155,40 @@ async def build_content(db: AsyncSession, job: ServiceJob, assignment: JobAssign
             "vessel_context_attribution": "owner_declared",
         }
     if "evidence" in sections:
-        assets = list(
-            (
+        assets = [
+            a
+            for a in (
                 await db.execute(
                     select(EvidenceAsset)
-                    .where(EvidenceAsset.job_id == job.id, EvidenceAsset.deleted_at.is_(None))
+                    .where(
+                        EvidenceAsset.job_id == job.id,
+                        EvidenceAsset.purpose.in_(BRIEF_ASSET_PURPOSES),
+                        EvidenceAsset.status == "available",
+                        EvidenceAsset.deleted_at.is_(None),
+                    )
                     .order_by(EvidenceAsset.created_at, EvidenceAsset.id)
                 )
             ).scalars()
-        )
-        obs = list(
-            (
-                await db.execute(
-                    select(Observation)
-                    .where(Observation.job_id == job.id, Observation.state.notin_(osvc.INACTIVE_STATES))
-                    .order_by(Observation.created_at, Observation.id)
-                )
-            ).scalars()
-        )
+            if vis.asset(a)
+        ]
+        included = {a.id for a in assets}
+        obs = [
+            o
+            for o in await osvc.visible_to(
+                db,
+                vis,
+                list(
+                    (
+                        await db.execute(
+                            select(Observation)
+                            .where(Observation.job_id == job.id, Observation.state.notin_(osvc.INACTIVE_STATES))
+                            .order_by(Observation.created_at, Observation.id)
+                        )
+                    ).scalars()
+                ),
+            )
+            if o.asset_id is None or o.asset_id in included
+        ]
         content["evidence"] = {
             "assets": [
                 {
@@ -190,12 +213,12 @@ async def build_content(db: AsyncSession, job: ServiceJob, assignment: JobAssign
     if "measurements" in sections:
         rows = await msvc.list_for_job(db, job.id)
         content["measurements"] = {
-            "current": [v for v in msvc.views(rows, job) if v["is_current"]],
-            "superseded_count": sum(1 for m in rows if m.state in msvc.INACTIVE),
+            "current": [v for v in msvc.views(rows, job, vis) if v["is_current"]],
+            "superseded_count": sum(1 for m in rows if m.state in msvc.INACTIVE and vis.measurement(m)),
         }
     if "preparation" in sections:
         items = await psvc.list_items(db, job, include_inactive=False)
-        item_views = await psvc.views(db, job, items)
+        item_views = await psvc.views(db, job, items, vis)
         site = [
             {"item_id": v["id"], "item": v["name"], "requirement": r}
             for v in item_views
@@ -217,7 +240,7 @@ async def build_content(db: AsyncSession, job: ServiceJob, assignment: JobAssign
             "needs_site_inspection": site,
         }
     if "scope" in sections:
-        content["scope"] = await ssvc.current_view(db, job)
+        content["scope"] = await ssvc.current_view(db, job, vis)
         current = content["scope"]["current"]
         content["scope"]["exclusions"] = current["exclusions"] if current else None
     return jsonable_encoder(content)
@@ -225,15 +248,7 @@ async def build_content(db: AsyncSession, job: ServiceJob, assignment: JobAssign
 
 def filtered(content: dict, actor: JobActor) -> dict:
     """What this actor may read of a snapshot now (a section later withdrawn is hidden)."""
-    if actor.is_owner:
-        return content
-    out = {k: v for k, v in content.items() if k not in CONTENT_SECTIONS}
-    allowed = [s for s in content.get("sections", []) if actor.can(s)]
-    out["sections"] = allowed
-    for s in allowed:
-        if s in content:
-            out[s] = content[s]
-    return out
+    return access.filtered_snapshot(content, actor)
 
 
 # ---------------------------------------------------------------------- state
@@ -301,7 +316,9 @@ async def view(db: AsyncSession, actor: JobActor, brief: PreparationBrief, *, wi
         "is_current": bool(assignment and assignment.shared_brief_id == brief.id and brief.status == "published"),
         "outdated": bool(reasons),
         "outdated_reasons": reasons,
-        "acknowledgements": await _acks(db, brief.id),
+        "acknowledgements": [
+            a for a in await _acks(db, brief.id) if actor.is_owner or a["organization_id"] == actor.organization_id
+        ],
     }
 
 

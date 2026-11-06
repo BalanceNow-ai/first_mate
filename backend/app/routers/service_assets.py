@@ -232,6 +232,8 @@ async def list_job_assets(
     if status_filter:
         q = q.where(EvidenceAsset.status == status_filter)
     rows = list((await db.execute(q.order_by(EvidenceAsset.created_at, EvidenceAsset.id))).scalars())
+    vis = await access.visibility(db, actor)  # organization boundary; live updates off: the brief's files
+    rows = [a for a in rows if vis.asset(a)]
     return AssetList(items=[asset_out(a, user_id) for a in rows[offset : offset + limit]], total=len(rows))
 
 

@@ -3,7 +3,7 @@
 Life cycle: ``create`` (idempotent, records the job evidence revision, asset versions,
 invoice revision, assignment, provider/model/config and an input digest) → ``claim``
 (short UPDATE … RETURNING with a lease and a fencing token; no lock is held while the
-provider runs) → provider call outside any transaction → ``publish`` (locks the run,
+provider runs) → provider call outside any transaction → ``publish`` (locks the job or invoice row, then the run,
 checks the fencing token, then re-checks authorization and every bound version; stale
 output is stored only as a ``superseded`` diagnostic and never published).
 """
@@ -16,7 +16,8 @@ import uuid
 from collections.abc import Awaitable, Callable
 from datetime import timedelta
 
-from sqlalchemy import or_, select, update
+from sqlalchemy import case, literal, or_, select, update
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
@@ -149,7 +150,22 @@ async def publish(
 ) -> str:
     """Publish a finished run if still owned and current. Returns the resulting status
     (``draft_ready``, ``superseded`` or ``lease_lost``). ``apply`` writes the derived
-    records (observations, extraction fields…) in the same transaction. Commits."""
+    records (observations, extraction fields…) in the same transaction. Commits.
+
+    Lock order (D22 extension): the subject first — the job row (or the invoice row) —
+    then the run. Holding the subject lock means no other transaction can bump the job's
+    evidence revision (or revise the invoice) between the staleness check and the write."""
+    subject = (
+        await db.execute(select(AnalysisRun.job_id, AnalysisRun.invoice_id).where(AnalysisRun.id == run_id))
+    ).first()
+    if subject is None:
+        await db.rollback()
+        return "lease_lost"
+    # (stale_reason re-reads both rows with populate_existing once they are locked)
+    if subject.job_id is not None:
+        await db.execute(select(ServiceJob.id).where(ServiceJob.id == subject.job_id).with_for_update())
+    if subject.invoice_id is not None:
+        await db.execute(select(Invoice.id).where(Invoice.id == subject.invoice_id).with_for_update())
     run = (
         await db.execute(
             select(AnalysisRun)
@@ -158,7 +174,15 @@ async def publish(
             .execution_options(populate_existing=True)
         )
     ).scalar_one_or_none()
-    if run is None or run.lease_token != token or run.status != "running":
+    if run is None or run.lease_token != token:
+        await db.rollback()
+        return "lease_lost"
+    if run.status == "superseded":  # the evidence changed while the provider ran
+        run.lease_token = None
+        run.lease_expires_at = None
+        await db.commit()
+        return "superseded"
+    if run.status != "running":
         await db.rollback()
         return "lease_lost"
     reason = await stale_reason(db, run)
@@ -179,9 +203,21 @@ async def publish(
 async def fail(db: AsyncSession, run_id: uuid.UUID, token: uuid.UUID, error: str) -> None:
     """Record a provider failure (honest "unavailable" state; retried while attempts remain)."""
     settings = get_settings()
-    run = (await db.execute(select(AnalysisRun).where(AnalysisRun.id == run_id).with_for_update())).scalar_one_or_none()
+    run = (
+        await db.execute(
+            select(AnalysisRun)
+            .where(AnalysisRun.id == run_id)
+            .with_for_update()
+            .execution_options(populate_existing=True)
+        )
+    ).scalar_one_or_none()
     if run is None or run.lease_token != token:
         await db.rollback()
+        return
+    if run.status != "running":  # superseded meanwhile: never resurrect it for a retry
+        run.lease_token = None
+        run.lease_expires_at = None
+        await db.commit()
         return
     run.error = error[:200]
     run.status = "failed" if run.attempts >= settings.service_processing_max_attempts else "pending"
@@ -191,8 +227,20 @@ async def fail(db: AsyncSession, run_id: uuid.UUID, token: uuid.UUID, error: str
 
 
 async def supersede_for_job(db: AsyncSession, job_id: uuid.UUID, kinds: tuple[str, ...] | None = None) -> None:
-    """Mark earlier draft results for a job superseded (call when evidence changes)."""
-    q = update(AnalysisRun).where(AnalysisRun.job_id == job_id, AnalysisRun.status.in_(("pending", "draft_ready")))
+    """Mark earlier results for a job superseded (call, holding the job lock, when evidence
+    changes) — pending, draft and *running* runs: a run whose provider call is in flight
+    keeps its lease token, so its publication finds it superseded and publishes nothing."""
+    q = update(AnalysisRun).where(
+        AnalysisRun.job_id == job_id, AnalysisRun.status.in_(("pending", "running", "draft_ready"))
+    )
     if kinds:
         q = q.where(AnalysisRun.kind.in_(kinds))
-    await db.execute(q.values(status="superseded").execution_options(synchronize_session=False))
+    await db.execute(
+        q.values(
+            status="superseded",
+            output=case(
+                (AnalysisRun.status == "running", literal({"stale": "evidence_changed"}, JSONB)),
+                else_=AnalysisRun.output,
+            ),
+        ).execution_options(synchronize_session=False)
+    )

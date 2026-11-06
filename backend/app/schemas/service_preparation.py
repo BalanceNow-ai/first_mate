@@ -146,6 +146,8 @@ class Provenance(APIModel):
     recorded_by: uuid.UUID | None
     recorded_by_role: str
     method: str
+    # Recorded/confirmed by another contractor organization (identities withheld).
+    other_organization: bool = False
 
 
 class Confirmation(APIModel):
@@ -183,6 +185,7 @@ class MeasurementResponse(APIModel):
     state: str
     provenance: Provenance
     recorded_by: uuid.UUID | None
+    recorded_by_other_organization: bool = False
     confirmation: Confirmation | None
     supersedes_id: uuid.UUID | None
     superseded_by_id: uuid.UUID | None

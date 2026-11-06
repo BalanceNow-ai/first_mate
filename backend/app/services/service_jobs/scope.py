@@ -27,7 +27,7 @@ from app.core.errors import AppError, not_found
 from app.models.service_jobs import ScopeDecision, ScopeRevision, ServiceJob
 from app.services import audit
 from app.services.service_jobs import runs
-from app.services.service_jobs.access import JobActor
+from app.services.service_jobs.access import JobActor, Visibility
 from app.services.service_jobs.observations import notify_counterparty
 
 LINE_KINDS = ("labour", "parts", "travel", "call_out", "consumables", "other")
@@ -127,21 +127,33 @@ async def propose(db: AsyncSession, actor: JobActor, data: ScopeInput) -> ScopeR
     """Contractor proposal (job row locked by the caller)."""
     actor.require_contractor()
     latest = await _latest(db, actor.job.id)
-    if latest is not None and data.supersedes_id != latest.id:
+    # Each organization proposes on its own chain: a previous organization's revisions
+    # (and prices) are neither shown to nor superseded "by name" by the next one.
+    own = latest
+    if latest is not None and latest.organization_id != actor.organization_id:
+        own = (
+            await db.execute(
+                select(ScopeRevision)
+                .where(ScopeRevision.job_id == actor.job.id, ScopeRevision.organization_id == actor.organization_id)
+                .order_by(ScopeRevision.revision_number.desc())
+                .limit(1)
+            )
+        ).scalar_one_or_none()
+    if own is not None and data.supersedes_id != own.id:
         raise AppError(
             409,
             "scope_conflict",
             "A newer scope revision exists; propose a change that supersedes the current revision",
-            extra={"current_revision_id": str(latest.id)},
+            extra={"current_revision_id": str(own.id)},
         )
-    if latest is None and data.supersedes_id is not None:
+    if own is None and data.supersedes_id is not None:
         raise not_found("Scope revision")
     lines, total, currency = _lines(data.estimate_lines, data.currency)
     rev = ScopeRevision(
         job_id=actor.job.id,
         revision_number=(latest.revision_number + 1) if latest else 1,
-        is_change=latest is not None,
-        supersedes_id=latest.id if latest else None,
+        is_change=own is not None,
+        supersedes_id=own.id if own else None,
         proposed_by=actor.user_id,
         organization_id=actor.organization_id,
         summary=data.summary,
@@ -155,8 +167,9 @@ async def propose(db: AsyncSession, actor: JobActor, data: ScopeInput) -> ScopeR
         content_digest="",
     )
     rev.content_digest = _digest(rev)
-    if latest is not None and latest.status in ("proposed", "change_requested", "rejected", "draft"):
-        latest.status = "superseded"
+    for previous in {r.id: r for r in (latest, own) if r is not None}.values():
+        if previous.status in ("proposed", "change_requested", "rejected", "draft"):
+            previous.status = "superseded"
     db.add(rev)
     await db.flush()
     await notify_counterparty(db, actor, "scope_proposed", f"scope:{rev.id}")
@@ -220,10 +233,14 @@ def view(rev: ScopeRevision, decision: ScopeDecision | None, latest_number: int 
     }
 
 
-async def views(db: AsyncSession, job_id: uuid.UUID) -> list[dict]:
+async def views(db: AsyncSession, job_id: uuid.UUID, vis: Visibility | None = None) -> list[dict]:
+    """Every revision with its decision; with ``vis``, only the reader organization's own
+    (a previous organization's prices and decisions are not shown to the next one)."""
     revs = await list_revisions(db, job_id)
-    decisions = await decisions_for(db, job_id)
     latest = revs[-1].revision_number if revs else None
+    if vis is not None:
+        revs = [r for r in revs if vis.organization_record(r.organization_id)]
+    decisions = await decisions_for(db, job_id)
     return [view(r, decisions.get(r.id), latest) for r in revs]
 
 
@@ -313,8 +330,8 @@ async def decide(
     return row, True
 
 
-async def current_view(db: AsyncSession, job: ServiceJob) -> dict:
-    items = await views(db, job.id)
+async def current_view(db: AsyncSession, job: ServiceJob, vis: Visibility | None = None) -> dict:
+    items = await views(db, job.id, vis)
     accepted = [i for i in items if i["decision"] and i["decision"]["decision"] == "accepted"]
     return {
         "current": items[-1] if items else None,

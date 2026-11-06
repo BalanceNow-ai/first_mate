@@ -10916,6 +10916,41 @@
       ],
       "title": "Occurs When"
      },
+     "snapshot_brief_id": {
+      "anyOf": [
+       {
+        "format": "uuid",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Snapshot Brief Id"
+     },
+     "snapshot_published_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Snapshot Published At"
+     },
+     "snapshot_state": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Snapshot State"
+     },
      "status": {
       "title": "Status",
       "type": "string"
@@ -12808,6 +12843,11 @@
        }
       ],
       "title": "Recorded By"
+     },
+     "recorded_by_other_organization": {
+      "default": false,
+      "title": "Recorded By Other Organization",
+      "type": "boolean"
      },
      "reference": {
       "anyOf": [
@@ -17022,6 +17062,11 @@
      "method": {
       "title": "Method",
       "type": "string"
+     },
+     "other_organization": {
+      "default": false,
+      "title": "Other Organization",
+      "type": "boolean"
      },
      "recorded_by": {
       "anyOf": [

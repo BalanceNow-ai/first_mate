@@ -16,7 +16,7 @@ from fastapi import APIRouter, Depends, Header, Query, Response, status
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.errors import AppError
+from app.core.errors import AppError, not_found
 from app.core.rate_limit import mutation_limit
 from app.database import get_db
 from app.middleware.auth import CurrentUserId
@@ -205,7 +205,8 @@ def _minput(body: MeasurementCreate) -> msvc.MeasurementInput:
 
 async def _measurement(db, actor, m) -> dict:
     rows = await msvc.list_for_job(db, actor.job.id)
-    return next(v for v in msvc.views(rows, actor.job) if v["id"] == m.id)
+    vis = await access.visibility(db, actor)  # the record acted on is always visible to its actor
+    return next(v for v in msvc.views(rows, actor.job, vis) if v["id"] == m.id)
 
 
 @router.get("/{job_id}/measurements", response_model=list[MeasurementResponse])
@@ -217,7 +218,7 @@ async def list_measurements(
 ):
     actor = await access.job_for(db, user_id, job_id, section="measurements")
     rows = await msvc.list_for_job(db, job_id)
-    out = msvc.views(rows, actor.job)
+    out = msvc.views(rows, actor.job, await access.visibility(db, actor))
     return out if include_inactive else [v for v in out if v["is_current"]]
 
 
@@ -296,7 +297,7 @@ def _iinput(body: PreparationItemCreate) -> psvc.ItemInput:
 
 
 async def _item(db, actor, item) -> dict:
-    return (await psvc.views(db, actor.job, [item]))[0]
+    return (await psvc.views(db, actor.job, [item], await access.visibility(db, actor)))[0]
 
 
 @router.get("/{job_id}/preparation-items", response_model=list[PreparationItemResponse])
@@ -309,7 +310,7 @@ async def list_preparation_items(
     """Provisional/confirmed items with provenance, open requirements and live catalogue facts."""
     actor = await access.job_for(db, user_id, job_id, section="preparation")
     items = await psvc.list_items(db, actor.job, include_inactive=include_inactive)
-    return await psvc.views(db, actor.job, items)
+    return await psvc.views(db, actor.job, items, await access.visibility(db, actor))
 
 
 @router.post("/{job_id}/preparation-items/suggest", response_model=list[PreparationItemResponse], dependencies=Mutation)
@@ -320,7 +321,7 @@ async def suggest_preparation_items(
     actor = await access.job_for(db, user_id, job_id, section="preparation", lock=True)
     await psvc.suggest(db, actor)
     items = await psvc.list_items(db, actor.job, include_inactive=False)
-    return await psvc.views(db, actor.job, items)
+    return await psvc.views(db, actor.job, items, await access.visibility(db, actor))
 
 
 @router.post(
@@ -542,17 +543,20 @@ async def export_brief(
 @router.get("/{job_id}/scopes", response_model=list[ScopeResponse])
 async def list_scopes(job_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")):
     """Every scope revision with its decision (oldest first; ``is_current`` marks the latest)."""
-    await access.job_for(db, user_id, job_id, section="scope")
-    return await ssvc.views(db, job_id)
+    actor = await access.job_for(db, user_id, job_id, section="scope")
+    return await ssvc.views(db, job_id, await access.visibility(db, actor))
 
 
 @router.get("/{job_id}/scopes/{scope_id}", response_model=ScopeResponse)
 async def get_scope(
     job_id: uuid.UUID, scope_id: uuid.UUID, user_id: CurrentUserId, db: AsyncSession = Depends(get_db, scope="function")
 ):
-    await access.job_for(db, user_id, job_id, section="scope")
+    actor = await access.job_for(db, user_id, job_id, section="scope")
     await ssvc.get_revision(db, job_id, scope_id)
-    return next(v for v in await ssvc.views(db, job_id) if v["id"] == scope_id)
+    found = [v for v in await ssvc.views(db, job_id, await access.visibility(db, actor)) if v["id"] == scope_id]
+    if not found:
+        raise not_found("Scope revision")
+    return found[0]
 
 
 @router.post(
@@ -576,7 +580,7 @@ async def propose_scope(
             supersedes_id=body.supersedes_id,
         ),
     )
-    return next(v for v in await ssvc.views(db, job_id) if v["id"] == rev.id)
+    return next(v for v in await ssvc.views(db, job_id, await access.visibility(db, actor)) if v["id"] == rev.id)
 
 
 @router.post(

@@ -225,3 +225,32 @@ async def test_export_is_escaped_attachment_and_not_cached(client, world):  # no
     for outsider in (world.tech2, world.other_tech, world.other_owner):
         r = await client.get(job_url(world.job.id, f"/briefs/{brief['id']}/export"), headers=outsider.headers)
         assert r.status_code == 404
+
+
+async def test_brief_lists_only_available_job_photos_and_documents(client, world, store):  # noqa: F811
+    """Review finding (p3): the brief listed every asset — an invoice document's private
+    caption, uploads still pending or quarantined — for the contractor."""
+    r = await client.post(
+        "/api/v1/service-assets/invoice-intents",
+        json={
+            "job_id": str(world.job.id),
+            "caption": "PRIVATE: other yard quoted 4,200 for this",
+            "filename": "inv.pdf",
+            "content_type": "application/pdf",
+            "size_bytes": 1000,
+        },
+        headers=world.owner.headers,
+    )
+    assert r.status_code == 201, r.text
+    photo = await make_asset(world.job, b"photo bytes")
+    document = await make_asset(world.job, b"%PDF doc", purpose="job_document", detected_type="application/pdf")
+    await make_asset(world.job, b"invoice bytes", purpose="invoice", detected_type="application/pdf")
+    for state in ("quarantined", "processing", "rejected", "upload_pending"):
+        await make_asset(world.job, f"{state} bytes".encode(), status=state)
+    brief = await _publish(client, world, await _preview(client, world))
+    for actor in (world.owner, world.tech):  # the owner previews exactly what is shared
+        r = await client.get(job_url(world.job.id, f"/briefs/{brief['id']}"), headers=actor.headers)
+        assets = r.json()["content"]["evidence"]["assets"]
+        assert {a["id"] for a in assets} == {str(photo), str(document)}
+        assert all(a["status"] == "available" and a["purpose"] in ("job_photo", "job_document") for a in assets)
+        assert "PRIVATE" not in r.text and "4,200" not in r.text

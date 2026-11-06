@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import case, func, select
+from sqlalchemy import case, func, or_, select, true
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import AppError, not_found
@@ -82,10 +82,23 @@ async def all_for_job(db: AsyncSession, job_id: uuid.UUID) -> list[EvidenceReque
     )
 
 
+def _boundary(vis: access.Visibility | None):
+    """SQL form of :meth:`access.Visibility.request` (true for the owner)."""
+    if vis is None or vis.unrestricted:
+        return true()
+    return or_(EvidenceRequest.requester_role != "contractor", EvidenceRequest.organization_id == vis.organization_id)
+
+
 async def list_for_job(
-    db: AsyncSession, job_id: uuid.UUID, *, status: str | None, limit: int, offset: int
+    db: AsyncSession,
+    job_id: uuid.UUID,
+    *,
+    status: str | None,
+    limit: int,
+    offset: int,
+    vis: access.Visibility | None = None,
 ) -> list[EvidenceRequest]:
-    q = select(EvidenceRequest).where(EvidenceRequest.job_id == job_id)
+    q = select(EvidenceRequest).where(EvidenceRequest.job_id == job_id, _boundary(vis))
     if status:
         q = q.where(EvidenceRequest.status == status)
     q = q.order_by(_PRIORITY_RANK, EvidenceRequest.created_at, EvidenceRequest.id).limit(limit).offset(offset)
@@ -108,15 +121,43 @@ async def available_asset_count(db: AsyncSession, job_id: uuid.UUID) -> int:
     )
 
 
-async def summary(db: AsyncSession, job_id: uuid.UUID) -> tuple[dict, list[dict], bool]:
-    """(evidence summary by state, gaps, technician_inspection_required) — the resume view."""
-    requests = await all_for_job(db, job_id)
+def visible(requests: list[EvidenceRequest], vis: access.Visibility | None) -> list[EvidenceRequest]:
+    """Requests this reader may see (another organization's requests stay with it)."""
+    return requests if vis is None else [r for r in requests if vis.request(r)]
+
+
+async def summary(
+    db: AsyncSession, job_id: uuid.UUID, vis: access.Visibility | None = None
+) -> tuple[dict, list[dict], bool]:
+    """(evidence summary by state, gaps, technician_inspection_required) — the resume view.
+
+    With live updates off this is the brief's evidence: the requests it listed (with their
+    live answers — a collaboration channel) plus the reader organization's own requests,
+    and the count of the brief's files that are still available."""
+    requests = visible(await all_for_job(db, job_id), vis)
+    if vis is not None and not vis.live:
+        requests = [
+            r for r in requests if vis.in_snapshot("requests", r.id) or vis.organization_record(r.organization_id)
+        ]
     grouped: dict[str, list[dict]] = {s: [] for s in STATUS_ORDER}
     for r in requests:
         grouped[r.status].append(view(r))
     gaps = [gap(r) for r in requests if r.status == "unavailable"]
     tech = any(r.technician_inspection_required for r in requests)
-    grouped["available_asset_count"] = await available_asset_count(db, job_id)
+    if vis is None or vis.unrestricted:
+        grouped["available_asset_count"] = await available_asset_count(db, job_id)
+    else:
+        assets = (
+            await db.execute(
+                select(EvidenceAsset).where(
+                    EvidenceAsset.job_id == job_id,
+                    EvidenceAsset.purpose.in_(("job_photo", "job_document")),
+                    EvidenceAsset.status == "available",
+                    EvidenceAsset.deleted_at.is_(None),
+                )
+            )
+        ).scalars()
+        grouped["available_asset_count"] = sum(1 for a in assets if vis.asset(a))
     return grouped, gaps, tech
 
 
@@ -163,7 +204,7 @@ def _proposal_view(p: guidance.Proposal) -> dict:
 async def next_for(db: AsyncSession, actor: JobActor) -> dict:
     """The next useful step: an outstanding request first, else a guidance proposal, else complete."""
     job = actor.job
-    requests = await all_for_job(db, job.id)
+    requests = visible(await all_for_job(db, job.id), await access.visibility(db, actor))
     gaps = [gap(r) for r in requests if r.status == "unavailable"]
     outstanding = [r for r in requests if r.status == "outstanding"]
     if outstanding:
@@ -273,10 +314,14 @@ async def get_locked(db: AsyncSession, job_id: uuid.UUID, request_id: uuid.UUID)
     return r
 
 
-async def get_one(db: AsyncSession, job_id: uuid.UUID, request_id: uuid.UUID) -> EvidenceRequest:
+async def get_one(
+    db: AsyncSession, job_id: uuid.UUID, request_id: uuid.UUID, vis: access.Visibility | None = None
+) -> EvidenceRequest:
     r = (
         await db.execute(
-            select(EvidenceRequest).where(EvidenceRequest.id == request_id, EvidenceRequest.job_id == job_id)
+            select(EvidenceRequest).where(
+                EvidenceRequest.id == request_id, EvidenceRequest.job_id == job_id, _boundary(vis)
+            )
         )
     ).scalar_one_or_none()
     if r is None:

@@ -409,8 +409,13 @@ async def resolve(db: AsyncSession, user_id: uuid.UUID, asset_id: uuid.UUID, *, 
             await access.job_for(db, user_id, asset.job_id, owner_only=True, lock=True)
         return AssetAccess(asset, "owner")
     actor = await access.job_for(db, user_id, asset.job_id, section="evidence", lock=lock_job)
-    if not actor.is_owner and asset.status != "available" and asset.uploaded_by != user_id:
-        raise not_found("Asset")
+    if not actor.is_owner:
+        if asset.status != "available" and asset.uploaded_by != user_id:
+            raise not_found("Asset")
+        vis = await access.visibility(db, actor)
+        if vis.other_contractor(asset.uploaded_by):
+            raise not_found("Asset")  # another organization's upload: no existence leak
+        vis.require("assets", asset)  # live updates off: only the brief's files
     return AssetAccess(asset, actor.role, actor)
 
 
@@ -768,8 +773,145 @@ def _walk_pdf(root) -> None:
             stack.extend(node)
 
 
+_PDF_RASTER_FILTERS = frozenset({"/DCTDecode", "/DCT", "/JPXDecode"})
+# Markers of embedded image/document metadata (EXIF APP1, XMP packets) that must not survive.
+_PDF_METADATA_MARKERS = (b"Exif\x00\x00", b"<x:xmpmeta", b"http://ns.adobe.com/xap/1.0/", b"<?xpacket")
+
+
+def _filters(value) -> list[str]:
+    from pypdf.generic import ArrayObject
+
+    if value is None:
+        return []
+    items = list(value) if isinstance(value, ArrayObject | list) else [value]
+    return [str(v) for v in items]
+
+
+def _pixels_only_jpeg(img: Image.Image) -> tuple[bytes, str]:
+    """Re-encode decoded pixels as a JPEG carrying no EXIF/XMP/ICC; returns (bytes, colour space)."""
+    if img.mode == "CMYK":
+        mode, space = "CMYK", "/DeviceCMYK"
+    elif img.mode in ("1", "L", "LA", "I", "I;16", "F"):
+        mode, space = "L", "/DeviceGray"
+    else:
+        mode, space = "RGB", "/DeviceRGB"
+    out = BytesIO()
+    # No exif=/icc_profile=/xmp= arguments: pixels only.
+    (_flatten(img) if mode == "RGB" else img.convert(mode)).save(out, "JPEG", quality=85)
+    return out.getvalue(), space
+
+
+def _strip_inline_images(page) -> None:
+    """Inline (BI … ID … EI) DCT/JPX images are re-encoded pixels-only too."""
+    from pypdf.generic import ContentStream, NameObject, NumberObject
+
+    contents = page.get_contents()
+    if contents is None:
+        return
+    if not isinstance(contents, ContentStream):
+        contents = ContentStream(contents, page.pdf)
+    changed = False
+    for operands, operator in contents.operations:
+        if operator != b"INLINE IMAGE":
+            continue
+        settings = operands["settings"]
+        key = "/F" if "/F" in settings else "/Filter"
+        names = _filters(settings.get(key))
+        if not any(n in _PDF_RASTER_FILTERS for n in names):
+            continue
+        if len(names) != 1:
+            raise RejectedError("pdf_metadata_unremovable")
+        with Image.open(BytesIO(operands["data"])) as img:
+            img.load()
+            operands["data"], space = _pixels_only_jpeg(img)
+        for k in ("/ColorSpace", "/BitsPerComponent"):  # replaced by the abbreviations below
+            if k in settings:
+                del settings[k]
+        settings[NameObject(key)] = NameObject("/DCT")
+        settings[NameObject("/CS")] = NameObject({"/DeviceRGB": "/RGB", "/DeviceGray": "/G"}.get(space, "/CMYK"))
+        settings[NameObject("/BPC")] = NumberObject(8)
+        for k in ("/DP", "/DecodeParms", "/D", "/Decode"):
+            if k in settings:
+                del settings[k]
+        changed = True
+    if changed:
+        page.replace_contents(contents)
+
+
+def _strip_pdf_metadata(writer) -> None:
+    """Drop XMP/metadata dictionaries everywhere and re-encode every embedded raster image
+    (JPEG/JPEG 2000 can carry EXIF GPS, XMP or ICC data) as a pixels-only JPEG; then make
+    sure no metadata marker survives in any (decoded) stream."""
+    from pypdf.generic import (
+        ArrayObject,
+        DictionaryObject,
+        IndirectObject,
+        NameObject,
+        NumberObject,
+        StreamObject,
+    )
+    from pypdf.generic._image_xobject import _xobj_to_image
+
+    for page in writer.pages:
+        _strip_inline_images(page)
+    seen: set[int] = set()
+    stack: list = [writer.root_object]
+    streams: list = []
+    visited = 0
+    while stack:
+        node = stack.pop()
+        if isinstance(node, IndirectObject):
+            if node.idnum in seen:
+                continue
+            seen.add(node.idnum)
+            node = node.get_object()
+        visited += 1
+        if visited > PDF_MAX_OBJECTS:
+            raise RejectedError("malformed_pdf")
+        if isinstance(node, DictionaryObject):
+            for key in ("/Metadata", "/PieceInfo"):
+                if key in node:
+                    del node[NameObject(key)]
+            if isinstance(node, StreamObject):
+                streams.append(node)
+            stack.extend(node.values())
+        elif isinstance(node, ArrayObject):
+            stack.extend(node)
+    for stream in streams:
+        if stream.get("/Subtype") != "/Image":
+            continue
+        names = _filters(stream.get("/Filter"))
+        if not any(n in _PDF_RASTER_FILTERS for n in names):
+            continue  # raw/Flate samples are pixels only
+        if len(names) == 1:
+            with Image.open(BytesIO(stream._data)) as img:  # noqa: SLF001 - the encoded JPEG bytes
+                img.load()
+                encoded, space = _pixels_only_jpeg(img)
+        else:
+            _ext, _raw, img = _xobj_to_image(stream)
+            encoded, space = _pixels_only_jpeg(img)
+        stream._data = encoded  # noqa: SLF001 - pypdf keeps the encoded bytes here
+        if hasattr(stream, "decoded_self"):
+            stream.decoded_self = None  # drop any cached decode of the old bytes
+        stream[NameObject("/Filter")] = NameObject("/DCTDecode")
+        stream[NameObject("/ColorSpace")] = NameObject(space)
+        stream[NameObject("/BitsPerComponent")] = NumberObject(8)
+        stream[NameObject("/Length")] = NumberObject(len(encoded))
+        for k in ("/DecodeParms", "/SMaskInData", "/Decode"):
+            if k in stream:
+                del stream[NameObject(k)]
+    for stream in streams:
+        try:
+            raw = stream.get_data()
+        except Exception:  # an exotic filter: check the bytes as stored
+            raw = stream._data or b""  # noqa: SLF001
+        if any(marker in raw for marker in _PDF_METADATA_MARKERS):
+            raise RejectedError("pdf_metadata_unremovable")
+
+
 def process_pdf(data: bytes) -> Outcome:
-    """Inert validation; the derivative is the pages re-written without document metadata."""
+    """Inert validation; the derivative is the pages re-written without document metadata,
+    XMP, or embedded image EXIF/GPS (every raster image is re-encoded pixels-only)."""
     from pypdf import PdfReader, PdfWriter
     from pypdf.generic import NameObject
 
@@ -795,7 +937,10 @@ def process_pdf(data: bytes) -> Outcome:
                 for key in ("/Metadata", "/PieceInfo"):
                     if key in page:
                         del page[NameObject(key)]
+            _strip_pdf_metadata(writer)
             writer.metadata = None
+            # Objects no longer referenced (the dropped XMP streams) must not be written either.
+            writer.compress_identical_objects(remove_identicals=False, remove_orphans=True)
             out = BytesIO()
             writer.write(out)
     except RejectedError:

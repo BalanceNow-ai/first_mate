@@ -214,6 +214,76 @@ async def test_active_pdf_upload_is_rejected_end_to_end(client, world, media_env
     assert (asset["status"], asset["rejection_reason"]) == ("rejected", "active_pdf_content")
 
 
+def _stream(dictionary: bytes, data: bytes) -> bytes:
+    return b"<< " + dictionary + b" /Length " + str(len(data)).encode() + b" >>\nstream\n" + data + b"\nendstream"
+
+
+XMP = (
+    b'<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?><x:xmpmeta xmlns:x="adobe:ns:meta/">'
+    b"<rdf:RDF><rdf:Description exif:GPSLatitude='36,51S'/></rdf:RDF></x:xmpmeta><?xpacket end='w'?>"
+)
+
+
+def pdf_with_photo_metadata() -> bytes:
+    """A scanned-photo style PDF whose embedded JPEGs carry EXIF/GPS (page image, an image in
+    a form XObject, and an inline image) plus XMP on the catalog and on the image."""
+    leak = jpeg_with_gps((16, 16), orientation=1)
+    assert b"Exif" in leak and b"SecretCam" in leak
+    content = b"q 64 0 0 64 0 0 cm /Im0 Do Q q /Fm0 Do Q q 8 0 0 8 0 0 cm BI /W 16 /H 16 /CS /RGB /BPC 8 /F /DCT ID "
+    content += leak + b" EI Q"
+    objects = [
+        b"<< /Type /Catalog /Pages 2 0 R /Metadata 7 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 64 64] "
+        b"/Resources << /XObject << /Im0 4 0 R /Fm0 6 0 R >> >> /Contents 5 0 R >>",
+        _stream(
+            b"/Type /XObject /Subtype /Image /Width 16 /Height 16 /ColorSpace /DeviceRGB /BitsPerComponent 8 "
+            b"/Filter /DCTDecode /Metadata 7 0 R",
+            leak,
+        ),
+        _stream(b"", content),
+        _stream(
+            b"/Type /XObject /Subtype /Form /BBox [0 0 64 64] /Resources << /XObject << /Im1 8 0 R >> >>",
+            b"q 32 0 0 32 0 0 cm /Im1 Do Q",
+        ),
+        _stream(b"/Type /Metadata /Subtype /XML", XMP),
+        _stream(
+            b"/Type /XObject /Subtype /Image /Width 16 /Height 16 /ColorSpace /DeviceRGB /BitsPerComponent 8 "
+            b"/Filter [/DCTDecode]",
+            leak,
+        ),
+    ]
+    from app.tests.test_service_media_support import build_pdf
+
+    return build_pdf(objects)
+
+
+def test_pdf_derivative_carries_no_embedded_image_exif_or_xmp():
+    """Review finding (p6): PDF derivatives kept embedded JPEGs byte-for-byte, EXIF/GPS included."""
+    pdf = pdf_with_photo_metadata()
+    out = media.process_pdf(pdf)
+    assert out.status == "available" and out.pages == 1
+    for marker in (b"Exif", b"SecretCam", b"OwnerPhoneSoftware", b"xmpmeta", b"xpacket", b"GPSLatitude"):
+        assert marker not in out.derivative, marker
+    reader = PdfReader(io.BytesIO(out.derivative))
+    page = reader.pages[0]
+    images = page.images  # XObject images (incl. the form's) and the inline one still render
+    assert len(images) >= 3
+    for image in images:
+        assert image.image.size == (16, 16)
+        assert not image.image.getexif()
+    assert "/Metadata" not in reader.trailer["/Root"]
+
+
+async def test_pdf_document_shared_with_the_contractor_has_no_photo_metadata(client, world, media_env):  # noqa: F811
+    asset = await upload(client, world.owner, world.job.id, pdf_with_photo_metadata(), purpose="job_document")
+    assert asset["status"] == "available", asset
+    for actor in (world.owner, world.tech):
+        got = await fetch_download(client, actor, asset["id"])
+        assert got.status_code == 200
+        assert b"Exif" not in got.content and b"SecretCam" not in got.content and b"xmpmeta" not in got.content
+
+
 # --------------------------------------------------------------------------- images: metadata, orientation, HEIC
 async def test_exif_and_gps_are_removed_from_the_derivative(client, world, media_env):  # noqa: F811
     original_bytes = jpeg_with_gps((40, 20), orientation=6)

@@ -339,14 +339,30 @@ async def view(db: AsyncSession, actor: JobActor) -> dict:
             "restricted_access": actor.can("access_restricted"),
         },
     }
-    if actor.can("summary"):
-        for k in SUMMARY_FIELDS:
-            out[k] = getattr(job, k)
-    if actor.can("evidence"):
-        grouped, gaps, tech = await evidence_requests.summary(db, job.id)
-        out["evidence"] = grouped
-        out["gaps"] = gaps
-        out["technician_inspection_required"] = tech
+    vis = await access.visibility(db, actor)
+    out["snapshot_state"] = vis.state
+    out["snapshot_brief_id"] = vis.brief.id if vis.brief is not None else None
+    out["snapshot_published_at"] = vis.brief.published_at if vis.brief is not None else None
+    if vis.live:
+        if actor.can("summary"):
+            for k in SUMMARY_FIELDS:
+                out[k] = getattr(job, k)
+        if actor.can("evidence"):
+            grouped, gaps, tech = await evidence_requests.summary(db, job.id, vis)
+            out["evidence"] = grouped
+            out["gaps"] = gaps
+            out["technician_inspection_required"] = tech
+    elif vis.snapshot is not None:
+        # Live updates off: the job content as of the published brief (header stays current).
+        summary = vis.snapshot.get("summary")
+        if actor.can("summary") and summary is not None:
+            for k in SUMMARY_FIELDS:
+                out[k] = summary.get(k)
+        if actor.can("evidence") and vis.snapshot.get("evidence") is not None:
+            grouped, gaps, tech = await evidence_requests.summary(db, job.id, vis)
+            out["evidence"] = grouped
+            out["gaps"] = gaps
+            out["technician_inspection_required"] = tech
     assignment = actor.assignment if not actor.is_owner else await access.live_assignment(db, job.id)
     out["assignment"] = await assignments.view(db, assignment) if assignment is not None else None
     return out
