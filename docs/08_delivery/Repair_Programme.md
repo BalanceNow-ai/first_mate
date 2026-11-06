@@ -390,18 +390,43 @@ The owner requested guided problem photos and access information, likely parts a
 - Source baseline inspected for this specification: `main@1ba32445a7f84a0b356682d8f5bb28ffb3711e5f`.
 - Work order: shared job/grants/private media → guided capture/measurements/brief/scope → invoice explanation → reciprocal feedback/moderation → integrated verification and landing. Complete all four capabilities; use provider substitutes/manual paths to avoid deferring a whole feature for missing live credentials.
 
-| Requirements | Scope | Status | Evidence / next action |
-|---|---|---|---|
-| SJ-01–SJ-03 | Persisted adaptive capture, unclear evidence, safe gaps | SPECIFIED_NOT_IMPLEMENTED | Implement owner capture/resume and missing-evidence flows |
-| SJ-04–SJ-05 | Dimensions, provenance, provisional parts and unknown suitability | SPECIFIED_NOT_IMPLEMENTED | Implement typed measurements and catalogue/fitment reuse |
-| SJ-06–SJ-07 | Contractor organization grants, isolation, revocation and stale publication | SPECIFIED_NOT_IMPLEMENTED | Implement membership, section grants and worker checks |
-| SJ-08–SJ-10 | Revisioned brief, requests, confirmation invalidation and explicit scope changes | SPECIFIED_NOT_IMPLEMENTED | Implement owner/contractor preparation and exact-revision decisions |
-| SJ-11–SJ-15 | Source-linked invoice explanation, arithmetic, questions and standalone uploads | SPECIFIED_NOT_IMPLEMENTED | Implement extraction/correction/comparison with manual/provider paths |
-| SJ-16–SJ-18 | Reciprocal eligibility, blind reveal, responses and moderation | SPECIFIED_NOT_IMPLEMENTED | Implement private job-specific feedback and 14-day lifecycle |
-| SJ-19–SJ-22 | Media security, injection resistance, concurrency and outages | SPECIFIED_NOT_IMPLEMENTED | Execute concrete negative and recovery cases |
-| SJ-23–SJ-24 | Real Flutter/API/local storage journeys and affected regressions | SPECIFIED_NOT_IMPLEMENTED | Execute integrated acceptance; record exact code identities and limitations |
+Evidence keys: `B:` backend pytest module (PostgreSQL + pgvector, real signed tokens);
+`J-API:` `scripts/e2e/service_jobs_api_journey.py` against the local stack (real GoTrue +
+Mailpit, VersityGW object store behind nginx, worker processing, CLI-provisioned
+organizations, a third unrelated owner/org); `J-SJ:` `frontend/e2e/service_jobs_journey.mjs`
+and `J-INV:` `frontend/e2e/invoice_journey.mjs` (Flutter web in Chromium against the stack);
+`F:` Flutter widget/contract tests on captured real payloads. "Live provider" means a real
+vision/OCR model on real photographs — not performed (spec §14 requires separate spend
+authority); the local substitute proves orchestration and contracts only.
 
-The implementer must split these grouped rows into individual requirement dispositions where outcomes differ, cite executed checks, and distinguish code not implemented from code implemented with live validation pending. No new hosted CI is required by this extension.
+| ID | Implementation | Executed evidence | Status |
+|---|---|---|---|
+| SJ-01 | Job from a vessel (`entry_point`), vessel-context snapshot with explicit correction, server-side resume of requests/assets/measurements | B:test_service_jobs_core_jobs (create/correct, resume), J-API, J-SJ | RESOLVED_AND_VERIFIED |
+| SJ-02 | Deterministic next-request guidance with reasons (`guidance.py`); blurred/unknown input → "unclear — retake", never invented text (`vision.local_fixture`) | B:test_service_jobs_core_evidence (11 scenarios × 3 end states), test_service_prep_* (SJ-02), J-API, J-SJ | RV (orchestration); live visual accuracy: IMPLEMENTED_EXTERNAL_VALIDATION_PENDING |
+| SJ-03 | "Cannot safely access" → visible gap + technician flag; hazardous wording blocklist on every generated and user-written prompt | B:test_service_jobs_core_evidence (SJ-03), J-API, J-SJ | RV |
+| SJ-04 | Typed dimensions (ID ≠ OD ≠ grade), original unit/precision, central conversion, photo estimate needs reference + uncertainty and stays `unknown` | B:test_service_prep_* (SJ-04 ×4), J-API | RV |
+| SJ-05 | Provisional parts/tools with open requirements, real catalogue candidates with central fitment, no fabricated SKU, owner-only cart add | B:test_service_prep_* (SJ-05), J-SJ | RV |
+| SJ-06 | Per-request access (`access.py`, SJ-D3): one live accepted assignment, owner-chosen sections, restricted per-member flag; snapshot-only unless `live_updates`; new organization sees no previous organization's prices/notes | B:test_service_jobs_access, test_service_jobs_core_grants, test_service_prep_idor (30 endpoints), test_service_jobs_visibility, test_service_media* IDOR, J-API (unassigned member, org admin, third party) | RV |
+| SJ-07 | Revocation/membership removal/reassignment apply to the next request and to publication (`runs.publish` re-checks under the job lock); signed URLs ≤ 300 s | B:test_service_media (SJ-07), test_service_jobs_core_grants, test_service_jobs_access, J-API (revoked contractor: no job, no URL) | RV |
+| SJ-08 | Owner preview → immutable published brief (digest), contractor acknowledgement incl. "incomplete" with a requested view, owner answers | B:test_service_prep_* (SJ-08), J-API, J-SJ | RV |
+| SJ-09 | Measurement/item revisions are new rows; changed evidence supersedes dependent confirmations, items, analysis and briefs | B:test_service_prep_* (SJ-09) | RV |
+| SJ-10 | Scope revisions with digest; owner-only decision on one exact revision (unique, Idempotency-Key); later change needs a new decision; document text cannot decide | B:test_service_prep_* (SJ-10, concurrent decisions), J-API, J-SJ | RV |
+| SJ-11 | Invoice revisions with immutable `extracted` + reviewed `fields`, page/region per field/line, low-certainty confirmation | B:test_service_invoices_api (SJ-11), J-API, J-INV | RV (synthetic PDFs, local extractor); live extraction accuracy: EXT |
+| SJ-12 | Decimal/minor-unit arithmetic with currency exponents; mixed/missing currency and tax stay explicit unknowns | B:test_service_invoices_math, test_service_invoices_api (SJ-12), J-INV | RV |
+| SJ-13 | Comparison with accepted scope/changes: matches / differs / additional with approval record or "no approval record available"; unreadable → comparison unavailable; duplicates are questions | B:test_service_invoices_api (SJ-13, plural kinds, unreadable values), J-API, J-INV | RV |
+| SJ-14 | Editable factual questions; explicit send with chosen documents (needs the `invoices` section); attributed responses; no payment/dispute/ledger effect | B:test_service_invoices_api (SJ-14, asserts no Order/PointsTransaction/PaymentEvent change), J-API, J-INV | RV |
+| SJ-15 | Standalone invoice: full owner explanation, no contractor access, no feedback eligibility | B:test_service_invoices_api (SJ-15), J-INV | RV |
+| SJ-16 | Eligibility from recorded attendance/completion only; one review per side/organization; N/A and absent ≠ zero; pre-attendance cancellation ineligible | B:test_service_feedback* (SJ-16 ×8), J-API, J-SJ | RV |
+| SJ-17 | Server-owned blind window (14 days from the eligibility event), reveal on both submitted or by the idempotent sweep; no side channels | B:test_service_feedback* (SJ-17 ×5, byte-identical views, outbox payloads), J-API, J-SJ | RV |
+| SJ-18 | Responses/correction requests/addenda, reports, case-scoped moderation with audited actions; no public scores/rankings | B:test_service_feedback_moderation (SJ-18 ×7), J-INV (moderator resolves a case) | RV |
+| SJ-19 | Magic-byte typing, pixel/page/size limits, inert-PDF validation, EXIF/GPS-free derivatives (images and PDFs), scanner failure → quarantined | B:test_service_media (SJ-19), test_service_media_s3 (real VersityGW), J-API (GPS removed, unsigned refused) | RV (local scanner substitute); production clamd: EXT |
+| SJ-20 | Photo/PDF/invoice text is data: no state, access, confidence, approval or commercial change; restricted values masked from provider input | B:test_service_prep_* (SJ-20), test_service_invoices_api (SJ-20), masking tests | RV |
+| SJ-21 | Expected-version 409s, idempotency keys, unique decisions/reviews, leases + fencing for media/analysis/extraction, job-before-run lock order | B:test_service_media (SJ-21), test_service_feedback_concurrency, test_service_jobs_core_jobs, runs publication race tests, invoice/asset deadlock test | RV |
+| SJ-22 | `disabled`/failed providers report honest unavailability; manual capture, measurement, preparation, invoice entry/correction remain usable | B:test_service_prep_* (SJ-22), test_service_invoices_api (SJ-22), F (unavailable states) | RV |
+| SJ-23 | Owner→contractor preparation, invoice and feedback journeys through Flutter + API + PostgreSQL + private storage | J-API, J-SJ, J-INV (see §5 service-jobs rows) | RV (local stack) |
+| SJ-24 | Existing catalogue, checkout, rewards and FM-01…FM-05 regressions | full backend suite; api_journey 39/39; catalogue/commerce/engagement browser journeys (§5) | RV |
+
+No new hosted CI is required by this extension.
 
 ### Implementation record (started 2026-11-06 from `main@2566107`)
 
@@ -425,6 +450,21 @@ Flutter journeys → integrated acceptance.
 | SJ-D6 | Scanning: `clamd` in production; `local_signature` (EICAR + structural checks — **not** a malware scanner) only in development/test; any scanner failure keeps the upload quarantined. |
 | SJ-D7 | Vision/OCR/extraction providers: `local_fixture` (development/test substitute: proves orchestration and contracts, not visual accuracy), `openai` (configured path; live evaluation pending separate spend authority) and `disabled` (manual capture/measurement/correction paths stay fully usable). |
 | SJ-D8 | Money: invoice amounts are exact decimals in the invoice's stated currency (Numeric(14,4) + ISO code, nulls kept); estimates are integer minor units with a currency. No arithmetic is delegated to a model. |
+| SJ-D9 | Sharing is snapshot-only by default: with `live_updates=false` an assigned contractor reads job content as of the latest published brief plus their own organization's records; collaboration channels (evidence requests, scope, visits, feedback, explicitly shared invoice questions) stay live. `live_updates=true` exposes the granted sections live. One rule (`access.visibility()`) serves every read and action. |
+| SJ-D10 | After reassignment the new organization sees none of the previous organization's scope revisions/decisions (prices), notes, uploads, requests or acknowledgements; owner/assistant evidence stays; another organization's measurements stay as evidence without member identities. A former participant keeps only the minimum participation record for feedback (their own assignment's visit events). |
+| SJ-D11 | Uploads go through the API (size enforced server-side) into a quarantine key; the worker scans, types by magic bytes, decodes under pixel/page limits and writes a metadata-free derivative (images re-encoded; PDF embedded images re-encoded, XMP/metadata dropped, or the upload is rejected). Contractors and providers only ever receive derivatives; originals are owner-only and audited. |
+| SJ-D12 | Invoice questions reach a contractor only by an explicit owner send to an assignment that has the `invoices` section; removing the section withdraws them. Standalone invoices cannot be shared. |
+| SJ-D13 | Notifications are one content-free template (`service_job_update`: kind + job id); ratings, review text, codes, document text and amounts never enter the outbox. |
+
+**Known limits of this increment (documented, not hidden):** a reported *response* (as
+opposed to a review) cannot yet be reported separately; feedback submission is idempotent
+by review state rather than a stored key; inactive-draft deletion notice is audit-only (no
+notification kind); EXIF capture time is not recorded; automatic archive after 24 months is
+configuration only; scanned (image-only) PDFs are not rasterised for the OpenAI extraction
+adapter (manual entry instead) and image pixels sent to a live provider cannot be masked;
+blur/darkness thresholds are tuned on synthetic images only; the vision/extraction
+`openai` adapters are contract-tested with fake SDK clients only.
+
 
 ### Extension decisions and limits
 

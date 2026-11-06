@@ -278,8 +278,9 @@ contract in a later release) or deployed under maintenance:
 | 0003 (points owed, ledger kinds) | yes (additive column and wider CHECK) | normal |
 | 0004 (fitment-rule scope CHECKs; malformed rules quarantined) | yes; the old release can no longer *insert* a malformed rule (it gets a database error instead of storing it) | normal; check `cli fitment-audit` afterwards |
 | 0005 (push per-device outcomes, lease token) | yes (additive columns with defaults; ignored by the old release) | normal; downgrade available |
+| 0006 (service jobs: new tables + `moderator` role) | yes (new tables only; the role CHECK only widens) | normal; downgrade available (moderators become customers); configure §12 before enabling |
 
-A rollback of the application across 0003–0005 is code-only (§9); the schema can stay.
+A rollback of the application across 0003–0006 is code-only (§9); the schema can stay.
 Rollback with representative writes has been exercised only on the local stack.
 
 ### 7b. Fitment-rule scope audit (revision 0004)
@@ -312,6 +313,10 @@ deploy/restore.sh --file /var/backups/helm/helm-<label>-<ts>.dump --confirm-rest
   application stopped so the matching release can be deployed.
 * Redis (queue/rate-limit state) and Typesense (rebuilt from the database) are not backed
   up.
+* Service-job media lives in the private object store (§12), **not** in the database dump.
+  Back the bucket up with the provider's versioning/replication; a database restore without
+  the matching objects leaves assets whose downloads fail (they are never served from
+  anywhere else).
 
 ## 9. Rollback
 
@@ -470,3 +475,63 @@ Compose/deploy-only variables (not read by the application): `HELM_PUBLIC_URL`,
 | `SENTRY_DSN` | "" | server-side DSN (optional) |
 | `SENTRY_TRACES_SAMPLE_RATE` | `0.1` |  |
 | `WORKER_HEARTBEAT_STALE_SECONDS` | `180` | `/ready` marks the celery heartbeat stale after this |
+
+## 12. Service jobs (Features 4–7)
+
+Contract: `docs/04_technical_spec/Service_Jobs_and_Contractor_Assistant_Specification.md`;
+decisions SJ-D1… in the Repair Programme §8.
+
+**Private object storage.** Production: a private S3-compatible bucket
+(`OBJECT_STORE_BACKEND=s3`, `OBJECT_STORE_ENDPOINT_URL` (empty for AWS),
+`OBJECT_STORE_PUBLIC_ENDPOINT_URL` — the host browsers use for signed downloads,
+`OBJECT_STORE_BUCKET`, `OBJECT_STORE_REGION`, `OBJECT_STORE_ACCESS_KEY`,
+`OBJECT_STORE_SECRET_KEY`). The bucket must block public access; keys are random and never
+returned by the API; signed download URLs live at most `SIGNED_URL_SECONDS` (≤ 300; refused
+above). `cli storage-init` creates the bucket idempotently (the local stack runs it on
+`up`). Locally the stack runs VersityGW (`objectstore` service, internal networks only)
+and nginx forwards `GET /helm-private/…` with the original Host so SigV4 verifies; unsigned,
+expired, tampered, PUT and DELETE requests are refused. `local_fs` is test-only.
+
+**Upload scanning.** Production: `UPLOAD_SCANNER=clamd` with `CLAMD_HOST`/`CLAMD_PORT`
+(INSTREAM). `local_signature` (EICAR + structural checks) is a development/test substitute
+and is refused outside dev/test; `disabled` keeps every upload quarantined. Any scanner
+error or timeout leaves the upload quarantined — it never becomes available.
+
+**Vision/OCR/extraction.** `SERVICE_VISION_PROVIDER=openai` (needs `OPENAI_API_KEY`;
+model `SERVICE_VISION_MODEL`) or `disabled`. `local_fixture` is test-only. With
+`disabled` (or an outage) analysis/extraction report "unavailable" and the manual paths
+(capture, measurements, preparation, invoice manual entry/correction) keep working. **Live
+provider evaluation has not been performed** (separate spend authority required; spec §14).
+
+**Contractor organizations** are provisioned by an operator (audited):
+
+```bash
+docker compose … run --rm --no-deps api cli create-contractor-org "Harbour Marine Ltd" [--nzbn …]
+docker compose … run --rm --no-deps api cli add-contractor-member <org_id> tech@example.co.nz --role member|admin
+docker compose … run --rm --no-deps api cli remove-contractor-member <org_id> tech@example.co.nz
+docker compose … run --rm --no-deps api cli list-contractor-orgs
+docker compose … run --rm --no-deps api cli grant-role moderator@example.co.nz moderator
+```
+
+The member must have signed up first. Platform admins can do the same through
+`/api/v1/contractors/organizations…`. Membership grants nothing by itself: only an owner's
+accepted assignment exposes a job, and only the sections the owner chose.
+
+**Background tasks** (Celery beat): `service-media-recover` (5 min; reprocesses unprocessed
+or lease-expired uploads), `service-media-retention` (hourly; abandoned upload intents
+after `SERVICE_UPLOAD_INTENT_HOURS`, inactive unassigned drafts after
+`SERVICE_DRAFT_RETENTION_DAYS` with an audited notice first; never jobs with a retention
+hold, an open moderation case, an assignment or an invoice; purges deleted objects),
+`service-analysis-sweep` and `service-invoice-sweep` (5 min; re-run lost/lease-expired
+analysis and extraction runs), `reveal-due-service-feedback` (5 min; reveals blind feedback
+at the end of the 14-day window — idempotent). Archiving completed jobs after
+`SERVICE_ARCHIVE_AFTER_MONTHS` is configuration only (no automatic archive task yet).
+
+**Limits** (all configurable): `SERVICE_JOB_MAX_ASSETS` (40), `SERVICE_IMAGE_MAX_BYTES`
+(10 MiB), `SERVICE_PDF_MAX_BYTES` (20 MiB), `SERVICE_PDF_MAX_PAGES` (50),
+`SERVICE_JOB_MAX_TOTAL_BYTES` (250 MiB), `SERVICE_IMAGE_MAX_PIXELS`,
+`SERVICE_OWNER_STORAGE_BYTES`, `SERVICE_ANALYSIS_RUNS_PER_DAY`, `FEEDBACK_WINDOW_DAYS` (14).
+
+**Not provided by this release:** production bucket/scanner provisioning, live vision/OCR
+evaluation, public contractor ratings, contractor payments/payouts, invoice payment or
+dispute actions, and automatic archive after 24 months.
