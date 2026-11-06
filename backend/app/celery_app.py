@@ -78,6 +78,8 @@ celery.conf.update(
         },
         # Service-job media: re-process unprocessed/lease-expired uploads; retention sweep.
         "service-media-recover": {"task": "app.tasks.service_media.recover_assets", "schedule": 300.0},
+        # Evidence analysis runs that were never picked up or whose lease expired.
+        "service-analysis-sweep": {"task": "app.tasks.service_analysis.sweep_pending", "schedule": 300.0},
         "service-media-retention": {
             "task": "app.tasks.service_media.retention_sweep",
             "schedule": crontab(minute=40),  # hourly
