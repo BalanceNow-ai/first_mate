@@ -10,7 +10,11 @@
 //   says "comparison unavailable" and sharing is unavailable → a job-linked invoice (job,
 //   accepted assignment and accepted scope set up through the API) shows matches,
 //   differences and "no approval record available" → the owner edits one suggested
-//   question and sends it with a document → the contractor (second browser context)
+//   question; sending it is refused because invoice questions aren't shared with the
+//   contractor yet (the assignment was made without the "invoices" section, and the
+//   contractor can't open invoice questions) → the app explains and offers "Edit sharing"
+//   → the owner adds "Invoice questions you choose to share" on the job's Sharing tab →
+//   sends it with a document → the contractor (second browser context)
 //   replies with a corrected invoice → the owner sees the attributed reply → a moderator
 //   resolves a reported review with a reason → an unrelated user cannot open the invoice.
 //
@@ -484,7 +488,8 @@ async function main() {
       affected_system: 'plumbing', affected_equipment: 'freshwater pump',
     }), 201, 'job');
     const assignment = await must(api('POST', `/service-jobs/${job.id}/assignments`, tokOwner,
-      { organization_id: orgId, sections: ['summary', 'evidence', 'scope', 'invoices'] },
+      // Invoice questions are NOT shared yet: the owner adds that section from the UI in step 5.
+      { organization_id: orgId, sections: ['summary', 'evidence', 'scope'] },
       { 'Idempotency-Key': `e2e-assign-${run}` }), 201, 'assignment');
     await must(api('POST', `/contractors/assignments/${assignment.id}/accept`, tokTech, { member_user_ids: [techMe.id] }), 200, 'accept');
     const scope = await must(api('POST', `/service-jobs/${job.id}/scopes`, tokTech, {
@@ -540,8 +545,34 @@ async function main() {
     await tap(owner, button(owner, 'Save draft'));
     const draft = await (await drafted).json();
     step('owner edited the suggested question into a private draft', draft.status === 'draft' && draft.text === edited);
+    const notShared = await api('GET', `/service-jobs/${job.id}/invoice-questions`, tokTech);
+    step('the contractor cannot open invoice questions while that section is not shared',
+      notShared.status === 403 && notShared.body?.code === 'section_not_shared');
+    await tap(owner, button(owner, 'Send to the contractor…'));
+    await tap(owner, owner.getByRole('checkbox', { name: /Revision 1 document/ }).first());
+    const refused = responseOf(owner, isCall('POST', new RegExp(`/questions/${draft.id}/send$`)));
+    await tap(owner, button(owner, /^Send$/));
+    const refusedResp = await refused;
+    const refusedBody = await refusedResp.json();
+    step('sending without the invoices section is refused and explained, with an offer to edit sharing',
+      refusedResp.status() === 409 && refusedBody.code === 'invoices_section_not_shared' &&
+        await seen(owner, text(owner, 'Invoice questions aren’t shared with this contractor')) &&
+        await seen(owner, text(owner, /nothing has been sent/)));
+    await tap(owner, owner.getByRole('dialog').or(owner.getByRole('alertdialog')).getByRole('button', { name: 'Edit sharing' }));
+    await seen(owner, text(owner, /Shared with /), 45_000);
+    step('"Edit sharing" opens the job’s Sharing tab', owner.url().includes(`/service-jobs/${job.id}/sharing`), owner.url());
+    await tap(owner, button(owner, 'Change shared sections'));
+    await tap(owner, owner.getByRole('checkbox', { name: /Invoice questions you choose to share/ }).first());
+    const shareResp = responseOf(owner, isCall('PATCH', new RegExp(`/service-jobs/${job.id}/assignments/[^/]+$`)));
+    await tap(owner, button(owner, /^Save$/));
+    const shared = await (await shareResp).json();
+    step('owner added “Invoice questions you choose to share” for the contractor',
+      shared.sections.includes('invoices') && await seen(owner, text(owner, /Invoice questions you choose to share/)),
+      shared.sections.join(','));
     const before = await must(api('GET', `/service-jobs/${job.id}/invoice-questions`, tokTech), 200, 'contractor list');
     step('nothing reaches the contractor before Send', before.length === 0);
+    await owner.goto(`${WEB}/#/invoices/${jid}`);
+    await seen(owner, text(owner, 'Draft — not sent'), 45_000);
     await tap(owner, button(owner, 'Send to the contractor…'));
     await tap(owner, owner.getByRole('checkbox', { name: /Revision 1 document/ }).first());
     const sent = responseOf(owner, isCall('POST', new RegExp(`/questions/${draft.id}/send$`)));

@@ -4,13 +4,19 @@
 //
 //   owner: confirmed signup (Mailpit link) → add vessel → "Get help with a problem" →
 //   next suggested request → upload a synthetic photo through the file chooser (intent →
-//   PUT → scan/decode) and see it processed → "I cannot safely get this" → record an owner
-//   measurement → invite a contractor organisation (provisioned with the audited CLI) with
-//   chosen sections, preview exactly, send → contractor admin (second browser context)
-//   accepts and assigns themself → owner previews and publishes the brief → contractor reads
-//   it and requests one more view → owner answers → contractor confirms a measurement and
-//   proposes a scope → owner accepts that exact revision → contractor records attendance and
-//   completion → both submit blind feedback → reviews reveal → a third unrelated user gets nothing.
+//   PUT → scan/decode) and see it processed → upload a synthetic PDF document (job_document)
+//   and see it processed; a PDF with a JavaScript action is refused with a plain reason →
+//   "I cannot safely get this" → record an owner measurement → invite a contractor
+//   organisation (provisioned with the audited CLI) with chosen sections and live updates
+//   left off (the default, explained), preview exactly, send → contractor admin (second
+//   browser context) accepts and assigns themself and is told the owner hasn't published a
+//   brief yet → owner previews and publishes the brief and downloads the printable brief →
+//   contractor sees "Showing the brief published on <date>", reads it, downloads it and
+//   requests one more view → owner answers → contractor confirms a measurement and proposes
+//   a scope → owner accepts that exact revision → contractor records attendance and
+//   completion → both submit blind feedback → reviews reveal → a third unrelated user gets
+//   nothing. Printable briefs are fetched with the Authorization header (never a token in a
+//   URL) and saved from a blob download.
 //
 // Usage:
 //   node frontend/e2e/service_jobs_journey.mjs
@@ -178,6 +184,31 @@ function syntheticPng(w = 320, h = 240) {
     chunk('IDAT', deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]);
 }
 
+/** A minimal one-page text PDF; `active` adds an /OpenAction JavaScript action (must be refused). */
+function syntheticPdf(lines, active = false) {
+  const esc = (t) => t.replace(/[\\()]/g, (c) => `\\${c}`);
+  const stream = lines.map((t, i) => `BT /F1 11 Tf 1 0 0 1 50 ${780 - 18 * i} Tm (${esc(t)}) Tj ET\n`).join('');
+  const objs = [
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+    '<< /Type /Pages /Kids [4 0 R] /Count 1 >>',
+    `<< /Length ${Buffer.byteLength(stream, 'latin1')} >>\nstream\n${stream}\nendstream`,
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 3 0 R >>',
+    `<< /Type /Catalog /Pages 2 0 R${active ? ' /OpenAction 6 0 R' : ''} >>`,
+  ];
+  if (active) objs.push('<< /S /JavaScript /JS (app.alert\\(1\\)) >>');
+  let out = '%PDF-1.4\n';
+  const offsets = [];
+  objs.forEach((o, i) => {
+    offsets.push(Buffer.byteLength(out, 'latin1'));
+    out += `${i + 1} 0 obj\n${o}\nendobj\n`;
+  });
+  const xref = Buffer.byteLength(out, 'latin1');
+  out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n`;
+  for (const off of offsets) out += `${String(off).padStart(10, '0')} 00000 n \n`;
+  out += `trailer\n<< /Size ${objs.length + 1} /Root 5 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+  return Buffer.from(out, 'latin1');
+}
+
 // ------------------------------------------------------------------ UI helpers
 const button = (page, name) => page.getByRole('button', { name }).first();
 const lastButton = (page, name) => page.getByRole('button', { name }).last();
@@ -243,7 +274,7 @@ async function choose(page, label, option) {
 }
 
 async function newPage(browser) {
-  const context = await browser.newContext({ viewport: { width: 1280, height: 1100 } });
+  const context = await browser.newContext({ viewport: { width: 1280, height: 1100 }, acceptDownloads: true });
   const page = await context.newPage();
   page.on('pageerror', (e) => console.log(`  [page error] ${e.message}`));
   currentPages.push(page);
@@ -261,6 +292,28 @@ async function signIn(page, email, password) {
 async function openTab(page, base, tab) {
   await page.goto(`${WEB}/#${base}/${tab}`);
   await page.waitForTimeout(500);
+}
+
+/** Taps "Download printable brief" and checks: an authenticated fetch (header, no token in
+ * the URL) of the export, then a browser download of the HTML from a blob URL. */
+async function downloadBrief(page) {
+  const exportReq = page.waitForRequest((r) => r.method() === 'GET' && /\/briefs\/[^/]+\/export$/.test(new URL(r.url()).pathname),
+    { timeout: 30_000 });
+  const exportResp = responseOf(page, isCall('GET', /\/briefs\/[^/]+\/export$/));
+  const download = page.waitForEvent('download', { timeout: 30_000 });
+  await tap(page, button(page, 'Download printable brief'));
+  const req = await exportReq;
+  const resp = await exportResp;
+  const dl = await download;
+  const path = await dl.path();
+  const html = path ? readFileSync(path, 'utf8') : '';
+  const url = new URL(req.url());
+  return {
+    ok: resp.status() === 200 && /^Bearer /.test(req.headers().authorization ?? '') && url.search === ''
+      && !/token|access/i.test(url.href) && dl.url().startsWith('blob:') && /\.html$/.test(dl.suggestedFilename())
+      && /<html/i.test(html),
+    detail: `${dl.suggestedFilename()} ${html.length} bytes`,
+  };
 }
 
 async function rateAll(page, n) {
@@ -366,6 +419,25 @@ async function main() {
       mine?.status === 'available' && await visible(text(page, 'Ready')) && await visible(text(page, 'Framing: not assessed')),
       `${mine?.width}×${mine?.height} ${mine?.detected_type}`);
 
+    // 5b. A PDF document (job_document) through the document picker; active content is refused.
+    for (const [name, pdf, expectOk] of [
+      ['pump-service-record.pdf', syntheticPdf(['Freshwater pump service record', 'Outlet hose 25 mm ID']), true],
+      ['pump-manual.pdf', syntheticPdf(['Pump manual'], true), false],
+    ]) {
+      const docChooser = page.waitForEvent('filechooser', { timeout: 30_000 });
+      const docIntent = responseOf(page, isCall('POST', /\/assets\/intents$/));
+      // The extra-upload row (the first such button belongs to the next suggested request).
+      await tap(page, page.getByRole('button', { name: 'Upload a document (PDF)' }).nth(1));
+      await (await docChooser).setFiles({ name, mimeType: 'application/pdf', buffer: pdf });
+      const di = await (await docIntent).json();
+      await visible(text(page, expectOk ? 'Document added' : /Document rejected: The PDF contains active content/), 60_000);
+      const doc = (await api('GET', `/service-assets/${di.asset.id}`, tokOwner)).body;
+      step(expectOk ? 'PDF document uploaded as job_document and processed'
+        : 'PDF with a JavaScript action refused with a plain reason',
+      di.asset.purpose === 'job_document' && (expectOk ? doc.status === 'available' && doc.pages === 1
+        : doc.status === 'rejected' && doc.rejection_reason === 'active_pdf_content'), `${doc.status} ${doc.rejection_reason ?? ''}`);
+    }
+
     // 6. "I cannot safely get this" on the next request.
     await page.reload();
     await page.waitForTimeout(1500);
@@ -408,17 +480,23 @@ async function main() {
     await dirResp;
     await page.waitForTimeout(500);
     await tap(page, page.getByRole('radio', { name: orgName }).or(page.getByText(orgName, { exact: true })).first());
+    const liveSwitch = page.getByRole('switch', { name: /Live updates/ }).or(page.getByRole('checkbox', { name: /Live updates/ })).first();
+    step('live updates are off by default and explained', await visible(text(page, /as of the brief you publish/))
+      && !(await liveSwitch.isChecked().catch(() => true)));
     const previewResp = responseOf(page, isCall('POST', /\/assignments\/preview$/));
     await tap(page, button(page, 'Preview what they will see'));
     const preview = await (await previewResp).json();
     step('sharing preview lists exactly the chosen sections', preview.organization.id === orgId
       && preview.withheld.includes('access_restricted') && await visible(text(page, /Preview: what Journey Marine/)),
       preview.sections.map((s) => s.section).join(','));
+    step('the preview explains what live updates off means', preview.live_updates === false
+      && await visible(text(page, /Live updates off: They will see the job/)));
     const inviteResp = responseOf(page, isCall('POST', /\/assignments$/));
     await tap(page, button(page, 'Send invitation'));
     const invite = await inviteResp;
     const assignment = await invite.json();
-    step('invitation sent with an Idempotency-Key', invite.status() === 201 && !!invite.request().headers()['idempotency-key'],
+    step('invitation sent with an Idempotency-Key (live updates off)', invite.status() === 201
+      && !!invite.request().headers()['idempotency-key'] && assignment.live_updates === false,
       assignment.sections.join(','));
 
     // 10. Contractor (second browser context): inbox → accept → assign themself.
@@ -434,6 +512,12 @@ async function main() {
     await tap(pageC, dialog(pageC).getByRole('button', { name: 'Confirm', exact: true }));
     const accepted = await (await acceptResp).json();
     step('org admin accepted and assigned a member', accepted.status === 'accepted' && accepted.members.length === 1);
+    const conBase = `/contractor/jobs/${job.id}`;
+    await openTab(pageC, conBase, 'brief');
+    const early = await api('GET', `/service-jobs/${job.id}`, tokCon);
+    step('before a brief is published the contractor sees only the header, and is told why',
+      early.body.snapshot_state === 'no_brief_published' && early.body.issue_description == null
+        && await visible(text(pageC, /The owner hasn't published a brief yet\. Until they do/)));
 
     // 11. Owner: ready for review, then preview and publish the brief.
     await openTab(page, base, 'overview');
@@ -457,10 +541,21 @@ async function main() {
     const published = await (await pubResp).json();
     step('owner previewed and published the brief revision', published.status === 'published'
       && published.content_digest === briefPreview.content_digest, `revision ${published.revision_number}`);
+    await page.reload();
+    await page.waitForTimeout(1000);
+    const ownerDl = await downloadBrief(page);
+    step('owner downloaded the printable brief (authenticated fetch → blob download)', ownerDl.ok, ownerDl.detail);
 
     // 12. Contractor reads the brief and requests one more view.
-    const conBase = `/contractor/jobs/${job.id}`;
     await openTab(pageC, conBase, 'brief');
+    await pageC.reload();
+    await pageC.waitForTimeout(1000);
+    const snap = await api('GET', `/service-jobs/${job.id}`, tokCon);
+    step('contractor sees "Showing the brief published on <date>" (live updates off)',
+      snap.body.snapshot_state === 'brief' && snap.body.snapshot_brief_id === published.id
+        && await visible(text(pageC, /Showing the brief published on/)));
+    const conDl = await downloadBrief(pageC);
+    step('contractor downloaded the printable brief (authenticated fetch → blob download)', conDl.ok, conDl.detail);
     step('contractor reads the published brief with gaps and limitations',
       await visible(text(pageC, /Brief — revision/)) && await visible(text(pageC, 'Gaps and open requests:')) && await visible(text(pageC, 'Limitations')));
     await tap(pageC, button(pageC, 'Request one more view'));
