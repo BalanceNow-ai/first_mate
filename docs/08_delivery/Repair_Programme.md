@@ -500,3 +500,18 @@ blur/darkness thresholds are tuned on synthetic images only; the vision/extracti
 4. Invoice explanations preserve document evidence and calculate amounts deterministically; missing approval records produce questions, not accusations.
 5. Build authority covers local implementation/verification and repository landing. Production deployment/migration, paid calls/provisioning, live messages, payments and public reputation effects remain outside automatic authority. Complete local/manual/provider-adapter work without waiting for production credentials.
 6. Preserve existing architecture and repair decisions (including D21–D23); contractor membership is separate from delivery/operator roles.
+
+### Service-jobs checkpoint
+
+- 2026-11-06: foundation (`8c0171d`, `5d5a821`: data model + migration 0006, authorization,
+  run fencing, storage interface) → five backend workstreams (media, jobs/grants/requests,
+  preparation/scope, invoices, feedback/moderation) → integrated API journey → independent
+  backend review (all findings fixed) → Flutter workstreams (owner/contractor journeys,
+  invoices/moderation, snapshot sharing/brief export/PDF uploads) → independent client/
+  contract review (all findings fixed) → CSP fix found by the through-proxy browser run.
+  All SJ-01…SJ-24 dispositioned above; landed through a pull request into `main`.
+- **Next (outside this build's authority):** provision a private production bucket and a
+  clamd scanner; run the spec §14 evaluated multimodal set with a live vision/OCR provider
+  (separate spend authority) before enabling real-owner AI analysis; validate notifications
+  with live Resend/FCM; operator procedure for contractor onboarding; production
+  deployment with migration 0006.
