@@ -160,13 +160,33 @@ async function fill(page, label, value) {
   // Flutter re-creates its DOM input when focus moves; retry until the value sticks.
   for (let attempt = 0; attempt < 4; attempt++) {
     await box.click();
-    await box.fill(value);
+    // Type real key events (as a person would): Flutter's controller sometimes misses a
+    // programmatic DOM value change under load, leaving the field empty in the form state.
+    await box.fill('');
+    await box.pressSequentially(value, { delay: 15 });
     await sleep(150);
     try {
       if ((await box.inputValue({ timeout: 2000 })) === value) return;
     } catch {}
   }
   throw new Error(`could not enter "${label}"`);
+}
+// Flutter web can re-create an earlier input's DOM node while a later field gains focus,
+// dropping its value; fill a group, then re-check every field and refill any that lost it.
+async function fillAll(page, pairs) {
+  for (const [label, value] of pairs) await fill(page, label, value);
+  for (let round = 0; round < 3; round++) {
+    let lost = false;
+    for (const [label, value] of pairs) {
+      const box = page.getByRole('textbox', { name: label }).first();
+      if ((await box.inputValue({ timeout: 2000 }).catch(() => '')) !== value) {
+        lost = true;
+        await fill(page, label, value);
+      }
+    }
+    if (!lost) return;
+  }
+  throw new Error('form values did not stick');
 }
 
 async function signupConfirmSignIn(page, email, name) {
@@ -322,9 +342,11 @@ async function main() {
       await fill(customer, 'Longitude', PIN.lng);
       await click(customer, 'Set pin');
       await see(customer, 'Inside Hauraki Gulf');
-      await fill(customer, 'Location name (e.g. bay or anchorage)', 'Motuihe Channel');
-      await fill(customer, 'Vessel name *', 'Journey Runner');
-      await fill(customer, 'Contact phone *', '021 555 0198');
+      await fillAll(customer, [
+        ['Location name (e.g. bay or anchorage)', 'Motuihe Channel'],
+        ['Vessel name *', 'Journey Runner'],
+        ['Contact phone *', '021 555 0198'],
+      ]);
       await click(customer, 'Get Helm Dash quote');
       await see(customer, 'Helm Dash quote');
       await click(customer, 'Continue to review');
