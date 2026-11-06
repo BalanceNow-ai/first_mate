@@ -1,0 +1,70 @@
+{
+  "organization": {
+    "id": "6b227433-4c77-44a5-aec1-11fffde39628",
+    "name": "Fixture Marine ecaf6296",
+    "trading_name": "Fixture Marine Services"
+  },
+  "sections": [
+    {
+      "section": "summary",
+      "label": "Problem summary and vessel details",
+      "exposes": [
+        "title",
+        "issue_description",
+        "affected_system",
+        "affected_equipment",
+        "occurs_when",
+        "already_tried",
+        "urgency",
+        "vessel_context"
+      ],
+      "counts": {},
+      "note": null
+    },
+    {
+      "section": "evidence",
+      "label": "Photos, documents and evidence requests",
+      "exposes": [
+        "evidence requests and answers",
+        "photos and documents (metadata-stripped copies)"
+      ],
+      "counts": {
+        "evidence_requests": 0,
+        "available_assets": 0
+      },
+      "note": null
+    },
+    {
+      "section": "measurements",
+      "label": "Measurements",
+      "exposes": [
+        "measurements with their method and source"
+      ],
+      "counts": {
+        "measurements": 1
+      },
+      "note": null
+    },
+    {
+      "section": "preparation",
+      "label": "Preparation list and briefs",
+      "exposes": [
+        "preparation items",
+        "published briefs"
+      ],
+      "counts": {
+        "preparation_items": 1,
+        "published_briefs": 0
+      },
+      "note": null
+    }
+  ],
+  "withheld": [
+    "access_general",
+    "access_restricted",
+    "scope",
+    "invoices"
+  ],
+  "live_updates": false,
+  "live_updates_note": "They will see the job — its summary, photos and documents, observations, measurements and preparation items — as of the brief you publish, not later changes, unless you turn on live updates. Until you publish a brief they see only the job's title and status. Evidence requests and your answers, scope proposals and your decisions, visits and any invoice question you choose to send stay up to date either way."
+}

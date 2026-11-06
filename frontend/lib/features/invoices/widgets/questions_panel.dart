@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:helm_marine/core/api/api_error.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
 import 'package:helm_marine/features/invoices/data/invoice_models.dart';
 import 'package:helm_marine/features/invoices/providers/invoice_providers.dart';
@@ -31,6 +33,8 @@ class _QuestionsPanelState extends ConsumerState<QuestionsPanel> {
       if (mounted && done != null) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(done)));
       }
+    } on _Handled {
+      // Already explained to the person.
     } catch (e) {
       if (mounted) await showMutationError(context, e, onReload: () => _controller.reload());
     } finally {
@@ -82,7 +86,35 @@ class _QuestionsPanelState extends ConsumerState<QuestionsPanel> {
       builder: (context) => _SendDialog(question: q, documents: docs),
     );
     if (chosen == null) return;
-    await _run(() => _controller.sendQuestion(q, chosen), done: 'Question sent to the assigned contractor.');
+    await _run(() async {
+      try {
+        await _controller.sendQuestion(q, chosen);
+      } catch (e) {
+        if (ApiError.from(e)?.code == 'invoices_section_not_shared' && widget.invoice.summary.jobId != null) {
+          if (mounted) await _offerSharing(widget.invoice.summary.jobId!);
+          throw const _Handled();
+        }
+        rethrow;
+      }
+    }, done: 'Question sent to the assigned contractor.');
+  }
+
+  /// The contractor can't receive invoice questions until the owner shares that section.
+  Future<void> _offerSharing(String jobId) async {
+    final edit = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Invoice questions aren’t shared with this contractor'),
+        content: const Text(
+            'The contractor on this job can only receive invoice questions if you add “Invoice questions you choose '
+            'to share” to what they can see. Your draft is kept and nothing has been sent.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Not now')),
+          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Edit sharing')),
+        ],
+      ),
+    );
+    if (edit == true && mounted) GoRouter.of(context).go('/service-jobs/$jobId/sharing');
   }
 
   @override
@@ -318,4 +350,9 @@ class _SendDialogState extends State<_SendDialog> {
       ],
     );
   }
+}
+
+/// An error already explained to the person (no further message).
+class _Handled implements Exception {
+  const _Handled();
 }

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:helm_marine/app.dart';
+import 'package:helm_marine/core/files/file_saver.dart';
 import 'package:helm_marine/core/router.dart';
 import 'package:helm_marine/features/service_jobs/data/media_picker.dart';
 import 'package:helm_marine/features/service_jobs/providers/service_jobs_providers.dart';
@@ -35,6 +36,17 @@ class FakePicker implements MediaPicker {
   Future<PickedMedia?> pick({required bool camera}) async {
     calls.add(camera);
     return result ?? PickedMedia(bytes: Uint8List.fromList(List.generate(64, (i) => i)), name: 'photo.png', mimeType: 'image/png');
+  }
+
+  /// Document picks (a synthetic PDF unless [document] is set).
+  PickedMedia? document;
+  int documentCalls = 0;
+
+  @override
+  Future<PickedMedia?> pickDocument() async {
+    documentCalls++;
+    return document ??
+        PickedMedia(bytes: Uint8List.fromList('%PDF-1.4 synthetic'.codeUnits), name: 'manual.pdf', mimeType: 'application/pdf');
   }
 }
 
@@ -102,6 +114,9 @@ class SjApp {
   final FakeBackend backend;
   final FakePicker picker;
   final FakeOpener opener;
+
+  /// Files handed to the person (e.g. the printable brief), instead of a real download.
+  final List<DownloadedFile> saved = [];
   late final ProviderContainer container;
 
   Future<void> start(String location, {Size size = const Size(1200, 2600)}) async {
@@ -110,6 +125,10 @@ class SjApp {
       ...testOverrides(gateway: gateway, backend: backend),
       mediaPickerProvider.overrideWithValue(picker),
       urlOpenerProvider.overrideWithValue(opener.call),
+      fileSaverProvider.overrideWithValue((file) async {
+        saved.add(file);
+        return 'Downloaded ${file.filename}';
+      }),
       uploadPollIntervalProvider.overrideWithValue(Duration.zero),
     ];
     container = ProviderContainer(overrides: overrides, retry: (_, _) => null);
@@ -137,6 +156,7 @@ class SjApp {
 
   Future<void> tap(Finder finder) async {
     await tester.ensureVisible(finder.first);
+    await tester.pump(); // lay out the scrolled position before hit-testing
     await tester.tap(finder.first);
     await settle();
   }

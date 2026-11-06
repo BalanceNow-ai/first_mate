@@ -124,6 +124,7 @@ class UploadTask {
     required this.localId,
     required this.name,
     required this.stage,
+    this.purpose = 'job_photo',
     this.requestId,
     this.asset,
     this.error,
@@ -133,6 +134,9 @@ class UploadTask {
 
   final String localId;
   final String name;
+
+  /// `job_photo` or `job_document`.
+  final String purpose;
   final String? requestId;
   final UploadStage stage;
   final ServiceAsset? asset;
@@ -146,6 +150,7 @@ class UploadTask {
       UploadTask(
         localId: localId,
         name: name,
+        purpose: purpose,
         requestId: requestId,
         stage: stage ?? this.stage,
         asset: asset ?? this.asset,
@@ -183,10 +188,12 @@ class UploadsController extends Notifier<List<UploadTask>> {
   void dismiss(String localId) => state = [for (final t in state) if (t.localId != localId) t];
 
   /// Uploads [media] (optionally answering [requestId]); returns the final asset.
-  Future<ServiceAsset?> upload(PickedMedia media, {String? requestId, String? caption}) async {
+  Future<ServiceAsset?> upload(PickedMedia media,
+      {String? requestId, String? caption, String purpose = 'job_photo'}) async {
     final task = UploadTask(
       localId: 'u${_seq++}',
       name: media.name,
+      purpose: purpose,
       requestId: requestId,
       stage: UploadStage.uploading,
       bytes: media.bytes,
@@ -196,6 +203,7 @@ class UploadsController extends Notifier<List<UploadTask>> {
       final intent = await _api.createAssetIntent(
         jobId,
         idempotencyKey: newIdempotencyKey('upload'),
+        purpose: purpose,
         evidenceRequestId: requestId,
         caption: caption,
         filename: media.name,
@@ -216,7 +224,7 @@ class UploadsController extends Notifier<List<UploadTask>> {
     if (task == null || task.bytes == null) return null;
     if (task.uploadUrl == null) {
       dismiss(localId);
-      return upload(PickedMedia(bytes: task.bytes!, name: task.name), requestId: task.requestId);
+      return upload(PickedMedia(bytes: task.bytes!, name: task.name), requestId: task.requestId, purpose: task.purpose);
     }
     return _send(task.copyWith(stage: UploadStage.uploading));
   }
@@ -226,6 +234,7 @@ class UploadsController extends Notifier<List<UploadTask>> {
     final task = UploadTask(
       localId: 'u${_seq++}',
       name: media.name,
+      purpose: asset.purpose,
       requestId: asset.evidenceRequestId,
       stage: UploadStage.uploading,
       asset: asset,

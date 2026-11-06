@@ -1,6 +1,6 @@
 {
-  "id": "c8846ba2-66f3-4056-8721-5461b3d4104f",
-  "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+  "id": "de076f70-28c2-4fd7-aee1-96ad1bd82c33",
+  "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
   "category": "part",
   "name": "Replacement hose",
   "purpose": "Replace the leaking or damaged hose section",
@@ -20,7 +20,7 @@
   },
   "depends_on": [
     {
-      "measurement_id": "94119ac7-4d8e-48b6-9098-889de5ecd157",
+      "measurement_id": "76382ab8-7029-485c-9f71-5151bdd82a38",
       "dimension": "hose_internal_diameter",
       "value_text": "25",
       "unit": "mm",
@@ -28,7 +28,7 @@
     }
   ],
   "supporting_asset_ids": [
-    "b7db34c3-cebc-460b-a93b-7533ed49a1f3"
+    "da35ae6e-9899-4c77-a124-ea3241a27ebc"
   ],
   "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
   "origin": "assistant",
@@ -56,15 +56,15 @@
     }
   ],
   "confirmed_product": null,
-  "confirmed_by": "662931a0-32ad-4560-a367-67378e4e539d",
-  "confirmed_at": "2026-11-06T04:39:01.766867Z",
-  "confirmed_job_revision": 11,
+  "confirmed_by": "70cc3540-4da9-4f13-8e08-b2845ea240db",
+  "confirmed_at": "2026-11-06T06:25:07.580626Z",
+  "confirmed_job_revision": 12,
   "evidence_changed_since_confirmation": false,
   "replaced_by_id": null,
   "evidence_request_ids": [],
-  "job_revision": 9,
+  "job_revision": 10,
   "version": 2,
   "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
-  "created_at": "2026-11-06T04:38:59.970388Z",
-  "updated_at": "2026-11-06T04:39:01.768765Z"
+  "created_at": "2026-11-06T06:25:05.792795Z",
+  "updated_at": "2026-11-06T06:25:07.582442Z"
 }

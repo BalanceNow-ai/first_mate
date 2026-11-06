@@ -1,7 +1,7 @@
 {
-  "assignment_id": "592b2554-c74e-46cb-a76b-3d90e4001117",
-  "job_id": "4b52dd52-f982-43a1-b948-72d71ae987c2",
-  "organization_id": "16c1eb31-48a0-49e9-b0df-bbd18938cf22",
+  "assignment_id": "f13ad21e-ea99-4f0a-9491-183e323407b9",
+  "job_id": "9b8164fc-f5fa-43ef-bd1b-9a3faf6f7199",
+  "organization_id": "3cef2e40-526d-40e8-9012-fe968c49a434",
   "status": "declined",
   "job_title": "Bilge pump cycling",
   "vessel_make": "Stabicraft",
@@ -11,7 +11,7 @@
   ],
   "live_updates": false,
   "inviter_first_name": "Fixture",
-  "invited_at": "2026-11-06T04:39:02.301210Z",
+  "invited_at": "2026-11-06T06:25:08.192453Z",
   "accepted_at": null,
   "version": 2,
   "members": []

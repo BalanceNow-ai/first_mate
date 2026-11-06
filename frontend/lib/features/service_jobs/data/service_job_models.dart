@@ -305,6 +305,9 @@ class ServiceJob {
     required this.viewer,
     this.vesselId,
     this.archivedAt,
+    this.snapshotState,
+    this.snapshotBriefId,
+    this.snapshotPublishedAt,
     this.issueDescription,
     this.affectedSystem,
     this.affectedEquipment,
@@ -330,6 +333,13 @@ class ServiceJob {
   final DateTime createdAt;
   final DateTime updatedAt;
   final Viewer viewer;
+
+  /// Where the job content comes from for this reader: `live` (the owner, or live
+  /// updates on), `brief` (as of the latest published brief) or
+  /// `no_brief_published` (live updates off and nothing published: header only).
+  final String? snapshotState;
+  final String? snapshotBriefId;
+  final DateTime? snapshotPublishedAt;
   final String? issueDescription;
   final String? affectedSystem;
   final String? affectedEquipment;
@@ -343,6 +353,12 @@ class ServiceJob {
   final Assignment? assignment;
 
   bool get isClosed => const {'completed', 'archived', 'cancelled'}.contains(status);
+
+  /// Live updates are off and the owner has not published a brief yet.
+  bool get awaitingBrief => snapshotState == 'no_brief_published';
+
+  /// The content shown is as of a published brief (live updates off).
+  bool get showsBriefSnapshot => snapshotState == 'brief';
 
   factory ServiceJob.fromJson(Map<String, dynamic> json) {
     final ctx = optMap(json, 'vessel_context');
@@ -361,6 +377,9 @@ class ServiceJob {
       createdAt: reqDate(json, 'created_at'),
       updatedAt: reqDate(json, 'updated_at'),
       viewer: Viewer.fromJson(reqMap(json, 'viewer')),
+      snapshotState: opt<String>(json, 'snapshot_state'),
+      snapshotBriefId: opt<String>(json, 'snapshot_brief_id'),
+      snapshotPublishedAt: _optDate(json, 'snapshot_published_at'),
       issueDescription: opt<String>(json, 'issue_description'),
       affectedSystem: opt<String>(json, 'affected_system'),
       affectedEquipment: opt<String>(json, 'affected_equipment'),
@@ -872,6 +891,7 @@ class Provenance {
     required this.recordedByRole,
     required this.method,
     this.recordedBy,
+    this.otherOrganization = false,
   });
 
   final String badge;
@@ -880,12 +900,16 @@ class Provenance {
   final String recordedByRole;
   final String method;
 
+  /// Recorded or confirmed by another contractor organisation (identities withheld).
+  final bool otherOrganization;
+
   factory Provenance.fromJson(Map<String, dynamic> json) => Provenance(
         badge: req<String>(json, 'badge'),
         label: req<String>(json, 'label'),
         recordedBy: opt<String>(json, 'recorded_by'),
         recordedByRole: req<String>(json, 'recorded_by_role'),
         method: req<String>(json, 'method'),
+        otherOrganization: opt<bool>(json, 'other_organization') ?? false,
       );
 }
 
@@ -944,6 +968,7 @@ class Measurement {
     this.sourceRegion,
     this.sourceObservationId,
     this.recordedBy,
+    this.recordedByOtherOrganization = false,
     this.confirmation,
     this.supersedesId,
     this.supersededById,
@@ -972,6 +997,10 @@ class Measurement {
   final String state;
   final Provenance provenance;
   final String? recordedBy;
+
+  /// Another contractor organisation recorded or confirmed this (their people and
+  /// notes are withheld; the value stays as evidence).
+  final bool recordedByOtherOrganization;
   final Confirmation? confirmation;
   final String? supersedesId;
   final String? supersededById;
@@ -979,6 +1008,17 @@ class Measurement {
   final int jobRevision;
   final String? notes;
   final DateTime createdAt;
+
+  /// Recorded or confirmed by another contractor organisation (shown without names).
+  bool get fromOtherOrganization => recordedByOtherOrganization || provenance.otherOrganization;
+
+  /// A contractor of another organisation recorded it (the recorder is withheld).
+  bool get recordedByAnotherOrganization =>
+      fromOtherOrganization && provenance.recordedByRole == 'contractor' && recordedBy == null;
+
+  /// Another organisation confirmed it (who confirmed is withheld).
+  bool get confirmedByAnotherOrganization =>
+      fromOtherOrganization && confirmation?.confirmedAt != null && confirmation?.confirmedBy == null;
 
   /// Value as recorded with its original unit (no invented precision).
   String get displayValue {
@@ -1012,6 +1052,7 @@ class Measurement {
       state: req<String>(json, 'state'),
       provenance: Provenance.fromJson(reqMap(json, 'provenance')),
       recordedBy: opt<String>(json, 'recorded_by'),
+      recordedByOtherOrganization: opt<bool>(json, 'recorded_by_other_organization') ?? false,
       confirmation: c == null ? null : Confirmation.fromJson(c),
       supersedesId: opt<String>(json, 'supersedes_id'),
       supersededById: opt<String>(json, 'superseded_by_id'),
@@ -1209,6 +1250,10 @@ class PreparationItem {
   final DateTime updatedAt;
 
   bool get isActive => !const {'rejected', 'replaced', 'superseded'}.contains(status);
+
+  /// Confirmed by another contractor organisation: the server withholds who
+  /// (`confirmed_by` is null while `confirmed_at` is set).
+  bool get confirmedByOtherOrganization => confirmedAt != null && confirmedBy == null;
 
   factory PreparationItem.fromJson(Map<String, dynamic> json) {
     final cp = optMap(json, 'confirmed_product');

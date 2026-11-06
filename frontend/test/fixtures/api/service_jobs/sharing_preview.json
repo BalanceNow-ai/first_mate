@@ -1,7 +1,7 @@
 {
   "organization": {
-    "id": "0f168314-a4b1-485f-88d7-5afa5a8cfd41",
-    "name": "Fixture Marine 6555556b",
+    "id": "6b227433-4c77-44a5-aec1-11fffde39628",
+    "name": "Fixture Marine ecaf6296",
     "trading_name": "Fixture Marine Services"
   },
   "sections": [
@@ -30,7 +30,7 @@
       ],
       "counts": {
         "evidence_requests": 4,
-        "available_assets": 2
+        "available_assets": 3
       },
       "note": null
     },
@@ -102,5 +102,5 @@
     "invoices"
   ],
   "live_updates": true,
-  "live_updates_note": "They will see changes you make after sharing."
+  "live_updates_note": "They will see the sections you share as they are now, including changes you make later. Evidence requests and your answers, scope proposals and your decisions, visits and any invoice question you choose to send stay up to date either way."
 }

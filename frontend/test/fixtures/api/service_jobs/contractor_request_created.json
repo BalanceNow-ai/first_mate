@@ -1,8 +1,8 @@
 {
-  "id": "3fc9741b-f945-4e20-9732-23dd86a21930",
-  "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+  "id": "53dd2046-ffd2-4332-b991-d9355f1797dc",
+  "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
   "requester_role": "contractor",
-  "organization_id": "0f168314-a4b1-485f-88d7-5afa5a8cfd41",
+  "organization_id": "6b227433-4c77-44a5-aec1-11fffde39628",
   "category": "connections",
   "component": "Outlet hose",
   "prompt": "Show both ends of the outlet hose",
@@ -15,8 +15,8 @@
   "answer_note": null,
   "answered_at": null,
   "version": 1,
-  "created_at": "2026-11-06T04:39:01.694134Z",
-  "updated_at": "2026-11-06T04:39:01.694137Z",
+  "created_at": "2026-11-06T06:25:07.507257Z",
+  "updated_at": "2026-11-06T06:25:07.507261Z",
   "options": [
     "take_photo",
     "upload_file",

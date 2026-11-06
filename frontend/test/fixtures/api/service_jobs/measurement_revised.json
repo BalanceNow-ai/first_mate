@@ -1,6 +1,6 @@
 {
-  "id": "9e6ecd2d-90f2-4a15-9b2e-f4a019815c3a",
-  "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+  "id": "02043a96-eeca-4eb3-a5ef-fcf878e11a11",
+  "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
   "dimension": "hose_external_diameter",
   "component": "Pump outlet hose",
   "value_text": "32.5",
@@ -22,16 +22,18 @@
   "provenance": {
     "badge": "owner_measured",
     "label": "Owner measured (caliper)",
-    "recorded_by": "12366c46-66eb-4676-88d0-85af20e48ee2",
+    "recorded_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
     "recorded_by_role": "owner",
-    "method": "owner_caliper"
+    "method": "owner_caliper",
+    "other_organization": false
   },
-  "recorded_by": "12366c46-66eb-4676-88d0-85af20e48ee2",
+  "recorded_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
+  "recorded_by_other_organization": false,
   "confirmation": null,
-  "supersedes_id": "ac420e6d-7c8d-4195-bc71-bedc85e6df78",
+  "supersedes_id": "30cbc283-1aa5-42be-abce-fb467e5987ee",
   "superseded_by_id": null,
   "is_current": true,
-  "job_revision": 8,
+  "job_revision": 9,
   "notes": null,
-  "created_at": "2026-11-06T04:38:59.909581Z"
+  "created_at": "2026-11-06T06:25:05.748352Z"
 }

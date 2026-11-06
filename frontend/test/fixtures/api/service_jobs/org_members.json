@@ -1,20 +1,20 @@
 [
   {
-    "user_id": "67cff377-80b9-4b39-8986-58e934adfe8c",
+    "user_id": "b3e94dbe-4e94-415a-888c-2e186240a6fe",
     "name": "Fixture Contractor Admin",
-    "email": "sj-cadmin-6555556b@example.test",
+    "email": "sj-cadmin-ecaf6296@example.test",
     "role": "admin",
     "status": "active",
-    "verified_at": "2026-11-06T04:38:50.087280Z",
+    "verified_at": "2026-11-06T06:24:53.090752Z",
     "removed_at": null
   },
   {
-    "user_id": "662931a0-32ad-4560-a367-67378e4e539d",
+    "user_id": "70cc3540-4da9-4f13-8e08-b2845ea240db",
     "name": "Fixture Technician",
-    "email": "sj-cmember-6555556b@example.test",
+    "email": "sj-cmember-ecaf6296@example.test",
     "role": "member",
     "status": "active",
-    "verified_at": "2026-11-06T04:38:52.493267Z",
+    "verified_at": "2026-11-06T06:24:55.614533Z",
     "removed_at": null
   }
 ]

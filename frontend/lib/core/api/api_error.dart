@@ -124,10 +124,23 @@ class ApiError implements Exception {
   String toString() => detail;
 }
 
+/// Plain messages for codes whose meaning the person needs explained (sharing
+/// choices on a service job); used instead of the server's wording.
+const _plainMessages = {
+  'live_updates_not_shared': 'The owner shares this job as of the brief they published, and this record isn’t in '
+      'it. Ask the owner to publish a new brief or to turn on live updates.',
+  'invoices_section_not_shared': 'You haven’t shared invoice questions with this contractor. Add “Invoice questions '
+      'you choose to share” on the job’s Sharing tab, then send the question.',
+  'section_not_shared': 'That part of the job hasn’t been shared with you.',
+  'derivative_unavailable': 'A shareable copy of this document isn’t available. Ask the owner to send it again.',
+};
+
 /// A user-presentable message for any error (never raw exception internals).
 String describeError(Object error) {
   final api = ApiError.from(error);
   if (api != null) {
+    final plain = _plainMessages[api.code];
+    if (plain != null) return plain;
     if (api.errors.isNotEmpty) {
       final first = api.errors.first;
       return first.field.isEmpty

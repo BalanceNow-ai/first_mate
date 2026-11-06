@@ -214,6 +214,7 @@ String friendlyTitle(Object error) {
   final api = ApiError.from(error);
   if (api == null) return 'Something went wrong';
   if (api.statusCode == 404) return 'Not found, or not shared with you';
+  if (api.code == 'live_updates_not_shared') return 'This isn’t in the brief the owner published';
   if (api.code == 'section_not_shared' || api.statusCode == 403) {
     return 'This part of the job has not been shared with you';
   }

@@ -679,14 +679,21 @@ class ComparisonItem {
     required this.differences,
     required this.approval,
     required this.approvalText,
+    this.unavailableReasons = const [],
   });
 
   final String lineId;
   final int lineNumber;
   final String? description;
 
-  /// matches | differs | not_in_accepted_scope | not_compared
+  /// matches | differs | comparison_unavailable | not_in_accepted_scope | not_compared
   final String status;
+
+  /// Why a matched line can't be compared (status `comparison_unavailable`): a value
+  /// is missing or unreadable — never treated as a match.
+  final List<String> unavailableReasons;
+
+  bool get comparisonUnavailable => status == 'comparison_unavailable';
   final bool additionalWork;
   final List<ScopeDifference> differences;
   final ApprovalRecord? approval;
@@ -699,6 +706,7 @@ class ComparisonItem {
       lineNumber: req<int>(json, 'line_number'),
       description: _optString(json, 'description'),
       status: req<String>(json, 'status'),
+      unavailableReasons: json['unavailable_reasons'] == null ? const [] : stringList(json, 'unavailable_reasons'),
       additionalWork: opt<bool>(json, 'additional_work') ?? false,
       differences: [for (final d in mapList(json, 'differences')) ScopeDifference.fromJson(d)],
       approval: approval == null ? null : ApprovalRecord.fromJson(approval),
@@ -1293,6 +1301,17 @@ class ServiceAsset {
       );
 }
 
+/// Plain-English text for why a line can't be compared with the accepted scope.
+String comparisonUnavailableReasonText(String reason) => switch (reason) {
+      'line_arithmetic_cannot_compute' => 'The line’s amount can’t be worked out from what is on the invoice.',
+      'invoice_amount_unreadable' => 'The amount on the invoice line can’t be read.',
+      'invoice_amount_unknown' => 'The invoice line has no amount.',
+      'approved_amount_unknown' => 'The accepted scope has no amount for this line.',
+      'invoice_unit_price_unreadable' => 'The unit price on the invoice line can’t be read.',
+      'invoice_quantity_unreadable' => 'The quantity on the invoice line can’t be read.',
+      _ => 'A value needed for the comparison is missing or unreadable.',
+    };
+
 /// Plain-English text for an upload rejection code.
 String rejectionText(String? reason) => switch (reason) {
       'unsupported_type' || 'type_not_allowed' => 'This kind of file is not accepted. Use a PDF, JPEG or PNG.',
@@ -1303,6 +1322,9 @@ String rejectionText(String? reason) => switch (reason) {
       'active_pdf_content' => 'The PDF contains active content (scripts or attachments) and was not accepted.',
       'encrypted_pdf' => 'The PDF is password-protected. Upload an unprotected copy.',
       'malformed_pdf' => 'The PDF could not be opened.',
+      'pdf_metadata_unremovable' =>
+        'Hidden information (metadata) in this PDF could not be removed safely. Print it to a new PDF or photograph '
+            'the pages instead.',
       _ => 'The file was not accepted.',
     };
 

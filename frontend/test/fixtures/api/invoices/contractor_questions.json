@@ -1,14 +1,14 @@
 [
   {
-    "id": "983707a3-cdb7-4ae0-b7d6-2d87b449362d",
-    "job_id": "cca9ac0a-92b4-4c45-b5ab-db2c9da287d2",
-    "invoice_id": "ae98cf58-5ca8-43f1-b5aa-ee47b74c4a1d",
+    "id": "1275d4f4-2b31-4765-be79-d97296a32ea9",
+    "job_id": "3f0c7f8a-4c6c-4232-9013-99ade16bf582",
+    "invoice_id": "44d9aca1-94eb-4564-bfd8-8e69ebac5889",
     "invoice_title": "Sink repair",
-    "invoice_revision_id": "4cb9ad8a-e89d-4111-ab9d-cfe717b50a80",
+    "invoice_revision_id": "abcd6cf0-c301-46bc-a05c-452e3f9c764d",
     "invoice_revision_number": 1,
     "text": "Line 5 (Consumables / sundries) isn't in the accepted scope we have on record. Could you let us know when and how this was agreed? Thanks.",
     "status": "shared",
-    "shared_at": "2026-11-06T04:58:29.539676Z",
+    "shared_at": "2026-11-06T06:27:23.739889Z",
     "version": 3,
     "line": {
       "line_number": 5,
@@ -24,7 +24,7 @@
     },
     "shared_assets": [
       {
-        "id": "e1887907-2dd1-4772-9082-51a048f67975",
+        "id": "18dd429b-ecaf-4b53-a144-82af52a3e5c1",
         "purpose": "invoice",
         "detected_type": "application/pdf",
         "pages": 1,

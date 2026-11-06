@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -5,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:helm_marine/core/api/api_client.dart';
 import 'package:helm_marine/core/api/api_error.dart';
+import 'package:helm_marine/core/files/file_saver.dart';
 import 'package:helm_marine/core/session/session.dart';
 import 'package:helm_marine/features/service_jobs/data/service_job_models.dart';
 
@@ -402,6 +404,32 @@ class ServiceJobsApi {
       _call(() => _dio.get('${_job(id)}/briefs/$briefId'), (d) => Brief.fromJson(_map(d)));
 
   /// Publishes exactly the previewed snapshot (quoting its digest).
+  /// The printable brief (inert HTML), fetched with the signed-in user's token as
+  /// bytes — never through a URL carrying credentials.
+  Future<DownloadedFile> exportBrief(String id, String briefId, {int? revisionNumber}) async {
+    try {
+      final r = await _dio.get<List<int>>('${_job(id)}/briefs/$briefId/export',
+          options: Options(responseType: ResponseType.bytes, headers: {'Accept': 'text/html'}));
+      final fallback = 'service-brief${revisionNumber == null ? '' : '-r$revisionNumber'}.html';
+      return DownloadedFile(
+        bytes: Uint8List.fromList(r.data ?? const []),
+        filename: filenameFromDisposition(r.headers.value('content-disposition'), fallback),
+        contentType: 'text/html;charset=utf-8',
+      );
+    } on DioException catch (e) {
+      // Error bodies arrive as bytes here; decode them into the usual API error.
+      final data = e.response?.data;
+      if (data is List<int>) {
+        Object? body;
+        try {
+          body = jsonDecode(utf8.decode(data));
+        } catch (_) {}
+        throw ApiError.fromResponse(e.response?.statusCode, body);
+      }
+      throw ApiError.from(e)!;
+    }
+  }
+
   Future<Brief> publishBrief(String id, Brief preview) => _call(
         () => _dio.post('${_job(id)}/briefs/${preview.id}/publish', data: {'content_digest': preview.contentDigest}),
         (d) => Brief.fromJson(_map(d)),

@@ -40,7 +40,7 @@ const sectionLabels = {
   'access_general': 'General access and logistics',
   'access_restricted': 'Access credentials and exact location',
   'scope': 'Scope and estimates',
-  'invoices': 'Invoices',
+  'invoices': 'Invoice questions you choose to share',
 };
 String sectionLabel(String s) => _from(sectionLabels, s);
 
@@ -125,11 +125,23 @@ String assetStatusLabel(String? s) => _from(assetStatusLabels, s);
 
 const rejectionReasonLabels = {
   'unsupported_type': 'This file type is not supported. Use a JPEG, PNG, WebP or HEIC photo, or a PDF.',
+  'type_not_allowed': 'This kind of file is not accepted here. Photos must be images; documents may be a PDF or '
+      'an image.',
   'too_large': 'The file is larger than allowed.',
   'too_many_pixels': 'The image is too large to process.',
+  'too_many_pages': 'The PDF has too many pages. Upload only the pages that matter.',
   'malformed': 'The file could not be read — it may be damaged.',
+  'malformed_image': 'The image could not be read — it may be damaged.',
+  'malformed_pdf': 'The PDF could not be opened — it may be damaged.',
+  'encrypted_pdf': 'The PDF is password-protected. Upload an unprotected copy.',
   'active_content': 'The file contains active content and was refused.',
+  'active_pdf_content': 'The PDF contains active content (scripts, actions or attachments) and was refused. '
+      'Print it to a new PDF and upload that.',
+  'pdf_metadata_unremovable': 'Hidden information (metadata) in this PDF could not be removed safely, so it was '
+      'refused. Print it to a new PDF or photograph the pages instead.',
+  'integrity_mismatch': 'The file changed while uploading. Try again.',
   'malware': 'The file was refused by the safety scan.',
+  'malware_detected': 'The file was refused by the safety scan.',
   'scan_failed': 'The safety scan could not finish, so the file stays unavailable.',
 };
 String rejectionReasonLabel(String? s) => s == null ? 'Rejected' : (rejectionReasonLabels[s] ?? humanise(s));

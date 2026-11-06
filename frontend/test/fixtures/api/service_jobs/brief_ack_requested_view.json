@@ -1,14 +1,14 @@
 {
   "acknowledgement": {
-    "id": "bb7e302a-13f8-40c4-a96e-079d0fab4cb7",
+    "id": "94ddbd08-7916-4512-8a77-7b0587f53a89",
     "kind": "incomplete",
     "note": "Need the pump label",
-    "user_id": "662931a0-32ad-4560-a367-67378e4e539d",
-    "organization_id": "0f168314-a4b1-485f-88d7-5afa5a8cfd41",
-    "created_at": "2026-11-06T04:39:00.589051Z"
+    "user_id": "70cc3540-4da9-4f13-8e08-b2845ea240db",
+    "organization_id": "6b227433-4c77-44a5-aec1-11fffde39628",
+    "created_at": "2026-11-06T06:25:06.352930Z"
   },
   "evidence_request": {
-    "id": "9abc22a3-97a7-485f-8023-721aadadc221",
+    "id": "3713a226-481c-4e1a-8ba0-e22897f3bcc6",
     "category": "label",
     "prompt": "Photograph the pump label without moving the pump",
     "reason": "Confirms the pump model and outlet size",

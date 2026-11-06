@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
 import 'package:helm_marine/core/widgets/state_views.dart';
+import 'package:helm_marine/features/service_jobs/data/labels.dart';
 import 'package:helm_marine/features/service_jobs/data/service_job_models.dart';
 import 'package:helm_marine/features/service_jobs/providers/service_jobs_providers.dart';
 import 'package:helm_marine/features/service_jobs/tabs/brief_tab.dart';
@@ -116,9 +117,14 @@ class _Workspace extends ConsumerWidget {
             tabs: [for (final t in tabs) Tab(icon: Icon(t.icon, size: 20), text: t.label)],
           ),
         ),
-        body: TabBarView(
-          children: [for (final t in tabs) _tabBody(t.segment, asContractor)],
-        ),
+        body: Column(children: [
+          if (asContractor) SnapshotBanner(job: job),
+          Expanded(
+            child: TabBarView(
+              children: [for (final t in tabs) _tabBody(t.segment, asContractor)],
+            ),
+          ),
+        ]),
       ),
     );
   }
@@ -138,5 +144,45 @@ class _Workspace extends ConsumerWidget {
       _ => const SizedBox.shrink(),
     };
     return ContentWidth(maxWidth: 960, child: child);
+  }
+}
+
+/// Contractor: where the job content comes from — the published brief (live updates
+/// off), nothing yet (no brief published) or live.
+class SnapshotBanner extends StatelessWidget {
+  const SnapshotBanner({super.key, required this.job});
+
+  final ServiceJob job;
+
+  @override
+  Widget build(BuildContext context) {
+    final (text, tone, icon) = switch (job.snapshotState) {
+      'no_brief_published' => (
+          "The owner hasn't published a brief yet. Until they do you see only the job's title and status — "
+              'evidence requests, scope, visits and invoice questions still work.',
+          Tone.warn,
+          Icons.hourglass_empty,
+        ),
+      'brief' => (
+          'Showing the brief published on '
+              '${job.snapshotPublishedAt == null ? 'an earlier date' : formatDate(job.snapshotPublishedAt!)}. '
+              'Changes the owner makes later appear when they publish a new brief.',
+          Tone.info,
+          Icons.description_outlined,
+        ),
+      'live' => ('Live: you see the shared sections as they are now.', Tone.good, Icons.sync),
+      _ => (null, Tone.neutral, Icons.info_outline),
+    };
+    if (text == null) return const SizedBox.shrink();
+    return Semantics(
+      container: true,
+      child: ContentWidth(
+        maxWidth: 960,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: InfoNote(text, tone: tone, icon: icon),
+        ),
+      ),
+    );
   }
 }

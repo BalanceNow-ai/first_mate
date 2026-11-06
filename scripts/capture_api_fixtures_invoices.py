@@ -728,6 +728,67 @@ def main() -> int:
     s.save("questions_answered", s.api("GET", f"/invoices/{jinv['id']}/questions", tok_owner), 200)
     print("job invoice / questions / contractor response captured")
 
+    # ------------------------------------------------------ a line that can't be compared
+    # A job-linked manual invoice whose call-out line has no amount: it matches the accepted
+    # scope's "Call-out fee" but can't be compared (never a "match").
+    unread = s.ok(s.api("POST", "/invoices", tok_owner, json={"job_id": job_id, "title": "Call-out docket"}), 201)
+    unread = s.ok(
+        s.api("PATCH", f"/invoices/{unread['id']}/fields", tok_owner,
+              json={"expected_version": unread["revision"]["version"], "currency": "NZD"}),
+        200,
+    )  # fmt: skip
+    unread = s.ok(
+        s.api(
+            "POST",
+            f"/invoices/{unread['id']}/lines",
+            tok_owner,
+            json={"expected_version": unread["revision"]["version"], "kind": "call_out", "description": "Call-out fee",
+                  "quantity": "1"},
+        ),
+        201,
+    )  # fmt: skip
+    uexp = s.save("explanation_comparison_unavailable", s.api("POST", f"/invoices/{unread['id']}/explain", tok_owner), 201)
+    statuses = [i["status"] for i in uexp["content"]["comparison"]["items"]]
+    if "comparison_unavailable" not in statuses:
+        raise SystemExit(f"expected a comparison_unavailable item, got {statuses}")
+    if not any(q["key"].startswith("scope:unreadable:") for q in uexp["content"]["suggested_questions"]):
+        raise SystemExit("expected a scope:unreadable suggested question")
+
+    # ------------------------------------------------------ invoices section not shared
+    job2 = s.ok(
+        s.api("POST", "/service-jobs/", tok_owner, json={"vessel_id": vessel["id"], "title": "Bilge pump cycling"}), 201
+    )
+    a2 = s.ok(
+        s.api(
+            "POST",
+            f"/service-jobs/{job2['id']}/assignments",
+            tok_owner,
+            json={"organization_id": org_id, "sections": ["summary", "scope"]},
+            headers={"Idempotency-Key": f"inv-assign2-{run}"},
+        ),
+        201,
+    )
+    s.ok(s.api("POST", f"/contractors/assignments/{a2['id']}/accept", tok_tech, json={"member_user_ids": [tech_me["id"]]}), 200)
+    inv2 = s.ok(s.api("POST", "/invoices", tok_owner, json={"job_id": job2["id"], "title": "Bilge pump invoice"}), 201)
+    q2 = s.ok(s.api("POST", f"/invoices/{inv2['id']}/questions", tok_owner, json={"text": "What was the call-out for?"}), 201)
+    s.save(
+        "error_invoices_section_not_shared",
+        s.api(
+            "POST",
+            f"/invoices/{inv2['id']}/questions/{q2['id']}/send",
+            tok_owner,
+            json={"expected_version": q2["version"], "asset_ids": []},
+            headers={"Idempotency-Key": f"inv-send2-{run}"},
+        ),
+        409,
+    )
+    s.save(
+        "error_contractor_section_not_shared",
+        s.api("GET", f"/service-jobs/{job2['id']}/invoice-questions", tok_tech),
+        403,
+    )
+    print("comparison-unavailable and section-not-shared captured")
+
     # ------------------------------------------------------ feedback report → moderation case
     now = datetime.now(UTC) - timedelta(minutes=5)
     s.ok(

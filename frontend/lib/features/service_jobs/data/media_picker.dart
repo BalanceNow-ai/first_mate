@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -13,10 +14,13 @@ class PickedMedia {
   final String? mimeType;
 }
 
-/// Picks a photo. On mobile web, `camera: true` opens a file input with
-/// `capture` so the phone camera starts; otherwise the file chooser opens.
+/// Picks a photo or a document. On mobile web, `camera: true` opens a file input
+/// with `capture` so the phone camera starts; otherwise the file chooser opens.
 abstract class MediaPicker {
   Future<PickedMedia?> pick({required bool camera});
+
+  /// A PDF document (job evidence such as a manual, a previous invoice or a service record).
+  Future<PickedMedia?> pickDocument();
 }
 
 class ImagePickerMediaPicker implements MediaPicker {
@@ -32,6 +36,20 @@ class ImagePickerMediaPicker implements MediaPicker {
     final bytes = await file.readAsBytes();
     final name = file.name.isEmpty ? 'photo' : file.name;
     return PickedMedia(bytes: bytes, name: name, mimeType: file.mimeType);
+  }
+
+  @override
+  Future<PickedMedia?> pickDocument() async {
+    // The server checks the content itself (type, pages, active content) and keeps only a
+    // metadata-stripped copy; nothing is changed here.
+    final file = await FilePicker.pickFile(
+      dialogTitle: 'Choose a document (PDF)',
+      type: FileType.custom,
+      allowedExtensions: const ['pdf'],
+    );
+    if (file == null) return null;
+    final bytes = await file.readAsBytes();
+    return PickedMedia(bytes: bytes, name: file.name.isEmpty ? 'document.pdf' : file.name, mimeType: 'application/pdf');
   }
 }
 

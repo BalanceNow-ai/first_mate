@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:helm_marine/core/api/api_error.dart';
+import 'package:helm_marine/core/files/file_saver.dart';
 import 'package:helm_marine/core/money/money.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
 import 'package:helm_marine/core/widgets/state_views.dart';
@@ -109,7 +110,7 @@ class _BriefTabState extends ConsumerState<BriefTab> {
             title: 'Revisions',
             children: [
               if (list.isEmpty) const Text('No brief revisions yet.'),
-              for (final b in list.reversed) BriefRevisionTile(brief: b),
+              for (final b in list.reversed) BriefRevisionTile(jobId: job.id, brief: b),
             ],
           ),
         ),
@@ -119,8 +120,9 @@ class _BriefTabState extends ConsumerState<BriefTab> {
 }
 
 class BriefRevisionTile extends StatelessWidget {
-  const BriefRevisionTile({super.key, required this.brief});
+  const BriefRevisionTile({super.key, required this.jobId, required this.brief});
 
+  final String jobId;
   final Brief brief;
 
   @override
@@ -140,6 +142,11 @@ class BriefRevisionTile extends StatelessWidget {
         for (final r in b.outdatedReasons) Text(outdatedReasonLabel(r)),
         for (final a in b.acknowledgements)
           Text('Contractor: ${ackKindLabel(a.kind)}${a.note == null ? '' : ' — “${a.note}”'} (${formatDateTime(a.createdAt)})'),
+        if (b.isPublished || b.status == 'superseded')
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: BriefExportButton(jobId: jobId, brief: b),
+          ),
       ]),
     );
   }
@@ -164,7 +171,7 @@ class ContractorBriefTab extends ConsumerWidget {
           builder: (list) {
             final published = list.where((b) => b.isPublished || b.status == 'superseded').toList();
             if (published.isEmpty) {
-              return const InfoNote('The owner has not published a brief yet. You will see it here when they do.');
+              return const InfoNote("The owner hasn't published a brief yet. You will see it here when they do.");
             }
             final latest = published.last;
             return _PublishedBrief(job: job, briefId: latest.id);
@@ -205,6 +212,8 @@ class _PublishedBrief extends ConsumerWidget {
           ].join(' · '),
           children: [
             BriefContentView(content: b.content ?? const {}),
+            const SizedBox(height: 8),
+            BriefExportButton(jobId: job.id, brief: b),
             const Divider(height: 24),
             const Text('Your response', style: TextStyle(fontWeight: FontWeight.bold)),
             for (final a in b.acknowledgements)
@@ -239,6 +248,44 @@ class _PublishedBrief extends ConsumerWidget {
       },
     );
   }
+}
+
+/// Downloads the printable brief: fetched with the signed-in user's token as bytes,
+/// then handed over as a file (web: a blob download) — the token never enters a URL.
+class BriefExportButton extends ConsumerStatefulWidget {
+  const BriefExportButton({super.key, required this.jobId, required this.brief});
+
+  final String jobId;
+  final Brief brief;
+
+  @override
+  ConsumerState<BriefExportButton> createState() => _BriefExportButtonState();
+}
+
+class _BriefExportButtonState extends ConsumerState<BriefExportButton> {
+  bool _busy = false;
+
+  Future<void> _export() async {
+    setState(() => _busy = true);
+    try {
+      final file = await ref
+          .read(serviceJobsApiProvider)
+          .exportBrief(widget.jobId, widget.brief.id, revisionNumber: widget.brief.revisionNumber);
+      final message = await ref.read(fileSaverProvider)(file);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    } catch (e) {
+      if (mounted) showErrorSnackBar(context, e, prefix: 'Could not download the printable brief');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => ActionButton(
+        label: _busy ? 'Preparing…' : 'Download printable brief',
+        icon: Icons.print_outlined,
+        onPressed: _busy ? null : _export,
+      );
 }
 
 /// Assigned contractor: general access, and audited credentials when authorised.

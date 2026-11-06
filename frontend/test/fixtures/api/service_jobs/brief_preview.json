@@ -1,6 +1,6 @@
 {
-  "id": "cdb56db0-83ff-401b-b6a6-d1aa0c57938e",
-  "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+  "id": "ad29a897-c634-4225-b7e0-1c80439ef44d",
+  "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
   "revision_number": 1,
   "status": "preview",
   "sections": [
@@ -12,13 +12,13 @@
     "scope"
   ],
   "recipient": {
-    "assignment_id": "37c0de48-2eca-4fa4-8d11-8950f6dce0dd",
+    "assignment_id": "9155337d-e13d-4c63-bb6c-d4a6d05e8b18",
     "assignment_status": "accepted",
-    "organization_id": "0f168314-a4b1-485f-88d7-5afa5a8cfd41",
-    "organization_name": "Fixture Marine 6555556b",
+    "organization_id": "6b227433-4c77-44a5-aec1-11fffde39628",
+    "organization_name": "Fixture Marine ecaf6296",
     "members": [
       {
-        "user_id": "662931a0-32ad-4560-a367-67378e4e539d",
+        "user_id": "70cc3540-4da9-4f13-8e08-b2845ea240db",
         "name": "Fixture Technician"
       }
     ]
@@ -26,19 +26,19 @@
   "content": {
     "brief_format": 1,
     "job": {
-      "id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+      "id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
       "title": "Water under the sink when the pump runs",
       "status": "contractor_review",
-      "evidence_revision": 9
+      "evidence_revision": 10
     },
     "recipient": {
-      "assignment_id": "37c0de48-2eca-4fa4-8d11-8950f6dce0dd",
+      "assignment_id": "9155337d-e13d-4c63-bb6c-d4a6d05e8b18",
       "assignment_status": "accepted",
-      "organization_id": "0f168314-a4b1-485f-88d7-5afa5a8cfd41",
-      "organization_name": "Fixture Marine 6555556b",
+      "organization_id": "6b227433-4c77-44a5-aec1-11fffde39628",
+      "organization_name": "Fixture Marine ecaf6296",
       "members": [
         {
-          "user_id": "662931a0-32ad-4560-a367-67378e4e539d",
+          "user_id": "70cc3540-4da9-4f13-8e08-b2845ea240db",
           "name": "Fixture Technician"
         }
       ]
@@ -91,10 +91,10 @@
           "propulsion_type": "outboard"
         },
         "equipment": [],
-        "captured_at": "2026-11-06T04:38:55.352546+00:00",
+        "captured_at": "2026-11-06T06:24:58.972809+00:00",
         "corrections": [
           {
-            "at": "2026-11-06T04:38:55.396617+00:00",
+            "at": "2026-11-06T06:24:59.040458+00:00",
             "by": "owner",
             "note": "Engine is the 2020 model",
             "fields": [
@@ -110,31 +110,31 @@
     "evidence": {
       "assets": [
         {
-          "id": "b7db34c3-cebc-460b-a93b-7533ed49a1f3",
+          "id": "da35ae6e-9899-4c77-a124-ea3241a27ebc",
           "purpose": "job_photo",
           "caption": "Locker under the galley sink",
           "detected_type": "image/png",
           "status": "available",
           "captured_at": null,
-          "evidence_request_id": "9548f761-ac8f-4812-94b6-3a749c62cf94",
+          "evidence_request_id": "995b0d83-8d2b-4729-a120-2ac71e3b6d50",
           "duplicate_of_id": null
         },
         {
-          "id": "e5f56635-551a-46cb-8ebd-92ecebb8cf7b",
+          "id": "b752afa1-7be5-4020-b90b-817437fa2acb",
           "purpose": "job_photo",
           "caption": "Pump label",
           "detected_type": "image/jpeg",
           "status": "available",
           "captured_at": null,
           "evidence_request_id": null,
-          "duplicate_of_id": "b7db34c3-cebc-460b-a93b-7533ed49a1f3"
+          "duplicate_of_id": "da35ae6e-9899-4c77-a124-ea3241a27ebc"
         },
         {
-          "id": "dca580d5-e5db-4735-82bd-4c081b39fc18",
-          "purpose": "job_photo",
-          "caption": null,
-          "detected_type": null,
-          "status": "rejected",
+          "id": "023fe36c-7c25-4c32-a81b-7f9e3fdd1a73",
+          "purpose": "job_document",
+          "caption": "Pump service record",
+          "detected_type": "application/pdf",
+          "status": "available",
           "captured_at": null,
           "evidence_request_id": null,
           "duplicate_of_id": null
@@ -142,9 +142,9 @@
       ],
       "observations": [
         {
-          "id": "bcddeed3-4156-4d6c-a041-8b1bf581a668",
-          "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
-          "asset_id": "b7db34c3-cebc-460b-a93b-7533ed49a1f3",
+          "id": "3db0cb0a-a198-44ac-912a-12b1eb7b64c7",
+          "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+          "asset_id": "023fe36c-7c25-4c32-a81b-7f9e3fdd1a73",
           "page": null,
           "region": null,
           "kind": "quality",
@@ -154,19 +154,19 @@
           "confidence": null,
           "uncertainty": "No text or feature could be read reliably; nothing has been inferred",
           "origin": "model",
-          "analysis_run_id": "24406c3a-f12f-4bbd-913c-5cd21ea70424",
+          "analysis_run_id": "9373db51-f23f-49c2-b0bf-f50339a38af3",
           "model_version": "local_fixture:fixture-registry",
           "recorded_by": null,
           "supersedes_id": null,
           "superseded_by_id": null,
-          "job_revision": 4,
+          "job_revision": 5,
           "is_measurement": false,
-          "created_at": "2026-11-06T04:38:58.900323+00:00"
+          "created_at": "2026-11-06T06:25:04.749263+00:00"
         },
         {
-          "id": "3e00e6db-a82c-460a-a64a-a5bb503d8cf5",
-          "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
-          "asset_id": "e5f56635-551a-46cb-8ebd-92ecebb8cf7b",
+          "id": "5d05a2aa-73e2-48bf-b5d1-b82f05d2b925",
+          "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+          "asset_id": "b752afa1-7be5-4020-b90b-817437fa2acb",
           "page": null,
           "region": null,
           "kind": "quality",
@@ -176,19 +176,41 @@
           "confidence": null,
           "uncertainty": "No text or feature could be read reliably; nothing has been inferred",
           "origin": "model",
-          "analysis_run_id": "24406c3a-f12f-4bbd-913c-5cd21ea70424",
+          "analysis_run_id": "9373db51-f23f-49c2-b0bf-f50339a38af3",
           "model_version": "local_fixture:fixture-registry",
           "recorded_by": null,
           "supersedes_id": null,
           "superseded_by_id": null,
-          "job_revision": 4,
+          "job_revision": 5,
           "is_measurement": false,
-          "created_at": "2026-11-06T04:38:58.902179+00:00"
+          "created_at": "2026-11-06T06:25:04.751407+00:00"
         },
         {
-          "id": "5f114f19-700b-4374-89cc-2d4faee85e57",
-          "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
-          "asset_id": "b7db34c3-cebc-460b-a93b-7533ed49a1f3",
+          "id": "3696571a-ce32-4688-a931-5b6f78b98b3a",
+          "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+          "asset_id": "da35ae6e-9899-4c77-a124-ea3241a27ebc",
+          "page": null,
+          "region": null,
+          "kind": "quality",
+          "assertion": "Image is unclear — retake a sharper, well-lit, closer view",
+          "extracted_text": null,
+          "state": "model_suggested",
+          "confidence": null,
+          "uncertainty": "No text or feature could be read reliably; nothing has been inferred",
+          "origin": "model",
+          "analysis_run_id": "9373db51-f23f-49c2-b0bf-f50339a38af3",
+          "model_version": "local_fixture:fixture-registry",
+          "recorded_by": null,
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "job_revision": 5,
+          "is_measurement": false,
+          "created_at": "2026-11-06T06:25:04.752584+00:00"
+        },
+        {
+          "id": "43cafd91-4ba5-4add-a89b-20301c9eb719",
+          "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+          "asset_id": "da35ae6e-9899-4c77-a124-ea3241a27ebc",
           "page": null,
           "region": {
             "h": 0.2,
@@ -205,17 +227,17 @@
           "origin": "owner",
           "analysis_run_id": null,
           "model_version": null,
-          "recorded_by": "12366c46-66eb-4676-88d0-85af20e48ee2",
+          "recorded_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
           "supersedes_id": null,
           "superseded_by_id": null,
-          "job_revision": 5,
+          "job_revision": 6,
           "is_measurement": false,
-          "created_at": "2026-11-06T04:38:59.861653+00:00"
+          "created_at": "2026-11-06T06:25:05.696171+00:00"
         }
       ],
       "requests": [
         {
-          "id": "9548f761-ac8f-4812-94b6-3a749c62cf94",
+          "id": "995b0d83-8d2b-4729-a120-2ac71e3b6d50",
           "category": "overview",
           "component": "Freshwater pump",
           "prompt": "Can you take a wide photo that shows where the Freshwater pump is on the boat? Step back far enough to see the locker or compartment around it.",
@@ -228,7 +250,7 @@
           "answer_note": null
         },
         {
-          "id": "5fa88d6d-aecc-4a7b-ad6e-f39ebbc1465a",
+          "id": "f39f3fbb-6868-4be5-92fd-d64100b01b58",
           "category": "access_route",
           "component": "Freshwater pump",
           "prompt": "Show the way in to the Freshwater pump: the locker opening, hatch or panel you look through, photographed from a step back. Leave it as it is.",
@@ -241,20 +263,20 @@
           "answer_note": "The far end is behind the hot water cylinder"
         },
         {
-          "id": "702c23e7-0495-4e65-80b7-f8b6610741de",
-          "category": "document",
-          "component": "Freshwater pump",
-          "prompt": "Do you have a manual, a previous service record or a quote for the Freshwater pump? Upload it, or note what you know.",
-          "reason": "Earlier work and the manufacturer's details save diagnosis time and avoid ordering the wrong part.",
+          "id": "2db69262-0e48-4f83-8a3e-5b238398f470",
+          "category": "close_up",
+          "component": "sink area",
+          "prompt": "Photograph where the water collects under the sink area, from where you normally look.",
+          "reason": "Where the water collects points to the connection or seal that is leaking.",
           "requester_role": "assistant",
-          "priority": "low",
+          "priority": "high",
           "status": "answered",
           "unavailable_reason": null,
           "technician_inspection_required": false,
           "answer_note": "The hose is marked 25 mm ID"
         },
         {
-          "id": "cb5d72e4-2bec-4b59-afa4-416d0ad3aba5",
+          "id": "0073e17b-1a8a-4ccf-9d49-67e6117e014a",
           "category": "document",
           "component": null,
           "prompt": "Previous service invoice for the pump",
@@ -269,7 +291,7 @@
       ],
       "gaps": [
         {
-          "id": "5fa88d6d-aecc-4a7b-ad6e-f39ebbc1465a",
+          "id": "f39f3fbb-6868-4be5-92fd-d64100b01b58",
           "category": "access_route",
           "component": "Freshwater pump",
           "prompt": "Show the way in to the Freshwater pump: the locker opening, hatch or panel you look through, photographed from a step back. Leave it as it is.",
@@ -292,8 +314,8 @@
     "measurements": {
       "current": [
         {
-          "id": "94119ac7-4d8e-48b6-9098-889de5ecd157",
-          "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+          "id": "76382ab8-7029-485c-9f71-5151bdd82a38",
+          "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
           "dimension": "hose_internal_diameter",
           "component": "Pump outlet hose",
           "value_text": "25",
@@ -308,29 +330,31 @@
           "tool": null,
           "reference": null,
           "thread": null,
-          "source_asset_id": "b7db34c3-cebc-460b-a93b-7533ed49a1f3",
+          "source_asset_id": "da35ae6e-9899-4c77-a124-ea3241a27ebc",
           "source_region": null,
           "source_observation_id": null,
           "state": "owner_declared",
           "provenance": {
             "badge": "owner_declared",
             "label": "Owner declared (read from a marking)",
-            "recorded_by": "12366c46-66eb-4676-88d0-85af20e48ee2",
+            "recorded_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
             "recorded_by_role": "owner",
-            "method": "marking_read"
+            "method": "marking_read",
+            "other_organization": false
           },
-          "recorded_by": "12366c46-66eb-4676-88d0-85af20e48ee2",
+          "recorded_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
+          "recorded_by_other_organization": false,
           "confirmation": null,
           "supersedes_id": null,
           "superseded_by_id": null,
           "is_current": true,
-          "job_revision": 6,
+          "job_revision": 7,
           "notes": "Printed on the hose",
-          "created_at": "2026-11-06T04:38:59.881486+00:00"
+          "created_at": "2026-11-06T06:25:05.721270+00:00"
         },
         {
-          "id": "9e6ecd2d-90f2-4a15-9b2e-f4a019815c3a",
-          "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+          "id": "02043a96-eeca-4eb3-a5ef-fcf878e11a11",
+          "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
           "dimension": "hose_external_diameter",
           "component": "Pump outlet hose",
           "value_text": "32.5",
@@ -352,22 +376,24 @@
           "provenance": {
             "badge": "owner_measured",
             "label": "Owner measured (caliper)",
-            "recorded_by": "12366c46-66eb-4676-88d0-85af20e48ee2",
+            "recorded_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
             "recorded_by_role": "owner",
-            "method": "owner_caliper"
+            "method": "owner_caliper",
+            "other_organization": false
           },
-          "recorded_by": "12366c46-66eb-4676-88d0-85af20e48ee2",
+          "recorded_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
+          "recorded_by_other_organization": false,
           "confirmation": null,
-          "supersedes_id": "ac420e6d-7c8d-4195-bc71-bedc85e6df78",
+          "supersedes_id": "30cbc283-1aa5-42be-abce-fb467e5987ee",
           "superseded_by_id": null,
           "is_current": true,
-          "job_revision": 8,
+          "job_revision": 9,
           "notes": null,
-          "created_at": "2026-11-06T04:38:59.909581+00:00"
+          "created_at": "2026-11-06T06:25:05.748352+00:00"
         },
         {
-          "id": "b4b3e16b-baf6-45d9-a50a-7c26fcc8606c",
-          "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+          "id": "604ddb21-eb18-4377-afe8-aeab5888f29f",
+          "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
           "dimension": "clamp_range",
           "component": "Outlet clamp",
           "value_text": "20-32",
@@ -389,18 +415,20 @@
           "provenance": {
             "badge": "owner_measured",
             "label": "Owner measured (tape measure)",
-            "recorded_by": "12366c46-66eb-4676-88d0-85af20e48ee2",
+            "recorded_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
             "recorded_by_role": "owner",
-            "method": "owner_tape"
+            "method": "owner_tape",
+            "other_organization": false
           },
-          "recorded_by": "12366c46-66eb-4676-88d0-85af20e48ee2",
+          "recorded_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
+          "recorded_by_other_organization": false,
           "confirmation": null,
           "supersedes_id": null,
           "superseded_by_id": null,
           "is_current": true,
-          "job_revision": 9,
+          "job_revision": 10,
           "notes": null,
-          "created_at": "2026-11-06T04:38:59.927307+00:00"
+          "created_at": "2026-11-06T06:25:05.762881+00:00"
         }
       ],
       "superseded_count": 1
@@ -408,8 +436,8 @@
     "preparation": {
       "items": [
         {
-          "id": "c8846ba2-66f3-4056-8721-5461b3d4104f",
-          "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+          "id": "de076f70-28c2-4fd7-aee1-96ad1bd82c33",
+          "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
           "category": "part",
           "name": "Replacement hose",
           "purpose": "Replace the leaking or damaged hose section",
@@ -429,7 +457,7 @@
           },
           "depends_on": [
             {
-              "measurement_id": "94119ac7-4d8e-48b6-9098-889de5ecd157",
+              "measurement_id": "76382ab8-7029-485c-9f71-5151bdd82a38",
               "dimension": "hose_internal_diameter",
               "value_text": "25",
               "unit": "mm",
@@ -437,7 +465,7 @@
             }
           ],
           "supporting_asset_ids": [
-            "b7db34c3-cebc-460b-a93b-7533ed49a1f3"
+            "da35ae6e-9899-4c77-a124-ea3241a27ebc"
           ],
           "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
           "origin": "assistant",
@@ -471,15 +499,15 @@
           "evidence_changed_since_confirmation": false,
           "replaced_by_id": null,
           "evidence_request_ids": [],
-          "job_revision": 9,
+          "job_revision": 10,
           "version": 1,
           "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
-          "created_at": "2026-11-06T04:38:59.970388+00:00",
-          "updated_at": "2026-11-06T04:38:59.970391+00:00"
+          "created_at": "2026-11-06T06:25:05.792795+00:00",
+          "updated_at": "2026-11-06T06:25:05.792798+00:00"
         },
         {
-          "id": "a2eacf80-91f3-465c-a5a5-c3e5a49283ed",
-          "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+          "id": "ca663815-a2b8-43e3-8454-fdc32a88898f",
+          "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
           "category": "part",
           "name": "Hose clamps",
           "purpose": "Secure each hose end on its fitting",
@@ -498,14 +526,14 @@
           },
           "depends_on": [
             {
-              "measurement_id": "9e6ecd2d-90f2-4a15-9b2e-f4a019815c3a",
+              "measurement_id": "02043a96-eeca-4eb3-a5ef-fcf878e11a11",
               "dimension": "hose_external_diameter",
               "value_text": "32.5",
               "unit": "mm",
               "state": "owner_measured"
             },
             {
-              "measurement_id": "94119ac7-4d8e-48b6-9098-889de5ecd157",
+              "measurement_id": "76382ab8-7029-485c-9f71-5151bdd82a38",
               "dimension": "hose_internal_diameter",
               "value_text": "25",
               "unit": "mm",
@@ -513,7 +541,7 @@
             }
           ],
           "supporting_asset_ids": [
-            "b7db34c3-cebc-460b-a93b-7533ed49a1f3"
+            "da35ae6e-9899-4c77-a124-ea3241a27ebc"
           ],
           "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
           "origin": "assistant",
@@ -547,15 +575,15 @@
           "evidence_changed_since_confirmation": false,
           "replaced_by_id": null,
           "evidence_request_ids": [],
-          "job_revision": 9,
+          "job_revision": 10,
           "version": 1,
           "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
-          "created_at": "2026-11-06T04:38:59.976463+00:00",
-          "updated_at": "2026-11-06T04:38:59.976467+00:00"
+          "created_at": "2026-11-06T06:25:05.796403+00:00",
+          "updated_at": "2026-11-06T06:25:05.796406+00:00"
         },
         {
-          "id": "4af7f4bb-7fa6-43a7-b516-f395692cd896",
-          "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+          "id": "20c3761f-90c6-4039-8531-4ba561664350",
+          "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
           "category": "part",
           "name": "Hose fitting / adaptor (if the existing one is damaged)",
           "purpose": "Connect the hose to the equipment if the existing fitting cannot be reused",
@@ -572,7 +600,7 @@
           },
           "depends_on": [],
           "supporting_asset_ids": [
-            "b7db34c3-cebc-460b-a93b-7533ed49a1f3"
+            "da35ae6e-9899-4c77-a124-ea3241a27ebc"
           ],
           "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
           "origin": "assistant",
@@ -606,15 +634,15 @@
           "evidence_changed_since_confirmation": false,
           "replaced_by_id": null,
           "evidence_request_ids": [],
-          "job_revision": 9,
+          "job_revision": 10,
           "version": 1,
           "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
-          "created_at": "2026-11-06T04:38:59.981742+00:00",
-          "updated_at": "2026-11-06T04:38:59.981745+00:00"
+          "created_at": "2026-11-06T06:25:05.799899+00:00",
+          "updated_at": "2026-11-06T06:25:05.799902+00:00"
         },
         {
-          "id": "910d70d6-c972-4b9c-9762-79da30b99e77",
-          "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+          "id": "4d8f2361-77f3-4682-a12b-7f148b17c267",
+          "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
           "category": "tool",
           "name": "Access and hand tools",
           "purpose": "Reach and work on the affected equipment (e.g. nut driver for clamps, hose cutter, torch, absorbent pads)",
@@ -630,7 +658,7 @@
           },
           "depends_on": [],
           "supporting_asset_ids": [
-            "b7db34c3-cebc-460b-a93b-7533ed49a1f3"
+            "da35ae6e-9899-4c77-a124-ea3241a27ebc"
           ],
           "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
           "origin": "assistant",
@@ -698,15 +726,15 @@
           "evidence_changed_since_confirmation": false,
           "replaced_by_id": null,
           "evidence_request_ids": [],
-          "job_revision": 9,
+          "job_revision": 10,
           "version": 1,
           "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
-          "created_at": "2026-11-06T04:38:59.986923+00:00",
-          "updated_at": "2026-11-06T04:38:59.986926+00:00"
+          "created_at": "2026-11-06T06:25:05.803337+00:00",
+          "updated_at": "2026-11-06T06:25:05.803339+00:00"
         },
         {
-          "id": "9c1f7228-600d-4379-9a02-966175610e37",
-          "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+          "id": "41e75942-c01e-41dc-b04f-c53a2d324b07",
+          "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
           "category": "consumable",
           "name": "Thread seal tape",
           "purpose": "Re-seal the pump outlet fitting",
@@ -733,52 +761,52 @@
           "evidence_changed_since_confirmation": false,
           "replaced_by_id": null,
           "evidence_request_ids": [],
-          "job_revision": 9,
+          "job_revision": 10,
           "version": 1,
           "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
-          "created_at": "2026-11-06T04:39:00.007106+00:00",
-          "updated_at": "2026-11-06T04:39:00.007109+00:00"
+          "created_at": "2026-11-06T06:25:05.827612+00:00",
+          "updated_at": "2026-11-06T06:25:05.827615+00:00"
         }
       ],
       "assumptions": [],
       "needs_site_inspection": [
         {
-          "item_id": "c8846ba2-66f3-4056-8721-5461b3d4104f",
+          "item_id": "de076f70-28c2-4fd7-aee1-96ad1bd82c33",
           "item": "Replacement hose",
           "requirement": "Application not confirmed (e.g. potable water, sanitation, fuel, exhaust) — not inferred from photos"
         },
         {
-          "item_id": "a2eacf80-91f3-465c-a5a5-c3e5a49283ed",
+          "item_id": "ca663815-a2b8-43e3-8454-fdc32a88898f",
           "item": "Hose clamps",
           "requirement": "Quantity depends on the number of connections — not confirmed"
         },
         {
-          "item_id": "a2eacf80-91f3-465c-a5a5-c3e5a49283ed",
+          "item_id": "ca663815-a2b8-43e3-8454-fdc32a88898f",
           "item": "Hose clamps",
           "requirement": "Clamp material/grade not confirmed from photos"
         },
         {
-          "item_id": "4af7f4bb-7fa6-43a7-b516-f395692cd896",
+          "item_id": "20c3761f-90c6-4039-8531-4ba561664350",
           "item": "Hose fitting / adaptor (if the existing one is damaged)",
           "requirement": "Fitting thread not confirmed"
         },
         {
-          "item_id": "4af7f4bb-7fa6-43a7-b516-f395692cd896",
+          "item_id": "20c3761f-90c6-4039-8531-4ba561664350",
           "item": "Hose fitting / adaptor (if the existing one is damaged)",
           "requirement": "Whether the existing fitting can be reused needs site inspection"
         },
         {
-          "item_id": "910d70d6-c972-4b9c-9762-79da30b99e77",
+          "item_id": "4d8f2361-77f3-4682-a12b-7f148b17c267",
           "item": "Access and hand tools",
           "requirement": "Access route and working space not confirmed"
         },
         {
-          "item_id": "9c1f7228-600d-4379-9a02-966175610e37",
+          "item_id": "41e75942-c01e-41dc-b04f-c53a2d324b07",
           "item": "Thread seal tape",
           "requirement": "Fitting thread not confirmed"
         },
         {
-          "evidence_request_id": "5fa88d6d-aecc-4a7b-ad6e-f39ebbc1465a",
+          "evidence_request_id": "f39f3fbb-6868-4be5-92fd-d64100b01b58",
           "item": "Freshwater pump",
           "requirement": "Show the way in to the Freshwater pump: the locker opening, hatch or panel you look through, photographed from a step back. Leave it as it is."
         }
@@ -791,11 +819,11 @@
       "exclusions": null
     }
   },
-  "job_revision": 9,
-  "current_job_revision": 9,
-  "content_digest": "969a6e2855e1ad51016956530a1428b9494c2e3d7dfedff555eca7376c951021",
-  "created_by": "12366c46-66eb-4676-88d0-85af20e48ee2",
-  "created_at": "2026-11-06T04:39:00.497661Z",
+  "job_revision": 10,
+  "current_job_revision": 10,
+  "content_digest": "b9d0eb951276758bf2a6c0cd20255eb8b499b24f4fd6346a76894fdd5a39d058",
+  "created_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
+  "created_at": "2026-11-06T06:25:06.220227Z",
   "published_at": null,
   "is_current": false,
   "outdated": false,

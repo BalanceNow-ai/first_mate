@@ -1,29 +1,29 @@
 {
-  "id": "ae98cf58-5ca8-43f1-b5aa-ee47b74c4a1d",
+  "id": "44d9aca1-94eb-4564-bfd8-8e69ebac5889",
   "title": "Sink repair",
-  "job_id": "cca9ac0a-92b4-4c45-b5ab-db2c9da287d2",
+  "job_id": "3f0c7f8a-4c6c-4232-9013-99ade16bf582",
   "standalone": false,
   "status": "owner_reviewed",
   "version": 3,
-  "current_revision_id": "4cb9ad8a-e89d-4111-ab9d-cfe717b50a80",
+  "current_revision_id": "abcd6cf0-c301-46bc-a05c-452e3f9c764d",
   "revision_number": 1,
   "supplier_name": "Fixture Harbour Marine",
   "total": "458.82",
   "currency": "NZD",
-  "created_at": "2026-11-06T04:58:28.351404Z",
-  "updated_at": "2026-11-06T04:58:29.437278Z",
+  "created_at": "2026-11-06T06:27:22.512999Z",
+  "updated_at": "2026-11-06T06:27:23.608977Z",
   "provisional": false,
   "needs_confirmation": [],
   "revision": {
-    "id": "4cb9ad8a-e89d-4111-ab9d-cfe717b50a80",
+    "id": "abcd6cf0-c301-46bc-a05c-452e3f9c764d",
     "revision_number": 1,
     "origin": "owner_upload",
     "status": "owner_reviewed",
-    "source_asset_id": "e1887907-2dd1-4772-9082-51a048f67975",
-    "uploaded_by": "fca3fbaf-0b44-4e70-b288-ba143ace7389",
+    "source_asset_id": "18dd429b-ecaf-4b53-a144-82af52a3e5c1",
+    "uploaded_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
     "organization_id": null,
     "supersedes_id": null,
-    "created_at": "2026-11-06T04:58:28.352675Z",
+    "created_at": "2026-11-06T06:27:22.514744Z",
     "currency": "NZD",
     "rounding": "half_up",
     "version": 3,
@@ -42,8 +42,8 @@
         }
       }
     ],
-    "reviewed_by": "fca3fbaf-0b44-4e70-b288-ba143ace7389",
-    "reviewed_at": "2026-11-06T04:58:29.437176+00:00",
+    "reviewed_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
+    "reviewed_at": "2026-11-06T06:27:23.608889+00:00",
     "fields": {
       "supplier_name": {
         "name": "supplier_name",
@@ -66,7 +66,7 @@
       },
       "invoice_number": {
         "name": "invoice_number",
-        "value": "INV-564434b8-J",
+        "value": "INV-06c6167d-J",
         "source": "extracted",
         "certainty": "high",
         "page": 1,
@@ -78,7 +78,7 @@
         },
         "illegible": false,
         "needs_confirmation": false,
-        "extracted_value": "INV-564434b8-J",
+        "extracted_value": "INV-06c6167d-J",
         "by": null,
         "at": null,
         "history": []
@@ -215,20 +215,20 @@
   },
   "revisions": [
     {
-      "id": "4cb9ad8a-e89d-4111-ab9d-cfe717b50a80",
+      "id": "abcd6cf0-c301-46bc-a05c-452e3f9c764d",
       "revision_number": 1,
       "origin": "owner_upload",
       "status": "owner_reviewed",
-      "source_asset_id": "e1887907-2dd1-4772-9082-51a048f67975",
-      "uploaded_by": "fca3fbaf-0b44-4e70-b288-ba143ace7389",
+      "source_asset_id": "18dd429b-ecaf-4b53-a144-82af52a3e5c1",
+      "uploaded_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
       "organization_id": null,
       "supersedes_id": null,
-      "created_at": "2026-11-06T04:58:28.352675Z"
+      "created_at": "2026-11-06T06:27:22.514744Z"
     }
   ],
   "lines": [
     {
-      "id": "c602dd99-3afd-4765-9e87-e32fe6914697",
+      "id": "0f727051-6ca6-4ac0-8c9e-02b31ea5955e",
       "line_number": 1,
       "kind": "labour",
       "kind_certainty": "medium",
@@ -268,7 +268,7 @@
       "version": 1
     },
     {
-      "id": "ee2c8303-5b3c-4a97-801d-af1052f01593",
+      "id": "15c1a1cd-ade0-446b-b370-b94c38797701",
       "line_number": 2,
       "kind": "part",
       "kind_certainty": "medium",
@@ -308,7 +308,7 @@
       "version": 1
     },
     {
-      "id": "103c947b-86af-436a-adb4-fec99b8ae9ce",
+      "id": "3bd70624-b8e9-4c36-8f7c-565fe8da7235",
       "line_number": 3,
       "kind": "part",
       "kind_certainty": "medium",
@@ -343,12 +343,12 @@
         "tax_printed": null
       },
       "corrected_fields": [],
-      "corrected_by": "fca3fbaf-0b44-4e70-b288-ba143ace7389",
-      "corrected_at": "2026-11-06T04:58:29.437189Z",
+      "corrected_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
+      "corrected_at": "2026-11-06T06:27:23.608904Z",
       "version": 2
     },
     {
-      "id": "6ea22578-25e2-41cc-8755-fc8b81a21906",
+      "id": "8b9f8088-e7b2-4176-b706-74c38cf998a4",
       "line_number": 4,
       "kind": "call_out",
       "kind_certainty": "medium",
@@ -388,7 +388,7 @@
       "version": 1
     },
     {
-      "id": "b5a8f6ad-a985-4249-951d-c8cb99d39a06",
+      "id": "f8855b99-fcf3-4dc2-a2f1-8ee67a96b705",
       "line_number": 5,
       "kind": "consumable",
       "kind_certainty": "medium",
@@ -429,12 +429,12 @@
     }
   ],
   "explanation": {
-    "id": "4ce2f909-5981-41fe-9de1-7602ddf20250",
-    "invoice_revision_id": "4cb9ad8a-e89d-4111-ab9d-cfe717b50a80",
+    "id": "e5630cf1-664c-4be8-b257-0a8619c383bd",
+    "invoice_revision_id": "abcd6cf0-c301-46bc-a05c-452e3f9c764d",
     "status": "current",
-    "basis_digest": "95c9d11777e6a7a3601f97cdb9960146e021c829f4240b63dda87a246e7cc6e6",
+    "basis_digest": "00964d6a7c6a1cad35b981d01357399d39f4a3db0cf1f3d28bdf02b00549fe46",
     "stale": false,
-    "created_at": "2026-11-06T04:58:29.462092Z",
+    "created_at": "2026-11-06T06:27:23.639974Z",
     "content": {
       "lines": [
         {
@@ -448,7 +448,7 @@
               "y": 0.1496
             }
           },
-          "line_id": "c602dd99-3afd-4765-9e87-e32fe6914697",
+          "line_id": "0f727051-6ca6-4ac0-8c9e-02b31ea5955e",
           "glossary": [
             {
               "term": "hr",
@@ -459,7 +459,7 @@
           "arithmetic": {
             "notes": [],
             "status": "matches",
-            "line_id": "c602dd99-3afd-4765-9e87-e32fe6914697",
+            "line_id": "0f727051-6ca6-4ac0-8c9e-02b31ea5955e",
             "printed": "237.50",
             "reasons": [],
             "computed": "237.50",
@@ -483,7 +483,7 @@
               "y": 0.1686
             }
           },
-          "line_id": "ee2c8303-5b3c-4a97-801d-af1052f01593",
+          "line_id": "15c1a1cd-ade0-446b-b370-b94c38797701",
           "glossary": [
             {
               "term": "id",
@@ -494,7 +494,7 @@
           "arithmetic": {
             "notes": [],
             "status": "matches",
-            "line_id": "ee2c8303-5b3c-4a97-801d-af1052f01593",
+            "line_id": "15c1a1cd-ade0-446b-b370-b94c38797701",
             "printed": "27.60",
             "reasons": [],
             "computed": "27.60",
@@ -518,7 +518,7 @@
               "y": 0.1876
             }
           },
-          "line_id": "103c947b-86af-436a-adb4-fec99b8ae9ce",
+          "line_id": "3bd70624-b8e9-4c36-8f7c-565fe8da7235",
           "glossary": [
             {
               "term": "ea",
@@ -537,7 +537,7 @@
           "arithmetic": {
             "notes": [],
             "status": "differs",
-            "line_id": "103c947b-86af-436a-adb4-fec99b8ae9ce",
+            "line_id": "3bd70624-b8e9-4c36-8f7c-565fe8da7235",
             "printed": "26.00",
             "reasons": [],
             "computed": "19.50",
@@ -561,7 +561,7 @@
               "y": 0.2067
             }
           },
-          "line_id": "6ea22578-25e2-41cc-8755-fc8b81a21906",
+          "line_id": "8b9f8088-e7b2-4176-b706-74c38cf998a4",
           "glossary": [
             {
               "term": "call-out",
@@ -572,7 +572,7 @@
           "arithmetic": {
             "notes": [],
             "status": "matches",
-            "line_id": "6ea22578-25e2-41cc-8755-fc8b81a21906",
+            "line_id": "8b9f8088-e7b2-4176-b706-74c38cf998a4",
             "printed": "95.00",
             "reasons": [],
             "computed": "95.00",
@@ -596,7 +596,7 @@
               "y": 0.2257
             }
           },
-          "line_id": "b5a8f6ad-a985-4249-951d-c8cb99d39a06",
+          "line_id": "f8855b99-fcf3-4dc2-a2f1-8ee67a96b705",
           "glossary": [
             {
               "term": "sundries",
@@ -611,7 +611,7 @@
           "arithmetic": {
             "notes": [],
             "status": "printed_only",
-            "line_id": "b5a8f6ad-a985-4249-951d-c8cb99d39a06",
+            "line_id": "f8855b99-fcf3-4dc2-a2f1-8ee67a96b705",
             "printed": "12.00",
             "reasons": [
               "missing_quantity",
@@ -645,7 +645,7 @@
           {
             "notes": [],
             "status": "matches",
-            "line_id": "c602dd99-3afd-4765-9e87-e32fe6914697",
+            "line_id": "0f727051-6ca6-4ac0-8c9e-02b31ea5955e",
             "printed": "237.50",
             "reasons": [],
             "computed": "237.50",
@@ -656,7 +656,7 @@
           {
             "notes": [],
             "status": "matches",
-            "line_id": "ee2c8303-5b3c-4a97-801d-af1052f01593",
+            "line_id": "15c1a1cd-ade0-446b-b370-b94c38797701",
             "printed": "27.60",
             "reasons": [],
             "computed": "27.60",
@@ -667,7 +667,7 @@
           {
             "notes": [],
             "status": "differs",
-            "line_id": "103c947b-86af-436a-adb4-fec99b8ae9ce",
+            "line_id": "3bd70624-b8e9-4c36-8f7c-565fe8da7235",
             "printed": "26.00",
             "reasons": [],
             "computed": "19.50",
@@ -678,7 +678,7 @@
           {
             "notes": [],
             "status": "matches",
-            "line_id": "6ea22578-25e2-41cc-8755-fc8b81a21906",
+            "line_id": "8b9f8088-e7b2-4176-b706-74c38cf998a4",
             "printed": "95.00",
             "reasons": [],
             "computed": "95.00",
@@ -689,7 +689,7 @@
           {
             "notes": [],
             "status": "printed_only",
-            "line_id": "b5a8f6ad-a985-4249-951d-c8cb99d39a06",
+            "line_id": "f8855b99-fcf3-4dc2-a2f1-8ee67a96b705",
             "printed": "12.00",
             "reasons": [
               "missing_quantity",
@@ -731,14 +731,14 @@
         "items": [
           {
             "status": "matches",
-            "line_id": "c602dd99-3afd-4765-9e87-e32fe6914697",
+            "line_id": "0f727051-6ca6-4ac0-8c9e-02b31ea5955e",
             "approval": {
               "is_change": false,
-              "decided_at": "2026-11-06T04:58:27.286827+00:00",
-              "decided_by": "fca3fbaf-0b44-4e70-b288-ba143ace7389",
-              "decision_id": "2b808f7f-8fe9-41e9-b335-dbf27be7a029",
+              "decided_at": "2026-11-06T06:27:21.430959+00:00",
+              "decided_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
+              "decision_id": "243aac52-b1db-43aa-b7ee-063c72f01222",
               "scope_line_index": 0,
-              "scope_revision_id": "50a1a166-0f6b-4dba-90cd-b7f6962929b5",
+              "scope_revision_id": "6a5392c2-f020-436f-ac01-a013b859bcd2",
               "scope_revision_number": 1,
               "scope_line_description": "Labour - replace hose and clamps"
             },
@@ -746,18 +746,19 @@
             "differences": [],
             "line_number": 1,
             "approval_text": "In the accepted scope (scope revision 1), accepted by the owner on 2026-11-06.",
-            "additional_work": false
+            "additional_work": false,
+            "unavailable_reasons": []
           },
           {
             "status": "matches",
-            "line_id": "ee2c8303-5b3c-4a97-801d-af1052f01593",
+            "line_id": "15c1a1cd-ade0-446b-b370-b94c38797701",
             "approval": {
               "is_change": false,
-              "decided_at": "2026-11-06T04:58:27.286827+00:00",
-              "decided_by": "fca3fbaf-0b44-4e70-b288-ba143ace7389",
-              "decision_id": "2b808f7f-8fe9-41e9-b335-dbf27be7a029",
+              "decided_at": "2026-11-06T06:27:21.430959+00:00",
+              "decided_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
+              "decision_id": "243aac52-b1db-43aa-b7ee-063c72f01222",
               "scope_line_index": 1,
-              "scope_revision_id": "50a1a166-0f6b-4dba-90cd-b7f6962929b5",
+              "scope_revision_id": "6a5392c2-f020-436f-ac01-a013b859bcd2",
               "scope_revision_number": 1,
               "scope_line_description": "Sanitation hose 25mm ID"
             },
@@ -765,18 +766,19 @@
             "differences": [],
             "line_number": 2,
             "approval_text": "In the accepted scope (scope revision 1), accepted by the owner on 2026-11-06.",
-            "additional_work": false
+            "additional_work": false,
+            "unavailable_reasons": []
           },
           {
             "status": "differs",
-            "line_id": "103c947b-86af-436a-adb4-fec99b8ae9ce",
+            "line_id": "3bd70624-b8e9-4c36-8f7c-565fe8da7235",
             "approval": {
               "is_change": false,
-              "decided_at": "2026-11-06T04:58:27.286827+00:00",
-              "decided_by": "fca3fbaf-0b44-4e70-b288-ba143ace7389",
-              "decision_id": "2b808f7f-8fe9-41e9-b335-dbf27be7a029",
+              "decided_at": "2026-11-06T06:27:21.430959+00:00",
+              "decided_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
+              "decision_id": "243aac52-b1db-43aa-b7ee-063c72f01222",
               "scope_line_index": 2,
-              "scope_revision_id": "50a1a166-0f6b-4dba-90cd-b7f6962929b5",
+              "scope_revision_id": "6a5392c2-f020-436f-ac01-a013b859bcd2",
               "scope_revision_number": 1,
               "scope_line_description": "S/S hose clamp 316"
             },
@@ -790,18 +792,19 @@
             ],
             "line_number": 3,
             "approval_text": "In the accepted scope (scope revision 1), accepted by the owner on 2026-11-06.",
-            "additional_work": false
+            "additional_work": false,
+            "unavailable_reasons": []
           },
           {
             "status": "differs",
-            "line_id": "6ea22578-25e2-41cc-8755-fc8b81a21906",
+            "line_id": "8b9f8088-e7b2-4176-b706-74c38cf998a4",
             "approval": {
               "is_change": false,
-              "decided_at": "2026-11-06T04:58:27.286827+00:00",
-              "decided_by": "fca3fbaf-0b44-4e70-b288-ba143ace7389",
-              "decision_id": "2b808f7f-8fe9-41e9-b335-dbf27be7a029",
+              "decided_at": "2026-11-06T06:27:21.430959+00:00",
+              "decided_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
+              "decision_id": "243aac52-b1db-43aa-b7ee-063c72f01222",
               "scope_line_index": 3,
-              "scope_revision_id": "50a1a166-0f6b-4dba-90cd-b7f6962929b5",
+              "scope_revision_id": "6a5392c2-f020-436f-ac01-a013b859bcd2",
               "scope_revision_number": 1,
               "scope_line_description": "Call-out fee"
             },
@@ -820,11 +823,12 @@
             ],
             "line_number": 4,
             "approval_text": "In the accepted scope (scope revision 1), accepted by the owner on 2026-11-06.",
-            "additional_work": false
+            "additional_work": false,
+            "unavailable_reasons": []
           },
           {
             "status": "not_in_accepted_scope",
-            "line_id": "b5a8f6ad-a985-4249-951d-c8cb99d39a06",
+            "line_id": "f8855b99-fcf3-4dc2-a2f1-8ee67a96b705",
             "approval": null,
             "description": "Consumables / sundries",
             "differences": [],
@@ -839,18 +843,18 @@
         "provisional": false,
         "scope_revisions": [
           {
-            "id": "50a1a166-0f6b-4dba-90cd-b7f6962929b5",
+            "id": "6a5392c2-f020-436f-ac01-a013b859bcd2",
             "currency": "NZD",
             "is_change": false,
-            "decided_at": "2026-11-06T04:58:27.286827+00:00",
-            "decision_id": "2b808f7f-8fe9-41e9-b335-dbf27be7a029",
+            "decided_at": "2026-11-06T06:27:21.430959+00:00",
+            "decision_id": "243aac52-b1db-43aa-b7ee-063c72f01222",
             "revision_number": 1
           }
         ],
         "scope_lines_not_invoiced": []
       },
       "duplicates": [],
-      "invoice_id": "ae98cf58-5ca8-43f1-b5aa-ee47b74c4a1d",
+      "invoice_id": "44d9aca1-94eb-4564-bfd8-8e69ebac5889",
       "limitations": [
         "This explanation translates and checks the invoice's own figures. It does not judge whether prices are fair, whether anyone acted improperly, or give legal or tax advice.",
         "Tax is shown only as printed. No tax rate is assumed and tax compliance is not checked.",
@@ -875,16 +879,16 @@
         }
       ],
       "provisional": false,
-      "revision_id": "4cb9ad8a-e89d-4111-ab9d-cfe717b50a80",
+      "revision_id": "abcd6cf0-c301-46bc-a05c-452e3f9c764d",
       "attributed_text": [],
       "revision_number": 1,
       "rounding_policy": "Rounding half-up to 2 decimal places (NZD minor unit).",
       "needs_confirmation": [],
       "suggested_questions": [
         {
-          "key": "arith:line:103c947b-86af-436a-adb4-fec99b8ae9ce",
+          "key": "arith:line:3bd70624-b8e9-4c36-8f7c-565fe8da7235",
           "text": "Line 3 (S/S hose clamp 316) shows 26.00, but 3 × 6.50 works out to 19.50. Could you confirm how this amount was calculated?",
-          "line_id": "103c947b-86af-436a-adb4-fec99b8ae9ce"
+          "line_id": "3bd70624-b8e9-4c36-8f7c-565fe8da7235"
         },
         {
           "key": "arith:total",
@@ -892,44 +896,44 @@
           "line_id": null
         },
         {
-          "key": "scope:differs:103c947b-86af-436a-adb4-fec99b8ae9ce:quantity",
+          "key": "scope:differs:3bd70624-b8e9-4c36-8f7c-565fe8da7235:quantity",
           "text": "Scope revision 1 shows quantity 4; line 3 of the invoice shows 3. Could you explain the difference?",
-          "line_id": "103c947b-86af-436a-adb4-fec99b8ae9ce"
+          "line_id": "3bd70624-b8e9-4c36-8f7c-565fe8da7235"
         },
         {
-          "key": "scope:differs:6ea22578-25e2-41cc-8755-fc8b81a21906:amount",
+          "key": "scope:differs:8b9f8088-e7b2-4176-b706-74c38cf998a4:amount",
           "text": "Scope revision 1 shows amount 85.00; line 4 of the invoice shows 95.00. Could you explain the difference?",
-          "line_id": "6ea22578-25e2-41cc-8755-fc8b81a21906"
+          "line_id": "8b9f8088-e7b2-4176-b706-74c38cf998a4"
         },
         {
-          "key": "scope:differs:6ea22578-25e2-41cc-8755-fc8b81a21906:unit_price",
+          "key": "scope:differs:8b9f8088-e7b2-4176-b706-74c38cf998a4:unit_price",
           "text": "Scope revision 1 shows unit price 85.00; line 4 of the invoice shows 95.00. Could you explain the difference?",
-          "line_id": "6ea22578-25e2-41cc-8755-fc8b81a21906"
+          "line_id": "8b9f8088-e7b2-4176-b706-74c38cf998a4"
         },
         {
-          "key": "scope:additional:b5a8f6ad-a985-4249-951d-c8cb99d39a06",
+          "key": "scope:additional:f8855b99-fcf3-4dc2-a2f1-8ee67a96b705",
           "text": "Line 5 (Consumables / sundries) isn't in the accepted scope we have on record. Could you let us know when and how this was agreed?",
-          "line_id": "b5a8f6ad-a985-4249-951d-c8cb99d39a06"
+          "line_id": "f8855b99-fcf3-4dc2-a2f1-8ee67a96b705"
         }
       ]
     }
   },
   "questions": [
     {
-      "id": "983707a3-cdb7-4ae0-b7d6-2d87b449362d",
-      "invoice_id": "ae98cf58-5ca8-43f1-b5aa-ee47b74c4a1d",
-      "invoice_revision_id": "4cb9ad8a-e89d-4111-ab9d-cfe717b50a80",
-      "line_id": "b5a8f6ad-a985-4249-951d-c8cb99d39a06",
+      "id": "1275d4f4-2b31-4765-be79-d97296a32ea9",
+      "invoice_id": "44d9aca1-94eb-4564-bfd8-8e69ebac5889",
+      "invoice_revision_id": "abcd6cf0-c301-46bc-a05c-452e3f9c764d",
+      "line_id": "f8855b99-fcf3-4dc2-a2f1-8ee67a96b705",
       "origin": "assistant_suggestion",
       "text": "Line 5 (Consumables / sundries) isn't in the accepted scope we have on record. Could you let us know when and how this was agreed? Thanks.",
       "status": "draft",
       "shared_assignment_id": null,
       "shared_asset_ids": [],
       "shared_at": null,
-      "created_by": "fca3fbaf-0b44-4e70-b288-ba143ace7389",
+      "created_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
       "version": 2,
-      "created_at": "2026-11-06T04:58:29.491834Z",
-      "updated_at": "2026-11-06T04:58:29.499817Z",
+      "created_at": "2026-11-06T06:27:23.679015Z",
+      "updated_at": "2026-11-06T06:27:23.687331Z",
       "responses": []
     }
   ],
@@ -939,16 +943,16 @@
     "message": null,
     "substitute": true,
     "latest_run": {
-      "id": "0a8cbab2-ca50-4ce5-a8a9-467695cfc784",
+      "id": "6d71737d-5ee3-45fd-b5cc-7c4079b7d64f",
       "status": "draft_ready",
-      "invoice_revision_id": "4cb9ad8a-e89d-4111-ab9d-cfe717b50a80",
+      "invoice_revision_id": "abcd6cf0-c301-46bc-a05c-452e3f9c764d",
       "provider": "local_fixture",
       "model": "local-fixture-v1",
       "attempts": 1,
       "error": null,
       "stale_reason": null,
-      "created_at": "2026-11-06T04:58:28.376252Z",
-      "updated_at": "2026-11-06T04:58:28.461266Z"
+      "created_at": "2026-11-06T06:27:22.540908Z",
+      "updated_at": "2026-11-06T06:27:22.632611Z"
     }
   }
 }

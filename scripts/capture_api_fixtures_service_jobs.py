@@ -83,6 +83,39 @@ def synthetic_image(fmt: str, seed: int, size=(480, 360)) -> bytes:
     return buf.getvalue()
 
 
+def synthetic_pdf(lines: list[str], *, active: bool = False) -> bytes:
+    """A minimal one-page text PDF (a synthetic service document). ``active`` adds an
+    /OpenAction JavaScript action, which the server must refuse (active content)."""
+    def esc(t: str) -> str:
+        return t.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+
+    stream = "".join(f"BT /F1 11 Tf 1 0 0 1 50 {780 - 18 * i} Tm ({esc(t)}) Tj ET\n" for i, t in enumerate(lines))
+    data = stream.encode("latin-1")
+    catalog = b"<< /Type /Catalog /Pages 2 0 R" + (b" /OpenAction 6 0 R" if active else b"") + b" >>"
+    objs = [
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+        b"<< /Type /Pages /Kids [4 0 R] /Count 1 >>",
+        b"<< /Length %d >>\nstream\n" % len(data) + data + b"\nendstream",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> "
+        b"/Contents 3 0 R >>",
+        catalog,
+    ]
+    if active:
+        objs.append(b"<< /S /JavaScript /JS (app.alert\\(1\\)) >>")
+    out = io.BytesIO()
+    out.write(b"%PDF-1.4\n")
+    offsets = []
+    for i, obj in enumerate(objs, 1):
+        offsets.append(out.tell())
+        out.write(f"{i} 0 obj\n".encode() + obj + b"\nendobj\n")
+    xref = out.tell()
+    out.write(f"xref\n0 {len(objs) + 1}\n0000000000 65535 f \n".encode())
+    for off in offsets:
+        out.write(f"{off:010d} 00000 n \n".encode())
+    out.write(f"trailer\n<< /Size {len(objs) + 1} /Root 5 0 R >>\nstartxref\n{xref}\n%%EOF\n".encode())
+    return out.getvalue()
+
+
 class Stack:
     def __init__(self, base: str, mailpit: str, anon: str, out: Path) -> None:
         self.base, self.mailpit, self.anon, self.out = base.rstrip("/"), mailpit.rstrip("/"), anon, out
@@ -155,8 +188,9 @@ class Stack:
     def upload(self, tok: str, job_id: str, data: bytes, name: str, *, request_id: str | None = None,
                caption: str | None = None, capture: str = "") -> dict:
         """Intent → PUT bytes → poll until processed. Captures each stage when ``capture`` is set."""
-        body = {"purpose": "job_photo", "filename": name, "content_type": "image/png" if name.endswith(".png") else "image/jpeg",
-                "size_bytes": len(data)}
+        content_type = {".png": "image/png", ".pdf": "application/pdf"}.get(Path(name).suffix, "image/jpeg")
+        body = {"purpose": "job_document" if name.endswith(".pdf") else "job_photo", "filename": name,
+                "content_type": content_type, "size_bytes": len(data)}
         if request_id:
             body["evidence_request_id"] = request_id
         if caption:
@@ -240,6 +274,11 @@ def main() -> int:
     s.upload(tok_o, jid, synthetic_image("JPEG", 2), "label.jpg", caption="Pump label", capture="asset_jpeg")
     # A spoofed "image" (text bytes) is rejected by content checks.
     s.upload(tok_o, jid, b"this is not an image, just text pretending\n" * 20, "fake.png", capture="asset_rejected")
+    # Documents (purpose job_document): a plain PDF is accepted (metadata-stripped copy); one
+    # with an /OpenAction JavaScript action is refused as active content.
+    s.upload(tok_o, jid, synthetic_pdf(["Freshwater pump service record", "Outlet hose 25 mm ID"]),
+             "pump-service.pdf", caption="Pump service record", capture="asset_pdf")
+    s.upload(tok_o, jid, synthetic_pdf(["Pump manual"], active=True), "manual.pdf", capture="asset_pdf_rejected")
     s.save("assets_list", s.api("GET", f"/service-jobs/{jid}/assets", tok_o), 200)
     assets = s.ok(s.api("GET", f"/service-jobs/{jid}/assets", tok_o), 200)["items"]
     available = [x for x in assets if x["status"] == "available"]
@@ -473,6 +512,57 @@ def main() -> int:
     j3 = s.ok(s.api("POST", "/service-jobs/", tok_o, json={"vessel_id": vessel["id"], "title": "Draft to delete"}), 201)
     s.ok(s.api("DELETE", f"/service-jobs/{j3['id']}", tok_o), 204)
     s.save("jobs_list_final", s.api("GET", "/service-jobs/", tok_o), 200)
+
+    # ------------------------------------------------------------------ live updates off (the default)
+    j4 = s.ok(s.api("POST", "/service-jobs/", tok_o, json={
+        "vessel_id": vessel["id"], "entry_point": "vessel", "title": "Navigation lights flicker",
+        "issue_description": "The port navigation light flickers when the engine starts.",
+        "affected_system": "Electrical", "affected_equipment": "Navigation lights", "urgency": "soon"}), 201)
+    p4 = f"/service-jobs/{j4['id']}"
+    j4 = s.ok(s.api("POST", f"{p4}/transition", tok_o, json={"expected_version": j4["version"],
+                                                              "to": "evidence_collection"}), 200)
+    m4 = s.ok(s.api("POST", f"{p4}/measurements", tok_o, json={
+        "dimension": "route_length", "component": "Port light cable run", "value_text": "3.2", "unit": "m",
+        "method": "owner_tape"}), 201)
+    s.ok(s.api("POST", f"{p4}/preparation-items", tok_o, json={
+        "category": "part", "name": "Heat-shrink butt connectors", "purpose": "Re-terminate the light cable",
+        "open_requirements": ["Cable gauge not confirmed"]}), 201)
+    snap_sections = ["summary", "evidence", "measurements", "preparation"]
+    s.save("sharing_preview_snapshot", s.api("POST", f"{p4}/assignments/preview", tok_o, json={
+        "organization_id": org_id, "sections": snap_sections}), 200)
+    a4 = s.save("assignment_invited_snapshot", s.api("POST", f"{p4}/assignments", tok_o, json={
+        "organization_id": org_id, "sections": snap_sections}, headers=idem("inv4")), 201)
+    s.ok(s.api("POST", f"/contractors/assignments/{a4['id']}/accept", tok_ca, json={"member_user_ids": [cm_id]}), 200)
+    s.save("job_contractor_no_brief", s.api("GET", p4, tok_cm), 200)
+    s.save("measurements_contractor_no_brief", s.api("GET", f"{p4}/measurements", tok_cm), 200)
+    b4 = s.ok(s.api("POST", f"{p4}/briefs/preview", tok_o), 201)
+    b4 = s.ok(s.api("POST", f"{p4}/briefs/{b4['id']}/publish", tok_o, json={"content_digest": b4["content_digest"]}), 200)
+    s.save("job_contractor_brief_snapshot", s.api("GET", p4, tok_cm), 200)
+    export = s.api("GET", f"{p4}/briefs/{b4['id']}/export", tok_cm)
+    if export.status_code != 200 or "text/html" not in export.headers.get("content-type", ""):
+        raise SystemExit(f"brief export: {export.status_code} {export.headers.get('content-type')}")
+    later = s.ok(s.api("POST", f"{p4}/measurements", tok_o, json={
+        "dimension": "other", "component": "Light fitting screws", "value_text": "M4", "method": "owner_other"}), 201)
+    s.save("error_live_updates_not_shared", s.api("POST", f"{p4}/measurements/{later['id']}/confirm", tok_cm,
+                                                  json={"method": "contractor_site"}), 403)
+    # The first organisation confirms and records; the job is then reassigned (live updates on).
+    s.ok(s.api("POST", f"{p4}/measurements/{m4['id']}/confirm", tok_cm,
+               json={"method": "contractor_site", "note": "Measured on site"}), 200)
+    s.ok(s.api("POST", f"{p4}/measurements", tok_cm, json={
+        "dimension": "other", "component": "Cable gauge", "value_text": "1.5 mm²", "method": "contractor_site",
+        "notes": "Tinned marine cable"}), 201)
+    item4 = s.ok(s.api("GET", f"{p4}/preparation-items", tok_cm), 200)[0]
+    s.ok(s.api("POST", f"{p4}/preparation-items/{item4['id']}/confirm", tok_cm,
+               json={"expected_version": item4["version"], "quantity": "4", "unit": "each",
+                     "quantity_basis": "Two at each end of the cable run", "note": "Requirement confirmed"}), 200)
+    a4 = s.ok(s.api("GET", f"{p4}/assignments", tok_o), 200)[0]
+    s.ok(s.api("POST", f"{p4}/assignments/{a4['id']}/reassign", tok_o, json={
+        "organization_id": other_org, "sections": snap_sections, "live_updates": True}, headers=idem("re4")), 201)
+    a5 = next(a for a in s.ok(s.api("GET", f"{p4}/assignments", tok_o), 200) if a["status"] == "invited")
+    s.ok(s.api("POST", f"/contractors/assignments/{a5['id']}/accept", tok_ca, json={"member_user_ids": [ca_id]}), 200)
+    s.save("job_contractor_live", s.api("GET", p4, tok_ca), 200)
+    s.save("measurements_other_org", s.api("GET", f"{p4}/measurements", tok_ca), 200)
+    s.save("preparation_items_other_org", s.api("GET", f"{p4}/preparation-items", tok_ca), 200)
 
     print("\nWrote:")
     for w in s.written:

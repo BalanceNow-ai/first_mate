@@ -1,29 +1,29 @@
 {
-  "id": "4cc39558-54d1-4bd6-b249-189396345569",
+  "id": "ae51872c-168a-4ba3-81aa-1297d48a0db9",
   "title": "Photo of invoice",
   "job_id": null,
   "standalone": true,
   "status": "extraction_draft",
   "version": 2,
-  "current_revision_id": "fa6816e5-d20b-4251-ac7a-1ff4eaad876d",
+  "current_revision_id": "b8ebc588-7b96-46f5-9cda-5c40e860725c",
   "revision_number": 1,
   "supplier_name": null,
   "total": null,
   "currency": null,
-  "created_at": "2026-11-06T04:58:26.046366Z",
-  "updated_at": "2026-11-06T04:58:26.148271Z",
+  "created_at": "2026-11-06T06:27:20.108013Z",
+  "updated_at": "2026-11-06T06:27:20.219433Z",
   "provisional": true,
   "needs_confirmation": [],
   "revision": {
-    "id": "fa6816e5-d20b-4251-ac7a-1ff4eaad876d",
+    "id": "b8ebc588-7b96-46f5-9cda-5c40e860725c",
     "revision_number": 1,
     "origin": "owner_upload",
     "status": "extraction_draft",
-    "source_asset_id": "891f2979-3355-4ab4-9063-c8a6f7aec9a5",
-    "uploaded_by": "fca3fbaf-0b44-4e70-b288-ba143ace7389",
+    "source_asset_id": "05189886-0a8a-4c0e-add3-7aa34a03c9ae",
+    "uploaded_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
     "organization_id": null,
     "supersedes_id": null,
-    "created_at": "2026-11-06T04:58:26.047898Z",
+    "created_at": "2026-11-06T06:27:20.109006Z",
     "currency": null,
     "rounding": "half_up",
     "version": 2,
@@ -167,15 +167,15 @@
   },
   "revisions": [
     {
-      "id": "fa6816e5-d20b-4251-ac7a-1ff4eaad876d",
+      "id": "b8ebc588-7b96-46f5-9cda-5c40e860725c",
       "revision_number": 1,
       "origin": "owner_upload",
       "status": "extraction_draft",
-      "source_asset_id": "891f2979-3355-4ab4-9063-c8a6f7aec9a5",
-      "uploaded_by": "fca3fbaf-0b44-4e70-b288-ba143ace7389",
+      "source_asset_id": "05189886-0a8a-4c0e-add3-7aa34a03c9ae",
+      "uploaded_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
       "organization_id": null,
       "supersedes_id": null,
-      "created_at": "2026-11-06T04:58:26.047898Z"
+      "created_at": "2026-11-06T06:27:20.109006Z"
     }
   ],
   "lines": [],
@@ -187,16 +187,16 @@
     "message": null,
     "substitute": true,
     "latest_run": {
-      "id": "4155b8da-6538-4a6c-b5e9-76d4fc4a3e2e",
+      "id": "d4bdcc7a-bd9b-4fe1-9083-41073648daec",
       "status": "draft_ready",
-      "invoice_revision_id": "fa6816e5-d20b-4251-ac7a-1ff4eaad876d",
+      "invoice_revision_id": "b8ebc588-7b96-46f5-9cda-5c40e860725c",
       "provider": "local_fixture",
       "model": "local-fixture-v1",
       "attempts": 1,
       "error": null,
       "stale_reason": null,
-      "created_at": "2026-11-06T04:58:26.072762Z",
-      "updated_at": "2026-11-06T04:58:26.157021Z"
+      "created_at": "2026-11-06T06:27:20.137407Z",
+      "updated_at": "2026-11-06T06:27:20.225264Z"
     }
   }
 }
