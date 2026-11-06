@@ -1,0 +1,31 @@
+{
+  "asset": {
+    "id": "23fc3dd6-dcac-4cdb-b12a-41b9fc89cd11",
+    "job_id": null,
+    "purpose": "invoice",
+    "status": "upload_pending",
+    "uploaded_by_role": "owner",
+    "uploaded_by_me": true,
+    "evidence_request_id": null,
+    "caption": null,
+    "detected_type": null,
+    "size_bytes": null,
+    "max_bytes": 2543,
+    "width": null,
+    "height": null,
+    "pages": null,
+    "quality": {},
+    "duplicate_of_id": null,
+    "rejection_reason": null,
+    "upload_expires_at": "2026-11-07T04:58:22.647838Z",
+    "version": 1,
+    "created_at": "2026-11-06T04:58:22.648429Z",
+    "updated_at": "2026-11-06T04:58:22.648431Z"
+  },
+  "upload": {
+    "method": "PUT",
+    "url": "/api/v1/service-assets/23fc3dd6-dcac-4cdb-b12a-41b9fc89cd11/content",
+    "max_bytes": 2543,
+    "expires_at": "2026-11-07T04:58:22.647838Z"
+  }
+}

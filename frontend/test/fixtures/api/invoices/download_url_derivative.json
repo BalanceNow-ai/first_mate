@@ -1,0 +1,6 @@
+{
+  "url": "http://localhost:18080/helm-private/derived/myZ1VVxr19T5hhw7FFf3Do9j93IAENw3?response-content-disposition=attachment%3B%20filename%3D%22invoice-23fc3dd6.pdf%22&response-content-type=application%2Fpdf&response-cache-control=no-store&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=localobjectstorekey%2F20261106%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20261106T045824Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=085f38b2a2fdf754978fdd2591ca09f6eb20c17fbcc45f5a0de248647a8b1fb5",
+  "expires_at": "2026-11-06T05:03:24.816414Z",
+  "variant": "derivative",
+  "disposition": "attachment"
+}

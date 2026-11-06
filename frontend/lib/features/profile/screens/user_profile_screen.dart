@@ -5,6 +5,8 @@ import 'package:helm_marine/core/auth/auth_controller.dart';
 import 'package:helm_marine/core/models/user.dart';
 import 'package:helm_marine/core/session/session.dart';
 import 'package:helm_marine/core/theme/helm_theme.dart';
+import 'package:helm_marine/features/invoices/widgets/invoices_entry.dart';
+import 'package:helm_marine/features/moderation/screens/moderation_screens.dart';
 import 'package:helm_marine/features/orders/screens/orders_screens.dart';
 import 'package:helm_marine/features/staff_orders/screens/staff_hub_screen.dart';
 
@@ -108,7 +110,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
           ),
           const SizedBox(height: 12),
           const RecentOrdersSection(),
+          const InvoicesEntry(),
           const StaffToolsEntry(),
+          const ModerationEntry(),
           const SizedBox(height: 24),
 
           // --- Settings ---

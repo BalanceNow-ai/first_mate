@@ -1,0 +1,6 @@
+{
+  "url": "http://localhost:18080/helm-private/derived/L68CF5EhbBmBwbeXY4lc2pM5FfQ2tDE6?response-content-disposition=attachment%3B%20filename%3D%22invoice-891f2979.jpg%22&response-content-type=image%2Fjpeg&response-cache-control=no-store&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=localobjectstorekey%2F20261106%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20261106T045827Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=e9ac4801d3c1c4850422a44a11f5359b44d213589ba721b995b526b98e8ab9c1",
+  "expires_at": "2026-11-06T05:03:27.119228Z",
+  "variant": "derivative",
+  "disposition": "attachment"
+}
