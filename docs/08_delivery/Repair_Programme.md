@@ -19,6 +19,7 @@ Status vocabulary (one per row):
   feature is disabled (or rejected) until configured.
 - `BLOCKED` — a concrete unavailable dependency or authority boundary prevents it.
 - `DEFERRED_FUTURE_SCOPE` — explicitly later rollout breadth only.
+- `SPECIFIED_NOT_IMPLEMENTED` — owner-requested scope with an accepted written contract; no implementation or verification claimed.
 
 ## 1. Plan (priority order)
 
@@ -378,3 +379,35 @@ a staging environment before it is turned on for customers.
   Supabase JWKS, OpenAI quality on licensed content, Resend/FCM, Strapi; provision
   hosting/TLS/DNS; sign mobile builds; formal WCAG audit; production load test.
 
+
+## 8. Service-jobs extension — specified 6 November 2026
+
+The owner requested guided problem photos and access information, likely parts and measurements, reciprocal feedback, and “understand my invoice.” This is a new bounded MVP alongside the repair record above. Existing closure evidence is preserved; this documentation update neither verifies new code nor reopens previously corrected defects.
+
+- Canonical detailed contract: [Service Jobs and Contractor Assistant](../04_technical_spec/Service_Jobs_and_Contractor_Assistant_Specification.md), version 1.0.
+- Master specification: Features 4–7; product design includes this extension.
+- Delegated delivery instructions: [Claude Code build prompt](Service_Jobs_Claude_Code_Build_Prompt.md).
+- Source baseline inspected for this specification: `main@1ba32445a7f84a0b356682d8f5bb28ffb3711e5f`.
+- Work order: shared job/grants/private media → guided capture/measurements/brief/scope → invoice explanation → reciprocal feedback/moderation → integrated verification and landing. Complete all four capabilities; use provider substitutes/manual paths to avoid deferring a whole feature for missing live credentials.
+
+| Requirements | Scope | Status | Evidence / next action |
+|---|---|---|---|
+| SJ-01–SJ-03 | Persisted adaptive capture, unclear evidence, safe gaps | SPECIFIED_NOT_IMPLEMENTED | Implement owner capture/resume and missing-evidence flows |
+| SJ-04–SJ-05 | Dimensions, provenance, provisional parts and unknown suitability | SPECIFIED_NOT_IMPLEMENTED | Implement typed measurements and catalogue/fitment reuse |
+| SJ-06–SJ-07 | Contractor organization grants, isolation, revocation and stale publication | SPECIFIED_NOT_IMPLEMENTED | Implement membership, section grants and worker checks |
+| SJ-08–SJ-10 | Revisioned brief, requests, confirmation invalidation and explicit scope changes | SPECIFIED_NOT_IMPLEMENTED | Implement owner/contractor preparation and exact-revision decisions |
+| SJ-11–SJ-15 | Source-linked invoice explanation, arithmetic, questions and standalone uploads | SPECIFIED_NOT_IMPLEMENTED | Implement extraction/correction/comparison with manual/provider paths |
+| SJ-16–SJ-18 | Reciprocal eligibility, blind reveal, responses and moderation | SPECIFIED_NOT_IMPLEMENTED | Implement private job-specific feedback and 14-day lifecycle |
+| SJ-19–SJ-22 | Media security, injection resistance, concurrency and outages | SPECIFIED_NOT_IMPLEMENTED | Execute concrete negative and recovery cases |
+| SJ-23–SJ-24 | Real Flutter/API/local storage journeys and affected regressions | SPECIFIED_NOT_IMPLEMENTED | Execute integrated acceptance; record exact code identities and limitations |
+
+The implementer must split these grouped rows into individual requirement dispositions where outcomes differ, cite executed checks, and distinguish code not implemented from code implemented with live validation pending. No new hosted CI is required by this extension.
+
+### Extension decisions and limits
+
+1. Feedback is reciprocal, private and job-specific by default; blind until both submit or 14 days. Public contractor reviews are future opt-in scope; public owner scores/blacklists and automated penalties are excluded.
+2. Photographs establish observations, not exact unscaled measurements or verified application suitability. Distinguish owner measurement, contractor confirmation and source verification.
+3. Sharing grants, scope acceptance, purchases, payments and feedback publication are deterministic authorized actions; model/OCR text cannot confer authority.
+4. Invoice explanations preserve document evidence and calculate amounts deterministically; missing approval records produce questions, not accusations.
+5. Build authority covers local implementation/verification and repository landing. Production deployment/migration, paid calls/provisioning, live messages, payments and public reputation effects remain outside automatic authority. Complete local/manual/provider-adapter work without waiting for production credentials.
+6. Preserve existing architecture and repair decisions (including D21–D23); contractor membership is separate from delivery/operator roles.

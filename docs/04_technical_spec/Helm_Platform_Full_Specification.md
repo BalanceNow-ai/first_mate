@@ -1,8 +1,11 @@
 # Helm Platform: Full Product & Technical Specification
 
-**Version:** 1.0  
-**Date:** 22 February 2026  
-**Author:** Manus AI
+**Version:** 1.1  
+**Date:** 6 November 2026  
+**Original author:** Manus AI  
+**Service-jobs specification update:** Owner-requested, 6 November 2026
+
+**Document authority:** Current implementation, accepted architecture decisions and closure evidence are recorded in [Repair Programme](../08_delivery/Repair_Programme.md). Its decisions supersede historical technology recommendations below (including the original orchestration/model examples). Features 4–7 are specified in detail in [Service Jobs and Contractor Assistant](Service_Jobs_and_Contractor_Assistant_Specification.md); they are new scope, not a claim of implementation. The original wireframes do not define these new journeys.
 
 ---
 
@@ -254,9 +257,38 @@ This document provides detailed feature specifications in a format suitable for 
 
 ---
 
+
+## Feature 4: Guided Problem Evidence and Measurements
+
+First Mate helps an owner describe symptoms and collect the most useful photos, equipment labels, safe measurements and access views. Requests adapt to the current evidence and explain why a view is needed. Owners can save/resume, correct observations and record that a requested view cannot safely be obtained. Unclear evidence remains unknown.
+
+Measurements distinguish hose inside/outside diameter, fitting/thread details, clamp ranges, route length and application requirements. A photo without a reliable scale cannot establish an exact dimension. Every material assertion carries its source, revision and confirmation state. Private uploads are validated, quarantined/scanned and shared only under explicit grants.
+
+## Feature 5: Contractor Preparation and Agreed Scope
+
+Owners share selected job information with an assigned contractor organization. Contractors receive a revisioned brief containing symptoms, annotated evidence, equipment details, access arrangements, confirmed and provisional parts/tools/consumables, and outstanding questions. Contractor membership is independent of Helm Dash operator roles.
+
+Parts suggestions preserve unknown suitability and use existing catalogue/fitment controls. Contractor confirmation of a requirement is distinct from verified product fit or stock. Contractors can request missing evidence and propose scope/estimate revisions; only an explicit owner decision accepts an exact revision or later change.
+
+## Feature 6: Understand My Invoice
+
+Owners upload a job-linked or standalone invoice and receive an editable extraction with document/page/region evidence and a plain-language explanation of parts, quantities, labour, call-out, discounts, printed tax and totals. Deterministic arithmetic reconciles extracted amounts, preserving currency and missing information.
+
+Compare the invoice with recorded scope, estimates and changes when available. Flag factual questions and unexplained differences without asserting fraud, unfair pricing or unauthorized work from missing records. Owners explicitly choose what to share; contractor responses and corrected invoices retain attribution. This feature does not authorize payment, dispute or messaging actions automatically.
+
+## Feature 7: Reciprocal Job Feedback
+
+Owners review contractor communication, coordination, work explanation, care and invoice clarity. Contractors review the owner's problem information, access preparation, availability and communication. Only eligible actual job participants submit one review per side, using anchored ratings, N/A and optional narrative.
+
+Feedback is private and job-specific by default. Reviews stay blind until both submit or the 14-day submission window ends. Provide response, correction/reporting and restricted moderation. Do not create public owner scores, blacklists or automatic booking/pricing penalties.
+
+**Detailed contract for Features 4–7:** [Service Jobs and Contractor Assistant](Service_Jobs_and_Contractor_Assistant_Specification.md), including permissions, data/revision semantics, safety/privacy, API/UI, operations and SJ-01–SJ-24 acceptance criteria. [Delegated Claude Code build prompt](../08_delivery/Service_Jobs_Claude_Code_Build_Prompt.md). Delivery status remains in the canonical Repair Programme.
+
+---
+
 ## 4. Wireframes & Mock UI Designs
 
-An interactive HTML prototype has been created to provide a visual and functional representation of the key user interface screens. This prototype serves as the definitive guide for the frontend development team.
+An interactive HTML prototype has been created to provide a visual and functional representation of the key user interface screens. This prototype is historical guidance for the original screens. Current accepted contracts and the service-jobs specification govern newer behavior.
 
 The prototype includes the following screens:
 

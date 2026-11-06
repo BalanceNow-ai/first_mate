@@ -387,3 +387,20 @@ This is not an incremental improvement on what Marine Deals, Burnsco, and Smart 
 > *Customer:* "I want to add a solar setup to my boat."
 >
 > *First Mate:* "Great project for your Stabicraft 529 Frontier! Based on your boat size and typical usage, I'd recommend a 200W setup. Here's what you'll need: a 200W flexible solar panel ($320), a Victron SmartSolar 75/15 MPPT controller ($195), a 100Ah lithium battery ($890), a battery monitor ($85), and the wiring and fusing kit ($65). Total: approximately $1,555. I've created a project list with all these items. The installation is moderately complex — here's a guide. Would you like me to find a certified marine electrician in your area who can do the installation?"
+
+---
+
+## Service Jobs Extension — 6 November 2026
+
+**Status: specified, not yet claimed implemented.** The detailed [Service Jobs and Contractor Assistant specification](../04_technical_spec/Service_Jobs_and_Contractor_Assistant_Specification.md) governs this extension; [Repair Programme](../08_delivery/Repair_Programme.md) records delivery and evidence.
+
+The owner–contractor journey extends vessel advice into practical service preparation: describe the problem, collect useful photos and measurements, share a contractor brief, agree scope and changes, understand the invoice, then exchange reciprocal feedback.
+
+- **Guided evidence:** adaptive capture of overview, access, labels, close-ups and safe measurements with clear reasons and a “cannot safely obtain” path. Preserve unknowns and source/confirmation states.
+- **Contractor preparation:** private assigned-organization access; useful arrival/access details; evidence-backed provisional parts, quantities, tools and consumables; missing-information requests; explicit owner acceptance of scope revisions. Hose ID/OD, thread, clamp range, length and application suitability are distinct facts.
+- **Invoice understanding:** source-linked editable extraction and explanation, deterministic calculations, comparison with available scope/approval records, factual questions and attributed contractor replies. No automatic payment or unsupported accusations.
+- **Reciprocal feedback:** actual participants review their experience of the same job using different relevant dimensions. Private by default, blind until both submit or 14 days, with N/A, response, reporting and moderation. No public owner reputation or automatic penalties.
+
+AI assists collection and explanation; it cannot confirm exact unscaled dimensions, grant sharing rights, approve work or purchase/pay. Restricted access information and invoices must not enter public profiles or a global retrieval corpus. Manual workflows remain usable when AI is unavailable.
+
+This extension reuses Flutter, FastAPI, PostgreSQL, existing identity/vessel/catalogue/fitment and background-processing services. It introduces service-contractor membership separately from delivery roles. SJ-01–SJ-24 in the detailed specification define acceptance; the [delegated build prompt](../08_delivery/Service_Jobs_Claude_Code_Build_Prompt.md) authorizes the bounded implementation.

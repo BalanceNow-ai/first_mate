@@ -48,6 +48,8 @@ Operations, production prerequisites and rollback: `docs/08_delivery/Operations_
 |---|---|
 | `docs/08_delivery/Repair_Programme.md` | **Current plan, decisions and closure table** — start here |
 | `docs/04_technical_spec/Helm_Platform_Full_Specification.md` | Master product specification |
+| [Service Jobs specification](docs/04_technical_spec/Service_Jobs_and_Contractor_Assistant_Specification.md) | Guided photos, measurements, contractor preparation, invoice understanding and private reciprocal feedback (new specified scope) |
+| [Claude Code service-jobs build prompt](docs/08_delivery/Service_Jobs_Claude_Code_Build_Prompt.md) | Delegated implementation, verification and landing instructions |
 | `docs/05_wireframes/index.html` | **Interactive UI mockups** — open in browser |
 | `docs/03_product_design/NZ_Marine_Platform_Product_Design.md` | Full platform product design |
 | `docs/03_product_design/RAG_and_Checklist_Design_Specification.md` | AI agent & RAG architecture |
