@@ -71,6 +71,12 @@ celery.conf.update(
             "task": "app.tasks.loyalty.calculate_monthly_multipliers",
             "schedule": crontab(minute=15, hour=0, day_of_month=1),
         },
+        # Service-job media: re-process unprocessed/lease-expired uploads; retention sweep.
+        "service-media-recover": {"task": "app.tasks.service_media.recover_assets", "schedule": 300.0},
+        "service-media-retention": {
+            "task": "app.tasks.service_media.retention_sweep",
+            "schedule": crontab(minute=40),  # hourly
+        },
     },
 )
 

@@ -122,6 +122,9 @@ cmd_up() {
     "${COMPOSE[@]}" logs --tail=50 migrate api auth || true
     die "stack did not become healthy"
   fi
+  # After migrate: the private service-media bucket (idempotent).
+  log "object store: ensuring the private service-media bucket"
+  "${COMPOSE[@]}" run --rm --no-deps -T api cli storage-init || die "object store bucket initialisation failed"
   "${COMPOSE[@]}" ps
   cat <<EOF
 
@@ -129,6 +132,7 @@ Helm local stack is up:
   web / API proxy   $HELM_PUBLIC_URL        (API: $HELM_PUBLIC_URL/api/v1, auth: $HELM_PUBLIC_URL/auth/v1)
   readiness         $HELM_PUBLIC_URL/ready  (workers heartbeat appears after ~60 s)
   Mailpit           http://localhost:${HELM_MAIL_UI_PORT:-18025}
+  object store      private bucket helm-private (signed downloads via $HELM_PUBLIC_URL/helm-private/)
   sign-up mode      GOTRUE_MAILER_AUTOCONFIRM=${GOTRUE_MAILER_AUTOCONFIRM}
   web bundle        $(cat "$LOCAL_DIR/web-status" 2>/dev/null || echo unknown)
 EOF

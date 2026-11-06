@@ -19,6 +19,7 @@ import secrets
 import time
 from pathlib import Path
 from typing import Protocol
+from urllib.parse import urlencode
 
 from app.config import get_settings
 
@@ -79,16 +80,28 @@ class LocalFsStore:
         return self._path(key).exists()
 
     def signed_get_url(self, key: str, *, filename: str, content_type: str, seconds: int) -> str:
-        expires = int(time.time()) + seconds
+        expires = int(time.time()) + min(seconds, MAX_SIGNED_URL_SECONDS)
         token = sign_local(key, expires, filename, content_type)
         settings = get_settings()
-        return f"{settings.api_v1_prefix}/service-assets/local-download?k={key}&e={expires}&t={token}"
+        query = urlencode({"k": key, "e": expires, "n": filename, "c": content_type, "t": token})
+        return f"{settings.api_v1_prefix}/service-assets/local-download?{query}"
+
+
+# Spec §12: signed URLs live at most five minutes, whatever the configuration says.
+MAX_SIGNED_URL_SECONDS = 300
 
 
 def sign_local(key: str, expires: int, filename: str, content_type: str) -> str:
     secret = get_settings().secret_key.encode()
-    msg = f"{key}\n{expires}\n{filename}\n{content_type}".encode()
+    msg = f"local-download\n{key}\n{expires}\n{filename}\n{content_type}".encode()
     return hmac.new(secret, msg, hashlib.sha256).hexdigest()
+
+
+def verify_local(key: str, expires: int, filename: str, content_type: str, token: str) -> bool:
+    """Constant-time check of a local_fs download token and its expiry."""
+    if expires < int(time.time()):
+        return False
+    return hmac.compare_digest(sign_local(key, expires, filename, content_type), token)
 
 
 _store: ObjectStore | None = None

@@ -47,6 +47,20 @@ x-backend: &backend
     TYPESENSE_PROTOCOL: http
     TYPESENSE_API_KEY: ${TYPESENSE_API_KEY:?set TYPESENSE_API_KEY in .env.prod}
     FORWARDED_ALLOW_IPS: ${HELM_EDGE_SUBNET:-10.247.90.0/24}
+    # Service-job private media (SJ-D5/SJ-D6). REQUIRED: an operator-provisioned PRIVATE
+    # S3-compatible bucket (default encryption on, no public access) and a clamd daemon
+    # reachable from api/worker. Nothing here provisions them. Empty endpoint = AWS S3.
+    OBJECT_STORE_BACKEND: ${OBJECT_STORE_BACKEND:?set OBJECT_STORE_BACKEND=s3 in .env.prod}
+    OBJECT_STORE_ENDPOINT_URL: ${OBJECT_STORE_ENDPOINT_URL:-}
+    OBJECT_STORE_PUBLIC_ENDPOINT_URL: ${OBJECT_STORE_PUBLIC_ENDPOINT_URL:-}
+    OBJECT_STORE_BUCKET: ${OBJECT_STORE_BUCKET:?set OBJECT_STORE_BUCKET (private bucket) in .env.prod}
+    OBJECT_STORE_REGION: ${OBJECT_STORE_REGION:?set OBJECT_STORE_REGION in .env.prod}
+    OBJECT_STORE_ACCESS_KEY: ${OBJECT_STORE_ACCESS_KEY:?set OBJECT_STORE_ACCESS_KEY in .env.prod}
+    OBJECT_STORE_SECRET_KEY: ${OBJECT_STORE_SECRET_KEY:?set OBJECT_STORE_SECRET_KEY in .env.prod}
+    SIGNED_URL_SECONDS: ${SIGNED_URL_SECONDS:-300}
+    UPLOAD_SCANNER: ${UPLOAD_SCANNER:?set UPLOAD_SCANNER=clamd in .env.prod}
+    CLAMD_HOST: ${CLAMD_HOST:?set CLAMD_HOST in .env.prod}
+    CLAMD_PORT: ${CLAMD_PORT:-3310}
   <<: [*hardening, *logging]
   tmpfs: ["/tmp:size=64m,mode=1777"]
   networks: [data, egress]
