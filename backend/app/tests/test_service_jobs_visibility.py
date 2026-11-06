@@ -20,7 +20,7 @@ from app.database import async_session
 from app.models.service_jobs import EvidenceAsset, JobAssignment
 from app.services.service_jobs import storage
 from app.tests.service_jobs_support import DEFAULT_SECTIONS, world  # noqa: F401
-from app.tests.test_service_prep_support import job_url, make_asset, measure, store  # noqa: F401
+from app.tests.test_service_prep_support import analyse, job_url, make_asset, measure, store  # noqa: F401
 
 API = "/api/v1"
 
@@ -150,6 +150,12 @@ async def test_live_updates_off_reads_only_the_published_brief(client, world, st
     assert (
         await client.post(f"{API}/service-assets/{photo}/download-url", headers=world.tech.headers)
     ).status_code == 200
+    # The owner's later analysis (and what it suggests) is not shared either.
+    run = await analyse(client, world.owner, world.job.id, key="owner-later-analysis")
+    assert (await client.get(job_url(world.job.id, "/analysis"), headers=world.tech.headers)).json()["runs"] == []
+    r = await client.get(job_url(world.job.id, f"/analysis/{run['id']}"), headers=world.tech.headers)
+    assert r.status_code == 404
+    assert await ids(client, world.tech, world.job.id, "/observations") == set()
     r = await client.post(
         job_url(world.job.id, f"/measurements/{m2['id']}/confirm"),
         json={"method": "contractor_site"},

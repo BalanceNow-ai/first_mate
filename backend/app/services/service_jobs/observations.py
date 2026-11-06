@@ -371,6 +371,9 @@ async def list_runs(db: AsyncSession, actor: JobActor) -> list[AnalysisRun]:
         .order_by(AnalysisRun.created_at.desc())
         .limit(50)
     )
+    vis = await access.visibility(db, actor)
+    if not vis.live:  # live updates off: only the runs this organization requested
+        q = q.where(AnalysisRun.id.in_(vis.run_ids or [uuid.UUID(int=0)]))
     return list((await db.execute(q)).scalars())
 
 
@@ -382,7 +385,8 @@ async def get_run(db: AsyncSession, actor: JobActor, run_id: uuid.UUID) -> Analy
             )
         )
     ).scalar_one_or_none()
-    if run is None:
+    vis = await access.visibility(db, actor)
+    if run is None or (not vis.live and run.id not in vis.run_ids):
         raise not_found("Analysis run")
     return run
 
