@@ -12,6 +12,39 @@ import 'package:helm_marine/features/service_jobs/widgets/common.dart';
 
 const _defaultSections = ['summary', 'evidence', 'measurements', 'preparation', 'access_general', 'scope'];
 
+/// What the live-updates choice means (the server's preview note gives the exact wording).
+const liveUpdatesOffExplanation =
+    'Off (recommended): they see the job as of the brief you publish — not your later changes — plus what '
+    'their own organisation records. Until you publish a brief they see only the job title and status.';
+const liveUpdatesOnExplanation =
+    'On: they see the sections you share as they are now, including every change you make later.';
+
+/// The live-updates switch, explained in plain words (off by default).
+class LiveUpdatesChoice extends StatelessWidget {
+  const LiveUpdatesChoice({super.key, required this.value, required this.onChanged});
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        title: const Text('Live updates'),
+        subtitle: Text(value ? liveUpdatesOnExplanation : liveUpdatesOffExplanation),
+        value: value,
+        onChanged: onChanged,
+      ),
+      const Text(
+        'Either way, evidence requests and your answers, scope proposals and decisions, visits and any invoice '
+        'question you choose to send stay up to date.',
+        style: TextStyle(color: HelmTheme.mutedText, fontSize: 12),
+      ),
+    ]);
+  }
+}
+
 /// Owner: choose who receives what, preview it exactly, and manage access.
 class SharingTab extends ConsumerWidget {
   const SharingTab({super.key, required this.job});
@@ -74,7 +107,11 @@ class _LiveAssignment extends ConsumerWidget {
         const SizedBox(height: 8),
         const Text('Sections they can see:', style: TextStyle(fontWeight: FontWeight.w600)),
         BulletList([for (final s in a.sections) sectionLabel(s)]),
-        FactRow('Live updates', a.liveUpdates ? 'On — they see changes as you make them' : 'Off — only published briefs'),
+        FactRow(
+            'Live updates',
+            a.liveUpdates
+                ? 'On — they see the shared sections as they are now, including later changes'
+                : 'Off — they see the job as of the brief you publish'),
         FactRow('Invited', formatDateTime(a.invitedAt)),
         if (a.acceptedAt != null) FactRow('Accepted', formatDateTime(a.acceptedAt!)),
         if (a.members.isNotEmpty) ...[
@@ -264,10 +301,9 @@ class _InviteCardState extends ConsumerState<_InviteCard> {
               _changed();
             },
           ),
-        SwitchListTile(
-          contentPadding: EdgeInsets.zero,
-          title: const Text('Live updates'),
-          subtitle: const Text('Let them see changes as you make them, not only published briefs'),
+        const Divider(height: 24),
+        const Text('How they see the job', style: TextStyle(fontWeight: FontWeight.w600)),
+        LiveUpdatesChoice(
           value: _liveUpdates,
           onChanged: (v) {
             _liveUpdates = v;
@@ -332,7 +368,15 @@ class SharingPreviewView extends StatelessWidget {
           Text(preview.withheld.map(sectionLabel).join(' · ')),
           const SizedBox(height: 8),
         ],
-        Text(preview.liveUpdatesNote),
+        Semantics(
+          container: true,
+          label: 'Live updates ${preview.liveUpdates ? 'on' : 'off'}: ${preview.liveUpdatesNote}',
+          excludeSemantics: true,
+          child: InfoNote(
+            '${preview.liveUpdates ? 'Live updates on' : 'Live updates off'}: ${preview.liveUpdatesNote}',
+            icon: preview.liveUpdates ? Icons.sync : Icons.description_outlined,
+          ),
+        ),
       ]),
     );
   }
@@ -368,12 +412,7 @@ class _SectionsDialogState extends State<_SectionsDialog> {
                 value: _sections.contains(s),
                 onChanged: (v) => setState(() => v == true ? _sections.add(s) : _sections.remove(s)),
               ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Live updates'),
-              value: _live,
-              onChanged: (v) => setState(() => _live = v),
-            ),
+            LiveUpdatesChoice(value: _live, onChanged: (v) => setState(() => _live = v)),
           ]),
         ),
       ),

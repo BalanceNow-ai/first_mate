@@ -1,7 +1,7 @@
 [
   {
-    "id": "4b52dd52-f982-43a1-b948-72d71ae987c2",
-    "vessel_id": "355c6500-8f19-4490-a582-cfdd14ba369d",
+    "id": "9b8164fc-f5fa-43ef-bd1b-9a3faf6f7199",
+    "vessel_id": "2e9b721c-6e85-48b0-8527-1f2384407263",
     "title": "Bilge pump cycling",
     "status": "cancelled",
     "urgency": "unknown",
@@ -9,12 +9,12 @@
     "outstanding_requests": 0,
     "gap_count": 0,
     "assignment_status": null,
-    "created_at": "2026-11-06T04:39:02.285192Z",
-    "updated_at": "2026-11-06T04:39:02.379855Z"
+    "created_at": "2026-11-06T06:25:08.170249Z",
+    "updated_at": "2026-11-06T06:25:08.281878Z"
   },
   {
-    "id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
-    "vessel_id": "355c6500-8f19-4490-a582-cfdd14ba369d",
+    "id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+    "vessel_id": "2e9b721c-6e85-48b0-8527-1f2384407263",
     "title": "Water under the sink when the pump runs",
     "status": "completed",
     "urgency": "routine",
@@ -22,7 +22,7 @@
     "outstanding_requests": 2,
     "gap_count": 1,
     "assignment_status": "accepted",
-    "created_at": "2026-11-06T04:38:55.353011Z",
-    "updated_at": "2026-11-06T04:39:02.250331Z"
+    "created_at": "2026-11-06T06:24:58.973884Z",
+    "updated_at": "2026-11-06T06:25:08.132603Z"
   }
 ]

@@ -97,13 +97,16 @@ class _MeasurementCard extends ConsumerWidget {
             Text('Thread: ${[m.thread!.standard, m.thread!.size, m.thread!.pitch].whereType<String>().join(' ')}'),
           FactRow('How', methodLabel(m.method)),
           FactRow('Provenance', m.provenance.label),
+          if (m.recordedByAnotherOrganization)
+            const FactRow('Recorded by', 'Another organisation (names are not shared)'),
           if (m.precision != null) FactRow('Precision', m.precision!),
           if (m.tool != null) FactRow('Tool', m.tool!),
           if (m.reference != null) FactRow('Scale reference', m.reference!),
           if (m.notes != null) FactRow('Notes', m.notes!),
           if (m.confirmation?.confirmedAt != null)
             FactRow('Confirmed',
-                '${formatDateTime(m.confirmation!.confirmedAt!)} · ${methodLabel(m.confirmation!.method)}'),
+                '${formatDateTime(m.confirmation!.confirmedAt!)} · ${methodLabel(m.confirmation!.method)}'
+                '${m.confirmedByAnotherOrganization ? ' · by another organisation (names are not shared)' : ''}'),
           FactRow('Recorded', formatDateTime(m.createdAt)),
           if (m.isCurrent && !job.isClosed) ...[
             const SizedBox(height: 8),

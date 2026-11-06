@@ -13,7 +13,8 @@ void main() {
   test('every captured fixture parses with its model', () {
     final parsers = <String, void Function(dynamic)>{
       for (final n in ['job_created', 'job_updated', 'job_context_corrected', 'job_after_upload', 'job_transitioned',
-        'job_contractor_view', 'job_completed_owner', 'job_cancelled'])
+        'job_contractor_view', 'job_completed_owner', 'job_cancelled', 'job_contractor_no_brief',
+        'job_contractor_brief_snapshot', 'job_contractor_live'])
         n: (d) => ServiceJob.fromJson(d),
       for (final n in ['jobs_list', 'jobs_list_final']) n: (d) => [for (final m in d) JobListItem.fromJson(m)],
       for (final n in ['next_proposal', 'next_accepted', 'next_after_upload', 'next_contractor_request'])
@@ -21,9 +22,12 @@ void main() {
       for (final n in ['request_unavailable', 'request_answered', 'request_created', 'request_waived', 'contractor_request_created'])
         n: (d) => EvidenceRequest.fromJson(d),
       for (final n in ['requests_list', 'requests_contractor']) n: (d) => [for (final m in d) EvidenceRequest.fromJson(m)],
-      for (final n in ['asset_png_intent', 'asset_jpeg_intent', 'asset_rejected_intent']) n: (d) => AssetIntent.fromJson(d),
+      for (final n in ['asset_png_intent', 'asset_jpeg_intent', 'asset_rejected_intent', 'asset_pdf_intent',
+        'asset_pdf_rejected_intent'])
+        n: (d) => AssetIntent.fromJson(d),
       for (final n in ['asset_png_received', 'asset_png_processed', 'asset_jpeg_received', 'asset_jpeg_processed',
-        'asset_rejected_received', 'asset_rejected_processed'])
+        'asset_rejected_received', 'asset_rejected_processed', 'asset_pdf_received', 'asset_pdf_processed',
+        'asset_pdf_rejected_received', 'asset_pdf_rejected_processed'])
         n: (d) => ServiceAsset.fromJson(d),
       for (final n in ['assets_list', 'assets_contractor']) n: (d) => AssetList.fromJson(d),
       'download_url': (d) => DownloadLink.fromJson(d),
@@ -33,8 +37,11 @@ void main() {
       'observation_note': (d) => Observation.fromJson(d),
       for (final n in ['measurement_marking', 'measurement_owner', 'measurement_revised', 'measurement_confirmed'])
         n: (d) => Measurement.fromJson(d),
-      for (final n in ['measurements', 'measurements_contractor']) n: (d) => [for (final m in d) Measurement.fromJson(m)],
-      for (final n in ['preparation_suggested', 'preparation_items', 'preparation_items_contractor'])
+      for (final n in ['measurements', 'measurements_contractor', 'measurements_contractor_no_brief',
+        'measurements_other_org'])
+        n: (d) => [for (final m in d) Measurement.fromJson(m)],
+      for (final n in ['preparation_suggested', 'preparation_items', 'preparation_items_contractor',
+        'preparation_items_other_org'])
         n: (d) => [for (final m in d) PreparationItem.fromJson(m)],
       for (final n in ['preparation_item_created', 'preparation_item_confirmed', 'preparation_item_rejected'])
         n: (d) => PreparationItem.fromJson(d),
@@ -43,8 +50,9 @@ void main() {
       'access_general_get': (d) => AccessDetails.fromJson(d, 'general'),
       'access_restricted': (d) => AccessDetails.fromJson(d, 'restricted'),
       'access_restricted_contractor': (d) => AccessDetails.fromJson(d, 'restricted'),
-      'sharing_preview': (d) => SharingPreview.fromJson(d),
-      for (final n in ['assignment_invited', 'assignment_member_restricted', 'assignment_revoked'])
+      for (final n in ['sharing_preview', 'sharing_preview_snapshot']) n: (d) => SharingPreview.fromJson(d),
+      for (final n in ['assignment_invited', 'assignment_member_restricted', 'assignment_revoked',
+        'assignment_invited_snapshot'])
         n: (d) => Assignment.fromJson(d),
       'assignments': (d) => [for (final m in d) Assignment.fromJson(m)],
       for (final n in ['brief_preview', 'brief_published', 'brief_contractor']) n: (d) => Brief.fromJson(d),

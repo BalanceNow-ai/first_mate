@@ -1,7 +1,7 @@
 {
   "item": {
-    "id": "a2eacf80-91f3-465c-a5a5-c3e5a49283ed",
-    "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+    "id": "ca663815-a2b8-43e3-8454-fdc32a88898f",
+    "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
     "category": "part",
     "name": "Hose clamps",
     "purpose": "Secure each hose end on its fitting",
@@ -18,19 +18,19 @@
       "required_od": "32.5 mm",
       "required_od_state": "owner_measured",
       "evidence_request_ids": [
-        "752688c5-bf9b-47ff-afa8-a62c244c882a"
+        "6269d1a2-17fe-46ad-9083-51cb910fa322"
       ]
     },
     "depends_on": [
       {
-        "measurement_id": "9e6ecd2d-90f2-4a15-9b2e-f4a019815c3a",
+        "measurement_id": "02043a96-eeca-4eb3-a5ef-fcf878e11a11",
         "dimension": "hose_external_diameter",
         "value_text": "32.5",
         "unit": "mm",
         "state": "owner_measured"
       },
       {
-        "measurement_id": "94119ac7-4d8e-48b6-9098-889de5ecd157",
+        "measurement_id": "76382ab8-7029-485c-9f71-5151bdd82a38",
         "dimension": "hose_internal_diameter",
         "value_text": "25",
         "unit": "mm",
@@ -38,7 +38,7 @@
       }
     ],
     "supporting_asset_ids": [
-      "b7db34c3-cebc-460b-a93b-7533ed49a1f3"
+      "da35ae6e-9899-4c77-a124-ea3241a27ebc"
     ],
     "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
     "origin": "assistant",
@@ -72,16 +72,16 @@
     "evidence_changed_since_confirmation": false,
     "replaced_by_id": null,
     "evidence_request_ids": [
-      "752688c5-bf9b-47ff-afa8-a62c244c882a"
+      "6269d1a2-17fe-46ad-9083-51cb910fa322"
     ],
-    "job_revision": 9,
+    "job_revision": 10,
     "version": 2,
     "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
-    "created_at": "2026-11-06T04:38:59.976463Z",
-    "updated_at": "2026-11-06T04:39:01.794963Z"
+    "created_at": "2026-11-06T06:25:05.796403Z",
+    "updated_at": "2026-11-06T06:25:07.611225Z"
   },
   "evidence_request": {
-    "id": "752688c5-bf9b-47ff-afa8-a62c244c882a",
+    "id": "6269d1a2-17fe-46ad-9083-51cb910fa322",
     "category": "markings",
     "prompt": "Photograph any printing on the clamp band",
     "reason": "Shows the clamp range",

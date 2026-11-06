@@ -1,29 +1,29 @@
 {
-  "id": "109d0375-63f3-4c12-a863-00570df18d19",
+  "id": "64b75be0-f63a-4233-8a3d-a1ab878f3529",
   "title": "Harbour Marine invoice",
   "job_id": null,
   "standalone": true,
   "status": "extraction_draft",
   "version": 4,
-  "current_revision_id": "c2e15894-535a-4fc7-9d80-e8710683bd25",
+  "current_revision_id": "488ab77d-3f39-447b-9d9b-89f7de3c64e1",
   "revision_number": 1,
   "supplier_name": "Fixture Harbour Marine",
   "total": "458.82",
   "currency": "NZD",
-  "created_at": "2026-11-06T04:58:23.698149Z",
-  "updated_at": "2026-11-06T04:58:24.887578Z",
+  "created_at": "2026-11-06T06:27:17.705283Z",
+  "updated_at": "2026-11-06T06:27:18.900560Z",
   "provisional": true,
   "needs_confirmation": [],
   "revision": {
-    "id": "c2e15894-535a-4fc7-9d80-e8710683bd25",
+    "id": "488ab77d-3f39-447b-9d9b-89f7de3c64e1",
     "revision_number": 1,
     "origin": "owner_upload",
     "status": "extraction_draft",
-    "source_asset_id": "23fc3dd6-dcac-4cdb-b12a-41b9fc89cd11",
-    "uploaded_by": "fca3fbaf-0b44-4e70-b288-ba143ace7389",
+    "source_asset_id": "81c32f53-705b-4c07-8a00-4394ae071a15",
+    "uploaded_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
     "organization_id": null,
     "supersedes_id": null,
-    "created_at": "2026-11-06T04:58:23.699498Z",
+    "created_at": "2026-11-06T06:27:17.707532Z",
     "currency": "NZD",
     "rounding": "half_up",
     "version": 4,
@@ -66,7 +66,7 @@
       },
       "invoice_number": {
         "name": "invoice_number",
-        "value": "INV-564434b8-S",
+        "value": "INV-06c6167d-S",
         "source": "extracted",
         "certainty": "high",
         "page": 1,
@@ -78,7 +78,7 @@
         },
         "illegible": false,
         "needs_confirmation": false,
-        "extracted_value": "INV-564434b8-S",
+        "extracted_value": "INV-06c6167d-S",
         "by": null,
         "at": null,
         "history": []
@@ -98,8 +98,8 @@
         "illegible": false,
         "needs_confirmation": false,
         "extracted_value": "2026-10-30",
-        "by": "fca3fbaf-0b44-4e70-b288-ba143ace7389",
-        "at": "2026-11-06T04:58:24.887544+00:00",
+        "by": "5368a570-19a8-49ca-95fc-a00cad92be93",
+        "at": "2026-11-06T06:27:18.900519+00:00",
         "history": [
           {
             "value": "2026-10-30",
@@ -222,20 +222,20 @@
   },
   "revisions": [
     {
-      "id": "c2e15894-535a-4fc7-9d80-e8710683bd25",
+      "id": "488ab77d-3f39-447b-9d9b-89f7de3c64e1",
       "revision_number": 1,
       "origin": "owner_upload",
       "status": "extraction_draft",
-      "source_asset_id": "23fc3dd6-dcac-4cdb-b12a-41b9fc89cd11",
-      "uploaded_by": "fca3fbaf-0b44-4e70-b288-ba143ace7389",
+      "source_asset_id": "81c32f53-705b-4c07-8a00-4394ae071a15",
+      "uploaded_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
       "organization_id": null,
       "supersedes_id": null,
-      "created_at": "2026-11-06T04:58:23.699498Z"
+      "created_at": "2026-11-06T06:27:17.707532Z"
     }
   ],
   "lines": [
     {
-      "id": "cadf1677-2e40-4b80-8a92-a24fd7c7fe7e",
+      "id": "0635d154-bb7e-48df-afb9-9e27aa108143",
       "line_number": 1,
       "kind": "labour",
       "kind_certainty": "medium",
@@ -275,7 +275,7 @@
       "version": 1
     },
     {
-      "id": "7f8c984a-6e07-4f15-ae6d-c77bfbda6200",
+      "id": "813cab08-43be-4187-a117-efb7a134a4e4",
       "line_number": 2,
       "kind": "part",
       "kind_certainty": "medium",
@@ -315,7 +315,7 @@
       "version": 1
     },
     {
-      "id": "a1ada642-6a3e-4bac-b3e0-261649d24a23",
+      "id": "c1f26456-bc78-4fcb-8820-aba1bccaea08",
       "line_number": 3,
       "kind": "part",
       "kind_certainty": "medium",
@@ -352,12 +352,12 @@
       "corrected_fields": [
         "quantity"
       ],
-      "corrected_by": "fca3fbaf-0b44-4e70-b288-ba143ace7389",
-      "corrected_at": "2026-11-06T04:58:24.866915Z",
+      "corrected_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
+      "corrected_at": "2026-11-06T06:27:18.878190Z",
       "version": 2
     },
     {
-      "id": "867bd183-c200-41a7-9c39-2153276c511f",
+      "id": "e42268b1-a604-41a9-ac9a-d9e00651e100",
       "line_number": 4,
       "kind": "call_out",
       "kind_certainty": "medium",
@@ -397,7 +397,7 @@
       "version": 1
     },
     {
-      "id": "1009a166-f751-4efd-9a23-c71bd8c0f682",
+      "id": "be9d6d4e-5f27-478a-b73f-28557da62141",
       "line_number": 5,
       "kind": "consumable",
       "kind_certainty": "medium",
@@ -445,16 +445,16 @@
     "message": null,
     "substitute": true,
     "latest_run": {
-      "id": "077d9132-19dd-4ccf-b660-86f217eae021",
+      "id": "feb636b1-35f7-450a-8dab-b9e9835ad8fc",
       "status": "draft_ready",
-      "invoice_revision_id": "c2e15894-535a-4fc7-9d80-e8710683bd25",
+      "invoice_revision_id": "488ab77d-3f39-447b-9d9b-89f7de3c64e1",
       "provider": "local_fixture",
       "model": "local-fixture-v1",
       "attempts": 1,
       "error": null,
       "stale_reason": null,
-      "created_at": "2026-11-06T04:58:23.747579Z",
-      "updated_at": "2026-11-06T04:58:23.836743Z"
+      "created_at": "2026-11-06T06:27:17.755262Z",
+      "updated_at": "2026-11-06T06:27:17.854374Z"
     }
   }
 }

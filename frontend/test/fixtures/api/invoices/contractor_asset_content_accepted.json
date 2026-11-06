@@ -1,6 +1,6 @@
 {
-  "id": "8eb3d0a3-bc1a-495c-ba4e-1d5f8c0ea1b8",
-  "job_id": "cca9ac0a-92b4-4c45-b5ab-db2c9da287d2",
+  "id": "1e39ccc0-3498-4d47-bed3-731a44fbc05c",
+  "job_id": "3f0c7f8a-4c6c-4232-9013-99ade16bf582",
   "purpose": "job_document",
   "status": "quarantined",
   "uploaded_by_role": "contractor",
@@ -16,8 +16,8 @@
   "quality": {},
   "duplicate_of_id": null,
   "rejection_reason": null,
-  "upload_expires_at": "2026-11-07T04:58:29.635256Z",
+  "upload_expires_at": "2026-11-07T06:27:23.841493Z",
   "version": 2,
-  "created_at": "2026-11-06T04:58:29.635763Z",
-  "updated_at": "2026-11-06T04:58:29.656612Z"
+  "created_at": "2026-11-06T06:27:23.842076Z",
+  "updated_at": "2026-11-06T06:27:23.869027Z"
 }

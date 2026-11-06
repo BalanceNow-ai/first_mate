@@ -10,25 +10,30 @@ import 'package:helm_marine/features/service_jobs/data/service_jobs_api.dart';
 import 'package:helm_marine/features/service_jobs/providers/service_jobs_providers.dart';
 import 'package:helm_marine/features/service_jobs/widgets/common.dart';
 
-/// Picks a photo (camera or file chooser) and uploads it through intent → PUT →
-/// processing, answering [requestId] when given. Refreshes the job afterwards.
+/// Picks a photo (camera or file chooser) — or, with [document], a PDF — and uploads
+/// it through intent → PUT → processing, answering [requestId] when given.
+/// Refreshes the job afterwards.
 Future<ServiceAsset?> pickAndUpload(BuildContext context, WidgetRef ref, String jobId,
-    {String? requestId, required bool camera}) async {
+    {String? requestId, bool camera = false, bool document = false}) async {
+  final what = document ? 'Document' : 'Photo';
   PickedMedia? media;
   try {
-    media = await ref.read(mediaPickerProvider).pick(camera: camera);
+    final picker = ref.read(mediaPickerProvider);
+    media = document ? await picker.pickDocument() : await picker.pick(camera: camera);
   } catch (e) {
-    if (context.mounted) showErrorSnackBar(context, e, prefix: 'Could not open the photo');
+    if (context.mounted) showErrorSnackBar(context, e, prefix: 'Could not open the ${what.toLowerCase()}');
     return null;
   }
   if (media == null) return null;
-  final asset = await ref.read(uploadsProvider(jobId).notifier).upload(media, requestId: requestId);
+  final asset = await ref
+      .read(uploadsProvider(jobId).notifier)
+      .upload(media, requestId: requestId, purpose: document ? 'job_document' : 'job_photo');
   refreshServiceJob(ref, jobId);
   if (context.mounted && asset != null) {
     final msg = switch (asset.status) {
-      'available' => 'Photo added',
-      'rejected' => 'Photo rejected: ${rejectionReasonLabel(asset.rejectionReason)}',
-      _ => 'Photo received — still being checked',
+      'available' => '$what added',
+      'rejected' => '$what rejected: ${rejectionReasonLabel(asset.rejectionReason)}',
+      _ => '$what received — still being checked',
     };
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
@@ -122,7 +127,7 @@ class AssetsSection extends ConsumerWidget {
           value: assets,
           onRetry: () => ref.invalidate(jobAssetsProvider(job.id)),
           builder: (list) => list.items.isEmpty
-              ? const Text('No photos yet.')
+              ? const Text('No photos or documents yet.')
               : Column(children: [for (final a in list.items) AssetTile(job: job, asset: a)]),
         ),
       ],

@@ -1,9 +1,9 @@
 {
-  "id": "83b1701a-a171-480d-b691-b6ca528e0b90",
-  "scope_revision_id": "3a4b9e7b-28db-4ba1-b58a-c3e853762566",
+  "id": "a185e7e3-2e6f-47df-b808-a6c8f3b1e4db",
+  "scope_revision_id": "9584b253-6a70-495a-a3c0-485916a2e9e5",
   "decision": "accepted",
-  "revision_digest": "5e8b944772013684775b4ee5370214ba4dddc49f0f204edb079e75e601395282",
-  "decided_by": "12366c46-66eb-4676-88d0-85af20e48ee2",
+  "revision_digest": "5d7d3ac4fc13de5a9ccd9ad107f6c5b139d55476fa31def82f13ec15ee0619eb",
+  "decided_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
   "note": "Go ahead",
-  "decided_at": "2026-11-06T04:39:01.886912Z"
+  "decided_at": "2026-11-06T06:25:07.714101Z"
 }

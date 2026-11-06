@@ -186,6 +186,24 @@ void main() {
       expect(provisional.comparison.provisional, isTrue);
     });
 
+    test('a matched line with a missing value is "comparison unavailable", never a match', () {
+      final c = InvoiceExplanation.fromJson(invMap('explanation_comparison_unavailable')).content;
+      final item = c.comparison.items.single;
+      expect(item.status, 'comparison_unavailable');
+      expect(item.comparisonUnavailable, isTrue);
+      expect(item.unavailableReasons, containsAll(['line_arithmetic_cannot_compute', 'invoice_amount_unknown']));
+      expect(item.approval, isNotNull, reason: 'it is matched to a scope line, just not comparable');
+      for (final r in item.unavailableReasons) {
+        expect(comparisonUnavailableReasonText(r), isNot(contains('_')));
+      }
+      final q = c.suggestedQuestions.firstWhere((q) => q.key.startsWith('scope:unreadable:'));
+      expect(q.key, 'scope:unreadable:${item.lineId}');
+      expect(q.lineId, item.lineId);
+      // Other comparisons carry no reasons.
+      final scoped = InvoiceExplanation.fromJson(invMap('explanation_job_scope')).content;
+      expect(scoped.comparison.items.every((i) => i.unavailableReasons.isEmpty), isTrue);
+    });
+
     test('decimal strings are formatted without floating point', () {
       expect(formatInvoiceAmount('1234567.50', 'NZD'), 'NZD 1,234,567.50');
       expect(formatInvoiceAmount('-20.00', 'AUD'), 'AUD -20.00');
@@ -262,6 +280,18 @@ void main() {
       expect(needs.extra['needs_confirmation'], isNotEmpty);
       expect(ApiError.fromResponse(409, inv('error_already_extracted')).code, 'already_extracted');
       expect(ApiError.fromResponse(400, inv('error_idempotency_key_required')).code, 'idempotency_key_required');
+    });
+
+    test('sharing a question needs the invoices section; the contractor is told plainly', () {
+      final owner = ApiError.fromResponse(409, inv('error_invoices_section_not_shared'));
+      expect(owner.code, 'invoices_section_not_shared');
+      expect(describeError(owner), contains('Sharing tab'));
+      final contractor = ApiError.fromResponse(403, inv('error_contractor_section_not_shared'));
+      expect(contractor.code, 'section_not_shared');
+      expect(describeError(contractor), contains('shared with you'));
+      expect(describeError(const ApiError(statusCode: 409, code: 'derivative_unavailable', detail: 'x')),
+          contains('Ask the owner'));
+      expect(rejectionText('pdf_metadata_unremovable'), contains('metadata'));
     });
   });
 

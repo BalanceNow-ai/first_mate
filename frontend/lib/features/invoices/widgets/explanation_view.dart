@@ -360,6 +360,20 @@ class ComparisonPanel extends StatelessWidget {
                       _ComparisonStatus(item: item),
                     ],
                   ),
+                  if (item.comparisonUnavailable) ...[
+                    const SizedBox(height: 4),
+                    const Text('This line can’t be compared with the accepted scope, so it is not counted as a match:'),
+                    for (final r in item.unavailableReasons)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8, top: 2),
+                        child: Text('•  ${comparisonUnavailableReasonText(r)}'),
+                      ),
+                    if (item.unavailableReasons.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 8, top: 2),
+                        child: Text('•  A value needed for the comparison is missing or unreadable.'),
+                      ),
+                  ],
                   for (final d in item.differences)
                     Text('${d.label}: invoice ${d.field == 'quantity' || d.field == 'currency' ? (d.invoice ?? 'not shown') : formatInvoiceAmount(d.invoice, currency)}'
                         ' · accepted scope ${d.field == 'quantity' || d.field == 'currency' ? (d.approved ?? 'not shown') : formatInvoiceAmount(d.approved, currency)}'),
@@ -406,6 +420,7 @@ class _ComparisonStatus extends StatelessWidget {
       'matches' => ('Matches the accepted scope', HelmTheme.success, Icons.check_circle_outline),
       'differs' => ('Differs from the accepted scope', HelmTheme.warning, Icons.compare_arrows),
       'not_in_accepted_scope' => ('Additional — not in the accepted scope', HelmTheme.warning, Icons.add_circle_outline),
+      'comparison_unavailable' => ('Can’t compare — a value is missing or unreadable', HelmTheme.warning, Icons.help_outline),
       _ => ('Not compared', HelmTheme.mutedText, Icons.remove),
     };
     return Flexible(child: InfoPill(label: label, color: color, icon: icon));

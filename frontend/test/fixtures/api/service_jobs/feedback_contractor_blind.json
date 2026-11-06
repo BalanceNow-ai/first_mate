@@ -1,18 +1,18 @@
 {
-  "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+  "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
   "my_side": "contractor",
   "my_direction": "contractor_to_owner",
   "eligible": true,
   "ineligible_reason": null,
   "window": {
     "basis": "completed",
-    "opens_at": "2026-11-06T04:39:01.966142Z",
-    "closes_at": "2026-11-20T04:39:01.966142Z",
+    "opens_at": "2026-11-06T06:25:07.846903Z",
+    "closes_at": "2026-11-20T06:25:07.846903Z",
     "is_open": true,
     "revealed": false,
     "revealed_at": null
   },
-  "reveal_rule": "Reviews are revealed when both sides submit, or on 2026-11-20T04:39:01.966142Z. Until then neither side can see the other's review.",
+  "reveal_rule": "Reviews are revealed when both sides submit, or on 2026-11-20T06:25:07.846903Z. Until then neither side can see the other's review.",
   "dimensions": [
     {
       "key": "problem_description_accuracy",

@@ -1,6 +1,6 @@
 {
-  "id": "4af7f4bb-7fa6-43a7-b516-f395692cd896",
-  "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+  "id": "20c3761f-90c6-4039-8531-4ba561664350",
+  "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
   "category": "part",
   "name": "Hose fitting / adaptor (if the existing one is damaged)",
   "purpose": "Connect the hose to the equipment if the existing fitting cannot be reused",
@@ -17,7 +17,7 @@
   },
   "depends_on": [],
   "supporting_asset_ids": [
-    "b7db34c3-cebc-460b-a93b-7533ed49a1f3"
+    "da35ae6e-9899-4c77-a124-ea3241a27ebc"
   ],
   "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
   "origin": "assistant",
@@ -51,9 +51,9 @@
   "evidence_changed_since_confirmation": false,
   "replaced_by_id": null,
   "evidence_request_ids": [],
-  "job_revision": 9,
+  "job_revision": 10,
   "version": 2,
   "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
-  "created_at": "2026-11-06T04:38:59.981742Z",
-  "updated_at": "2026-11-06T04:39:01.815315Z"
+  "created_at": "2026-11-06T06:25:05.799899Z",
+  "updated_at": "2026-11-06T06:25:07.632593Z"
 }

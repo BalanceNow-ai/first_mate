@@ -1,5 +1,5 @@
 {
-  "id": "23fc3dd6-dcac-4cdb-b12a-41b9fc89cd11",
+  "id": "81c32f53-705b-4c07-8a00-4394ae071a15",
   "job_id": null,
   "purpose": "invoice",
   "status": "available",
@@ -18,8 +18,8 @@
   },
   "duplicate_of_id": null,
   "rejection_reason": null,
-  "upload_expires_at": "2026-11-07T04:58:22.647838Z",
+  "upload_expires_at": "2026-11-07T06:27:16.650814Z",
   "version": 3,
-  "created_at": "2026-11-06T04:58:22.648429Z",
-  "updated_at": "2026-11-06T04:58:22.726008Z"
+  "created_at": "2026-11-06T06:27:16.651333Z",
+  "updated_at": "2026-11-06T06:27:16.731952Z"
 }

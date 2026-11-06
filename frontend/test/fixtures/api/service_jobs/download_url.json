@@ -1,6 +1,6 @@
 {
-  "url": "http://localhost:18080/helm-private/derived/OIRb2u1kZG1kF4-Hg7bdvVzNqsrKmNFp?response-content-disposition=attachment%3B%20filename%3D%22photo-b7db34c3.jpg%22&response-content-type=image%2Fjpeg&response-cache-control=no-store&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=localobjectstorekey%2F20261106%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20261106T043858Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=43151e1867ddb19d94e577671761a8ff05a2f55022fd4589e47ad9ba992dff89",
-  "expires_at": "2026-11-06T04:43:58.675652Z",
+  "url": "http://localhost:18080/helm-private/derived/W7GKKpX0bdkNzhgcjOnyv3xBiLg1MCBm?response-content-disposition=attachment%3B%20filename%3D%22photo-da35ae6e.jpg%22&response-content-type=image%2Fjpeg&response-cache-control=no-store&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=localobjectstorekey%2F20261106%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20261106T062504Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=43f3f029cf8a65ebfa5412647f877703e395fdf5e3b0b05bb6d4052f0b7aaa69",
+  "expires_at": "2026-11-06T06:30:04.514998Z",
   "variant": "derivative",
   "disposition": "attachment"
 }

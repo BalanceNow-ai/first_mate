@@ -1,12 +1,12 @@
 {
   "asset": {
-    "id": "b7db34c3-cebc-460b-a93b-7533ed49a1f3",
-    "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+    "id": "da35ae6e-9899-4c77-a124-ea3241a27ebc",
+    "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
     "purpose": "job_photo",
     "status": "upload_pending",
     "uploaded_by_role": "owner",
     "uploaded_by_me": true,
-    "evidence_request_id": "9548f761-ac8f-4812-94b6-3a749c62cf94",
+    "evidence_request_id": "995b0d83-8d2b-4729-a120-2ac71e3b6d50",
     "caption": "Locker under the galley sink",
     "detected_type": null,
     "size_bytes": null,
@@ -17,15 +17,15 @@
     "quality": {},
     "duplicate_of_id": null,
     "rejection_reason": null,
-    "upload_expires_at": "2026-11-07T04:38:55.497148Z",
+    "upload_expires_at": "2026-11-07T06:24:59.159213Z",
     "version": 1,
-    "created_at": "2026-11-06T04:38:55.497614Z",
-    "updated_at": "2026-11-06T04:38:55.497616Z"
+    "created_at": "2026-11-06T06:24:59.159764Z",
+    "updated_at": "2026-11-06T06:24:59.159766Z"
   },
   "upload": {
     "method": "PUT",
-    "url": "/api/v1/service-assets/b7db34c3-cebc-460b-a93b-7533ed49a1f3/content",
+    "url": "/api/v1/service-assets/da35ae6e-9899-4c77-a124-ea3241a27ebc/content",
     "max_bytes": 11593,
-    "expires_at": "2026-11-07T04:38:55.497148Z"
+    "expires_at": "2026-11-07T06:24:59.159213Z"
   }
 }

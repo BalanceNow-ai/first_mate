@@ -44,6 +44,8 @@ class ContractorInvoiceQuestionsScreen extends ConsumerWidget {
             error: (e, _) {
               final api = ApiError.from(e);
               final title = switch (api?.statusCode) {
+                403 when api?.code == 'section_not_shared' =>
+                  'The owner hasn’t shared invoice questions on this job with you',
                 403 => 'This page is for the contractor assigned to the job',
                 404 => 'Job not found',
                 _ => 'Could not load the questions',

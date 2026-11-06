@@ -1,7 +1,7 @@
 [
   {
-    "id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
-    "vessel_id": "355c6500-8f19-4490-a582-cfdd14ba369d",
+    "id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+    "vessel_id": "2e9b721c-6e85-48b0-8527-1f2384407263",
     "title": "Water under the sink when the pump runs",
     "status": "evidence_collection",
     "urgency": "routine",
@@ -9,7 +9,7 @@
     "outstanding_requests": 0,
     "gap_count": 1,
     "assignment_status": "invited",
-    "created_at": "2026-11-06T04:38:55.353011Z",
-    "updated_at": "2026-11-06T04:38:59.928814Z"
+    "created_at": "2026-11-06T06:24:58.973884Z",
+    "updated_at": "2026-11-06T06:25:05.764189Z"
   }
 ]

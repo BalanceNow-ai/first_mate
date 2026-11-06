@@ -1,9 +1,9 @@
 {
-  "id": "4a443d8b-4eda-43f5-b674-28c387ce7400",
-  "scope_revision_id": "4be23c83-3a4f-4828-ae7b-d4c784ece0f4",
+  "id": "318122c1-db14-4e7e-a338-577d37d5d9c1",
+  "scope_revision_id": "497c9cd3-38e8-4b1f-87d6-48353f84d7a9",
   "decision": "change_requested",
-  "revision_digest": "2b045917e2a16acce34878ec3d90c551801e82553be8c42af7158f987f936921",
-  "decided_by": "12366c46-66eb-4676-88d0-85af20e48ee2",
+  "revision_digest": "6e56ff0c80ce093673da4372d415d2bea4771a3f8dd82c610a7b38ede362e28b",
+  "decided_by": "cc15fbbf-dc2a-4fb5-828e-772d83687a0f",
   "note": "Please quote the fitting separately",
-  "decided_at": "2026-11-06T04:39:01.935548Z"
+  "decided_at": "2026-11-06T06:25:07.801239Z"
 }

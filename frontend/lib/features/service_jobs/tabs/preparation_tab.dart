@@ -121,6 +121,9 @@ class _ItemCard extends ConsumerWidget {
           for (final d in i.dependsOn)
             FactRow('Depends on', '${dimensionLabel(d.dimension)} ${d.valueText ?? ''}${d.unit == null ? '' : ' ${d.unit}'} '
                 '(${provenanceLabel(d.state).toLowerCase()})'),
+          if (i.confirmedAt != null)
+            FactRow('Confirmed', '${formatDateTime(i.confirmedAt!)}'
+                '${i.confirmedByOtherOrganization ? ' · by another organisation (names are not shared)' : ''}'),
           if (i.evidenceChangedSinceConfirmation)
             const InfoNote('Evidence changed after this was confirmed — it needs confirming again.', tone: Tone.warn),
           if (i.openRequirements.isNotEmpty) ...[

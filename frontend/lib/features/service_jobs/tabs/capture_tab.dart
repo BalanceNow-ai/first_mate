@@ -38,7 +38,22 @@ class CaptureTab extends ConsumerWidget {
                 icon: Icons.upload_file,
                 onPressed: () => pickAndUpload(context, ref, job.id, camera: false),
               ),
+              ActionButton(
+                label: 'Upload a document (PDF)',
+                icon: Icons.picture_as_pdf_outlined,
+                onPressed: () => pickAndUpload(context, ref, job.id, document: true),
+              ),
             ]),
+          ),
+        if (!job.isClosed)
+          const Padding(
+            padding: EdgeInsets.only(bottom: 16),
+            child: Text(
+              'Documents such as a manual page, a previous invoice or a service record help too. PDFs are checked '
+              'and kept without hidden information; files with scripts or attachments, password protection or too '
+              'many pages are refused.',
+              style: TextStyle(color: HelmTheme.mutedText),
+            ),
           ),
         _RequestsSection(job: job),
         AssetsSection(job: job),
@@ -75,6 +90,14 @@ List<Widget> requestActions(BuildContext context, WidgetRef ref, ServiceJob job,
       onPressed: () async {
         final r = await resolve();
         if (r != null && context.mounted) await pickAndUpload(context, ref, job.id, requestId: r.id, camera: false);
+      },
+    ),
+    ActionButton(
+      label: 'Upload a document (PDF)',
+      icon: Icons.picture_as_pdf_outlined,
+      onPressed: () async {
+        final r = await resolve();
+        if (r != null && context.mounted) await pickAndUpload(context, ref, job.id, requestId: r.id, document: true);
       },
     ),
     ActionButton(

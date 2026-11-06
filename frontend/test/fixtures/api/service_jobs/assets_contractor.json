@@ -1,13 +1,13 @@
 {
   "items": [
     {
-      "id": "b7db34c3-cebc-460b-a93b-7533ed49a1f3",
-      "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+      "id": "da35ae6e-9899-4c77-a124-ea3241a27ebc",
+      "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
       "purpose": "job_photo",
       "status": "available",
       "uploaded_by_role": "owner",
       "uploaded_by_me": false,
-      "evidence_request_id": "9548f761-ac8f-4812-94b6-3a749c62cf94",
+      "evidence_request_id": "995b0d83-8d2b-4729-a120-2ac71e3b6d50",
       "caption": "Locker under the galley sink",
       "detected_type": "image/png",
       "size_bytes": 11593,
@@ -26,14 +26,14 @@
       },
       "duplicate_of_id": null,
       "rejection_reason": null,
-      "upload_expires_at": "2026-11-07T04:38:55.497148Z",
+      "upload_expires_at": "2026-11-07T06:24:59.159213Z",
       "version": 3,
-      "created_at": "2026-11-06T04:38:55.497614Z",
-      "updated_at": "2026-11-06T04:38:55.578903Z"
+      "created_at": "2026-11-06T06:24:59.159764Z",
+      "updated_at": "2026-11-06T06:24:59.269500Z"
     },
     {
-      "id": "e5f56635-551a-46cb-8ebd-92ecebb8cf7b",
-      "job_id": "bde599b9-7ccd-46ec-bc89-f731e8b668c5",
+      "id": "b752afa1-7be5-4020-b90b-817437fa2acb",
+      "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
       "purpose": "job_photo",
       "status": "available",
       "uploaded_by_role": "owner",
@@ -55,13 +55,38 @@
         "mean_luminance": 109.8,
         "label_legibility": "not_assessed"
       },
-      "duplicate_of_id": "b7db34c3-cebc-460b-a93b-7533ed49a1f3",
+      "duplicate_of_id": "da35ae6e-9899-4c77-a124-ea3241a27ebc",
       "rejection_reason": null,
-      "upload_expires_at": "2026-11-07T04:38:56.554430Z",
+      "upload_expires_at": "2026-11-07T06:25:00.242267Z",
       "version": 3,
-      "created_at": "2026-11-06T04:38:56.554936Z",
-      "updated_at": "2026-11-06T04:38:56.637561Z"
+      "created_at": "2026-11-06T06:25:00.242954Z",
+      "updated_at": "2026-11-06T06:25:00.354955Z"
+    },
+    {
+      "id": "023fe36c-7c25-4c32-a81b-7f9e3fdd1a73",
+      "job_id": "88619b15-4071-461e-9f2b-6ae51e45ba77",
+      "purpose": "job_document",
+      "status": "available",
+      "uploaded_by_role": "owner",
+      "uploaded_by_me": false,
+      "evidence_request_id": null,
+      "caption": "Pump service record",
+      "detected_type": "application/pdf",
+      "size_bytes": 675,
+      "max_bytes": 675,
+      "width": null,
+      "height": null,
+      "pages": 1,
+      "quality": {
+        "method": "pdf"
+      },
+      "duplicate_of_id": null,
+      "rejection_reason": null,
+      "upload_expires_at": "2026-11-07T06:25:02.367115Z",
+      "version": 3,
+      "created_at": "2026-11-06T06:25:02.367611Z",
+      "updated_at": "2026-11-06T06:25:02.463336Z"
     }
   ],
-  "total": 2
+  "total": 3
 }

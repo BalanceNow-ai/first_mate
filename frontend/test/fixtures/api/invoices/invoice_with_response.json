@@ -1,29 +1,29 @@
 {
-  "id": "ae98cf58-5ca8-43f1-b5aa-ee47b74c4a1d",
+  "id": "44d9aca1-94eb-4564-bfd8-8e69ebac5889",
   "title": "Sink repair",
-  "job_id": "cca9ac0a-92b4-4c45-b5ab-db2c9da287d2",
+  "job_id": "3f0c7f8a-4c6c-4232-9013-99ade16bf582",
   "standalone": false,
   "status": "uploaded",
   "version": 4,
-  "current_revision_id": "e406e43b-62ff-4614-8799-ceb4efff2992",
+  "current_revision_id": "c8393f1e-217c-4a9a-99b7-d862a78346f2",
   "revision_number": 2,
   "supplier_name": null,
   "total": null,
   "currency": null,
-  "created_at": "2026-11-06T04:58:28.351404Z",
-  "updated_at": "2026-11-06T04:58:30.696278Z",
+  "created_at": "2026-11-06T06:27:22.512999Z",
+  "updated_at": "2026-11-06T06:27:24.919994Z",
   "provisional": true,
   "needs_confirmation": [],
   "revision": {
-    "id": "e406e43b-62ff-4614-8799-ceb4efff2992",
+    "id": "c8393f1e-217c-4a9a-99b7-d862a78346f2",
     "revision_number": 2,
     "origin": "contractor_correction",
     "status": "uploaded",
-    "source_asset_id": "8eb3d0a3-bc1a-495c-ba4e-1d5f8c0ea1b8",
-    "uploaded_by": "df6a115b-127e-4f73-b8e3-471f23e8b224",
-    "organization_id": "65bc78ca-8204-411b-b8fd-966f75520fd4",
-    "supersedes_id": "4cb9ad8a-e89d-4111-ab9d-cfe717b50a80",
-    "created_at": "2026-11-06T04:58:30.695418Z",
+    "source_asset_id": "1e39ccc0-3498-4d47-bed3-731a44fbc05c",
+    "uploaded_by": "5e456531-76f4-485e-9a4d-4da534ba45d6",
+    "organization_id": "114b2148-66df-4009-bb41-1e17f0b270c9",
+    "supersedes_id": "abcd6cf0-c301-46bc-a05c-452e3f9c764d",
+    "created_at": "2026-11-06T06:27:24.919002Z",
     "currency": null,
     "rounding": "half_up",
     "version": 1,
@@ -164,58 +164,58 @@
   },
   "revisions": [
     {
-      "id": "4cb9ad8a-e89d-4111-ab9d-cfe717b50a80",
+      "id": "abcd6cf0-c301-46bc-a05c-452e3f9c764d",
       "revision_number": 1,
       "origin": "owner_upload",
       "status": "superseded",
-      "source_asset_id": "e1887907-2dd1-4772-9082-51a048f67975",
-      "uploaded_by": "fca3fbaf-0b44-4e70-b288-ba143ace7389",
+      "source_asset_id": "18dd429b-ecaf-4b53-a144-82af52a3e5c1",
+      "uploaded_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
       "organization_id": null,
       "supersedes_id": null,
-      "created_at": "2026-11-06T04:58:28.352675Z"
+      "created_at": "2026-11-06T06:27:22.514744Z"
     },
     {
-      "id": "e406e43b-62ff-4614-8799-ceb4efff2992",
+      "id": "c8393f1e-217c-4a9a-99b7-d862a78346f2",
       "revision_number": 2,
       "origin": "contractor_correction",
       "status": "uploaded",
-      "source_asset_id": "8eb3d0a3-bc1a-495c-ba4e-1d5f8c0ea1b8",
-      "uploaded_by": "df6a115b-127e-4f73-b8e3-471f23e8b224",
-      "organization_id": "65bc78ca-8204-411b-b8fd-966f75520fd4",
-      "supersedes_id": "4cb9ad8a-e89d-4111-ab9d-cfe717b50a80",
-      "created_at": "2026-11-06T04:58:30.695418Z"
+      "source_asset_id": "1e39ccc0-3498-4d47-bed3-731a44fbc05c",
+      "uploaded_by": "5e456531-76f4-485e-9a4d-4da534ba45d6",
+      "organization_id": "114b2148-66df-4009-bb41-1e17f0b270c9",
+      "supersedes_id": "abcd6cf0-c301-46bc-a05c-452e3f9c764d",
+      "created_at": "2026-11-06T06:27:24.919002Z"
     }
   ],
   "lines": [],
   "explanation": null,
   "questions": [
     {
-      "id": "983707a3-cdb7-4ae0-b7d6-2d87b449362d",
-      "invoice_id": "ae98cf58-5ca8-43f1-b5aa-ee47b74c4a1d",
-      "invoice_revision_id": "4cb9ad8a-e89d-4111-ab9d-cfe717b50a80",
-      "line_id": "b5a8f6ad-a985-4249-951d-c8cb99d39a06",
+      "id": "1275d4f4-2b31-4765-be79-d97296a32ea9",
+      "invoice_id": "44d9aca1-94eb-4564-bfd8-8e69ebac5889",
+      "invoice_revision_id": "abcd6cf0-c301-46bc-a05c-452e3f9c764d",
+      "line_id": "f8855b99-fcf3-4dc2-a2f1-8ee67a96b705",
       "origin": "assistant_suggestion",
       "text": "Line 5 (Consumables / sundries) isn't in the accepted scope we have on record. Could you let us know when and how this was agreed? Thanks.",
       "status": "answered",
-      "shared_assignment_id": "50af0fc7-1738-4a24-9101-bec87f245be1",
+      "shared_assignment_id": "78b7e850-d62b-4356-92bc-651b19941bd3",
       "shared_asset_ids": [
-        "e1887907-2dd1-4772-9082-51a048f67975"
+        "18dd429b-ecaf-4b53-a144-82af52a3e5c1"
       ],
-      "shared_at": "2026-11-06T04:58:29.539676Z",
-      "created_by": "fca3fbaf-0b44-4e70-b288-ba143ace7389",
+      "shared_at": "2026-11-06T06:27:23.739889Z",
+      "created_by": "5368a570-19a8-49ca-95fc-a00cad92be93",
       "version": 4,
-      "created_at": "2026-11-06T04:58:29.491834Z",
-      "updated_at": "2026-11-06T04:58:30.698824Z",
+      "created_at": "2026-11-06T06:27:23.679015Z",
+      "updated_at": "2026-11-06T06:27:24.923006Z",
       "responses": [
         {
-          "id": "a445ba36-07f2-430d-84a8-25220513ec74",
-          "question_id": "983707a3-cdb7-4ae0-b7d6-2d87b449362d",
-          "author_id": "df6a115b-127e-4f73-b8e3-471f23e8b224",
+          "id": "00fbabe1-753b-4aa7-aa82-a8a81cde4f0b",
+          "question_id": "1275d4f4-2b31-4765-be79-d97296a32ea9",
+          "author_id": "5e456531-76f4-485e-9a4d-4da534ba45d6",
           "author_role": "contractor",
-          "organization_id": "65bc78ca-8204-411b-b8fd-966f75520fd4",
+          "organization_id": "114b2148-66df-4009-bb41-1e17f0b270c9",
           "text": "Sorry — the sundries were not agreed and the call-out should be the quoted rate. A corrected invoice is attached.",
-          "corrected_revision_id": "e406e43b-62ff-4614-8799-ceb4efff2992",
-          "created_at": "2026-11-06T04:58:30.699501Z"
+          "corrected_revision_id": "c8393f1e-217c-4a9a-99b7-d862a78346f2",
+          "created_at": "2026-11-06T06:27:24.923992Z"
         }
       ]
     }
@@ -226,16 +226,16 @@
     "message": null,
     "substitute": true,
     "latest_run": {
-      "id": "0a8cbab2-ca50-4ce5-a8a9-467695cfc784",
+      "id": "6d71737d-5ee3-45fd-b5cc-7c4079b7d64f",
       "status": "draft_ready",
-      "invoice_revision_id": "4cb9ad8a-e89d-4111-ab9d-cfe717b50a80",
+      "invoice_revision_id": "abcd6cf0-c301-46bc-a05c-452e3f9c764d",
       "provider": "local_fixture",
       "model": "local-fixture-v1",
       "attempts": 1,
       "error": null,
       "stale_reason": null,
-      "created_at": "2026-11-06T04:58:28.376252Z",
-      "updated_at": "2026-11-06T04:58:28.461266Z"
+      "created_at": "2026-11-06T06:27:22.540908Z",
+      "updated_at": "2026-11-06T06:27:22.632611Z"
     }
   }
 }
