@@ -350,3 +350,20 @@ async def test_invitation_and_inbox_show_the_title_only_with_the_summary_section
     assert r.status_code == 200, r.text
     inbox = (await client.get(f"{API}/contractors/me/jobs", headers=world.other_tech.headers)).json()
     assert [i["title"] for i in inbox["assigned"]] == [world.job.title]
+
+
+async def test_job_title_is_neutral_without_the_summary_section(client, world):  # noqa: F811
+    from sqlalchemy import update
+
+    from app.database import async_session
+    from app.models.service_jobs import JobAssignment
+
+    async with async_session() as s:
+        await s.execute(
+            update(JobAssignment).where(JobAssignment.id == world.assignment_id).values(sections=["evidence"])
+        )
+        await s.commit()
+    r = await client.get(f"/api/v1/service-jobs/{world.job.id}", headers=world.tech.headers)
+    assert r.status_code == 200 and r.json()["title"] == "Service job"
+    owner = await client.get(f"/api/v1/service-jobs/{world.job.id}", headers=world.owner.headers)
+    assert owner.json()["title"] == world.job.title

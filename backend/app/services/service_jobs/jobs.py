@@ -323,7 +323,8 @@ async def view(db: AsyncSession, actor: JobActor) -> dict:
         "id": job.id,
         "vessel_id": job.vessel_id,
         "entry_point": job.entry_point,
-        "title": job.title,
+        # Same gating as the inbox: the title can describe the owner's problem.
+        "title": job.title if actor.can("summary") else "Service job",
         "status": job.status,
         "version": job.version,
         "evidence_revision": job.evidence_revision,
