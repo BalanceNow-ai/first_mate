@@ -79,3 +79,6 @@ frontend/android/app/release/
 !deploy/no-build-ca.pem
 *.key
 credentials.json
+
+# Browser-journey failure screenshots (generated)
+e2e-artifacts/
