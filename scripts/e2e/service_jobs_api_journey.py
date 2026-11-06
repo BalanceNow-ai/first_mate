@@ -200,7 +200,7 @@ def main() -> int:
          m_est.json().get("state", m_est.text[:80]))
 
     # ---- SJ-06: invite org A with sections; preview first ------------------------------------
-    sections = ["summary", "evidence", "measurements", "preparation", "access_general", "scope"]
+    sections = ["summary", "evidence", "measurements", "preparation", "access_general", "scope", "invoices"]
     r = s.api("POST", f"/service-jobs/{jid}/assignments/preview", owner, json={"organization_id": org_a, "sections": sections, "live_updates": True})
     step("owner previews what the organization will see", r.status_code == 200, r.text[:120])
     r = s.api("POST", f"/service-jobs/{jid}/assignments", owner, headers=idem(), json={"organization_id": org_a, "sections": sections, "live_updates": True})
