@@ -208,3 +208,66 @@ async def test_contest_needs_attendance_or_completion(client, world):  # noqa: F
         headers={**world.tech.headers, "Idempotency-Key": key()},
     )
     assert r.status_code == 409 and r.json()["code"] == "not_contestable"
+
+
+async def test_former_participant_keeps_only_their_own_minimal_visit_record(client, world):  # noqa: F811
+    """Review finding: a contractor revoked by reassignment read the next organization's
+    visit notes and contested the owner's record of the new assignment (job → disputed)."""
+    mine = await visit(client, world.tech, world.job.id, "attended", note="Org A: swapped the hose clamp")
+    owner_on_a = await visit(client, world.owner, world.job.id, "attended", note="Owner note to org A")
+    r = await client.post(
+        f"/api/v1/service-jobs/{world.job.id}/assignments/{world.assignment_id}/reassign",
+        json={"organization_id": str(world.org_b), "sections": ["summary"], "live_updates": False},
+        headers={**world.owner.headers, "Idempotency-Key": key()},
+    )
+    assert r.status_code == 201, r.text
+    r = await client.post(
+        f"/api/v1/contractors/assignments/{r.json()['id']}/accept",
+        json={"member_user_ids": [str(world.other_tech.id)]},
+        headers=world.other_tech.headers,
+    )
+    assert r.status_code == 200, r.text
+    b_event = await visit(client, world.other_tech, world.job.id, "attended", note="Org B: impeller, invoice to follow")
+    owner_on_b = await visit(client, world.owner, world.job.id, "completed", note="Owner confirms org B's work")
+    url = f"/api/v1/service-jobs/{world.job.id}/visits"
+
+    # Former participant (org A): only org A's assignment, minimal — no names/notes but their own.
+    r = await client.get(url, headers=world.tech.headers)
+    assert r.status_code == 200, r.text
+    seen = {e["id"]: e for e in r.json()}
+    assert set(seen) == {mine["event"]["id"], owner_on_a["event"]["id"]}
+    assert seen[mine["event"]["id"]]["note"] == "Org A: swapped the hose clamp"  # their own record
+    other = seen[owner_on_a["event"]["id"]]
+    assert other["kind"] == "attended" and other["actor_role"] == "owner" and other["occurred_at"]
+    assert other["note"] is None and other["actor_name"] is None and other["actor_id"] is None
+    assert "Org B" not in r.text and "Nikau" not in r.text and "org B's work" not in r.text
+
+    # ...and may contest only records of their own assignment.
+    r = await client.post(
+        f"{url}/{owner_on_b['event']['id']}/contest",
+        json={"reason": "I was revoked but I can still dispute this"},
+        headers={**world.tech.headers, "Idempotency-Key": key()},
+    )
+    assert r.status_code == 404, r.text
+    assert (await _job(world.job.id)).disputed is False
+    r = await client.post(
+        f"{url}/{owner_on_a['event']['id']}/contest",
+        json={"reason": "We did not attend with the owner that day"},
+        headers={**world.tech.headers, "Idempotency-Key": key()},
+    )
+    assert r.status_code == 201, r.text
+
+    # Current participant (org B): the current assignment's events only.
+    r = await client.get(url, headers=world.other_tech.headers)
+    assert r.status_code == 200, r.text
+    assert {e["id"] for e in r.json()} == {b_event["event"]["id"], owner_on_b["event"]["id"]}
+    assert "Org A" not in r.text and "Owner note to org A" not in r.text
+    r = await client.post(
+        f"{url}/{owner_on_a['event']['id']}/contest",
+        json={"reason": "Not ours to contest"},
+        headers={**world.other_tech.headers, "Idempotency-Key": key()},
+    )
+    assert r.status_code == 404
+    # Nobody else: an unassigned member of org A, an unrelated owner.
+    for outsider in (world.tech2, world.other_owner):
+        assert (await client.get(url, headers=outsider.headers)).status_code == 404

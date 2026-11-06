@@ -178,12 +178,41 @@ async def views(db: AsyncSession, job: ServiceJob, observations: list[Observatio
     return [_view(o, job, unc.get(str(o.id)), successor.get(o.id)) for o in observations]
 
 
+async def visible_to(db: AsyncSession, vis: access.Visibility, rows: list[Observation]) -> list[Observation]:
+    """Observations this reader may see: within the organization boundary, on files they may
+    see (never on invoice documents), and — live updates off — those in the brief."""
+    if vis.unrestricted:
+        return rows
+    asset_ids = {o.asset_id for o in rows if o.asset_id is not None}
+    assets = (
+        {a.id: a for a in (await db.execute(select(EvidenceAsset).where(EvidenceAsset.id.in_(asset_ids)))).scalars()}
+        if asset_ids
+        else {}
+    )
+
+    def asset_ok(o: Observation) -> bool:
+        if o.asset_id is None:
+            return True
+        a = assets.get(o.asset_id)
+        return a is not None and a.purpose in ANALYSABLE_PURPOSES and vis.asset(a)
+
+    return [o for o in rows if vis.observation(o, asset_visible=asset_ok(o))]
+
+
 async def list_for_job(db: AsyncSession, actor: JobActor, *, include_inactive: bool = True) -> list[dict]:
     q = select(Observation).where(Observation.job_id == actor.job.id)
     if not include_inactive:
         q = q.where(Observation.state.notin_(INACTIVE_STATES))
     rows = list((await db.execute(q.order_by(Observation.created_at, Observation.id))).scalars())
+    rows = await visible_to(db, await access.visibility(db, actor), rows)
     return await views(db, actor.job, rows)
+
+
+async def _require_visible(db: AsyncSession, actor: JobActor, obs: Observation) -> None:
+    if actor.is_owner:
+        return
+    if not await visible_to(db, await access.visibility(db, actor), [obs]):
+        raise AppError(403, access.NOT_SHARED_CODE, access.NOT_SHARED_MESSAGE)
 
 
 async def _locked_observation(db: AsyncSession, job_id: uuid.UUID, obs_id: uuid.UUID) -> Observation:
@@ -222,7 +251,11 @@ async def add_note(
 ) -> Observation:
     """A person's note or annotation on the evidence (job row locked by the caller)."""
     if asset_id is not None:
-        await get_asset(db, actor.job.id, asset_id)
+        asset = await get_asset(db, actor.job.id, asset_id)
+        if not actor.is_owner:
+            if asset.purpose not in ANALYSABLE_PURPOSES:
+                raise not_found("Evidence asset")
+            (await access.visibility(db, actor)).require("assets", asset)
     obs = Observation(
         job_id=actor.job.id,
         asset_id=asset_id,
@@ -251,6 +284,7 @@ def _may_change(actor: JobActor, obs: Observation) -> None:
 
 async def reject(db: AsyncSession, actor: JobActor, obs_id: uuid.UUID, note: str | None) -> Observation:
     obs = await _locked_observation(db, actor.job.id, obs_id)
+    await _require_visible(db, actor, obs)
     _may_change(actor, obs)
     previous = obs.state
     obs.state = "rejected"
@@ -278,6 +312,7 @@ async def supersede(
 ) -> Observation:
     """Replace an observation with a person's correction; the original is kept as superseded."""
     old = await _locked_observation(db, actor.job.id, obs_id)
+    await _require_visible(db, actor, old)
     _may_change(actor, old)
     kind = old.kind if old.kind in vision.PROVIDER_KINDS else ("owner_note" if actor.is_owner else "contractor_note")
     new = Observation(
@@ -336,6 +371,9 @@ async def list_runs(db: AsyncSession, actor: JobActor) -> list[AnalysisRun]:
         .order_by(AnalysisRun.created_at.desc())
         .limit(50)
     )
+    vis = await access.visibility(db, actor)
+    if not vis.live:  # live updates off: only the runs this organization requested
+        q = q.where(AnalysisRun.id.in_(vis.run_ids or [uuid.UUID(int=0)]))
     return list((await db.execute(q)).scalars())
 
 
@@ -347,7 +385,8 @@ async def get_run(db: AsyncSession, actor: JobActor, run_id: uuid.UUID) -> Analy
             )
         )
     ).scalar_one_or_none()
-    if run is None:
+    vis = await access.visibility(db, actor)
+    if run is None or (not vis.live and run.id not in vis.run_ids):
         raise not_found("Analysis run")
     return run
 
@@ -395,6 +434,15 @@ async def request_analysis(
     if asset_ids:
         q = q.where(EvidenceAsset.id.in_(asset_ids))
     assets = list((await db.execute(q.order_by(EvidenceAsset.created_at, EvidenceAsset.id))).scalars())
+    if not actor.is_owner:
+        vis = await access.visibility(db, actor)
+        if any(vis.other_contractor(a.uploaded_by) for a in assets):
+            assets = [a for a in assets if not vis.other_contractor(a.uploaded_by)]
+        if asset_ids:
+            for a in assets:
+                vis.require("assets", a)
+        else:
+            assets = [a for a in assets if vis.asset(a)]
     if asset_ids and len({a.id for a in assets}) != len(set(asset_ids)):
         raise not_found("Evidence asset")
     if any(a.status != "available" or not a.derivative_key for a in assets) and asset_ids:

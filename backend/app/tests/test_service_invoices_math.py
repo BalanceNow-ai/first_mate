@@ -385,3 +385,86 @@ async def test_disabled_provider_and_configuration(monkeypatch):
 def test_doc_builder_shapes():
     doc = InvoiceDoc(header=[("Supplier", "X")])
     assert doc.pages()[0][0].text == "Supplier: X"
+
+
+def _compare_one(line_values: dict, scope_line: dict) -> dict:
+    from app.services.service_jobs import invoice_explain as iex
+    from app.services.service_jobs.invoices import checks_for
+
+    def f(v):
+        return {"value": v, "source": "owner", "illegible": False}
+
+    fields = {
+        n: f(None)
+        for n in ("supplier_name", "invoice_number", "invoice_date", "subtotal", "tax_printed", "total", "warranty")
+    }
+    fields["follow_up"] = f(None)
+    fields["currency"] = f("NZD")
+    base_line = {
+        "id": "L1",
+        "line_number": 1,
+        "kind": "parts",
+        "description": "Replace raw water pump impeller",
+        "part_number": None,
+        "quantity": None,
+        "unit": None,
+        "unit_price": None,
+        "line_total": None,
+        "tax_printed": None,
+        "currency": None,
+        "illegible": [],
+    }
+    scope = {
+        "id": "S1",
+        "revision_number": 1,
+        "is_change": False,
+        "currency": "NZD",
+        "content_digest": "d",
+        "estimate_lines": [{"description": "Replace raw water pump impeller", "kind": "parts", **scope_line}],
+        "decision": {"id": "D1", "decided_at": "2026-10-01T00:00:00", "decided_by": "o"},
+    }
+    ctx = iex.ExplainContext(
+        invoice_id="i",
+        revision_id="r",
+        revision_number=1,
+        revision_status="owner_reviewed",
+        fields=fields,
+        lines=[{**base_line, **line_values}],
+        job={"id": "j"},
+        scopes=[scope],
+        illegible_fields=[],
+    )
+    questions: list[dict] = []
+    return iex._compare(ctx, checks_for(ctx), questions)["items"][0] | {"_questions": questions}
+
+
+@pytest.mark.parametrize(
+    ("line_values", "scope_line", "reason"),
+    [
+        # Review finding (p8): an unreadable line total was reported as "matches".
+        ({"illegible": ["line_total"]}, {"quantity": "1", "amount_minor": 12000, "unit_price_minor": 12000}, None),
+        ({}, {"quantity": "1", "amount_minor": 12000}, "invoice_amount_unknown"),
+        ({"line_total": "120.00"}, {"quantity": "1"}, "approved_amount_unknown"),
+        (
+            {"line_total": "120.00", "illegible": ["quantity"]},
+            {"quantity": "1", "amount_minor": 12000},
+            "invoice_quantity_unreadable",
+        ),
+    ],
+)
+def test_scope_comparison_never_matches_on_a_missing_or_unreadable_value(line_values, scope_line, reason):
+    item = _compare_one(line_values, scope_line)
+    assert item["status"] == "comparison_unavailable", item
+    assert item["unavailable_reasons"]
+    if reason:
+        assert reason in item["unavailable_reasons"]
+    assert any(q["key"] == "scope:unreadable:L1" for q in item["_questions"])
+
+
+def test_scope_comparison_still_matches_and_differs_on_readable_values():
+    ok = _compare_one(
+        {"quantity": "1", "unit_price": "120.00", "line_total": "120.00"}, {"quantity": "1", "amount_minor": 12000}
+    )
+    assert ok["status"] == "matches" and ok["unavailable_reasons"] == []
+    diff = _compare_one({"quantity": "1", "unit_price": "150.00", "line_total": "150.00"}, {"amount_minor": 12000})
+    assert diff["status"] == "differs" and [d["field"] for d in diff["differences"]] == ["amount"]

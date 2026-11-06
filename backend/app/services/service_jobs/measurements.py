@@ -28,9 +28,10 @@ from app.core.errors import AppError, not_found
 from app.database import utcnow
 from app.models.service_jobs import MEASUREMENT_DIMENSIONS, Measurement, Observation, PreparationItem, ServiceJob
 from app.services import audit
-from app.services.service_jobs import revisions, units
-from app.services.service_jobs.access import JobActor
+from app.services.service_jobs import access, revisions, units
+from app.services.service_jobs.access import JobActor, Visibility
 from app.services.service_jobs.observations import actor_role, get_asset, role_of
+from app.services.service_jobs.observations import visible_to as visible_observations
 
 LENGTH_DIMENSIONS = (
     "hose_internal_diameter",
@@ -169,6 +170,10 @@ async def _validated(db: AsyncSession, actor: JobActor, data: MeasurementInput) 
         asset = await get_asset(db, actor.job.id, data.source_asset_id)
         if asset.status != "available":
             raise _invalid("asset_not_available", "That photo or document is not available yet")
+        if not actor.is_owner:
+            if asset.purpose not in ("job_photo", "job_document"):
+                raise not_found("Evidence asset")
+            (await access.visibility(db, actor)).require("assets", asset)
     region = None
     if data.source_region is not None:
         from app.services.service_jobs.vision import _region  # shared normalisation
@@ -185,6 +190,8 @@ async def _validated(db: AsyncSession, actor: JobActor, data: MeasurementInput) 
         ).scalar_one_or_none()
         if obs is None:
             raise not_found("Observation")
+        if not actor.is_owner and not await visible_observations(db, await access.visibility(db, actor), [obs]):
+            raise AppError(403, access.NOT_SHARED_CODE, access.NOT_SHARED_MESSAGE)
         if obs.state in INACTIVE:
             raise AppError(409, "observation_inactive", "That observation was rejected or superseded")
         if data.method == "marking_read":
@@ -250,6 +257,12 @@ async def _locked(db: AsyncSession, job_id: uuid.UUID, measurement_id: uuid.UUID
     return m
 
 
+async def _require_visible(db: AsyncSession, actor: JobActor, m: Measurement) -> None:
+    """A contractor acts only on measurements they may read (live updates off: the brief's)."""
+    if not actor.is_owner:
+        (await access.visibility(db, actor)).require("measurements", m)
+
+
 def _require_current(m: Measurement) -> None:
     if m.state in INACTIVE:
         raise AppError(
@@ -260,6 +273,7 @@ def _require_current(m: Measurement) -> None:
 async def revise(db: AsyncSession, actor: JobActor, measurement_id: uuid.UUID, data: MeasurementInput) -> Measurement:
     """A correction is a new revision; the old row and its dependants are superseded (SJ-09)."""
     old = await _locked(db, actor.job.id, measurement_id)
+    await _require_visible(db, actor, old)
     _require_current(old)
     fields = await _validated(db, actor, data)
     state = _state_for(actor, data.method)
@@ -290,6 +304,7 @@ async def revise(db: AsyncSession, actor: JobActor, measurement_id: uuid.UUID, d
 
 async def reject(db: AsyncSession, actor: JobActor, measurement_id: uuid.UUID, note: str | None) -> Measurement:
     m = await _locked(db, actor.job.id, measurement_id)
+    await _require_visible(db, actor, m)
     _require_current(m)
     previous = m.state
     m.state = "rejected"
@@ -315,6 +330,7 @@ async def confirm(
     if method not in CONFIRMATION_METHODS:
         raise _invalid("invalid_confirmation_method", "Confirm by site measurement, the marking or a document")
     m = await _locked(db, actor.job.id, measurement_id)
+    await _require_visible(db, actor, m)
     _require_current(m)
     if m.method == "image_estimate_with_reference":
         raise AppError(
@@ -477,8 +493,10 @@ def view(m: Measurement, job: ServiceJob, successor: uuid.UUID | None = None) ->
             "recorded_by": m.recorded_by,
             "recorded_by_role": recorder,
             "method": m.method,
+            "other_organization": False,
         },
         "recorded_by": m.recorded_by,
+        "recorded_by_other_organization": False,
         "confirmation": (
             {"confirmed_by": m.confirmed_by, "confirmed_at": m.confirmed_at, "method": m.confirmation_method}
             if m.confirmed_by
@@ -493,6 +511,24 @@ def view(m: Measurement, job: ServiceJob, successor: uuid.UUID | None = None) ->
     }
 
 
-def views(rows: list[Measurement], job: ServiceJob) -> list[dict]:
+def _without_people(v: dict) -> dict:
+    """Another organization's measurement: kept as evidence, its people's identities withheld."""
+    v = {**v, "recorded_by": None, "notes": None, "recorded_by_other_organization": True}
+    v["provenance"] = {**v["provenance"], "recorded_by": None, "other_organization": True}
+    if v["confirmation"] is not None:
+        v["confirmation"] = {**v["confirmation"], "confirmed_by": None}
+    return v
+
+
+def views(rows: list[Measurement], job: ServiceJob, vis: Visibility | None = None) -> list[dict]:
+    """Views of ``rows``; with ``vis``, only what that reader may see (see :mod:`access`)."""
     successor = {m.supersedes_id: m.id for m in rows if m.supersedes_id}
-    return [view(m, job, successor.get(m.id)) for m in rows]
+    out = []
+    for m in rows:
+        if vis is not None and not vis.measurement(m):
+            continue
+        v = view(m, job, successor.get(m.id))
+        if vis is not None and vis.foreign_people(m.recorded_by, m.confirmed_by):
+            v = _without_people(v)
+        out.append(v)
+    return out

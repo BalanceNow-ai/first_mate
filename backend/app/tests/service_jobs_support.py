@@ -77,6 +77,7 @@ async def assign(
     *,
     sections: list[str] | None = None,
     status: str = "accepted",
+    live_updates: bool = False,
 ) -> uuid.UUID:
     """An assignment (accepted by default) with ``members`` [(actor, restricted_access)]."""
     async with async_session() as s:
@@ -85,6 +86,7 @@ async def assign(
             organization_id=org_id,
             status=status,
             sections=sections if sections is not None else DEFAULT_SECTIONS,
+            live_updates=live_updates,
             invited_by=invited_by,
             accepted_at=utcnow() if status == "accepted" else None,
         )
@@ -124,7 +126,10 @@ async def make_world() -> World:
     tech = await create_actor("customer", full_name="Tama Technician")
     tech2 = await create_actor("customer", full_name="Tui SecondTech")
     org_a = await create_org("Harbour Marine Services", (org_admin, "admin"), (tech, "member"), (tech2, "member"))
-    assignment_id = await assign(job.id, org_a, owner.id, [(tech, True)])
+    # Live updates on: most tests exercise working access to the live sections. The default
+    # (live updates off: content as of the published brief) is covered by
+    # test_service_jobs_visibility.py, which builds its own assignment.
+    assignment_id = await assign(job.id, org_a, owner.id, [(tech, True)], live_updates=True)
     other_tech = await create_actor("customer", full_name="Nikau OtherOrg")
     org_b = await create_org("Other Marine Ltd", (other_tech, "admin"))
     other_owner = await create_actor("customer", full_name="Oscar OtherOwner")

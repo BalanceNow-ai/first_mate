@@ -11,6 +11,10 @@
 * The *other* participant may contest an attendance/completion. That records a
   ``completion_contested`` event, opens a moderation case and flags the job as disputed —
   it never rewrites or deletes the contested fact.
+* Reading and contesting follow :class:`Participation`: the owner sees every event; the
+  current participant sees the current assignment's events; a *former* participant
+  (revoked by a reassignment, still an active member) keeps only the minimum record of
+  their own assignment — kind, times, actor role — and may contest only its records.
 
 The job row lock is taken first, then the feedback window (D22 extension).
 """
@@ -18,6 +22,7 @@ The job row lock is taken first, then the feedback window (D22 extension).
 from __future__ import annotations
 
 import uuid
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -26,7 +31,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import AppError, not_found
 from app.database import utcnow
-from app.models.service_jobs import ModerationAction, ModerationCase, ServiceJob, VisitEvent
+from app.models.service_jobs import (
+    JobAssignment,
+    JobAssignmentMember,
+    ModerationAction,
+    ModerationCase,
+    ServiceJob,
+    VisitEvent,
+)
 from app.models.user import User
 from app.services import audit
 from app.services.service_jobs import access, feedback
@@ -188,19 +200,96 @@ async def _notify_other_side(db: AsyncSession, job: ServiceJob, by_owner: bool, 
         await notify(db, uid, "visit_recorded", job_id=job.id, key=f"{ev.id}:{uid}")
 
 
+@dataclass
+class Participation:
+    """Who may see/contest which visit records of a job.
+
+    * owner — every event;
+    * current participant (assigned member of the live accepted assignment) — that
+      assignment's events (and the owner's events not tied to any assignment);
+    * former participant (was assigned on an earlier/revoked assignment of the job and is
+      still an active member of that organization) — only the minimum participation
+      record of *their own* assignment(s): kind, times and actor role, without names or
+      notes other than their own (spec §9.1). Nobody else: 404."""
+
+    job: ServiceJob
+    user_id: uuid.UUID
+    side: str  # "owner" | "contractor"
+    current: bool
+    assignment_ids: frozenset[uuid.UUID] | None  # None: every event (owner)
+    organization_id: uuid.UUID | None = None
+
+    def may_see(self, ev: VisitEvent) -> bool:
+        if self.assignment_ids is None:
+            return True
+        if ev.assignment_id is None:
+            return self.current and ev.actor_role == "owner"
+        return ev.assignment_id in self.assignment_ids
+
+
+async def participation(
+    db: AsyncSession, user_id: uuid.UUID, job_id: uuid.UUID, *, lock: bool = False
+) -> Participation:
+    job = await feedback._job(db, job_id, lock=lock)  # noqa: SLF001 - same feedback/visits boundary
+    if job is None:
+        raise not_found("Service job")
+    if job.owner_id == user_id:
+        return Participation(job, user_id, "owner", True, None)
+    live = await access.live_assignment(db, job.id)
+    if (
+        live is not None
+        and live.status == "accepted"
+        and await access.active_membership(db, user_id, live.organization_id) is not None
+        and await access.assigned_member(db, live.id, user_id) is not None
+    ):
+        return Participation(job, user_id, "contractor", True, frozenset({live.id}), live.organization_id)
+    rows = (
+        await db.execute(
+            select(JobAssignment)
+            .join(JobAssignmentMember, JobAssignmentMember.assignment_id == JobAssignment.id)
+            .where(
+                JobAssignment.job_id == job.id,
+                JobAssignmentMember.user_id == user_id,
+                JobAssignment.accepted_at.is_not(None),
+            )
+        )
+    ).scalars()
+    former = [a for a in rows if await access.active_membership(db, user_id, a.organization_id) is not None]
+    if not former:
+        raise not_found("Service job")
+    return Participation(
+        job,
+        user_id,
+        "contractor",
+        False,
+        frozenset(a.id for a in former),
+        former[0].organization_id if len({a.organization_id for a in former}) == 1 else None,
+    )
+
+
+def _minimal(view: dict[str, Any], viewer_id: uuid.UUID) -> dict[str, Any]:
+    """A former participant's minimum record: no names or notes but their own."""
+    if view["actor_id"] == viewer_id:
+        return view
+    return {**view, "actor_id": None, "actor_name": None, "note": None}
+
+
 async def list_events(db: AsyncSession, user_id: uuid.UUID, job_id: uuid.UUID) -> list[dict[str, Any]]:
-    party = await feedback.party_for(db, user_id, job_id)
-    rows = list(
-        (
+    party = await participation(db, user_id, job_id)
+    rows = [
+        ev
+        for ev in (
             await db.execute(
                 select(VisitEvent)
                 .where(VisitEvent.job_id == party.job.id)
                 .order_by(VisitEvent.occurred_at, VisitEvent.recorded_at, VisitEvent.id)
             )
         ).scalars()
-    )
+        if party.may_see(ev)
+    ]
     contested = await _contests_of(db, party.job.id)
-    return [await event_view(db, ev, contested) for ev in rows]
+    views = [await event_view(db, ev, contested) for ev in rows]
+    return views if party.current else [_minimal(v, user_id) for v in views]
 
 
 async def contest(
@@ -215,7 +304,7 @@ async def contest(
 ) -> dict[str, Any]:
     """The other participant disputes an attendance/completion record → moderation, job flagged disputed."""
     now = now or utcnow()
-    party = await feedback.party_for(db, user_id, job_id, lock=True)
+    party = await participation(db, user_id, job_id, lock=True)
     job = party.job
     replay = await _by_key(db, job.id, user_id, idempotency_key)
     if replay is not None:
@@ -225,8 +314,8 @@ async def contest(
     target = (
         await db.execute(select(VisitEvent).where(VisitEvent.id == event_id, VisitEvent.job_id == job.id))
     ).scalar_one_or_none()
-    if target is None:
-        raise not_found("Visit")
+    if target is None or not party.may_see(target):
+        raise not_found("Visit")  # a contractor contests only their own assignment's records
     if target.kind not in CONTESTABLE:
         raise AppError(409, "not_contestable", "Only attendance or completion records can be contested")
     if target.actor_role == party.side or target.actor_id == user_id:
@@ -282,15 +371,14 @@ async def contest(
         job.version += 1
         job.updated_at = now
     await db.flush()
-    recipients = (
-        [job.owner_id]
-        if party.side == "contractor"
-        else (
-            await feedback.contractor_recipients(db, party.assignment_id, party.organization_id)
-            if party.assignment_id and party.organization_id
+    recipients: list = [job.owner_id]
+    if party.side == "owner":
+        target_assignment = await db.get(JobAssignment, target.assignment_id) if target.assignment_id else None
+        recipients = (
+            await feedback.contractor_recipients(db, target_assignment.id, target_assignment.organization_id)
+            if target_assignment is not None
             else []
         )
-    )
     for uid in recipients:
         await notify(db, uid, "visit_recorded", job_id=job.id, key=f"{ev.id}:{uid}")
     return await _contest_result(db, job, ev, True)

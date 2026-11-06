@@ -382,6 +382,12 @@ class JobResponse(APIModel):
     created_at: datetime
     updated_at: datetime
     viewer: Viewer
+    # Where the job content below comes from: "live" (owner, or live updates on), "brief"
+    # (live updates off: as of the latest published brief) or "no_brief_published" (live
+    # updates off and nothing published yet: header only).
+    snapshot_state: str | None = None
+    snapshot_brief_id: uuid.UUID | None = None
+    snapshot_published_at: datetime | None = None
     # "summary" section
     issue_description: str | None = None
     affected_system: str | None = None

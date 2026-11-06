@@ -340,7 +340,14 @@ async def list_evidence_requests(
     offset: int = Query(0, ge=0, le=100_000),
 ) -> list[dict]:
     actor = await access.job_for(db, user_id, job_id, section="evidence")
-    rows = await evidence_requests.list_for_job(db, actor.job.id, status=status_filter, limit=limit, offset=offset)
+    rows = await evidence_requests.list_for_job(
+        db,
+        actor.job.id,
+        status=status_filter,
+        limit=limit,
+        offset=offset,
+        vis=await access.visibility(db, actor),
+    )
     return [evidence_requests.view(r) for r in rows]
 
 
@@ -362,7 +369,8 @@ async def create_evidence_request(
 @router.get("/{job_id}/evidence-requests/{request_id}", response_model=EvidenceRequestResponse)
 async def get_evidence_request(job_id: uuid.UUID, request_id: uuid.UUID, user_id: CurrentUserId, db: DB) -> dict:
     actor = await access.job_for(db, user_id, job_id, section="evidence")
-    return evidence_requests.view(await evidence_requests.get_one(db, actor.job.id, request_id))
+    vis = await access.visibility(db, actor)
+    return evidence_requests.view(await evidence_requests.get_one(db, actor.job.id, request_id, vis))
 
 
 @router.post(

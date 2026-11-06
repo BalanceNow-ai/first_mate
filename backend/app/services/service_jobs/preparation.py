@@ -34,9 +34,9 @@ from app.models.product import Product
 from app.models.service_jobs import EvidenceRequest, Measurement, PreparationItem, ServiceJob
 from app.models.vessel import Vessel
 from app.services import audit, fitment
+from app.services.service_jobs import access, units
 from app.services.service_jobs import measurements as msvc
-from app.services.service_jobs import units
-from app.services.service_jobs.access import JobActor, check_version
+from app.services.service_jobs.access import JobActor, Visibility, check_version
 from app.services.service_jobs.observations import actor_role, create_evidence_request, role_of
 
 ACTIVE_STATUSES = ("suggested", "needs_evidence", "contractor_confirmed")
@@ -282,10 +282,21 @@ async def list_items(db: AsyncSession, job: ServiceJob, *, include_inactive: boo
     return list((await db.execute(q.order_by(PreparationItem.created_at, PreparationItem.id))).scalars())
 
 
-async def views(db: AsyncSession, job: ServiceJob, items: list[PreparationItem]) -> list[dict]:
+async def views(
+    db: AsyncSession, job: ServiceJob, items: list[PreparationItem], vis: Visibility | None = None
+) -> list[dict]:
+    """Views of ``items``; with ``vis``, only what that reader may see (see :mod:`access`)."""
+    if vis is not None:
+        items = [i for i in items if vis.item(i)]
     products = await candidate_views(db, job, items)
     ms = {str(m.id): m for m in await msvc.list_for_job(db, job.id)}
-    return [view(i, job, products, ms) for i in items]
+    out = []
+    for i in items:
+        v = view(i, job, products, ms)
+        if vis is not None and vis.foreign_people(i.confirmed_by):
+            v["confirmed_by"] = None  # another organization's confirmation: identity withheld
+        out.append(v)
+    return out
 
 
 # ---------------------------------------------------------------------- suggestions
@@ -497,6 +508,22 @@ def _quantity(actor: JobActor, data: ItemInput) -> None:
 async def create_item(db: AsyncSession, actor: JobActor, data: ItemInput) -> PreparationItem:
     _quantity(actor, data)
     mids, aids = await _validate_refs(db, actor.job, data)
+    if not actor.is_owner and (mids or aids):
+        from app.models.service_jobs import EvidenceAsset
+
+        vis = await access.visibility(db, actor)
+        if mids:
+            for m in (
+                await db.execute(select(Measurement).where(Measurement.id.in_([uuid.UUID(x) for x in mids])))
+            ).scalars():
+                vis.require("measurements", m)
+        if aids:
+            for a in (
+                await db.execute(select(EvidenceAsset).where(EvidenceAsset.id.in_([uuid.UUID(x) for x in aids])))
+            ).scalars():
+                if a.purpose not in ("job_photo", "job_document") or vis.other_contractor(a.uploaded_by):
+                    raise not_found("Evidence asset")
+                vis.require("assets", a)
     spec = dict(data.specification or {})
     spec.pop("evidence_request_ids", None)
     spec.pop("template", None)
@@ -525,17 +552,23 @@ async def create_item(db: AsyncSession, actor: JobActor, data: ItemInput) -> Pre
     return item
 
 
-async def _locked_item(db: AsyncSession, job_id: uuid.UUID, item_id: uuid.UUID) -> PreparationItem:
+async def _locked_item(db: AsyncSession, actor: JobActor, item_id: uuid.UUID) -> PreparationItem:
+    """The item, locked (job row already locked by the caller), if the actor may act on it."""
     item = (
         await db.execute(
             select(PreparationItem)
-            .where(PreparationItem.id == item_id, PreparationItem.job_id == job_id)
+            .where(PreparationItem.id == item_id, PreparationItem.job_id == actor.job.id)
             .with_for_update()
             .execution_options(populate_existing=True)
         )
     ).scalar_one_or_none()
     if item is None:
         raise not_found("Preparation item")
+    if not actor.is_owner:
+        vis = await access.visibility(db, actor)
+        if item.origin == "contractor" and vis.other_contractor(item.created_by):
+            raise not_found("Preparation item")  # another organization's item
+        vis.require("items", item)
     return item
 
 
@@ -572,7 +605,7 @@ async def confirm(
 ) -> PreparationItem:
     """The contractor confirms the requirement (not a catalogue match, stock or price)."""
     actor.require_contractor()
-    item = await _locked_item(db, actor.job.id, item_id)
+    item = await _locked_item(db, actor, item_id)
     check_version(item.version, expected_version, "preparation item")
     _require_active(item)
     await _deps_current(db, item)
@@ -620,7 +653,7 @@ async def replace(
 ) -> PreparationItem:
     """The contractor replaces an item with their own requirement (confirmed by them)."""
     actor.require_contractor()
-    old = await _locked_item(db, actor.job.id, item_id)
+    old = await _locked_item(db, actor, item_id)
     check_version(old.version, expected_version, "preparation item")
     _require_active(old)
     new = await create_item(db, actor, data)
@@ -646,7 +679,7 @@ async def replace(
 async def reject(
     db: AsyncSession, actor: JobActor, item_id: uuid.UUID, *, expected_version: int | None, note: str | None
 ) -> PreparationItem:
-    item = await _locked_item(db, actor.job.id, item_id)
+    item = await _locked_item(db, actor, item_id)
     check_version(item.version, expected_version, "preparation item")
     _require_active(item)
     if actor.is_owner and item.status == "contractor_confirmed":
@@ -677,7 +710,7 @@ async def request_evidence(
     priority: str,
 ) -> tuple[PreparationItem, EvidenceRequest]:
     actor.require_contractor()
-    item = await _locked_item(db, actor.job.id, item_id)
+    item = await _locked_item(db, actor, item_id)
     check_version(item.version, expected_version, "preparation item")
     _require_active(item)
     request = await create_evidence_request(
@@ -704,7 +737,7 @@ async def confirm_catalogue_match(
     """The contractor states that this real catalogue product meets the confirmed
     requirement. Refused for a fitment or dimension contradiction. Not stock or price."""
     actor.require_contractor()
-    item = await _locked_item(db, actor.job.id, item_id)
+    item = await _locked_item(db, actor, item_id)
     check_version(item.version, expected_version, "preparation item")
     if item.status != "contractor_confirmed":
         raise AppError(409, "requirement_not_confirmed", "Confirm the requirement before choosing a catalogue product")

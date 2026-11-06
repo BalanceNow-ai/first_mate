@@ -335,7 +335,7 @@ async def test_sj07_revocation_and_reassignment_block_new_downloads(client, worl
     async with async_session() as s:
         await s.execute(update(JobAssignment).where(JobAssignment.id == world.assignment_id).values(status="revoked"))
         await s.commit()
-    await assign(world.job.id, world.org_b, world.owner.id, [(world.other_tech, False)])
+    await assign(world.job.id, world.org_b, world.owner.id, [(world.other_tech, False)], live_updates=True)
     for call in (
         client.post(f"/api/v1/service-assets/{asset['id']}/download-url", headers=world.tech.headers),
         client.get(f"/api/v1/service-assets/{asset['id']}", headers=world.tech.headers),

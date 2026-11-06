@@ -32,6 +32,7 @@ import base64
 import hashlib
 import json
 import logging
+import re
 from dataclasses import asdict, dataclass, field
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -401,18 +402,55 @@ def availability(settings: Settings | None = None) -> dict:
 CONTEXT_FIELDS = ("title", "issue_description", "affected_system", "affected_equipment", "occurs_when")
 
 
+RESTRICTED_MASK = "[restricted]"
+MIN_SECRET_CHARS = 2  # short berth/gate codes ("F7", "42") are masked too
+# Separators people type differently from the stored value: spaces, dashes, dots, slashes,
+# brackets, plus, hash, underscores, colons, commas.
+_SEP = r"[\s\-‐-―.,:;/\\()\[\]+#_*'\"]*"
+
+
+def _secret_patterns(restricted: dict | None) -> list[re.Pattern]:
+    """One pattern per restricted value that matches it however it is formatted: only its
+    letters/digits matter, in order, with any separators between them (both directions:
+    stored "+64 21 000 0000" matches typed "6421000000" and vice versa), case-insensitive,
+    never inside a longer word or number. Phone-like values also match their trailing
+    subscriber digits (typed with a national prefix instead of the country code)."""
+    cores: set[tuple[str, bool]] = set()  # (letters/digits, national form with optional trunk 0)
+    for value in (restricted or {}).values():
+        if value is None or isinstance(value, bool):
+            continue
+        values = value if isinstance(value, list | tuple) else [value]
+        for v in values:
+            core = "".join(ch for ch in str(v) if ch.isalnum())
+            if len(core) >= MIN_SECRET_CHARS:
+                cores.add((core, False))
+                if core.isdigit() and len(core) >= 9:
+                    # +CC … typed as a national number: drop a 1–3 digit country code.
+                    cores.update((core[cc:], True) for cc in (1, 2, 3) if len(core) - cc >= 7)
+    patterns = []
+    for core, national in sorted(cores, key=lambda c: len(c[0]), reverse=True):
+        body = _SEP.join(re.escape(ch) for ch in core)
+        prefix = rf"(?:0{_SEP})?" if national else ""
+        patterns.append(re.compile(rf"(?<![^\W_]){prefix}{body}(?![^\W_])", re.IGNORECASE))
+    return patterns
+
+
+def mask_restricted(text: str, patterns: list[re.Pattern]) -> str:
+    for pattern in patterns:
+        text = pattern.sub(RESTRICTED_MASK, text)
+    return text
+
+
 def masked_context(job, vessel_label: str | None, restricted: dict | None) -> dict:
     """Whitelisted job context for a provider. Restricted access values (gate codes, phone
-    numbers, exact location) are removed even if the owner typed them into free text."""
-    secrets = [str(v) for v in (restricted or {}).values() if v is not None and len(str(v).strip()) >= 3]
+    numbers, exact location) are removed even if the owner typed them into free text, in
+    any formatting (see :func:`_secret_patterns`)."""
+    patterns = _secret_patterns(restricted)
     context: dict = {}
     for name in CONTEXT_FIELDS:
         value = getattr(job, name, None)
         if value:
-            text = str(value)[:1000]
-            for secret in secrets:
-                text = text.replace(secret.strip(), "[restricted]")
-            context[name] = text
+            context[name] = mask_restricted(str(value)[:1000], patterns)
     if vessel_label:
-        context["vessel"] = vessel_label
+        context["vessel"] = mask_restricted(vessel_label, patterns)
     return context

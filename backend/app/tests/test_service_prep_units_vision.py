@@ -134,6 +134,41 @@ def test_masked_context_removes_restricted_values():
     assert set(ctx) == {"title", "issue_description", "affected_system", "vessel"}
 
 
+@pytest.mark.parametrize(
+    ("typed", "leaked"),
+    [
+        ("gate code 4512 # please", "4512"),  # stored "4512#", typed with a space
+        ("berth F27 on the left", "F27"),  # stored "F-27", typed without the dash
+        ("berth f 27", "f 27"),  # case and spacing
+        ("call 6421 000 0000", "6421 000 0000"),  # stored "+64 21 000 0000", regrouped
+        ("call 021-000-0000 after 5", "021-000-0000"),  # national format of the stored +64 number
+        ("ring (021) 000 0000", "000 0000"),
+        ("key safe 7Q", "7Q"),  # short (2-character) codes are masked too
+        ("call +64 21 000 0000", "21 000 0000"),  # the stored formatting itself
+    ],
+)
+def test_masked_context_matches_restricted_values_in_any_formatting(typed, leaked):
+    restricted = {"gate_code": "4512#", "berth": "F-27", "contact_phone": "+64 21 000 0000", "key_safe": "7q"}
+    job = SimpleNamespace(
+        title="Leak", issue_description=typed, affected_system=None, affected_equipment=None, occurs_when=None
+    )
+    ctx = vision.masked_context(job, None, restricted)
+    assert leaked not in ctx["issue_description"] and "[restricted]" in ctx["issue_description"], ctx
+
+
+def test_masked_context_does_not_mask_inside_longer_words_or_numbers():
+    job = SimpleNamespace(
+        title="Hose 1427 x 2027",
+        issue_description="Leak at F270 fitting since 2027; part 74512 ok",
+        affected_system=None,
+        affected_equipment=None,
+        occurs_when=None,
+    )
+    ctx = vision.masked_context(job, "2022 Stabicraft 2050", {"gate_code": "4512", "berth": "F27", "pin": "1"})
+    assert ctx["title"] == "Hose 1427 x 2027" and "[restricted]" not in ctx["issue_description"]
+    assert ctx["vessel"] == "2022 Stabicraft 2050"
+
+
 # ---------------------------------------------------------------------- OpenAI adapter (fake SDK client)
 class FakeVisionClient:
     def __init__(self, content=None, error: Exception | None = None):

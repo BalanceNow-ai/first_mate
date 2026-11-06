@@ -17,7 +17,7 @@ contractor's corrected document is a *new* revision that supersedes the old one.
 Concurrency: the invoice row is locked first (``owned_invoice(lock=True)``), then its
 revision/lines/questions; ``expected_version`` mismatches are 409. Extraction runs follow
 ``runs.py`` (create → claim → provider outside any transaction → publish with re-check);
-publication locks run → invoice, and request paths never lock run rows.
+publication locks invoice → run (the subject row first), and request paths never lock run rows.
 """
 
 from __future__ import annotations
@@ -150,8 +150,24 @@ async def create_invoice(
     db: AsyncSession, user_id: uuid.UUID, *, asset_id: uuid.UUID | None, job_id: uuid.UUID | None, title: str
 ) -> tuple[Invoice, bool]:
     """Invoice + revision 1 from the owner's own available ``invoice`` asset (or a manual
-    entry without a document). Re-submitting the same asset returns the existing invoice."""
+    entry without a document). Re-submitting the same asset returns the existing invoice.
+
+    Lock order (D22 extension): the job row (when job-linked) before the asset row — the
+    order asset deletion uses — so creating an invoice and deleting its document cannot
+    deadlock (inserting the invoice also takes a key-share lock on the job row)."""
     asset = None
+    if asset_id is not None:
+        peek = (
+            await db.execute(
+                select(EvidenceAsset.job_id).where(EvidenceAsset.id == asset_id, EvidenceAsset.owner_id == user_id)
+            )
+        ).first()
+        if peek is not None and peek.job_id is not None and (job_id is None or job_id == peek.job_id):
+            await access.job_for(db, user_id, peek.job_id, owner_only=True, lock=True)
+        elif job_id is not None:
+            await access.job_for(db, user_id, job_id, owner_only=True, lock=True)
+    elif job_id is not None:
+        await access.job_for(db, user_id, job_id, owner_only=True, lock=True)
     if asset_id is not None:
         asset = (
             await db.execute(
@@ -1108,6 +1124,13 @@ async def send_question(
         raise AppError(
             409, "no_assigned_contractor", "No contractor has accepted this job, so there is no one to ask yet."
         )
+    if "invoices" not in (assignment.sections or []):
+        raise AppError(
+            409,
+            "invoices_section_not_shared",
+            "You haven't shared invoice questions with this contractor. Add “Invoice questions you choose to "
+            "share” to what they can see, then send the question.",
+        )
     unique_ids = list(dict.fromkeys(asset_ids))
     if len(unique_ids) > MAX_SHARED_ASSETS:
         raise AppError(422, "too_many_documents", f"Share at most {MAX_SHARED_ASSETS} documents with a question")
@@ -1150,7 +1173,9 @@ async def contractor_actor(db: AsyncSession, user_id: uuid.UUID, job_id: uuid.UU
     actor = await access.job_for(db, user_id, job_id)
     if actor.role != "contractor":
         raise AppError(403, "contractor_only", "Owners manage invoice questions from the invoice itself")
-    return actor
+    # Shared questions and their documents need the "invoices" section on the live
+    # assignment: removing the section withdraws them on the next request.
+    return actor.require("invoices")
 
 
 def _visible_questions(actor: access.JobActor):
@@ -1193,12 +1218,24 @@ async def shared_asset_url(
     asset = await db.get(EvidenceAsset, asset_id)
     if asset is None or asset.status != "available" or asset.deleted_at is not None:
         raise not_found("Shared document")
+    if not asset.derivative_key:
+        # Never fall back to the original (it may carry metadata): no derivative, no download.
+        raise AppError(
+            409,
+            "derivative_unavailable",
+            "A shareable copy of this document isn't available; ask the owner to re-send it",
+        )
     seconds = min(get_settings().signed_url_seconds, 300)
-    key = asset.derivative_key or asset.storage_key
-    content_type = asset.detected_type or "application/octet-stream"
-    url = storage.get_store().signed_get_url(
-        key, filename=f"invoice-document-{asset.id.hex[:8]}", content_type=content_type, seconds=seconds
-    )
+    content_type = "application/pdf" if asset.detected_type == "application/pdf" else "image/jpeg"  # the derivative
+    try:
+        url = storage.get_store().signed_get_url(
+            asset.derivative_key,
+            filename=f"invoice-document-{asset.id.hex[:8]}",
+            content_type=content_type,
+            seconds=seconds,
+        )
+    except storage.ObjectStoreError:
+        raise AppError(503, "storage_unavailable", "File storage is temporarily unavailable") from None
     return {"url": url, "expires_in": seconds, "content_type": content_type}
 
 

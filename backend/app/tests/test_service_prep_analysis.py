@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 
 from sqlalchemy import func, select
@@ -10,14 +11,17 @@ from app.config import get_settings
 from app.database import async_session
 from app.models.service_jobs import (
     AnalysisRun,
+    EvidenceAsset,
     JobAssignment,
     Measurement,
     Observation,
     PreparationItem,
     ScopeDecision,
     ScopeRevision,
+    ServiceJob,
 )
-from app.services.service_jobs import vision
+from app.services.service_jobs import observations as osvc
+from app.services.service_jobs import revisions, runs, vision
 from app.tests.service_jobs_support import world  # noqa: F401
 from app.tests.test_service_prep_support import (  # noqa: F401
     analyse,
@@ -197,6 +201,82 @@ async def test_sj21_evidence_changed_during_the_run_is_superseded_not_published(
     assert await _observations(client, world.owner, world.job.id) == []
     r = await client.get(job_url(world.job.id, f"/analysis/{run_id}"), headers=world.owner.headers)
     assert r.json()["status"] == "superseded" and r.json()["superseded_reason"] == "evidence_changed"
+
+
+async def _claimed_run(world) -> tuple:  # noqa: F811
+    asset_id = await make_asset(world.job, synthetic("pump-label"))
+    async with async_session() as s:
+        job = await s.get(ServiceJob, world.job.id)
+        asset = await s.get(EvidenceAsset, asset_id)
+        run, _ = await runs.create(
+            s,
+            kind="evidence_observations",
+            requested_by=world.owner.id,
+            job=job,
+            assets=[asset],
+            idempotency_key="race-1",
+        )
+        await s.commit()
+        run_id = run.id
+    async with async_session() as s:
+        token = await runs.claim(s, run_id)
+    return asset_id, run_id, token
+
+
+async def test_publication_waits_for_a_concurrent_revision_bump_and_publishes_nothing(world, store):  # noqa: F811
+    """Review finding (p4b): publication locked only the run row, so it read the evidence
+    revision while another transaction held the job lock and was about to bump it — stale
+    observations were published. Now the job row is locked first (job → run)."""
+    asset_id, run_id, token = await _claimed_run(world)
+    observed = [
+        vision.VisionObservation(
+            kind="label_text", assertion="appears to read X", extracted_text="X", page=None, region=None
+        )
+    ]
+    bumped = asyncio.Event()
+
+    async def bump_and_hold():
+        async with async_session() as s:
+            j = (
+                await s.execute(select(ServiceJob).where(ServiceJob.id == world.job.id).with_for_update())
+            ).scalar_one()
+            await revisions.bump(s, j, reason="measurement_recorded")  # e.g. the owner records a measurement
+            bumped.set()
+            await asyncio.sleep(0.5)
+            await s.commit()
+
+    async def publish():
+        await bumped.wait()
+        async with async_session() as s:
+
+            async def apply(session, published):
+                await osvc._publish_observations(session, published, [(str(asset_id), observed)], "fixture:-")
+
+            return await runs.publish(s, run_id, token, {"observations": []}, apply)
+
+    _, status = await asyncio.gather(bump_and_hold(), publish())
+    assert status == "superseded"
+    async with async_session() as s:
+        run = await s.get(AnalysisRun, run_id)
+        published = (await s.execute(select(func.count()).select_from(Observation))).scalar_one()
+    assert run.status == "superseded" and run.lease_token is None and published == 0
+
+
+async def test_evidence_change_supersedes_a_running_run_and_a_late_failure_cannot_revive_it(world, store):  # noqa: F811
+    _asset_id, run_id, token = await _claimed_run(world)
+    async with async_session() as s:
+        job = (await s.execute(select(ServiceJob).where(ServiceJob.id == world.job.id).with_for_update())).scalar_one()
+        await revisions.bump(s, job, reason="asset_available")
+        await s.commit()
+    async with async_session() as s:
+        run = await s.get(AnalysisRun, run_id)
+        assert run.status == "superseded" and run.output == {"stale": "evidence_changed"}
+    async with async_session() as s:
+        await runs.fail(s, run_id, token, "analysis_unavailable")  # the provider then fails: no retry
+    async with async_session() as s:
+        run = await s.get(AnalysisRun, run_id)
+        assert run.status == "superseded" and run.lease_token is None
+        assert await runs.claim(s, run_id) is None
 
 
 async def test_sj07_access_revoked_during_the_run_blocks_publication(client, world, store, monkeypatch):  # noqa: F811
