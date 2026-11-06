@@ -71,6 +71,11 @@ celery.conf.update(
             "task": "app.tasks.loyalty.calculate_monthly_multipliers",
             "schedule": crontab(minute=15, hour=0, day_of_month=1),
         },
+        # Blind feedback reveal once a job's 14-day window has closed (idempotent).
+        "reveal-due-service-feedback": {
+            "task": "app.tasks.service_feedback.reveal_due_feedback",
+            "schedule": crontab(minute="*/5"),
+        },
     },
 )
 
