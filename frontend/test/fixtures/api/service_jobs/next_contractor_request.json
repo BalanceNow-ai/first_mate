@@ -1,0 +1,42 @@
+{
+  "request": {
+    "id": "d84215f9-95ce-48e7-865e-1f709a686d1d",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+    "requester_role": "contractor",
+    "organization_id": "f3af1153-00e5-444d-b892-8b8dbe1478dc",
+    "category": "label",
+    "component": "Freshwater pump",
+    "prompt": "Photograph the pump label without moving the pump",
+    "reason": "Confirms the pump model and outlet size",
+    "measurement_dimension": null,
+    "priority": "normal",
+    "status": "outstanding",
+    "unavailable_reason": null,
+    "technician_inspection_required": false,
+    "answer_note": null,
+    "answered_at": null,
+    "version": 1,
+    "created_at": "2026-11-06T07:32:19.782496Z",
+    "updated_at": "2026-11-06T07:32:19.782500Z",
+    "options": [
+      "take_photo",
+      "upload_file",
+      "answer_with_note",
+      "cannot_safely_get"
+    ]
+  },
+  "proposal": null,
+  "complete": false,
+  "message": "Answer this request with a photo, a note, or “I cannot safely get this”.",
+  "gaps": [
+    {
+      "request_id": "8f476298-8fa0-4387-9468-8e9e70e038c6",
+      "category": "access_route",
+      "component": "Freshwater pump",
+      "prompt": "Show the way in to the Freshwater pump: the locker opening, hatch or panel you look through, photographed from a step back. Leave it as it is.",
+      "reason": "cannot_safely_access",
+      "note": "The far end is behind the hot water cylinder",
+      "technician_inspection_required": true
+    }
+  ]
+}

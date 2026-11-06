@@ -1,0 +1,28 @@
+[
+  {
+    "id": "e6877d2a-5593-42fe-b7bc-e742cac29e4a",
+    "vessel_id": "391062c8-7c60-4c24-bbcc-202b68ea01c9",
+    "title": "Bilge pump cycling",
+    "status": "cancelled",
+    "urgency": "unknown",
+    "version": 2,
+    "outstanding_requests": 0,
+    "gap_count": 0,
+    "assignment_status": null,
+    "created_at": "2026-11-06T07:32:21.631317Z",
+    "updated_at": "2026-11-06T07:32:21.756655Z"
+  },
+  {
+    "id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+    "vessel_id": "391062c8-7c60-4c24-bbcc-202b68ea01c9",
+    "title": "Water under the sink when the pump runs",
+    "status": "completed",
+    "urgency": "routine",
+    "version": 8,
+    "outstanding_requests": 2,
+    "gap_count": 1,
+    "assignment_status": "accepted",
+    "created_at": "2026-11-06T07:32:11.959391Z",
+    "updated_at": "2026-11-06T07:32:21.583092Z"
+  }
+]

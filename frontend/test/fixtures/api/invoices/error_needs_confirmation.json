@@ -1,0 +1,7 @@
+{
+  "detail": "Some values were hard to read. Confirm or correct them before marking the invoice reviewed.",
+  "code": "needs_confirmation",
+  "needs_confirmation": [
+    "line:e297946a-6b01-475c-be0d-0142f1571274"
+  ]
+}

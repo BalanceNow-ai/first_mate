@@ -1,0 +1,21 @@
+{
+  "id": "8f476298-8fa0-4387-9468-8e9e70e038c6",
+  "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+  "requester_role": "assistant",
+  "organization_id": null,
+  "category": "access_route",
+  "component": "Freshwater pump",
+  "prompt": "Show the way in to the Freshwater pump: the locker opening, hatch or panel you look through, photographed from a step back. Leave it as it is.",
+  "reason": "Working space and obstructions decide which tools and how much time the job needs.",
+  "measurement_dimension": null,
+  "priority": "normal",
+  "status": "unavailable",
+  "unavailable_reason": "cannot_safely_access",
+  "technician_inspection_required": true,
+  "answer_note": "The far end is behind the hot water cylinder",
+  "answered_at": "2026-11-06T07:32:17.939461Z",
+  "version": 2,
+  "created_at": "2026-11-06T07:32:17.927898Z",
+  "updated_at": "2026-11-06T07:32:17.939749Z",
+  "options": []
+}

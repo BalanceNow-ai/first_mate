@@ -42,7 +42,29 @@ TEMPLATES = (
     "experience_redemption_updated",
     "service_reminder",
     "crew_invite",
+    "service_job_update",
 )
+
+# Service-job notifications are deliberately content-free (spec §12): they say that an
+# update is available and deep-link to authenticated content. No ratings, review text,
+# access credentials, invoice amounts or document text are ever placed in them.
+SERVICE_JOB_UPDATES = {
+    "assignment_invited": "A boat owner has invited your organization to review a service job",
+    "assignment_accepted": "Your contractor accepted the service job",
+    "evidence_requested": "Your contractor has asked for more information on a service job",
+    "evidence_answered": "The owner has added information to a service job",
+    "brief_published": "A service-job brief has been shared with you",
+    "brief_acknowledged": "Your contractor has reviewed the service-job brief",
+    "scope_proposed": "A proposed scope of work is waiting for your decision",
+    "scope_decided": "The owner has responded to your proposed scope of work",
+    "visit_recorded": "A visit was recorded on a service job",
+    "invoice_question": "You have a question about an invoice on a service job",
+    "invoice_response": "Your contractor has responded to your invoice question",
+    "feedback_open": "You can now leave feedback for a completed service job",
+    "feedback_revealed": "Feedback for a service job is now visible",
+    "feedback_response": "There is a response to feedback on a service job",
+    "moderation_update": "There is an update on a report you are involved in",
+}
 
 
 @dataclass
@@ -116,6 +138,10 @@ def _lines(template: str, p: dict[str, Any]) -> tuple[str, list[str], str]:
             f"This invite expires on {p.get('expires_on', '')}.",
         ]
         return f"You're invited to join {crew}", lines, f"Invite to join {crew}"
+    if template == "service_job_update":
+        headline = SERVICE_JOB_UPDATES.get(str(p.get("kind")), "There is an update on a service job")
+        lines = [f"{headline}.", "Sign in to Helm to view it."]
+        return "Service job update", lines, headline
     raise KeyError(template)
 
 

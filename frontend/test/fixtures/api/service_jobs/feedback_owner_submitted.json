@@ -1,0 +1,72 @@
+{
+  "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+  "my_side": "owner",
+  "my_direction": "owner_to_contractor",
+  "eligible": true,
+  "ineligible_reason": null,
+  "window": {
+    "basis": "completed",
+    "opens_at": "2026-11-06T07:32:21.289822Z",
+    "closes_at": "2026-11-20T07:32:21.289822Z",
+    "is_open": true,
+    "revealed": false,
+    "revealed_at": null
+  },
+  "reveal_rule": "Reviews are revealed when both sides submit, or on 2026-11-20T07:32:21.289822Z. Until then neither side can see the other's review.",
+  "dimensions": [
+    {
+      "key": "communication_clarity",
+      "label": "Communication and clarity"
+    },
+    {
+      "key": "arrival_access_coordination",
+      "label": "Arrival and access coordination"
+    },
+    {
+      "key": "explanation_of_work_and_changes",
+      "label": "Explanation of work and changes"
+    },
+    {
+      "key": "care_and_agreed_work_delivery",
+      "label": "Care and agreed work delivery"
+    },
+    {
+      "key": "invoice_clarity_and_scope_relationship",
+      "label": "Invoice clarity and relationship to scope"
+    }
+  ],
+  "can_edit": true,
+  "mine": {
+    "id": "1a907f78-1f18-4528-bfd9-a3a2cf69e09d",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+    "direction": "owner_to_contractor",
+    "status": "submitted",
+    "version": 1,
+    "author": {
+      "id": "5cfee740-8410-4f69-9f23-78bde6dd70b7",
+      "name": "Fixture Owner",
+      "role": "owner"
+    },
+    "organization": {
+      "id": "f3af1153-00e5-444d-b892-8b8dbe1478dc",
+      "name": "Fixture Marine cda525ff"
+    },
+    "basis": "completed",
+    "visit_date": "2026-11-06T04:32:21.284886Z",
+    "ratings": {
+      "communication_clarity": 5,
+      "arrival_access_coordination": 4,
+      "care_and_agreed_work_delivery": 5,
+      "explanation_of_work_and_changes": 4,
+      "invoice_clarity_and_scope_relationship": "not_applicable"
+    },
+    "narrative": "Arrived on time and explained the change to the fitting clearly.",
+    "content_state": "visible",
+    "submitted_at": "2026-11-06T07:32:21.401154Z",
+    "revealed_at": null,
+    "created_at": "2026-11-06T07:32:21.382976Z",
+    "updated_at": "2026-11-06T07:32:21.401154Z",
+    "responses": []
+  },
+  "theirs": null
+}

@@ -1,0 +1,93 @@
+{
+  "item": {
+    "id": "a7a1e9e6-1320-45d8-a650-f1bc0659cd72",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+    "category": "part",
+    "name": "Hose clamps",
+    "purpose": "Secure each hose end on its fitting",
+    "quantity": null,
+    "unit": "each",
+    "quantity_basis": null,
+    "open_requirements": [
+      "Clamp range must include the recorded 32.5 mm hose OD",
+      "Quantity depends on the number of connections — not confirmed",
+      "Clamp material/grade not confirmed from photos"
+    ],
+    "specification": {
+      "template": "clamps",
+      "required_od": "32.5 mm",
+      "required_od_state": "owner_measured",
+      "evidence_request_ids": [
+        "78dfcb7a-e283-4687-88ad-616ec348b100"
+      ]
+    },
+    "depends_on": [
+      {
+        "measurement_id": "4ca0b05a-8618-4ac4-b59d-850a62bc2901",
+        "dimension": "hose_external_diameter",
+        "value_text": "32.5",
+        "unit": "mm",
+        "state": "owner_measured"
+      },
+      {
+        "measurement_id": "f07e2072-8209-4b21-8c5b-bcbc84da940f",
+        "dimension": "hose_internal_diameter",
+        "value_text": "25",
+        "unit": "mm",
+        "state": "contractor_confirmed"
+      }
+    ],
+    "supporting_asset_ids": [
+      "c52df3b5-b660-42bf-9801-7d42d03f9595"
+    ],
+    "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
+    "origin": "assistant",
+    "created_by_role": "assistant",
+    "status": "needs_evidence",
+    "requirement_state": "needs_evidence",
+    "catalogue_match": "candidates",
+    "candidates": [
+      {
+        "product_id": "67d0765d-201d-4fa8-8ee5-7fb0356f50ca",
+        "sku": "SYN-HOSE-CLAMP",
+        "name": "316 stainless hose clamp assortment (synthetic)",
+        "brand": "FixtureGeneral",
+        "price_cents": 2490,
+        "sale_price_cents": null,
+        "currency": "NZD",
+        "is_active": true,
+        "in_stock": true,
+        "fitment_status": "universal",
+        "fitment_message": "Suitable for any vessel, including Kahawai (2021 Stabicraft 2050 Supercab)",
+        "dimension_check": {
+          "status": "unknown",
+          "reason": "The product has no stated clamp range"
+        }
+      }
+    ],
+    "confirmed_product": null,
+    "confirmed_by": null,
+    "confirmed_by_other_organization": false,
+    "confirmed_at": null,
+    "confirmed_job_revision": null,
+    "evidence_changed_since_confirmation": false,
+    "replaced_by_id": null,
+    "evidence_request_ids": [
+      "78dfcb7a-e283-4687-88ad-616ec348b100"
+    ],
+    "job_revision": 10,
+    "version": 2,
+    "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
+    "created_at": "2026-11-06T07:32:19.234565Z",
+    "updated_at": "2026-11-06T07:32:21.057956Z"
+  },
+  "evidence_request": {
+    "id": "78dfcb7a-e283-4687-88ad-616ec348b100",
+    "category": "markings",
+    "prompt": "Photograph any printing on the clamp band",
+    "reason": "Shows the clamp range",
+    "requester_role": "contractor",
+    "status": "outstanding",
+    "priority": "normal"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "6c0511b8-8b40-456a-9626-83ae6ef351d8",
+  "job_id": null,
+  "purpose": "invoice",
+  "status": "quarantined",
+  "uploaded_by_role": "owner",
+  "uploaded_by_me": true,
+  "evidence_request_id": null,
+  "caption": null,
+  "detected_type": null,
+  "size_bytes": 2543,
+  "max_bytes": 2543,
+  "width": null,
+  "height": null,
+  "pages": null,
+  "quality": {},
+  "duplicate_of_id": null,
+  "rejection_reason": null,
+  "upload_expires_at": "2026-11-07T07:32:36.922331Z",
+  "version": 2,
+  "created_at": "2026-11-06T07:32:36.922892Z",
+  "updated_at": "2026-11-06T07:32:36.941972Z"
+}

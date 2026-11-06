@@ -26,6 +26,10 @@ celery = Celery(
         "app.tasks.loyalty",
         "app.tasks.notifications",
         "app.tasks.reminders",
+        "app.tasks.service_media",
+        "app.tasks.service_analysis",
+        "app.tasks.service_invoices",
+        "app.tasks.service_feedback",
     ],
 )
 
@@ -66,6 +70,23 @@ celery.conf.update(
         "calculate-crew-multipliers": {
             "task": "app.tasks.loyalty.calculate_monthly_multipliers",
             "schedule": crontab(minute=15, hour=0, day_of_month=1),
+        },
+        # Blind feedback reveal once a job's 14-day window has closed (idempotent).
+        "reveal-due-service-feedback": {
+            "task": "app.tasks.service_feedback.reveal_due_feedback",
+            "schedule": crontab(minute="*/5"),
+        },
+        # Service-job media: re-process unprocessed/lease-expired uploads; retention sweep.
+        "service-media-recover": {"task": "app.tasks.service_media.recover_assets", "schedule": 300.0},
+        # Evidence analysis runs that were never picked up or whose lease expired.
+        "service-analysis-sweep": {"task": "app.tasks.service_analysis.sweep_pending", "schedule": 300.0},
+        "service-invoice-sweep": {
+            "task": "app.tasks.service_invoices.sweep_invoice_extractions",
+            "schedule": 300.0,
+        },
+        "service-media-retention": {
+            "task": "app.tasks.service_media.retention_sweep",
+            "schedule": crontab(minute=40),  # hourly
         },
     },
 )

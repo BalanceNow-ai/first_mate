@@ -1,0 +1,25 @@
+{
+  "assigned": [
+    {
+      "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+      "title": "Water under the sink when the pump runs",
+      "status": "evidence_collection",
+      "assignment_id": "3c4a832b-e0a8-4663-81d7-2da9395ab846",
+      "organization_id": "f3af1153-00e5-444d-b892-8b8dbe1478dc",
+      "organization_name": "Fixture Marine cda525ff",
+      "sections": [
+        "summary",
+        "evidence",
+        "measurements",
+        "preparation",
+        "access_general",
+        "access_restricted",
+        "scope"
+      ],
+      "restricted_access": false,
+      "accepted_at": "2026-11-06T07:32:19.504877Z",
+      "updated_at": "2026-11-06T07:32:19.173500Z"
+    }
+  ],
+  "invitations": []
+}

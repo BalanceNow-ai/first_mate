@@ -1,0 +1,339 @@
+[
+  {
+    "id": "674800af-9d98-405d-9ae8-9357a5a02c82",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+    "category": "part",
+    "name": "Replacement hose",
+    "purpose": "Replace the leaking or damaged hose section",
+    "quantity": null,
+    "unit": "m",
+    "quantity_basis": null,
+    "open_requirements": [
+      "Application not confirmed (e.g. potable water, sanitation, fuel, exhaust) — not inferred from photos",
+      "Length needed not known",
+      "Both hose ends not yet confirmed"
+    ],
+    "specification": {
+      "template": "hose",
+      "application": null,
+      "internal_diameter": "25 mm",
+      "internal_diameter_state": "owner_declared"
+    },
+    "depends_on": [
+      {
+        "measurement_id": "f07e2072-8209-4b21-8c5b-bcbc84da940f",
+        "dimension": "hose_internal_diameter",
+        "value_text": "25",
+        "unit": "mm",
+        "state": "owner_declared"
+      }
+    ],
+    "supporting_asset_ids": [
+      "c52df3b5-b660-42bf-9801-7d42d03f9595"
+    ],
+    "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
+    "origin": "assistant",
+    "created_by_role": "assistant",
+    "status": "suggested",
+    "requirement_state": "possible",
+    "catalogue_match": "candidates",
+    "candidates": [
+      {
+        "product_id": "5e2fd0a1-ef6d-4605-befe-60b639a0dc54",
+        "sku": "SYN-HOSE-FIT",
+        "name": "Assorted hose & fittings kit (synthetic)",
+        "brand": "FixtureGeneral",
+        "price_cents": 5490,
+        "sale_price_cents": null,
+        "currency": "NZD",
+        "is_active": true,
+        "in_stock": true,
+        "fitment_status": "universal",
+        "fitment_message": "Suitable for any vessel, including Kahawai (2021 Stabicraft 2050 Supercab)",
+        "dimension_check": {
+          "status": "not_applicable",
+          "reason": null
+        }
+      }
+    ],
+    "confirmed_product": null,
+    "confirmed_by": null,
+    "confirmed_by_other_organization": false,
+    "confirmed_at": null,
+    "confirmed_job_revision": null,
+    "evidence_changed_since_confirmation": false,
+    "replaced_by_id": null,
+    "evidence_request_ids": [],
+    "job_revision": 10,
+    "version": 1,
+    "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
+    "created_at": "2026-11-06T07:32:19.227524Z",
+    "updated_at": "2026-11-06T07:32:19.227528Z"
+  },
+  {
+    "id": "a7a1e9e6-1320-45d8-a650-f1bc0659cd72",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+    "category": "part",
+    "name": "Hose clamps",
+    "purpose": "Secure each hose end on its fitting",
+    "quantity": null,
+    "unit": "each",
+    "quantity_basis": null,
+    "open_requirements": [
+      "Clamp range must include the recorded 32.5 mm hose OD",
+      "Quantity depends on the number of connections — not confirmed",
+      "Clamp material/grade not confirmed from photos"
+    ],
+    "specification": {
+      "template": "clamps",
+      "required_od": "32.5 mm",
+      "required_od_state": "owner_measured"
+    },
+    "depends_on": [
+      {
+        "measurement_id": "4ca0b05a-8618-4ac4-b59d-850a62bc2901",
+        "dimension": "hose_external_diameter",
+        "value_text": "32.5",
+        "unit": "mm",
+        "state": "owner_measured"
+      },
+      {
+        "measurement_id": "f07e2072-8209-4b21-8c5b-bcbc84da940f",
+        "dimension": "hose_internal_diameter",
+        "value_text": "25",
+        "unit": "mm",
+        "state": "owner_declared"
+      }
+    ],
+    "supporting_asset_ids": [
+      "c52df3b5-b660-42bf-9801-7d42d03f9595"
+    ],
+    "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
+    "origin": "assistant",
+    "created_by_role": "assistant",
+    "status": "suggested",
+    "requirement_state": "possible",
+    "catalogue_match": "candidates",
+    "candidates": [
+      {
+        "product_id": "67d0765d-201d-4fa8-8ee5-7fb0356f50ca",
+        "sku": "SYN-HOSE-CLAMP",
+        "name": "316 stainless hose clamp assortment (synthetic)",
+        "brand": "FixtureGeneral",
+        "price_cents": 2490,
+        "sale_price_cents": null,
+        "currency": "NZD",
+        "is_active": true,
+        "in_stock": true,
+        "fitment_status": "universal",
+        "fitment_message": "Suitable for any vessel, including Kahawai (2021 Stabicraft 2050 Supercab)",
+        "dimension_check": {
+          "status": "unknown",
+          "reason": "The product has no stated clamp range"
+        }
+      }
+    ],
+    "confirmed_product": null,
+    "confirmed_by": null,
+    "confirmed_by_other_organization": false,
+    "confirmed_at": null,
+    "confirmed_job_revision": null,
+    "evidence_changed_since_confirmation": false,
+    "replaced_by_id": null,
+    "evidence_request_ids": [],
+    "job_revision": 10,
+    "version": 1,
+    "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
+    "created_at": "2026-11-06T07:32:19.234565Z",
+    "updated_at": "2026-11-06T07:32:19.234568Z"
+  },
+  {
+    "id": "7848bf1a-4955-42fb-a994-7b8debaa810d",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+    "category": "part",
+    "name": "Hose fitting / adaptor (if the existing one is damaged)",
+    "purpose": "Connect the hose to the equipment if the existing fitting cannot be reused",
+    "quantity": null,
+    "unit": "each",
+    "quantity_basis": null,
+    "open_requirements": [
+      "Fitting thread not confirmed",
+      "Whether the existing fitting can be reused needs site inspection"
+    ],
+    "specification": {
+      "thread": null,
+      "template": "fitting"
+    },
+    "depends_on": [],
+    "supporting_asset_ids": [
+      "c52df3b5-b660-42bf-9801-7d42d03f9595"
+    ],
+    "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
+    "origin": "assistant",
+    "created_by_role": "assistant",
+    "status": "suggested",
+    "requirement_state": "possible",
+    "catalogue_match": "candidates",
+    "candidates": [
+      {
+        "product_id": "5e2fd0a1-ef6d-4605-befe-60b639a0dc54",
+        "sku": "SYN-HOSE-FIT",
+        "name": "Assorted hose & fittings kit (synthetic)",
+        "brand": "FixtureGeneral",
+        "price_cents": 5490,
+        "sale_price_cents": null,
+        "currency": "NZD",
+        "is_active": true,
+        "in_stock": true,
+        "fitment_status": "universal",
+        "fitment_message": "Suitable for any vessel, including Kahawai (2021 Stabicraft 2050 Supercab)",
+        "dimension_check": {
+          "status": "not_applicable",
+          "reason": null
+        }
+      }
+    ],
+    "confirmed_product": null,
+    "confirmed_by": null,
+    "confirmed_by_other_organization": false,
+    "confirmed_at": null,
+    "confirmed_job_revision": null,
+    "evidence_changed_since_confirmation": false,
+    "replaced_by_id": null,
+    "evidence_request_ids": [],
+    "job_revision": 10,
+    "version": 1,
+    "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
+    "created_at": "2026-11-06T07:32:19.240354Z",
+    "updated_at": "2026-11-06T07:32:19.240357Z"
+  },
+  {
+    "id": "3de6d8ba-0f08-4db0-b656-480bddfaa4af",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+    "category": "tool",
+    "name": "Access and hand tools",
+    "purpose": "Reach and work on the affected equipment (e.g. nut driver for clamps, hose cutter, torch, absorbent pads)",
+    "quantity": null,
+    "unit": null,
+    "quantity_basis": null,
+    "open_requirements": [
+      "Access route and working space not confirmed",
+      "Tool list to be confirmed by the contractor"
+    ],
+    "specification": {
+      "template": "tools"
+    },
+    "depends_on": [],
+    "supporting_asset_ids": [
+      "c52df3b5-b660-42bf-9801-7d42d03f9595"
+    ],
+    "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
+    "origin": "assistant",
+    "created_by_role": "assistant",
+    "status": "suggested",
+    "requirement_state": "possible",
+    "catalogue_match": "candidates",
+    "candidates": [
+      {
+        "product_id": "3a00cdf9-365f-4627-9235-092cac1f8b33",
+        "sku": "SYN-TOOLKIT-COASTAL",
+        "name": "Coastal tool kit: sockets, multimeter, strap wrench (synthetic)",
+        "brand": "FixtureTools",
+        "price_cents": 18990,
+        "sale_price_cents": 15990,
+        "currency": "NZD",
+        "is_active": true,
+        "in_stock": true,
+        "fitment_status": "universal",
+        "fitment_message": "Suitable for any vessel, including Kahawai (2021 Stabicraft 2050 Supercab)",
+        "dimension_check": {
+          "status": "not_applicable",
+          "reason": null
+        }
+      },
+      {
+        "product_id": "e6e37a31-a043-4916-b9eb-46e3ab1099bc",
+        "sku": "SYN-TOOLKIT-BASIC",
+        "name": "Grab-bag basic tool kit (synthetic)",
+        "brand": "FixtureTools",
+        "price_cents": 8990,
+        "sale_price_cents": null,
+        "currency": "NZD",
+        "is_active": true,
+        "in_stock": true,
+        "fitment_status": "universal",
+        "fitment_message": "Suitable for any vessel, including Kahawai (2021 Stabicraft 2050 Supercab)",
+        "dimension_check": {
+          "status": "not_applicable",
+          "reason": null
+        }
+      },
+      {
+        "product_id": "32084605-dcaf-458e-99df-3a5ea93ff724",
+        "sku": "SYN-CRIMP-KIT",
+        "name": "Heat-shrink butt connector & crimper kit (synthetic)",
+        "brand": "FixtureTools",
+        "price_cents": 4990,
+        "sale_price_cents": null,
+        "currency": "NZD",
+        "is_active": true,
+        "in_stock": false,
+        "fitment_status": "universal",
+        "fitment_message": "Suitable for any vessel, including Kahawai (2021 Stabicraft 2050 Supercab)",
+        "dimension_check": {
+          "status": "not_applicable",
+          "reason": null
+        }
+      }
+    ],
+    "confirmed_product": null,
+    "confirmed_by": null,
+    "confirmed_by_other_organization": false,
+    "confirmed_at": null,
+    "confirmed_job_revision": null,
+    "evidence_changed_since_confirmation": false,
+    "replaced_by_id": null,
+    "evidence_request_ids": [],
+    "job_revision": 10,
+    "version": 1,
+    "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
+    "created_at": "2026-11-06T07:32:19.245663Z",
+    "updated_at": "2026-11-06T07:32:19.245665Z"
+  },
+  {
+    "id": "69a11d92-31be-4bf5-9c94-6dd10304e73c",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+    "category": "consumable",
+    "name": "Thread seal tape",
+    "purpose": "Re-seal the pump outlet fitting",
+    "quantity": null,
+    "unit": null,
+    "quantity_basis": null,
+    "open_requirements": [
+      "Fitting thread not confirmed"
+    ],
+    "specification": {},
+    "depends_on": [],
+    "supporting_asset_ids": [],
+    "source_note": "Owner suggestion",
+    "origin": "owner",
+    "created_by_role": "owner",
+    "status": "suggested",
+    "requirement_state": "possible",
+    "catalogue_match": "none",
+    "candidates": [],
+    "confirmed_product": null,
+    "confirmed_by": null,
+    "confirmed_by_other_organization": false,
+    "confirmed_at": null,
+    "confirmed_job_revision": null,
+    "evidence_changed_since_confirmation": false,
+    "replaced_by_id": null,
+    "evidence_request_ids": [],
+    "job_revision": 10,
+    "version": 1,
+    "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
+    "created_at": "2026-11-06T07:32:19.268593Z",
+    "updated_at": "2026-11-06T07:32:19.268596Z"
+  }
+]

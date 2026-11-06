@@ -1,0 +1,21 @@
+{
+  "event": {
+    "id": "552f6443-9359-47d2-aea6-2501d46ee190",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+    "assignment_id": "3c4a832b-e0a8-4663-81d7-2da9395ab846",
+    "kind": "completion_contested",
+    "actor_id": "5cfee740-8410-4f69-9f23-78bde6dd70b7",
+    "actor_name": "Fixture Owner",
+    "actor_role": "owner",
+    "occurred_at": "2026-11-06T07:32:21.583092Z",
+    "recorded_at": "2026-11-06T07:32:21.583092Z",
+    "note": "The hose was replaced but the fitting still drips",
+    "contests_event_id": "da534b34-2b34-478d-918d-53d36e1afe3a",
+    "contested": false
+  },
+  "case_id": "fe2c714c-83ca-4d9e-b49d-31a260ff5523",
+  "job_status": "completed",
+  "job_version": 8,
+  "job_disputed": true,
+  "created": true
+}

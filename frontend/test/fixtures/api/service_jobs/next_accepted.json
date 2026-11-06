@@ -1,0 +1,32 @@
+{
+  "request": {
+    "id": "43e88575-def4-47a0-a1a9-9c3d8c9497cb",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+    "requester_role": "assistant",
+    "organization_id": null,
+    "category": "overview",
+    "component": "Freshwater pump",
+    "prompt": "Can you take a wide photo that shows where the Freshwater pump is on the boat? Step back far enough to see the locker or compartment around it.",
+    "reason": "A wide view tells the contractor where to go and what they will be working around, before they arrive.",
+    "measurement_dimension": null,
+    "priority": "high",
+    "status": "outstanding",
+    "unavailable_reason": null,
+    "technician_inspection_required": false,
+    "answer_note": null,
+    "answered_at": null,
+    "version": 1,
+    "created_at": "2026-11-06T07:32:12.079132Z",
+    "updated_at": "2026-11-06T07:32:12.079135Z",
+    "options": [
+      "take_photo",
+      "upload_file",
+      "answer_with_note",
+      "cannot_safely_get"
+    ]
+  },
+  "proposal": null,
+  "complete": false,
+  "message": "A wide view tells the contractor where to go and what they will be working around, before they arrive.",
+  "gaps": []
+}

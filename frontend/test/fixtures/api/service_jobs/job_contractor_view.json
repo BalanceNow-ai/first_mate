@@ -1,0 +1,206 @@
+{
+  "id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+  "vessel_id": "391062c8-7c60-4c24-bbcc-202b68ea01c9",
+  "entry_point": "vessel",
+  "title": "Water under the sink when the pump runs",
+  "status": "contractor_review",
+  "version": 5,
+  "evidence_revision": 10,
+  "disputed": false,
+  "archived_at": null,
+  "created_at": "2026-11-06T07:32:11.959391Z",
+  "updated_at": "2026-11-06T07:32:19.608754Z",
+  "viewer": {
+    "role": "contractor",
+    "sections": [
+      "summary",
+      "evidence",
+      "measurements",
+      "preparation",
+      "access_general",
+      "access_restricted",
+      "scope"
+    ],
+    "organization_id": "f3af1153-00e5-444d-b892-8b8dbe1478dc",
+    "assignment_id": "3c4a832b-e0a8-4663-81d7-2da9395ab846",
+    "restricted_access": true
+  },
+  "snapshot_state": "live",
+  "snapshot_brief_id": null,
+  "snapshot_published_at": null,
+  "issue_description": "There is water under the galley sink whenever the freshwater pump runs.",
+  "affected_system": "Freshwater",
+  "affected_equipment": "Freshwater pump",
+  "occurs_when": "When the pump runs",
+  "already_tried": "Tightened the visible hose clamp",
+  "urgency": "routine",
+  "vessel_context": {
+    "engine": {
+      "make": "Yamaha",
+      "year": 2020,
+      "model": "F150"
+    },
+    "source": "vessel_record",
+    "vessel": {
+      "make": "Stabicraft",
+      "year": 2021,
+      "model": "2050 Supercab",
+      "nickname": "Kahawai",
+      "hull_type": null,
+      "length_ft": null,
+      "propulsion_type": "outboard"
+    },
+    "equipment": [],
+    "captured_at": "2026-11-06T07:32:11.958148+00:00",
+    "corrections": [
+      {
+        "at": "2026-11-06T07:32:12.016221+00:00",
+        "by": "owner",
+        "note": "Engine is the 2020 model",
+        "fields": [
+          "engine.year"
+        ]
+      }
+    ],
+    "owner_confirmed": true,
+    "uncertain_categories": []
+  },
+  "evidence": {
+    "outstanding": [],
+    "answered": [
+      {
+        "id": "43e88575-def4-47a0-a1a9-9c3d8c9497cb",
+        "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+        "requester_role": "assistant",
+        "organization_id": null,
+        "category": "overview",
+        "component": "Freshwater pump",
+        "prompt": "Can you take a wide photo that shows where the Freshwater pump is on the boat? Step back far enough to see the locker or compartment around it.",
+        "reason": "A wide view tells the contractor where to go and what they will be working around, before they arrive.",
+        "measurement_dimension": null,
+        "priority": "high",
+        "status": "answered",
+        "unavailable_reason": null,
+        "technician_inspection_required": false,
+        "answer_note": null,
+        "answered_at": "2026-11-06T07:32:12.260572Z",
+        "version": 2,
+        "created_at": "2026-11-06T07:32:12.079132Z",
+        "updated_at": "2026-11-06T07:32:12.281898Z",
+        "options": []
+      },
+      {
+        "id": "e7e2b9e5-f95b-4bda-85e1-edd6ba961679",
+        "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+        "requester_role": "assistant",
+        "organization_id": null,
+        "category": "close_up",
+        "component": "sink area",
+        "prompt": "Photograph where the water collects under the sink area, from where you normally look.",
+        "reason": "Where the water collects points to the connection or seal that is leaking.",
+        "measurement_dimension": null,
+        "priority": "high",
+        "status": "answered",
+        "unavailable_reason": null,
+        "technician_inspection_required": false,
+        "answer_note": "The hose is marked 25 mm ID",
+        "answered_at": "2026-11-06T07:32:17.968574Z",
+        "version": 2,
+        "created_at": "2026-11-06T07:32:17.955547Z",
+        "updated_at": "2026-11-06T07:32:17.969303Z",
+        "options": []
+      }
+    ],
+    "unavailable": [
+      {
+        "id": "8f476298-8fa0-4387-9468-8e9e70e038c6",
+        "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+        "requester_role": "assistant",
+        "organization_id": null,
+        "category": "access_route",
+        "component": "Freshwater pump",
+        "prompt": "Show the way in to the Freshwater pump: the locker opening, hatch or panel you look through, photographed from a step back. Leave it as it is.",
+        "reason": "Working space and obstructions decide which tools and how much time the job needs.",
+        "measurement_dimension": null,
+        "priority": "normal",
+        "status": "unavailable",
+        "unavailable_reason": "cannot_safely_access",
+        "technician_inspection_required": true,
+        "answer_note": "The far end is behind the hot water cylinder",
+        "answered_at": "2026-11-06T07:32:17.939461Z",
+        "version": 2,
+        "created_at": "2026-11-06T07:32:17.927898Z",
+        "updated_at": "2026-11-06T07:32:17.939749Z",
+        "options": []
+      }
+    ],
+    "waived": [
+      {
+        "id": "1821e385-08f3-4f22-bafa-f353c3f9dd28",
+        "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+        "requester_role": "owner",
+        "organization_id": null,
+        "category": "document",
+        "component": null,
+        "prompt": "Previous service invoice for the pump",
+        "reason": "Shows what was replaced last time",
+        "measurement_dimension": null,
+        "priority": "low",
+        "status": "waived",
+        "unavailable_reason": null,
+        "technician_inspection_required": false,
+        "answer_note": "Not available",
+        "answered_at": "2026-11-06T07:32:17.998078Z",
+        "version": 2,
+        "created_at": "2026-11-06T07:32:17.984362Z",
+        "updated_at": "2026-11-06T07:32:17.998341Z",
+        "options": []
+      }
+    ],
+    "available_asset_count": 3
+  },
+  "gaps": [
+    {
+      "request_id": "8f476298-8fa0-4387-9468-8e9e70e038c6",
+      "category": "access_route",
+      "component": "Freshwater pump",
+      "prompt": "Show the way in to the Freshwater pump: the locker opening, hatch or panel you look through, photographed from a step back. Leave it as it is.",
+      "reason": "cannot_safely_access",
+      "note": "The far end is behind the hot water cylinder",
+      "technician_inspection_required": true
+    }
+  ],
+  "technician_inspection_required": true,
+  "assignment": {
+    "id": "3c4a832b-e0a8-4663-81d7-2da9395ab846",
+    "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+    "organization": {
+      "id": "f3af1153-00e5-444d-b892-8b8dbe1478dc",
+      "name": "Fixture Marine cda525ff",
+      "trading_name": "Fixture Marine Services"
+    },
+    "status": "accepted",
+    "sections": [
+      "summary",
+      "evidence",
+      "measurements",
+      "preparation",
+      "access_general",
+      "access_restricted",
+      "scope"
+    ],
+    "live_updates": true,
+    "invited_at": "2026-11-06T07:32:19.374532Z",
+    "accepted_at": "2026-11-06T07:32:19.504877Z",
+    "revoked_at": null,
+    "version": 4,
+    "members": [
+      {
+        "user_id": "60d99bf1-bead-4f28-96b8-1649c76ec4e5",
+        "name": "Fixture Technician",
+        "restricted_access": true,
+        "added_at": "2026-11-06T07:32:19.509917Z"
+      }
+    ]
+  }
+}

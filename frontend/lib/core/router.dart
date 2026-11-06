@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:helm_marine/core/routes/catalogue_routes.dart';
 import 'package:helm_marine/core/routes/commerce_routes.dart';
 import 'package:helm_marine/core/routes/engagement_routes.dart';
+import 'package:helm_marine/core/routes/invoice_routes.dart';
+import 'package:helm_marine/core/routes/service_routes.dart';
 import 'package:helm_marine/core/auth/auth_controller.dart';
 import 'package:helm_marine/core/widgets/app_shell.dart';
 import 'package:helm_marine/features/ai_chat/screens/chat_screen.dart';
@@ -149,6 +151,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           ...catalogueRoutes,
           ...commerceRoutes,
           ...engagementRoutes,
+          ...invoiceRoutes,
+          ...serviceRoutes,
         ],
       ),
     ],

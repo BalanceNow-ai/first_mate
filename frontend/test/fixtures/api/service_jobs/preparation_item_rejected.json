@@ -1,0 +1,60 @@
+{
+  "id": "7848bf1a-4955-42fb-a994-7b8debaa810d",
+  "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+  "category": "part",
+  "name": "Hose fitting / adaptor (if the existing one is damaged)",
+  "purpose": "Connect the hose to the equipment if the existing fitting cannot be reused",
+  "quantity": null,
+  "unit": "each",
+  "quantity_basis": null,
+  "open_requirements": [
+    "Fitting thread not confirmed",
+    "Whether the existing fitting can be reused needs site inspection"
+  ],
+  "specification": {
+    "thread": null,
+    "template": "fitting"
+  },
+  "depends_on": [],
+  "supporting_asset_ids": [
+    "c52df3b5-b660-42bf-9801-7d42d03f9595"
+  ],
+  "source_note": "Suggested from the job description and recorded measurements; provisional until the contractor confirms.",
+  "origin": "assistant",
+  "created_by_role": "assistant",
+  "status": "rejected",
+  "requirement_state": "rejected",
+  "catalogue_match": "candidates",
+  "candidates": [
+    {
+      "product_id": "5e2fd0a1-ef6d-4605-befe-60b639a0dc54",
+      "sku": "SYN-HOSE-FIT",
+      "name": "Assorted hose & fittings kit (synthetic)",
+      "brand": "FixtureGeneral",
+      "price_cents": 5490,
+      "sale_price_cents": null,
+      "currency": "NZD",
+      "is_active": true,
+      "in_stock": true,
+      "fitment_status": "universal",
+      "fitment_message": "Suitable for any vessel, including Kahawai (2021 Stabicraft 2050 Supercab)",
+      "dimension_check": {
+        "status": "not_applicable",
+        "reason": null
+      }
+    }
+  ],
+  "confirmed_product": null,
+  "confirmed_by": null,
+  "confirmed_by_other_organization": false,
+  "confirmed_at": null,
+  "confirmed_job_revision": null,
+  "evidence_changed_since_confirmation": false,
+  "replaced_by_id": null,
+  "evidence_request_ids": [],
+  "job_revision": 10,
+  "version": 2,
+  "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
+  "created_at": "2026-11-06T07:32:19.240354Z",
+  "updated_at": "2026-11-06T07:32:21.088793Z"
+}

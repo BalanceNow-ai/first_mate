@@ -1,0 +1,15 @@
+[
+  {
+    "id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+    "vessel_id": "391062c8-7c60-4c24-bbcc-202b68ea01c9",
+    "title": "Water under the sink when the pump runs",
+    "status": "evidence_collection",
+    "urgency": "routine",
+    "version": 4,
+    "outstanding_requests": 0,
+    "gap_count": 1,
+    "assignment_status": "invited",
+    "created_at": "2026-11-06T07:32:11.959391Z",
+    "updated_at": "2026-11-06T07:32:19.173500Z"
+  }
+]

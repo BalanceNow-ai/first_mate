@@ -1,0 +1,460 @@
+{
+  "id": "ad7a3928-fa46-44a8-b477-fc8174cf131a",
+  "title": "Harbour Marine invoice",
+  "job_id": null,
+  "standalone": true,
+  "status": "owner_reviewed",
+  "version": 5,
+  "current_revision_id": "f698f8ad-dc81-4015-8a62-062e287176e1",
+  "revision_number": 1,
+  "supplier_name": "Fixture Harbour Marine",
+  "total": "458.82",
+  "currency": "NZD",
+  "created_at": "2026-11-06T07:32:37.972567Z",
+  "updated_at": "2026-11-06T07:32:38.380196Z",
+  "provisional": false,
+  "needs_confirmation": [],
+  "revision": {
+    "id": "f698f8ad-dc81-4015-8a62-062e287176e1",
+    "revision_number": 1,
+    "origin": "owner_upload",
+    "status": "owner_reviewed",
+    "source_asset_id": "6c0511b8-8b40-456a-9626-83ae6ef351d8",
+    "uploaded_by": "7ee281cf-7f47-46eb-97ad-e6edd9c5fa8d",
+    "organization_id": null,
+    "supersedes_id": null,
+    "created_at": "2026-11-06T07:32:37.974045Z",
+    "currency": "NZD",
+    "rounding": "half_up",
+    "version": 5,
+    "extraction_status": "extracted",
+    "extraction_provider": "local_fixture",
+    "extraction_notes": [],
+    "unparsed_text": [
+      {
+        "text": "Bank account: [masked]",
+        "page": 1,
+        "region": {
+          "x": 0.084,
+          "y": 0.3432,
+          "w": 0.242,
+          "h": 0.0134
+        }
+      }
+    ],
+    "reviewed_by": "7ee281cf-7f47-46eb-97ad-e6edd9c5fa8d",
+    "reviewed_at": "2026-11-06T07:32:38.380127+00:00",
+    "fields": {
+      "supplier_name": {
+        "name": "supplier_name",
+        "value": "Fixture Harbour Marine",
+        "source": "extracted",
+        "certainty": "high",
+        "page": 1,
+        "region": {
+          "x": 0.084,
+          "y": 0.038,
+          "w": 0.2689,
+          "h": 0.0148
+        },
+        "illegible": false,
+        "needs_confirmation": false,
+        "extracted_value": "Fixture Harbour Marine",
+        "by": null,
+        "at": null,
+        "history": []
+      },
+      "invoice_number": {
+        "name": "invoice_number",
+        "value": "INV-e55a15b6-S",
+        "source": "extracted",
+        "certainty": "high",
+        "page": 1,
+        "region": {
+          "x": 0.084,
+          "y": 0.057,
+          "w": 0.2185,
+          "h": 0.0148
+        },
+        "illegible": false,
+        "needs_confirmation": false,
+        "extracted_value": "INV-e55a15b6-S",
+        "by": null,
+        "at": null,
+        "history": []
+      },
+      "invoice_date": {
+        "name": "invoice_date",
+        "value": "30 October 2026",
+        "source": "owner_corrected",
+        "certainty": "high",
+        "page": 1,
+        "region": {
+          "x": 0.084,
+          "y": 0.076,
+          "w": 0.1345,
+          "h": 0.0148
+        },
+        "illegible": false,
+        "needs_confirmation": false,
+        "extracted_value": "2026-10-30",
+        "by": "7ee281cf-7f47-46eb-97ad-e6edd9c5fa8d",
+        "at": "2026-11-06T07:32:38.356792+00:00",
+        "history": [
+          {
+            "value": "2026-10-30",
+            "source": "extracted",
+            "by": null,
+            "at": null
+          }
+        ]
+      },
+      "currency": {
+        "name": "currency",
+        "value": "NZD",
+        "source": "extracted",
+        "certainty": "high",
+        "page": 1,
+        "region": {
+          "x": 0.084,
+          "y": 0.095,
+          "w": 0.1092,
+          "h": 0.0148
+        },
+        "illegible": false,
+        "needs_confirmation": false,
+        "extracted_value": "NZD",
+        "by": null,
+        "at": null,
+        "history": []
+      },
+      "subtotal": {
+        "name": "subtotal",
+        "value": "398.10",
+        "source": "extracted",
+        "certainty": "high",
+        "page": 1,
+        "region": {
+          "x": 0.5546,
+          "y": 0.2565,
+          "w": 0.1345,
+          "h": 0.0148
+        },
+        "illegible": false,
+        "needs_confirmation": false,
+        "extracted_value": "398.10",
+        "by": null,
+        "at": null,
+        "history": []
+      },
+      "tax_printed": {
+        "name": "tax_printed",
+        "value": "59.72",
+        "source": "extracted",
+        "certainty": "high",
+        "page": 1,
+        "region": {
+          "x": 0.5546,
+          "y": 0.2755,
+          "w": 0.084,
+          "h": 0.0148
+        },
+        "illegible": false,
+        "needs_confirmation": false,
+        "extracted_value": "59.72",
+        "by": null,
+        "at": null,
+        "history": []
+      },
+      "total": {
+        "name": "total",
+        "value": "458.82",
+        "source": "extracted",
+        "certainty": "high",
+        "page": 1,
+        "region": {
+          "x": 0.5546,
+          "y": 0.2945,
+          "w": 0.1092,
+          "h": 0.0148
+        },
+        "illegible": false,
+        "needs_confirmation": false,
+        "extracted_value": "458.82",
+        "by": null,
+        "at": null,
+        "history": []
+      },
+      "warranty": {
+        "name": "warranty",
+        "value": "12 months on parts supplied",
+        "source": "extracted",
+        "certainty": "high",
+        "page": 1,
+        "region": {
+          "x": 0.084,
+          "y": 0.3266,
+          "w": 0.2798,
+          "h": 0.0134
+        },
+        "illegible": false,
+        "needs_confirmation": false,
+        "extracted_value": "12 months on parts supplied",
+        "by": null,
+        "at": null,
+        "history": []
+      },
+      "follow_up": {
+        "name": "follow_up",
+        "value": null,
+        "source": "extracted",
+        "certainty": "unknown",
+        "page": null,
+        "region": null,
+        "illegible": false,
+        "needs_confirmation": false,
+        "extracted_value": null,
+        "by": null,
+        "at": null,
+        "history": []
+      }
+    }
+  },
+  "revisions": [
+    {
+      "id": "f698f8ad-dc81-4015-8a62-062e287176e1",
+      "revision_number": 1,
+      "origin": "owner_upload",
+      "status": "owner_reviewed",
+      "source_asset_id": "6c0511b8-8b40-456a-9626-83ae6ef351d8",
+      "uploaded_by": "7ee281cf-7f47-46eb-97ad-e6edd9c5fa8d",
+      "organization_id": null,
+      "supersedes_id": null,
+      "created_at": "2026-11-06T07:32:37.974045Z"
+    }
+  ],
+  "lines": [
+    {
+      "id": "67bf8568-27a4-479d-945c-cdee07b21179",
+      "line_number": 1,
+      "kind": "labour",
+      "kind_certainty": "medium",
+      "description": "Labour - replace hose and clamps",
+      "part_number": null,
+      "quantity": "2.5",
+      "unit": "hr",
+      "unit_price": "95.00",
+      "line_total": "237.50",
+      "tax_printed": null,
+      "currency": null,
+      "page": 1,
+      "region": {
+        "x": 0.084,
+        "y": 0.1496,
+        "w": 0.8067,
+        "h": 0.0148
+      },
+      "certainty": "high",
+      "source": "extracted",
+      "needs_confirmation": false,
+      "illegible": [],
+      "extracted_values": {
+        "kind": "labour",
+        "unit": "hr",
+        "currency": null,
+        "quantity": "2.5",
+        "line_total": "237.50",
+        "unit_price": "95.00",
+        "description": "Labour - replace hose and clamps",
+        "part_number": null,
+        "tax_printed": null
+      },
+      "corrected_fields": [],
+      "corrected_by": null,
+      "corrected_at": null,
+      "version": 1
+    },
+    {
+      "id": "1992ec2f-7e0a-4594-9276-14abc0cc7ee7",
+      "line_number": 2,
+      "kind": "part",
+      "kind_certainty": "medium",
+      "description": "Sanitation hose 25mm ID",
+      "part_number": "SH-25",
+      "quantity": "1.5",
+      "unit": "m",
+      "unit_price": "18.40",
+      "line_total": "27.60",
+      "tax_printed": null,
+      "currency": null,
+      "page": 1,
+      "region": {
+        "x": 0.084,
+        "y": 0.1686,
+        "w": 0.7983,
+        "h": 0.0148
+      },
+      "certainty": "high",
+      "source": "extracted",
+      "needs_confirmation": false,
+      "illegible": [],
+      "extracted_values": {
+        "kind": "part",
+        "unit": "m",
+        "currency": null,
+        "quantity": "1.5",
+        "line_total": "27.60",
+        "unit_price": "18.40",
+        "description": "Sanitation hose 25mm ID",
+        "part_number": "SH-25",
+        "tax_printed": null
+      },
+      "corrected_fields": [],
+      "corrected_by": null,
+      "corrected_at": null,
+      "version": 1
+    },
+    {
+      "id": "e297946a-6b01-475c-be0d-0142f1571274",
+      "line_number": 3,
+      "kind": "part",
+      "kind_certainty": "medium",
+      "description": "S/S hose clamp 316",
+      "part_number": "HC-316-32",
+      "quantity": "4",
+      "unit": "ea",
+      "unit_price": "6.50",
+      "line_total": "26.00",
+      "tax_printed": null,
+      "currency": null,
+      "page": 1,
+      "region": {
+        "x": 0.084,
+        "y": 0.1876,
+        "w": 0.7983,
+        "h": 0.0148
+      },
+      "certainty": "low",
+      "source": "owner_corrected",
+      "needs_confirmation": false,
+      "illegible": [],
+      "extracted_values": {
+        "kind": "part",
+        "unit": "ea",
+        "currency": null,
+        "quantity": "3",
+        "line_total": "26.00",
+        "unit_price": "6.50",
+        "description": "S/S hose clamp 316",
+        "part_number": "HC-316-32",
+        "tax_printed": null
+      },
+      "corrected_fields": [
+        "quantity"
+      ],
+      "corrected_by": "7ee281cf-7f47-46eb-97ad-e6edd9c5fa8d",
+      "corrected_at": "2026-11-06T07:32:38.335755Z",
+      "version": 2
+    },
+    {
+      "id": "896ece06-8691-4bb4-9c19-5bd616134ebc",
+      "line_number": 4,
+      "kind": "call_out",
+      "kind_certainty": "medium",
+      "description": "Call-out fee",
+      "part_number": null,
+      "quantity": "1",
+      "unit": null,
+      "unit_price": "95.00",
+      "line_total": "95.00",
+      "tax_printed": null,
+      "currency": null,
+      "page": 1,
+      "region": {
+        "x": 0.084,
+        "y": 0.2067,
+        "w": 0.7983,
+        "h": 0.0148
+      },
+      "certainty": "high",
+      "source": "extracted",
+      "needs_confirmation": false,
+      "illegible": [],
+      "extracted_values": {
+        "kind": "call_out",
+        "unit": null,
+        "currency": null,
+        "quantity": "1",
+        "line_total": "95.00",
+        "unit_price": "95.00",
+        "description": "Call-out fee",
+        "part_number": null,
+        "tax_printed": null
+      },
+      "corrected_fields": [],
+      "corrected_by": null,
+      "corrected_at": null,
+      "version": 1
+    },
+    {
+      "id": "0e33ad31-8739-4b0a-8c9f-419d5932635e",
+      "line_number": 5,
+      "kind": "consumable",
+      "kind_certainty": "medium",
+      "description": "Consumables / sundries",
+      "part_number": null,
+      "quantity": null,
+      "unit": null,
+      "unit_price": null,
+      "line_total": "12.00",
+      "tax_printed": null,
+      "currency": null,
+      "page": 1,
+      "region": {
+        "x": 0.084,
+        "y": 0.2257,
+        "w": 0.7983,
+        "h": 0.0148
+      },
+      "certainty": "high",
+      "source": "extracted",
+      "needs_confirmation": false,
+      "illegible": [],
+      "extracted_values": {
+        "kind": "consumable",
+        "unit": null,
+        "currency": null,
+        "quantity": null,
+        "line_total": "12.00",
+        "unit_price": null,
+        "description": "Consumables / sundries",
+        "part_number": null,
+        "tax_printed": null
+      },
+      "corrected_fields": [],
+      "corrected_by": null,
+      "corrected_at": null,
+      "version": 1
+    }
+  ],
+  "explanation": null,
+  "questions": [],
+  "extraction": {
+    "provider": "local_fixture",
+    "available": true,
+    "message": null,
+    "substitute": true,
+    "latest_run": {
+      "id": "9424e05e-783f-4c9a-8b12-228079a91b68",
+      "status": "draft_ready",
+      "invoice_revision_id": "f698f8ad-dc81-4015-8a62-062e287176e1",
+      "provider": "local_fixture",
+      "model": "local-fixture-v1",
+      "attempts": 1,
+      "error": null,
+      "stale_reason": null,
+      "created_at": "2026-11-06T07:32:38.022466Z",
+      "updated_at": "2026-11-06T07:32:38.116235Z"
+    }
+  }
+}

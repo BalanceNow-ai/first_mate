@@ -1,0 +1,345 @@
+{
+  "id": "34a453ea-35f4-41f7-84ff-15e4b219e7d1",
+  "invoice_revision_id": "f698f8ad-dc81-4015-8a62-062e287176e1",
+  "status": "current",
+  "basis_digest": "20e109d25b9ea1efe945f279d6d5df76f98f650d7b8b5c0b81e4b8968f9c65c0",
+  "stale": false,
+  "created_at": "2026-11-06T07:32:38.402727Z",
+  "content": {
+    "lines": [
+      {
+        "kind": "labour",
+        "source": {
+          "page": 1,
+          "region": {
+            "h": 0.0148,
+            "w": 0.8067,
+            "x": 0.084,
+            "y": 0.1496
+          }
+        },
+        "line_id": "67bf8568-27a4-479d-945c-cdee07b21179",
+        "glossary": [
+          {
+            "term": "hr",
+            "meaning": "hour — a time unit printed on the invoice"
+          }
+        ],
+        "certainty": "high",
+        "arithmetic": {
+          "notes": [],
+          "status": "matches",
+          "line_id": "67bf8568-27a4-479d-945c-cdee07b21179",
+          "printed": "237.50",
+          "reasons": [],
+          "computed": "237.50",
+          "difference": "0.00",
+          "amount_used": "237.50",
+          "line_number": 1
+        },
+        "line_number": 1,
+        "plain_language": "Labour — time charged for the work: Labour - replace hose and clamps. Quantity 2.5 (hr) at 95.00 each. Amount shown: 237.50.",
+        "related_to_job": [],
+        "needs_confirmation": false
+      },
+      {
+        "kind": "part",
+        "source": {
+          "page": 1,
+          "region": {
+            "h": 0.0148,
+            "w": 0.7983,
+            "x": 0.084,
+            "y": 0.1686
+          }
+        },
+        "line_id": "1992ec2f-7e0a-4594-9276-14abc0cc7ee7",
+        "glossary": [
+          {
+            "term": "id",
+            "meaning": "internal diameter (the inside width of a hose or pipe)"
+          }
+        ],
+        "certainty": "high",
+        "arithmetic": {
+          "notes": [],
+          "status": "matches",
+          "line_id": "1992ec2f-7e0a-4594-9276-14abc0cc7ee7",
+          "printed": "27.60",
+          "reasons": [],
+          "computed": "27.60",
+          "difference": "0.00",
+          "amount_used": "27.60",
+          "line_number": 2
+        },
+        "line_number": 2,
+        "plain_language": "A part or material supplied: Sanitation hose 25mm ID. Part number SH-25 (as printed). Quantity 1.5 (m) at 18.40 each. Amount shown: 27.60.",
+        "related_to_job": [],
+        "needs_confirmation": false
+      },
+      {
+        "kind": "part",
+        "source": {
+          "page": 1,
+          "region": {
+            "h": 0.0148,
+            "w": 0.7983,
+            "x": 0.084,
+            "y": 0.1876
+          }
+        },
+        "line_id": "e297946a-6b01-475c-be0d-0142f1571274",
+        "glossary": [
+          {
+            "term": "ea",
+            "meaning": "each — the price for one item"
+          },
+          {
+            "term": "s/s",
+            "meaning": "stainless steel"
+          },
+          {
+            "term": "316",
+            "meaning": "a marine grade of stainless steel (as printed; the grade is not verified)"
+          }
+        ],
+        "certainty": "low",
+        "arithmetic": {
+          "notes": [],
+          "status": "matches",
+          "line_id": "e297946a-6b01-475c-be0d-0142f1571274",
+          "printed": "26.00",
+          "reasons": [],
+          "computed": "26.00",
+          "difference": "0.00",
+          "amount_used": "26.00",
+          "line_number": 3
+        },
+        "line_number": 3,
+        "plain_language": "A part or material supplied: S/S hose clamp 316. Part number HC-316-32 (as printed). Quantity 4 (ea) at 6.50 each. Amount shown: 26.00.",
+        "related_to_job": [],
+        "needs_confirmation": false
+      },
+      {
+        "kind": "call_out",
+        "source": {
+          "page": 1,
+          "region": {
+            "h": 0.0148,
+            "w": 0.7983,
+            "x": 0.084,
+            "y": 0.2067
+          }
+        },
+        "line_id": "896ece06-8691-4bb4-9c19-5bd616134ebc",
+        "glossary": [
+          {
+            "term": "call-out",
+            "meaning": "a charge for attending, separate from the time worked"
+          }
+        ],
+        "certainty": "high",
+        "arithmetic": {
+          "notes": [],
+          "status": "matches",
+          "line_id": "896ece06-8691-4bb4-9c19-5bd616134ebc",
+          "printed": "95.00",
+          "reasons": [],
+          "computed": "95.00",
+          "difference": "0.00",
+          "amount_used": "95.00",
+          "line_number": 4
+        },
+        "line_number": 4,
+        "plain_language": "A call-out charge — a fee for attending, separate from time worked: Call-out fee. Quantity 1 (unit not stated) at 95.00 each. Amount shown: 95.00.",
+        "related_to_job": [],
+        "needs_confirmation": false
+      },
+      {
+        "kind": "consumable",
+        "source": {
+          "page": 1,
+          "region": {
+            "h": 0.0148,
+            "w": 0.7983,
+            "x": 0.084,
+            "y": 0.2257
+          }
+        },
+        "line_id": "0e33ad31-8739-4b0a-8c9f-419d5932635e",
+        "glossary": [
+          {
+            "term": "sundries",
+            "meaning": "small workshop materials (sealant, cable ties, rags and similar) charged together"
+          },
+          {
+            "term": "consumables",
+            "meaning": "small materials used up during the job, charged together"
+          }
+        ],
+        "certainty": "high",
+        "arithmetic": {
+          "notes": [],
+          "status": "printed_only",
+          "line_id": "0e33ad31-8739-4b0a-8c9f-419d5932635e",
+          "printed": "12.00",
+          "reasons": [
+            "missing_quantity",
+            "missing_unit_price"
+          ],
+          "computed": null,
+          "difference": null,
+          "amount_used": "12.00",
+          "line_number": 5
+        },
+        "line_number": 5,
+        "plain_language": "Consumables — small materials used up during the job: Consumables / sundries. Amount shown: 12.00.",
+        "related_to_job": [],
+        "needs_confirmation": false
+      }
+    ],
+    "version": "invoice-explanation-v1",
+    "currency": {
+      "code": "NZD",
+      "status": "stated",
+      "exponent": 2
+    },
+    "phrasing": "deterministic_template",
+    "arithmetic": {
+      "tax": {
+        "note": "Tax is shown only as printed. First Mate does not assume a rate, whether tax is included, or whether the invoice meets tax requirements.",
+        "source": "printed_total",
+        "printed": "59.72"
+      },
+      "lines": [
+        {
+          "notes": [],
+          "status": "matches",
+          "line_id": "67bf8568-27a4-479d-945c-cdee07b21179",
+          "printed": "237.50",
+          "reasons": [],
+          "computed": "237.50",
+          "difference": "0.00",
+          "amount_used": "237.50",
+          "line_number": 1
+        },
+        {
+          "notes": [],
+          "status": "matches",
+          "line_id": "1992ec2f-7e0a-4594-9276-14abc0cc7ee7",
+          "printed": "27.60",
+          "reasons": [],
+          "computed": "27.60",
+          "difference": "0.00",
+          "amount_used": "27.60",
+          "line_number": 2
+        },
+        {
+          "notes": [],
+          "status": "matches",
+          "line_id": "e297946a-6b01-475c-be0d-0142f1571274",
+          "printed": "26.00",
+          "reasons": [],
+          "computed": "26.00",
+          "difference": "0.00",
+          "amount_used": "26.00",
+          "line_number": 3
+        },
+        {
+          "notes": [],
+          "status": "matches",
+          "line_id": "896ece06-8691-4bb4-9c19-5bd616134ebc",
+          "printed": "95.00",
+          "reasons": [],
+          "computed": "95.00",
+          "difference": "0.00",
+          "amount_used": "95.00",
+          "line_number": 4
+        },
+        {
+          "notes": [],
+          "status": "printed_only",
+          "line_id": "0e33ad31-8739-4b0a-8c9f-419d5932635e",
+          "printed": "12.00",
+          "reasons": [
+            "missing_quantity",
+            "missing_unit_price"
+          ],
+          "computed": null,
+          "difference": null,
+          "amount_used": "12.00",
+          "line_number": 5
+        }
+      ],
+      "status": "complete",
+      "blockers": [],
+      "currency": "NZD",
+      "lines_sum": "398.10",
+      "total_check": {
+        "notes": [
+          "Expected total = subtotal (or line sum) + tax as printed."
+        ],
+        "status": "differs",
+        "printed": "458.82",
+        "reasons": [],
+        "computed": "457.82",
+        "difference": "1.00"
+      },
+      "subtotal_check": {
+        "status": "matches",
+        "printed": "398.10",
+        "reasons": [],
+        "computed": "398.10",
+        "difference": "0.00"
+      },
+      "currency_status": "stated",
+      "line_currencies": [],
+      "rounding_policy": "half_up",
+      "rounding_policy_text": "Rounding half-up to 2 decimal places (NZD minor unit)."
+    },
+    "comparison": {
+      "items": [],
+      "reason": "standalone_invoice",
+      "status": "unavailable",
+      "message": "This invoice is not linked to a service job, so there is no accepted scope to compare with."
+    },
+    "duplicates": [],
+    "invoice_id": "ad7a3928-fa46-44a8-b477-fc8174cf131a",
+    "limitations": [
+      "This explanation translates and checks the invoice's own figures. It does not judge whether prices are fair, whether anyone acted improperly, or give legal or tax advice.",
+      "Tax is shown only as printed. No tax rate is assumed and tax compliance is not checked.",
+      "Nothing has been sent, disputed, paid or changed. A question is only sent when you choose to send it."
+    ],
+    "obligations": [
+      {
+        "kind": "warranty",
+        "note": "As stated on the invoice; First Mate has not verified the terms.",
+        "text": "12 months on parts supplied",
+        "source": {
+          "page": 1,
+          "field": "warranty",
+          "region": {
+            "h": 0.0134,
+            "w": 0.2798,
+            "x": 0.084,
+            "y": 0.3266
+          },
+          "line_id": null
+        }
+      }
+    ],
+    "provisional": false,
+    "revision_id": "f698f8ad-dc81-4015-8a62-062e287176e1",
+    "attributed_text": [],
+    "revision_number": 1,
+    "rounding_policy": "Rounding half-up to 2 decimal places (NZD minor unit).",
+    "needs_confirmation": [],
+    "suggested_questions": [
+      {
+        "key": "arith:total",
+        "text": "The subtotal plus the printed tax comes to 457.82, and the printed total is 458.82. Could you explain the difference of 1.00?",
+        "line_id": null
+      }
+    ]
+  }
+}

@@ -11,12 +11,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base, created_at_col, updated_at_col
 
-ROLES = ("customer", "operator", "dispatcher", "admin")
+ROLES = ("customer", "operator", "dispatcher", "admin", "moderator")
 
 
 class User(Base):
     __tablename__ = "users"
-    __table_args__ = (CheckConstraint("role IN ('customer','operator','dispatcher','admin')", name="valid_role"),)
+    __table_args__ = (
+        CheckConstraint("role IN ('customer','operator','dispatcher','admin','moderator')", name="valid_role"),
+    )
 
     # Primary key == the verified `sub` claim of the Supabase access token.
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)

@@ -1,0 +1,19 @@
+{
+  "acknowledgement": {
+    "id": "2cfc0a0c-0806-4f34-beb7-c4c166c1463d",
+    "kind": "incomplete",
+    "note": "Need the pump label",
+    "user_id": "60d99bf1-bead-4f28-96b8-1649c76ec4e5",
+    "organization_id": "f3af1153-00e5-444d-b892-8b8dbe1478dc",
+    "created_at": "2026-11-06T07:32:19.788221Z"
+  },
+  "evidence_request": {
+    "id": "d84215f9-95ce-48e7-865e-1f709a686d1d",
+    "category": "label",
+    "prompt": "Photograph the pump label without moving the pump",
+    "reason": "Confirms the pump model and outlet size",
+    "requester_role": "contractor",
+    "status": "outstanding",
+    "priority": "normal"
+  }
+}

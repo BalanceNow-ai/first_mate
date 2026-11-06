@@ -1,0 +1,23 @@
+{
+  "id": "4ae21b08-ef1e-4b06-a60c-88e3a3aa6a9c",
+  "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+  "purpose": "job_photo",
+  "status": "rejected",
+  "uploaded_by_role": "owner",
+  "uploaded_by_me": true,
+  "evidence_request_id": null,
+  "caption": null,
+  "detected_type": null,
+  "size_bytes": 860,
+  "max_bytes": 860,
+  "width": null,
+  "height": null,
+  "pages": null,
+  "quality": {},
+  "duplicate_of_id": null,
+  "rejection_reason": "unsupported_type",
+  "upload_expires_at": "2026-11-07T07:32:14.301704Z",
+  "version": 3,
+  "created_at": "2026-11-06T07:32:14.302228Z",
+  "updated_at": "2026-11-06T07:32:14.385685Z"
+}

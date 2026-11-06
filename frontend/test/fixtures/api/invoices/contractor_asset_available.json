@@ -1,0 +1,25 @@
+{
+  "id": "9ac3aadd-511f-431e-bfa0-af2eb8ed0bfb",
+  "job_id": "b2ae3232-4337-4a54-bbd2-498316044265",
+  "purpose": "job_document",
+  "status": "available",
+  "uploaded_by_role": "contractor",
+  "uploaded_by_me": true,
+  "evidence_request_id": null,
+  "caption": "Corrected invoice",
+  "detected_type": "application/pdf",
+  "size_bytes": 2396,
+  "max_bytes": 2396,
+  "width": null,
+  "height": null,
+  "pages": 1,
+  "quality": {
+    "method": "pdf"
+  },
+  "duplicate_of_id": null,
+  "rejection_reason": null,
+  "upload_expires_at": "2026-11-07T07:32:43.307931Z",
+  "version": 3,
+  "created_at": "2026-11-06T07:32:43.308379Z",
+  "updated_at": "2026-11-06T07:32:43.398290Z"
+}

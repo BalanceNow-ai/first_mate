@@ -1,0 +1,31 @@
+{
+  "id": "7f3b0446-bffa-48c9-845e-12e9cc34e0b2",
+  "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+  "purpose": "job_photo",
+  "status": "available",
+  "uploaded_by_role": "owner",
+  "uploaded_by_me": true,
+  "evidence_request_id": null,
+  "caption": "Pump label",
+  "detected_type": "image/jpeg",
+  "size_bytes": 43793,
+  "max_bytes": 43793,
+  "width": 480,
+  "height": 360,
+  "pages": null,
+  "quality": {
+    "blur": "ok",
+    "method": "heuristic-v1",
+    "framing": "not_assessed",
+    "darkness": "ok",
+    "blur_score": 1508.6,
+    "mean_luminance": 109.8,
+    "label_legibility": "not_assessed"
+  },
+  "duplicate_of_id": "c52df3b5-b660-42bf-9801-7d42d03f9595",
+  "rejection_reason": null,
+  "upload_expires_at": "2026-11-07T07:32:13.230898Z",
+  "version": 3,
+  "created_at": "2026-11-06T07:32:13.231393Z",
+  "updated_at": "2026-11-06T07:32:13.326241Z"
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "89eb89fa-9834-411c-a999-f3c104cedc3b",
+    "job_id": "825db48c-1270-4554-998f-5468c1687a6b",
+    "category": "part",
+    "name": "Heat-shrink butt connectors",
+    "purpose": "Re-terminate the light cable",
+    "quantity": "4",
+    "unit": "each",
+    "quantity_basis": "Contractor: Two at each end of the cable run",
+    "open_requirements": [
+      "Cable gauge not confirmed"
+    ],
+    "specification": {},
+    "depends_on": [],
+    "supporting_asset_ids": [],
+    "source_note": "Added by the owner",
+    "origin": "owner",
+    "created_by_role": "owner",
+    "status": "contractor_confirmed",
+    "requirement_state": "contractor_confirmed",
+    "catalogue_match": "none",
+    "candidates": [],
+    "confirmed_product": null,
+    "confirmed_by": null,
+    "confirmed_by_other_organization": true,
+    "confirmed_at": "2026-11-06T07:32:22.208676Z",
+    "confirmed_job_revision": 4,
+    "evidence_changed_since_confirmation": false,
+    "replaced_by_id": null,
+    "evidence_request_ids": [],
+    "job_revision": 1,
+    "version": 2,
+    "commercial_note": "Provisional preparation only — not a purchase, quote, work instruction or approval. The owner adds products to the cart; stock and price are checked then.",
+    "created_at": "2026-11-06T07:32:21.873444Z",
+    "updated_at": "2026-11-06T07:32:22.209987Z"
+  }
+]

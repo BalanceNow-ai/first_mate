@@ -1,0 +1,47 @@
+{
+  "id": "531e55bb-a472-4aab-8f45-d36b6da7eb5e",
+  "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+  "revision_number": 2,
+  "is_change": true,
+  "supersedes_id": "d37f7b16-0321-4208-a9a5-4eec21c8acbf",
+  "proposed_by": "60d99bf1-bead-4f28-96b8-1649c76ec4e5",
+  "organization_id": "f3af1153-00e5-444d-b892-8b8dbe1478dc",
+  "summary": "Also replace the outlet fitting",
+  "tasks": [
+    {
+      "description": "Replace outlet hose",
+      "needs_site_inspection": false
+    },
+    {
+      "description": "Replace corroded outlet fitting",
+      "needs_site_inspection": false
+    }
+  ],
+  "estimate_lines": [
+    {
+      "description": "Labour",
+      "kind": "labour",
+      "quantity": "2",
+      "unit": "hour",
+      "unit_price_minor": 9500,
+      "amount_minor": 19000
+    },
+    {
+      "description": "Hose, clamps and fitting",
+      "kind": "parts",
+      "quantity": null,
+      "unit": null,
+      "unit_price_minor": null,
+      "amount_minor": 6800
+    }
+  ],
+  "estimate_total_minor": 25800,
+  "currency": "NZD",
+  "exclusions": null,
+  "assumptions": null,
+  "status": "proposed",
+  "content_digest": "f552bd141f5e6f8a5abad5721cb48a6e6f3081a2d3372d6f39e120b098557685",
+  "is_current": true,
+  "decision": null,
+  "created_at": "2026-11-06T07:32:21.215280Z"
+}

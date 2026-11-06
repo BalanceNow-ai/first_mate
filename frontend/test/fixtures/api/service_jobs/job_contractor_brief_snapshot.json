@@ -1,0 +1,94 @@
+{
+  "id": "825db48c-1270-4554-998f-5468c1687a6b",
+  "vessel_id": "391062c8-7c60-4c24-bbcc-202b68ea01c9",
+  "entry_point": "vessel",
+  "title": "Navigation lights flicker",
+  "status": "evidence_collection",
+  "version": 2,
+  "evidence_revision": 1,
+  "disputed": false,
+  "archived_at": null,
+  "created_at": "2026-11-06T07:32:21.826823Z",
+  "updated_at": "2026-11-06T07:32:21.860202Z",
+  "viewer": {
+    "role": "contractor",
+    "sections": [
+      "summary",
+      "evidence",
+      "measurements",
+      "preparation"
+    ],
+    "organization_id": "f3af1153-00e5-444d-b892-8b8dbe1478dc",
+    "assignment_id": "fa42e907-a736-41bb-b251-c9cd9095375d",
+    "restricted_access": false
+  },
+  "snapshot_state": "brief",
+  "snapshot_brief_id": "b7a3bc97-03b7-4c23-9e43-a2ef2c8c833d",
+  "snapshot_published_at": "2026-11-06T07:32:22.030302Z",
+  "issue_description": "The port navigation light flickers when the engine starts.",
+  "affected_system": "Electrical",
+  "affected_equipment": "Navigation lights",
+  "occurs_when": null,
+  "already_tried": null,
+  "urgency": "soon",
+  "vessel_context": {
+    "engine": {
+      "make": "Yamaha",
+      "year": 2021,
+      "model": "F150"
+    },
+    "source": "vessel_record",
+    "vessel": {
+      "make": "Stabicraft",
+      "year": 2021,
+      "model": "2050 Supercab",
+      "nickname": "Kahawai",
+      "hull_type": null,
+      "length_ft": null,
+      "propulsion_type": "outboard"
+    },
+    "equipment": [],
+    "captured_at": "2026-11-06T07:32:21.826184+00:00",
+    "corrections": [],
+    "owner_confirmed": false,
+    "uncertain_categories": []
+  },
+  "evidence": {
+    "outstanding": [],
+    "answered": [],
+    "unavailable": [],
+    "waived": [],
+    "available_asset_count": 0
+  },
+  "gaps": [],
+  "technician_inspection_required": false,
+  "assignment": {
+    "id": "fa42e907-a736-41bb-b251-c9cd9095375d",
+    "job_id": "825db48c-1270-4554-998f-5468c1687a6b",
+    "organization": {
+      "id": "f3af1153-00e5-444d-b892-8b8dbe1478dc",
+      "name": "Fixture Marine cda525ff",
+      "trading_name": "Fixture Marine Services"
+    },
+    "status": "accepted",
+    "sections": [
+      "summary",
+      "evidence",
+      "measurements",
+      "preparation"
+    ],
+    "live_updates": false,
+    "invited_at": "2026-11-06T07:32:21.906829Z",
+    "accepted_at": "2026-11-06T07:32:21.932398Z",
+    "revoked_at": null,
+    "version": 3,
+    "members": [
+      {
+        "user_id": "60d99bf1-bead-4f28-96b8-1649c76ec4e5",
+        "name": "Fixture Technician",
+        "restricted_access": false,
+        "added_at": "2026-11-06T07:32:21.935451Z"
+      }
+    ]
+  }
+}

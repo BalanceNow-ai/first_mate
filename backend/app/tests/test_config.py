@@ -24,6 +24,11 @@ GOOD_PROD = dict(
     cms_provider="disabled",
     courier_rate_mode="disabled",
     courier_rate_card="",
+    object_store_backend="s3",
+    object_store_access_key="ak",
+    object_store_secret_key="sk",
+    upload_scanner="clamd",
+    service_vision_provider="disabled",
 )
 
 
@@ -35,6 +40,12 @@ def test_good_production_config_passes():
     "override, fragment",
     [
         ({"secret_key": "change-me-in-production"}, "SECRET_KEY"),
+        ({"object_store_backend": "local_fs"}, "OBJECT_STORE_BACKEND"),
+        ({"object_store_secret_key": ""}, "OBJECT_STORE_ACCESS_KEY"),
+        ({"upload_scanner": "local_signature"}, "UPLOAD_SCANNER"),
+        ({"service_vision_provider": "local_fixture"}, "SERVICE_VISION_PROVIDER"),
+        ({"service_vision_provider": "openai", "openai_api_key": ""}, "OPENAI_API_KEY"),
+        ({"signed_url_seconds": 3600}, "SIGNED_URL_SECONDS"),
         ({"allowed_origins": "*"}, "ALLOWED_ORIGINS"),
         ({"payment_provider": "local"}, "test-only"),
         ({"stripe_webhook_secret": ""}, "STRIPE_WEBHOOK_SECRET"),

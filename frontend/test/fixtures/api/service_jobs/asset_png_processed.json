@@ -1,0 +1,31 @@
+{
+  "id": "c52df3b5-b660-42bf-9801-7d42d03f9595",
+  "job_id": "c5519a30-69a3-403c-a548-4766a355ffc5",
+  "purpose": "job_photo",
+  "status": "available",
+  "uploaded_by_role": "owner",
+  "uploaded_by_me": true,
+  "evidence_request_id": "43e88575-def4-47a0-a1a9-9c3d8c9497cb",
+  "caption": "Locker under the galley sink",
+  "detected_type": "image/png",
+  "size_bytes": 11593,
+  "max_bytes": 11593,
+  "width": 480,
+  "height": 360,
+  "pages": null,
+  "quality": {
+    "blur": "ok",
+    "method": "heuristic-v1",
+    "framing": "not_assessed",
+    "darkness": "ok",
+    "blur_score": 1513.9,
+    "mean_luminance": 105.1,
+    "label_legibility": "not_assessed"
+  },
+  "duplicate_of_id": null,
+  "rejection_reason": null,
+  "upload_expires_at": "2026-11-07T07:32:12.153195Z",
+  "version": 3,
+  "created_at": "2026-11-06T07:32:12.154925Z",
+  "updated_at": "2026-11-06T07:32:12.270999Z"
+}
