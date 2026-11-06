@@ -315,6 +315,7 @@ class SharingPreviewView extends StatelessWidget {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Semantics(
           header: true,
+          container: true,
           child: Text('Preview: what ${preview.organization.displayName} will see',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
         ),

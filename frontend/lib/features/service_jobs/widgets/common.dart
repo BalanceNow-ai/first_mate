@@ -9,12 +9,12 @@ import 'package:helm_marine/features/service_jobs/providers/service_jobs_provide
 enum Tone { neutral, info, good, warn, bad }
 
 Color toneColor(Tone tone) => switch (tone) {
-      Tone.neutral => HelmTheme.mutedText,
-      Tone.info => HelmTheme.primary,
-      Tone.good => HelmTheme.success,
-      Tone.warn => HelmTheme.warning,
-      Tone.bad => HelmTheme.error,
-    };
+  Tone.neutral => HelmTheme.mutedText,
+  Tone.info => HelmTheme.primary,
+  Tone.good => HelmTheme.success,
+  Tone.warn => HelmTheme.warning,
+  Tone.bad => HelmTheme.error,
+};
 
 /// A plain, labelled status/provenance badge (colour is never the only signal).
 class StatusBadge extends StatelessWidget {
@@ -43,8 +43,10 @@ class StatusBadge extends StatelessWidget {
           children: [
             if (icon != null) ...[Icon(icon, size: 14, color: HelmTheme.darken(color)), const SizedBox(width: 4)],
             Flexible(
-              child: Text(label,
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: HelmTheme.darken(color))),
+              child: Text(
+                label,
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: HelmTheme.darken(color)),
+              ),
             ),
           ],
         ),
@@ -54,12 +56,12 @@ class StatusBadge extends StatelessWidget {
 }
 
 Tone provenanceTone(String badge) => switch (badge) {
-      'contractor_confirmed' || 'source_verified' => Tone.good,
-      'owner_measured' || 'owner_declared' => Tone.info,
-      'model_suggested' || 'suggested' => Tone.warn,
-      'rejected' => Tone.bad,
-      _ => Tone.neutral,
-    };
+  'contractor_confirmed' || 'source_verified' => Tone.good,
+  'owner_measured' || 'owner_declared' => Tone.info,
+  'model_suggested' || 'suggested' => Tone.warn,
+  'rejected' => Tone.bad,
+  _ => Tone.neutral,
+};
 
 /// The plain provenance badge ("Suggested", "Owner measured", "Contractor confirmed", "Unknown", "Superseded").
 class ProvenanceBadge extends StatelessWidget {
@@ -73,11 +75,11 @@ class ProvenanceBadge extends StatelessWidget {
 }
 
 Tone jobStatusTone(String s) => switch (s) {
-      'completed' => Tone.good,
-      'cancelled' || 'archived' => Tone.neutral,
-      'draft' => Tone.neutral,
-      _ => Tone.info,
-    };
+  'completed' => Tone.good,
+  'cancelled' || 'archived' => Tone.neutral,
+  'draft' => Tone.neutral,
+  _ => Tone.info,
+};
 
 /// A titled card section.
 class SectionCard extends StatelessWidget {
@@ -90,32 +92,39 @@ class SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Semantics(
-                    header: true,
-                    child: Text(title,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+    return Semantics(
+      container: true,
+      explicitChildNodes: true,
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Semantics(
+                      header: true,
+                      container: true,
+                      child: Text(
+                        title,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ),
-                ),
-                ?trailing,
+                  ?trailing,
+                ],
+              ),
+              if (subtitle != null) ...[
+                const SizedBox(height: 4),
+                Semantics(container: true, child: Text(subtitle!, style: const TextStyle(color: HelmTheme.mutedText))),
               ],
-            ),
-            if (subtitle != null) ...[
-              const SizedBox(height: 4),
-              Text(subtitle!, style: const TextStyle(color: HelmTheme.mutedText)),
+              const SizedBox(height: 8),
+              for (final c in children) Semantics(container: true, child: c),
             ],
-            const SizedBox(height: 8),
-            ...children,
-          ],
+          ),
         ),
       ),
     );
@@ -168,8 +177,13 @@ class FactRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 150, child: Text(label, style: const TextStyle(color: HelmTheme.mutedText))),
-          Expanded(child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500))),
+          SizedBox(
+            width: 150,
+            child: Text(label, style: const TextStyle(color: HelmTheme.mutedText)),
+          ),
+          Expanded(
+            child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
+          ),
         ],
       ),
     );
@@ -200,7 +214,9 @@ String friendlyTitle(Object error) {
   final api = ApiError.from(error);
   if (api == null) return 'Something went wrong';
   if (api.statusCode == 404) return 'Not found, or not shared with you';
-  if (api.code == 'section_not_shared' || api.statusCode == 403) return 'This part of the job has not been shared with you';
+  if (api.code == 'section_not_shared' || api.statusCode == 403) {
+    return 'This part of the job has not been shared with you';
+  }
   return 'Something went wrong';
 }
 
@@ -225,7 +241,8 @@ Future<T?> runJobAction<T>(
   } catch (e) {
     if (!context.mounted) return null;
     final api = ApiError.from(e);
-    if (api != null && (api.code == 'version_conflict' || api.code == 'preview_outdated' || api.code == 'brief_outdated')) {
+    if (api != null &&
+        (api.code == 'version_conflict' || api.code == 'preview_outdated' || api.code == 'brief_outdated')) {
       await showDialog<void>(
         context: context,
         builder: (dialogContext) => AlertDialog(
@@ -251,7 +268,14 @@ Future<T?> runJobAction<T>(
 
 /// A large, labelled action button.
 class ActionButton extends StatelessWidget {
-  const ActionButton({super.key, required this.label, required this.onPressed, this.icon, this.filled = false, this.tone});
+  const ActionButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.icon,
+    this.filled = false,
+    this.tone,
+  });
 
   final String label;
   final VoidCallback? onPressed;
@@ -327,8 +351,13 @@ Future<String?> promptText(
 }
 
 /// Yes/no confirmation.
-Future<bool> confirmAction(BuildContext context,
-    {required String title, required String message, String confirm = 'Confirm', bool destructive = false}) async {
+Future<bool> confirmAction(
+  BuildContext context, {
+  required String title,
+  required String message,
+  String confirm = 'Confirm',
+  bool destructive = false,
+}) async {
   final ok = await showDialog<bool>(
     context: context,
     builder: (dialogContext) => AlertDialog(
@@ -363,7 +392,10 @@ class BulletList extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 2),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [const Text('•  '), Expanded(child: Text(i))],
+              children: [
+                const Text('•  '),
+                Expanded(child: Text(i)),
+              ],
             ),
           ),
       ],

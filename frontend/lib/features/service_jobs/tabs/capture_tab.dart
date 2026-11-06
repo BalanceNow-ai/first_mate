@@ -145,6 +145,7 @@ class _NextStepCard extends ConsumerWidget {
               return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Semantics(
                   header: true,
+                  container: true,
                   child: const Text('Nothing more is needed right now',
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
@@ -168,6 +169,7 @@ class _NextStepCard extends ConsumerWidget {
               const SizedBox(height: 12),
               Semantics(
                 header: true,
+                container: true,
                 child: Text(prompt, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
               const SizedBox(height: 8),

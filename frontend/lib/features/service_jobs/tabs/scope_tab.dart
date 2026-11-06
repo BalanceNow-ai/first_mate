@@ -97,6 +97,7 @@ class _ScopeCard extends ConsumerWidget {
             Expanded(
               child: Semantics(
                 header: true,
+                container: true,
                 child: Text('Revision ${s.revisionNumber}${s.isChange ? ' (change)' : ''}',
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),

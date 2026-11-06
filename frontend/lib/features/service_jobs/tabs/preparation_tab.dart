@@ -72,7 +72,7 @@ class PreparationTab extends ConsumerWidget {
               for (final i in active) _ItemCard(job: job, item: i),
               if (inactive.isNotEmpty) ...[
                 const SizedBox(height: 16),
-                Semantics(header: true, child: const Text('Rejected, replaced or superseded', style: TextStyle(fontWeight: FontWeight.bold))),
+                Semantics(header: true, container: true, child: const Text('Rejected, replaced or superseded', style: TextStyle(fontWeight: FontWeight.bold))),
                 const SizedBox(height: 8),
                 for (final i in inactive) _ItemCard(job: job, item: i),
               ],

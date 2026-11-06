@@ -45,7 +45,7 @@ class MeasurementsTab extends ConsumerWidget {
               for (final m in current) _MeasurementCard(job: job, m: m),
               if (old.isNotEmpty) ...[
                 const SizedBox(height: 16),
-                Semantics(header: true, child: const Text('Earlier and superseded', style: TextStyle(fontWeight: FontWeight.bold))),
+                Semantics(header: true, container: true, child: const Text('Earlier and superseded', style: TextStyle(fontWeight: FontWeight.bold))),
                 const SizedBox(height: 8),
                 for (final m in old) _MeasurementCard(job: job, m: m),
               ],

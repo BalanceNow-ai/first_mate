@@ -313,7 +313,7 @@ class BriefContentView extends StatelessWidget {
 
   Widget _heading(String text) => Padding(
         padding: const EdgeInsets.only(top: 12, bottom: 4),
-        child: Semantics(header: true, child: Text(text, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
+        child: Semantics(header: true, container: true, child: Text(text, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
       );
 
   @override
